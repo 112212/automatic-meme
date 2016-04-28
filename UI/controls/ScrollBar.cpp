@@ -1,6 +1,5 @@
 #ifdef USE_SDL
-#include <SDL2/SDL2_gfxPrimitives.h>
-#include "../common/SDL/CSurface.h"
+#include "../common/SDL/Drawing.hpp"
 #endif
 #include "ScrollBar.hpp"
 
@@ -61,12 +60,14 @@ void ScrollBar::onPositionChange() {
 #elif USE_SDL
 void ScrollBar::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	#ifdef SELECTION_MARK
-		Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
 	#else
-		Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
 	#endif
 		
-	boxColor(ren, m_slider.x+pos.x, m_slider.y+pos.y, pos.x+m_slider.x+m_slider.w, pos.y+m_slider.y+m_slider.h, Colors::White);
+	
+	Drawing::Rect(m_slider.x+pos.x, m_slider.y+pos.y, m_slider.w, m_slider.h, Colors::White);
+	// boxColor(ren, m_slider.x+pos.x, m_slider.y+pos.y, pos.x+m_slider.x+m_slider.w, pos.y+m_slider.y+m_slider.h, Colors::White);
 	// rectangleColor(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.x+pos.x+m_rect.w, pos.y+m_rect.y+m_rect.h, Colors::White);
 }
 

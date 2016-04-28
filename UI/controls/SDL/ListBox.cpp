@@ -29,23 +29,24 @@ void ListBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 		if(i >= m_max_items)
 			break;
 		if(m_selected_index == i+offs) {
-			Draw_FillRect( ren, x, y + h, m_rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, 0xffff0000 );
+			Drawing::FillRect(  x, y + h, m_rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, 0xffff0000 );
 			
 		} else
-			Draw_FillRect( ren, x, y + h, m_rect.w, (*it)->h, 0 );
-		CSurface::OnDraw(ren, *it, x+2, y + h);
+			Drawing::FillRect(  x, y + h, m_rect.w, (*it)->h, 0 );
+		// TODO: fix this
+		// CSurface::OnDraw(ren, *it, x+2, y + h);
 		h += (*it)->h;
 	}
 	//Draw_Rect(surf, x, y, m_rect.w, h, Colors::c_white );
 	if(m_drawscrollbar) {
 		m_scrollbar->Render( ren, pos, false );
 	}
-	Draw_Rect(ren, x, y, m_rect.w, m_rect.h, Colors::Gray );
+	Drawing::Rect(x, y, m_rect.w, m_rect.h, Colors::Gray );
 	
 	#ifdef SELECTION_MARK
-		Draw_Rect(ren, x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+		Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
 	#else
-		Draw_Rect(ren, x, y, m_rect.w, m_rect.h, Colors::White );
+		Drawing::Rect( x, y, m_rect.w, m_rect.h, Colors::White );
 	#endif
 }
 

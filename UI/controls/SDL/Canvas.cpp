@@ -1,5 +1,5 @@
 #include "Canvas.hpp"
-#include "../../common/SDL/CSurface.h"
+#include "../../common/SDL/Drawing.hpp"
 
 //#define SELECTION_MARK
 namespace ng {
@@ -25,8 +25,8 @@ void Canvas::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	int y = m_rect.y + pos.y;
 	
 	// crtanje sdl draw
-	Draw_FillRect(ren, x, y, m_rect.w, m_rect.h, 0 );
-	Draw_Rect(ren, x, y, m_rect.w, m_rect.h, Colors::Gray );
+	Drawing::FillRect(x, y, m_rect.w, m_rect.h, 0 );
+	Drawing::Rect( x, y, m_rect.w, m_rect.h, Colors::Gray );
 	
 	if(maketex) {
 		if(m_tex_drawing)
@@ -37,7 +37,9 @@ void Canvas::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 		SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
 	} else if(m_drawing && m_tex_drawing)
 		//CSurface::OnDraw( ren, m_drawing, x, y );
-		CSurface::OnDraw(ren, m_tex_drawing, m_drawing, x, y);
+		
+		// TODO: fix this
+		// CSurface::OnDraw(ren, m_tex_drawing, m_drawing, x, y);
 	
 	
 	if(display_grid) {

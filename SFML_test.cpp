@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
-#include "UI/ngGui.hpp"
+#include "UI/Gui.hpp"
 #include "UI/Widget.hpp"
 #include "UI/controls/Button.hpp"
 

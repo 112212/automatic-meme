@@ -71,10 +71,10 @@ sdl_test_cpp := $(cpp) SDL_test.cpp \
 		UI/controls/SDL/Canvas.cpp \
 		UI/controls/SDL/CheckBox.cpp \
 		UI/controls/WidgetMover.cpp \
-		UI/common/SDL/CSurface.cpp \
+		UI/common/SDL/Drawing.cpp \
 		
 sdl_test_obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(sdl_test_cpp)))
-sdl_link := -lSDL2 -lSDL2_ttf -lSDL2_gfx -lGL
+sdl_link := -lSDL2 -lSDL2_ttf -lSDL2_gfx -lGL -lGLEW
 sdl_test_exe := sdl_test
 
 sdl_test_build: defs := -DUSE_SDL

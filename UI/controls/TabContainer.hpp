@@ -3,7 +3,7 @@
 
 #include "../Control.hpp"
 #include "Container.hpp"
-#include "../common/SFML/Drawi.hpp"
+#include "../common/SFML/Drawing.hpp"
 namespace ng {
 // events
 enum {

@@ -2,7 +2,7 @@
 #define NG_TEXTBOX_HPP
 
 #include "../../Control.hpp"
-#include "../../common/SDL/CSurface.h"
+#include "../../common/SDL/Drawing.hpp"
 namespace ng {
 enum {
 	EVENT_TEXTBOX_CHANGE,

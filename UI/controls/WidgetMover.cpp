@@ -1,5 +1,5 @@
 #include "WidgetMover.hpp"
-#include "../common/SDL/CSurface.h"
+#include "../common/SDL/Drawing.hpp"
 
 namespace ng {
 WidgetMover::WidgetMover() {
@@ -20,9 +20,9 @@ void WidgetMover::OnMouseUp( int mX, int mY ) {
 
 void WidgetMover::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	#ifdef SELECTION_MARK
-		Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
 	#else
-		Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+		Drawing::Rect( m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
 	#endif
 	
 	

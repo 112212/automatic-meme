@@ -1,6 +1,6 @@
 #include "ComboBox.hpp"
 #ifdef USE_SDL
-#include "../common/SDL/CSurface.h"
+#include "../common/SDL/Drawing.hpp"
 #endif
 
 namespace ng {
@@ -541,20 +541,20 @@ void ComboBox::openBox() {
 	void ComboBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	
 		#ifdef SELECTION_MARK
-			Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
 		#else
-			Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
 		#endif
 		
-		Draw_VLine(ren, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE, m_rect.y+pos.y, m_rect.y+pos.y+m_rect.h, Colors::Gray );
+		Drawing::VLine( m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE, m_rect.y+pos.y, m_rect.y+pos.y+m_rect.h, Colors::Gray );
 		
 		if(m_is_textbox_mode ?  m_is_onarrow : isSelected) {
-			Draw_FillRect(ren, m_rect.x+pos.x+m_rect.w-KVADRAT_SIZE+1, m_rect.y+pos.y+1, KVADRAT_SIZE-2, m_rect.h-2, 0x336633 );
+			Drawing::FillRect(m_rect.x+pos.x+m_rect.w-KVADRAT_SIZE+1, m_rect.y+pos.y+1, KVADRAT_SIZE-2, m_rect.h-2, 0x336633 );
 		}
 		
 		
-		Draw_Line(ren, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE + INNER_X, m_rect.y+pos.y+INNER_Y, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE/2, m_rect.y+pos.y+m_rect.h-INNER_Y, Colors::Gray );
-		Draw_Line(ren, m_rect.x+pos.x+m_rect.w - INNER_X, m_rect.y+pos.y+INNER_Y, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE/2, m_rect.y+pos.y+m_rect.h-INNER_Y, Colors::Gray );
+		Drawing::Line(m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE + INNER_X, m_rect.y+pos.y+INNER_Y, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE/2, m_rect.y+pos.y+m_rect.h-INNER_Y, Colors::Gray );
+		Drawing::Line(m_rect.x+pos.x+m_rect.w - INNER_X, m_rect.y+pos.y+INNER_Y, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE/2, m_rect.y+pos.y+m_rect.h-INNER_Y, Colors::Gray );
 		
 		if(m_is_opened) {
 			// draw items
@@ -564,11 +564,15 @@ void ComboBox::openBox() {
 				if(i >= m_max_dropdown_items)
 					break;
 				if(m_virtual_selected_index == i) {
-					Draw_FillRect( ren, m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, 0xffff0000 );
+					Drawing::FillRect( m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, 0xffff0000 );
 				} else {
-					rectangleColor( ren, m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_rect.x+pos.x + m_max_width, m_rect.y+pos.y + (*it)->h, 0);
+					Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width, (*it)->h, 0);
+					// rectangleColor( ren, m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_rect.x+pos.x + m_max_width, m_rect.y+pos.y + (*it)->h, 0);
 				}
-				CSurface::OnDraw(ren, *it, m_rect.x+pos.x+2, m_rect.y+pos.y + m_rect.h + h);
+				
+				// TODO: fix this
+				// CSurface::OnDraw(ren, *it, m_rect.x+pos.x+2, m_rect.y+pos.y + m_rect.h + h);
+				
 				h += (*it)->h;
 			}
 			//Draw_Rect(surf, m_rect.x+pos.x, m_rect.y+pos.y+m_rect.h, m_max_width, h, CColors::c_white );
@@ -585,7 +589,8 @@ void ComboBox::openBox() {
 		if(m_is_textbox_mode) {
 			m_textbox->Render( ren, pos, m_textbox_focus );
 		} else if(m_surf_sel_text) {
-			CSurface::OnDraw( ren, m_surf_sel_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+			// TODO: fix this
+			// CSurface::OnDraw( ren, m_surf_sel_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
 		}
 		
 	}

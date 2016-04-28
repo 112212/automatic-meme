@@ -1,5 +1,5 @@
 #include "TrackBar.hpp"
-#include "../../common/SDL/CSurface.h"
+#include "../../common/SDL/Drawing.hpp"
 namespace ng {
 TrackBar::TrackBar() {
 	setType( TYPE_TRACKBAR );
@@ -27,33 +27,34 @@ void TrackBar::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	int y = m_rect.y + pos.y;
 	#ifdef SELECTION_MARK
 	if(isSelected)
-		Draw_Rect(ren, x, y, m_rect.w, m_rect.h, Colors::Yellow);
+		Drawing::Rect( x, y, m_rect.w, m_rect.h, Colors::Yellow);
 	#endif
 	if(m_is_vertical) {
 		int x2 = x + m_rect.w/2;
-		Draw_Line(ren, x2, y, x2, y+m_rect.h, Colors::White);
+		Drawing::Line( x2, y, x2, y+m_rect.h, Colors::White);
 		if(m_marks > 0) {
 			int dh = (float)m_rect.h / (float)m_marks;
 			int y;
 			for(int i=0; i <= m_marks; i++) {
 				y = y + dh*i;
-				Draw_Line(ren, x2-5, y, x2+5, y, Colors::White);
+				Drawing::Line(x2-5, y, x2+5, y, Colors::White);
 			}
 		}
-		Draw_FillEllipse(ren, x2, y + m_rect.h - m_slider_pix, 5, 5, m_on_it ? Colors::Yellow : Colors::White);
+		Drawing::FillCircle( x2, y + m_rect.h - m_slider_pix, 5, m_on_it ? Colors::Yellow : Colors::White);
 	} else {
 		int h = y+m_rect.h/2;
-		Draw_Line(ren, x, h, x+m_rect.w, h, Colors::White);
+		Drawing::Line(x, h, x+m_rect.w, h, Colors::White);
 		if(m_marks > 0) {
 			float dw = (float)m_rect.w / (float)m_marks;
 			for(int i=0; i <= m_marks; i++) {
-				Draw_Line(ren, x + dw*i, h-5, x + dw*i, h+5, Colors::White);
+				Drawing::Line(x + dw*i, h-5, x + dw*i, h+5, Colors::White);
 			}
 		}
-		Draw_FillEllipse(ren, x + m_slider_pix, h - 1, 5, 5, m_on_it ? Colors::Yellow : Colors::White);
+		Drawing::FillCircle( x + m_slider_pix, h - 1, 5, m_on_it ? Colors::Yellow : Colors::White);
 	}
 	if(m_surf_num) {
-		CSurface::OnDraw( ren, m_surf_num, m_text_loc.x, m_text_loc.y );
+		// TODO: fix this
+		// CSurface::OnDraw( ren, m_surf_num, m_text_loc.x, m_text_loc.y );
 	}
 }
 

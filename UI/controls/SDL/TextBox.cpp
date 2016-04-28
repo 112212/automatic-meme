@@ -23,9 +23,9 @@ void TextBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	
 	
 	#ifdef SELECTION_MARK
-		Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
 	#else
-		Draw_Rect(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
 	#endif
 	
 	
@@ -38,13 +38,17 @@ void TextBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	
 	// prvo mora da postoji prvi tekst
 	if(m_surf_first) {
-		CSurface::OnDraw( ren, m_surf_first, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+		// TODO: fix this
+		// CSurface::OnDraw( ren, m_surf_first, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
 		// ako postoji prvi tekst, da li postoji drugi tekst (selekcija)
 		if(m_surf_middle) {
-			CSurface::OnDraw( ren, m_surf_middle, m_text_loc.x + m_surf_first->w+pos.x, m_text_loc.y+pos.y );
+			// TODO: fix this
+			// CSurface::OnDraw( ren, m_surf_middle, m_text_loc.x + m_surf_first->w+pos.x, m_text_loc.y+pos.y );
 			// ako postoji drugi tekst, da li postoji treci tekst (znaci da postoji selekcija negde izmedju)
-			if(m_surf_last)
-				CSurface::OnDraw( ren, m_surf_last, m_text_loc.x + m_surf_first->w + m_surf_middle->w + pos.x, m_text_loc.y + pos.y );
+			if(m_surf_last) {
+				// TODO: fix this
+				// CSurface::OnDraw( ren, m_surf_last, m_text_loc.x + m_surf_first->w + m_surf_middle->w + pos.x, m_text_loc.y + pos.y );
+			}
 		}
 	}
 	
@@ -52,7 +56,8 @@ void TextBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	
 	if(isSelected)
 		//Draw_VLine(surf, m_cursor_pt, m_rect.y+5, m_rect.y+m_rect.h-5, CColors::c_white ); 
-		vlineColor(ren, m_cursor_pt+pos.x, m_rect.y+5+pos.y, m_rect.y+m_rect.h-5+pos.y, Colors::White );
+		Drawing::VLine(m_cursor_pt, m_rect.y+5, m_rect.y+m_rect.h-5, Colors::White); 
+		// vlineColor(ren, m_cursor_pt+pos.x, m_rect.y+5+pos.y, m_rect.y+m_rect.h-5+pos.y, Colors::White );
 }
 
 void TextBox::SetText( std::string text ) {

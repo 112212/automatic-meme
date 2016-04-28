@@ -1,5 +1,5 @@
 #include "CheckBox.hpp"
-#include "../../common/SDL/CSurface.h"
+#include "../../common/SDL/Drawing.hpp"
 namespace ng {
 CheckBox::CheckBox() {
 	setType( TYPE_CHECKBOX );
@@ -21,15 +21,16 @@ void CheckBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	
 	#ifdef SELECTION_MARK
 		if(isSelected)
-			Draw_Rect(ren, x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
+			Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
 	#endif
 	
 	
-	Draw_Rect(ren, x+CHECKBOX_SHIFT, y, CHECKBOX_SIZE, CHECKBOX_SIZE, Colors::White );
+	Drawing::Rect(x+CHECKBOX_SHIFT, y, CHECKBOX_SIZE, CHECKBOX_SIZE, Colors::White );
 	
-	if(m_surf_text)
-		CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
-		
+	if(m_surf_text) {
+		// TODO: fix this
+		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+	}
 	
 	if(m_isChecked) {
 		int x1 = x+CHECKBOX_OKVIR+CHECKBOX_SHIFT;
@@ -38,8 +39,8 @@ void CheckBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 		int y2 = y+CHECKBOX_SIZE-CHECKBOX_OKVIR;
 		
 		
-		Draw_Line(ren, x1, y1, x2, y2, Colors::Yellow );
-		Draw_Line(ren, x1, y2, x2, y1, Colors::Yellow );
+		Drawing::Line(x1, y1, x2, y2, Colors::Yellow );
+		Drawing::Line(x1, y2, x2, y1, Colors::Yellow );
 		
 	}
 	

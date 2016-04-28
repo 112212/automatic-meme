@@ -37,7 +37,7 @@ class GuiEngine : public Cache
 #endif
 {
 	private:
-		
+		static bool firstInit;
 		std::map<std::string, Control*> map_name_control;
 		std::map<unsigned int, Control*> map_id_control;
 		

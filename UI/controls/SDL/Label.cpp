@@ -20,7 +20,7 @@
 // 
 #include "Label.hpp"
 #include "../../common/debug.hpp"
-#include "../../common/SDL/CSurface.h"
+#include "../../common/SDL/Drawing.hpp"
 namespace ng {
 Label::Label() {
 	setType( TYPE_LABEL );
@@ -43,7 +43,8 @@ void Label::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	// vector<SDL_Surface*>::iterator
 	int j=0;
 	for( auto i = m_surfs.begin(); i != m_surfs.end(); i++,j++) {
-		CSurface::OnDraw( ren, *i, m_rect.x, m_rect.y+5+j*line_height );
+		// TODO: fix this
+		// CSurface::OnDraw( ren, *i, m_rect.x, m_rect.y+5+j*line_height );
 	}
 }
 

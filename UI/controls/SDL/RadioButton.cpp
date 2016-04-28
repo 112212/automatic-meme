@@ -1,5 +1,5 @@
 #include "RadioButton.hpp"
-#include "../../common/SDL/CSurface.h"
+#include "../../common/SDL/Drawing.hpp"
 namespace ng {
 RadioButton::RadioButton() {
 	setType( TYPE_RADIOBUTTON );
@@ -19,13 +19,16 @@ void RadioButton::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	int y = m_rect.y + pos.y;
 	#ifdef SELECTION_MARK
 	if(isSelected)
-		Draw_Rect(ren, x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
+		Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
 	#endif
-	Draw_Circle(ren, x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
-	if(m_surf_text)
-		CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
-	if(m_isSelected)
-		Draw_FillCircle(ren, x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
+	Drawing::Circle( x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
+	if(m_surf_text) {
+		// TODO: fix this
+		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+	}
+	if(m_isSelected) {
+		Drawing::FillCircle(x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
+	}
 }
 
 

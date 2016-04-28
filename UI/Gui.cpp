@@ -1,10 +1,17 @@
 #include "Gui.hpp"
 #include "Widget.hpp"
 
+#ifdef USE_SDL
+#include "common/SDL/Drawing.hpp"
+#endif
+
 #define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSans.ttf"
 
 #define MAX_BASIC_EVENTS 6
 namespace ng {
+	
+bool GuiEngine::firstInit = true;
+
 GuiEngine::GuiEngine() {
 	#ifdef USE_SFML
 		if( !Fonts::FontExists( "default" ) ) {
@@ -34,6 +41,13 @@ GuiEngine::GuiEngine() {
 	hasIntercepted = false;
 	sel_intercept = 0;
 	sel_intercept_vector.resize(15);
+	
+	#ifdef USE_SDL
+	if(firstInit) {
+		Drawing::Init();
+		firstInit = false;
+	}
+	#endif
 }
 
 void GuiEngine::LockWidget(Widget* widget) {
