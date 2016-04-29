@@ -33,7 +33,7 @@ class Label : public Control {
 		TTF_Font* m_font;
 		const static int line_height;
 		
-		void Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected );
+		void Render( SDL_Rect pos, bool isSelected );
 	public:
 		Label();
 		~Label();

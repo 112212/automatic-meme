@@ -538,7 +538,7 @@ void ComboBox::openBox() {
 		}
 	}
 	
-	void ComboBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+	void ComboBox::Render( SDL_Rect pos, bool isSelected ) {
 	
 		#ifdef SELECTION_MARK
 			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
@@ -581,13 +581,13 @@ void ComboBox::openBox() {
 					m_scrollrect.h = h;
 					m_scrollbar->SetRect( m_scrollrect );
 				}
-				m_scrollbar->Render( ren, pos, false );
+				m_scrollbar->Render( pos, false );
 			}
 		}
 		
 		
 		if(m_is_textbox_mode) {
-			m_textbox->Render( ren, pos, m_textbox_focus );
+			m_textbox->Render( pos, m_textbox_focus );
 		} else if(m_surf_sel_text) {
 			// TODO: fix this
 			// CSurface::OnDraw( ren, m_surf_sel_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );

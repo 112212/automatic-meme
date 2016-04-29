@@ -118,19 +118,9 @@ namespace Drawing {
 	
 	// shaders
 	unsigned int readShader(std::string shaderStr, unsigned int shaderType)
-	{
-		// reading shader
-		std::ifstream shaderStream(shaderStr);       
-		if(!shaderStream) {
-			throw std::string("Failed to load shader file: ") + shaderStr;
-		}
+	{	
 		
-		std::stringstream shaderData;
-		
-		shaderData << shaderStream.rdbuf(); 
-		shaderStream.close();
-		
-		const std::string &shaderString = shaderData.str();
+		const std::string &shaderString = shaderStr;
 		const char *shaderSource = shaderString.c_str();
 		GLint shaderLength = shaderString.size();
 		
@@ -196,15 +186,15 @@ namespace Drawing {
 	";
 
 	static const char* fragmentShader_code = 
-	"#version 330\
-	\
-	in vec3 inColor;\
-	\
-	out vec4 color;\
-	\
-	void main() {\
-		color = vec4(inColor, 1.0f);\
-	}\
+	"#version 330\n\
+	\n\
+	in vec3 inColor;\n\
+	\n\
+	out vec4 color;\n\
+	\n\
+	void main() {\n\
+		color = vec4(inColor, 1.0f);\n\
+	}\n\
 	";
 
 	GLuint vao = 0,
@@ -215,8 +205,6 @@ namespace Drawing {
 	GLuint shader = 0;
 
 	void Init() {
-		glewExperimental = GL_TRUE; 
-		glewInit();
 		try {
 			shader = loadShader( vertexShader_code, fragmentShader_code );
 		} catch( std::string& e ) {
@@ -233,7 +221,7 @@ namespace Drawing {
 		
 	}
 	
-	int sizeX, sizeY;
+	int sizeX=500, sizeY=500;
 	void SetResolution( int w, int h ) {
 		w = sizeX;
 		h = sizeY;

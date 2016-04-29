@@ -15,7 +15,7 @@ CheckBox::~CheckBox() {
 		delete[] m_text;
 }
 
-void CheckBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+void CheckBox::Render(  SDL_Rect pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	

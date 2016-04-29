@@ -27,7 +27,7 @@ class CheckBox : public Control {
 		CheckBox();
 		~CheckBox();
 		
-		void Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected );
+		void Render(  SDL_Rect pos, bool isSelected );
 		void OnMouseDown( int mX, int mY );
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();

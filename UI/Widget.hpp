@@ -14,7 +14,7 @@ class Widget : public Cache, public Control {
 		friend class GuiEngine;
 		friend class Control;
 		friend class Cache;
-		void set_eine(GuiEngine* eine);
+		void set_engine(GuiEngine* engine);
 		
 		#ifdef USE_SFML
 			sf::RectangleShape rect;
@@ -54,7 +54,7 @@ class Widget : public Cache, public Control {
 		#ifdef USE_SFML
 			virtual void Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
-			virtual void Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+			virtual void Render(  SDL_Rect position, bool isSelected );
 		#endif
 		
 		
@@ -64,7 +64,7 @@ class Widget : public Cache, public Control {
 		#ifdef USE_SFML
 			void RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected);
 		#elif USE_SDL
-			void RenderWidget( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+			void RenderWidget( SDL_Rect position, bool isSelected );
 		#endif
 		void SetOffset(int x, int y);
 		const Point& GetOffset() { return offset; }

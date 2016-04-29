@@ -20,7 +20,7 @@ Canvas::~Canvas() {
 }
 
 const int grid_color = 0xff808080;
-void Canvas::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+void Canvas::Render( SDL_Rect pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	
@@ -31,10 +31,12 @@ void Canvas::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	if(maketex) {
 		if(m_tex_drawing)
 			SDL_DestroyTexture(m_tex_drawing);
-		m_tex_drawing = SDL_CreateTextureFromSurface( ren, m_drawing );
+		// TODO: fix this
+		// m_tex_drawing = SDL_CreateTextureFromSurface( ren, m_drawing );
 		maketex = false;
 		SDL_Rect r = { x, y, m_rect.w, m_rect.h };
-		SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
+		// TODO: fix this
+		// SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
 	} else if(m_drawing && m_tex_drawing)
 		//CSurface::OnDraw( ren, m_drawing, x, y );
 		

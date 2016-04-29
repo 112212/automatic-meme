@@ -12,34 +12,34 @@ Widget::Widget() : Control(),
 Widget::~Widget() {
 }
 
-void Widget::set_eine(GuiEngine* eine) {
-	this->eine = eine;
+void Widget::set_engine(GuiEngine* engine) {
+	this->engine = engine;
 	for(Control* c : controls) {
 		if(c->isWidget) {
 			Widget* w = static_cast<Widget*>(c);
-			w->set_eine(eine);
+			w->set_engine(engine);
 		} else {
-			c->eine = eine;
+			c->engine = engine;
 		}
 	}
 }
 
 
 void Widget::intercept() {
-	if(eine)
-		eine->hasIntercepted = true;
+	if(engine)
+		engine->hasIntercepted = true;
 }
 void Widget::setInterceptMask(unsigned int mask) {
 	intercept_mask = mask;
 }
 
 void Widget::AddControl( Control* control ) {
-	if(control->widget or control->eine) return;
+	if(control->widget or control->engine) return;
 	control->widget = this;
-	if(eine) {
+	if(engine) {
 		if(control->isWidget) {
 			Widget* w = static_cast<Widget*>(control);
-			w->set_eine(eine);
+			w->set_engine(engine);
 		}
 	}
 	
@@ -48,8 +48,8 @@ void Widget::AddControl( Control* control ) {
 }
 
 bool Widget::isThisWidgetSelected() {
-	if(eine)
-		return eine->last_selected_widget == this;
+	if(engine)
+		return engine->last_selected_widget == this;
 	else
 		return false;
 }
@@ -59,25 +59,25 @@ bool Widget::isThisWidgetInSelectedBranch() {
 }
 
 void Widget::LockWidget(bool lock) {
-	if(!eine) {
-		cout << "\n[GUI] widget cannot be locked if not bound to an eine\n";
+	if(!engine) {
+		cout << "\n[GUI] widget cannot be locked if not bound to an engine\n";
 		return;
 	}
 	if(lock)
-		eine->LockWidget(this);
+		engine->LockWidget(this);
 	else
 		sendGuiCommand( GUI_WIDGET_UNLOCK );
 }
 
 void Widget::RemoveControl( Control* control ) {
-	if(!eine)
+	if(!engine)
 		removeControlFromCache(control);
 }
 
 void Widget::SetOffset(int x, int y) {
 	if(isThisWidgetInSelectedBranch()) {
-		eine->sel_widget_offset.x += x-offset.x;
-		eine->sel_widget_offset.y += y-offset.y;
+		engine->sel_widget_offset.x += x-offset.x;
+		engine->sel_widget_offset.y += y-offset.y;
 	}
 	offset.x = x;
 	offset.y = y;
@@ -116,10 +116,10 @@ void Widget::RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool i
 	#endif
 }
 #elif USE_SDL
-void Widget::Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected ) {
-	RenderWidget(ren,position,isSelected);
+void Widget::Render( SDL_Rect position, bool isSelected ) {
+	RenderWidget(position,isSelected);
 }
-void Widget::RenderWidget( SDL_Renderer* ren, SDL_Rect position, bool isSelected ) {
+void Widget::RenderWidget( SDL_Rect position, bool isSelected ) {
 	
 	position.x += m_rect.x + offset.x;
 	position.y += m_rect.y + offset.y;
@@ -129,10 +129,10 @@ void Widget::RenderWidget( SDL_Renderer* ren, SDL_Rect position, bool isSelected
 			auto &c = ca.control;
 			#ifdef SELECTED_CONTROL_ON_TOP
 				if(c != selected_control) {
-					c->Render(ren, position, false);
+					c->Render( position, false);
 				}
 			#else
-				c->Render(ren, position, c == selected_control);
+				c->Render( position, c == selected_control);
 			#endif
 		}
 	}

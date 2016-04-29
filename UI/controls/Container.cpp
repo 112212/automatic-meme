@@ -1,4 +1,5 @@
-#include <SDL2/SDL2_gfxPrimitives.h>
+// #include <SDL2/SDL2_gfxPrimitives.h>
+#include "../common/SDL/Drawing.hpp"
 #include "Container.hpp"
 #include <SFML/OpenGL.hpp>
 #include "../Gui.hpp"
@@ -131,7 +132,7 @@ void Container::onPositionChange() {
 }
 
 #elif USE_SDL
-void Container::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+void Container::Render(  SDL_Rect pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	
@@ -147,7 +148,8 @@ void Container::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 		w -= thickness + 1;
 	}
 	
-	rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, 0xffffffff);
+	Drawing::Rect(x,y,m_rect.w, m_rect.h, 0xffffffff);
+	// rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, 0xffffffff);
 	
 	if(depth == 0) {
 		glClearStencil( 0 );
@@ -163,17 +165,18 @@ void Container::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	glStencilOp( GL_INCR, GL_INCR, GL_INCR );
 	glStencilFunc( GL_NEVER, 0, 0 );
 	
-	boxColor(ren, x, y, x+w, y+h, 0);
+	Drawing::FillRect(x, y, w, h, 0);
+	// boxColor(ren, x, y, x+w, y+h, 0);
 	
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 	glStencilFunc( GL_LESS, depth++, 0xffffffff );
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 	
-	innerWidget->Render(ren,{x,y},isSelected);
+	innerWidget->Render({x,y},isSelected);
 	
 	glDisable( GL_STENCIL_TEST );
 	
-	RenderWidget(ren, pos, isSelected);
+	RenderWidget(pos, isSelected);
 }
 
 void Container::onPositionChange() {

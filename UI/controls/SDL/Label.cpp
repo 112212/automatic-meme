@@ -37,7 +37,7 @@ Label::~Label() {
 }
 
 
-void Label::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+void Label::Render( SDL_Rect pos, bool isSelected ) {
 	//~ if(m_surf_text)
 		//~ CSurface::OnDraw( surf, m_surf_text, m_rect.x, m_rect.y+5 );
 	// vector<SDL_Surface*>::iterator

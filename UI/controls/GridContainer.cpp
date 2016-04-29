@@ -1,6 +1,7 @@
 #include "GridContainer.hpp"
 #ifdef USE_SDL
-#include <SDL2/SDL2_gfxPrimitives.h>
+// #include <SDL2/SDL2_gfxPrimitives.h>
+#include "../common/SDL/Drawing.hpp"
 #endif
 
 namespace ng {
@@ -39,8 +40,9 @@ int GridContainer::getPointedControl( int x, int y ) {
 	}
 #elif USE_SDL
 	void GridContainer::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
-		rectangleColor(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.x+m_rect.w+pos.x, m_rect.y+m_rect.h+pos.y, 0xffffffff);
-		RenderWidget(ren,pos,isSelected);
+		// rectangleColor(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.x+m_rect.w+pos.x, m_rect.y+m_rect.h+pos.y, 0xffffffff);
+		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, 0xffffffff);
+		RenderWidget(pos,isSelected);
 	}
 	void GridContainer::onPositionChange() {}
 #endif

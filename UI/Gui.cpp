@@ -10,7 +10,6 @@
 #define MAX_BASIC_EVENTS 6
 namespace ng {
 	
-bool GuiEngine::firstInit = true;
 
 GuiEngine::GuiEngine() {
 	#ifdef USE_SFML
@@ -42,16 +41,10 @@ GuiEngine::GuiEngine() {
 	sel_intercept = 0;
 	sel_intercept_vector.resize(15);
 	
-	#ifdef USE_SDL
-	if(firstInit) {
-		Drawing::Init();
-		firstInit = false;
-	}
-	#endif
 }
 
 void GuiEngine::LockWidget(Widget* widget) {
-	if(!widget or widget->eine != this) return;
+	if(!widget or widget->engine != this) return;
 	sel_first_depth_widget = widget;
 	Point ofs = {0,0};
 	Widget *w;
@@ -112,7 +105,7 @@ void GuiEngine::UnlockWidget() {
 	for(int i=depth; i >= 0; i--) {
 		sel_intercept_vector[i+d] = sel_intercept_vector[i];
 	}
-	// add intercepts from eine to widget
+	// add intercepts from engine to widget
 	w = sel_first_depth_widget;
 	w = w->widget;
 	depth += d;
@@ -187,16 +180,16 @@ void GuiEngine::processControlEvent(int event_type) {
 
 	  
 void GuiEngine::AddControl( Control* control ) {
-	if(control->eine) return;
+	if(control->engine) return;
 	
 	if(control->isWidget) {
 		Widget* w = static_cast<Widget*>(control);
 
 		recursiveProcessWidgetControls(w, true);
 		
-		w->set_eine(this);
+		w->set_engine(this);
 	} else {
-		control->eine = this;
+		control->engine = this;
 	}
 	
 	addControlToCache(control);
@@ -206,7 +199,7 @@ void GuiEngine::AddControl( Control* control ) {
 }
 
 void GuiEngine::RemoveControl( Control* control ) {
-	if(control->eine != this) return;
+	if(control->engine != this) return;
 	
 	if(selected_control == control) {
 		unselectControl();
@@ -255,7 +248,7 @@ void GuiEngine::RemoveControl( Control* control ) {
 		removeControlFromCache(control);
 	else
 		control->widget->removeControlFromCache(control);
-	control->eine = 0;
+	control->engine = 0;
 	control->widget = 0;
 }
 
@@ -699,7 +692,7 @@ void GuiEngine::OnCleanup() {
 			// selected_control->OnKeyUp( sym, mod );
 		}
 	}
-	void GuiEngine::Render( SDL_Renderer* ren ) {
+	void GuiEngine::Render(  ) {
 		bool has_selected_control = false;
 		SDL_Rect pos = {0,0,0,0};
 		for(auto &ca : cache) {
@@ -713,7 +706,7 @@ void GuiEngine::OnCleanup() {
 					has_selected_control = true;
 				}
 				#else
-					c->Render(ren,pos, c == selected_control);
+					c->Render(pos, c == selected_control);
 				#endif
 			}
 		}

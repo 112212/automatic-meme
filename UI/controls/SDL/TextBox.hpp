@@ -50,7 +50,7 @@ class TextBox : public Control {
 		~TextBox();
 		
 		
-		virtual void Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+		virtual void Render( SDL_Rect position, bool isSelected );
 		virtual void OnMouseDown( int mX, int mY );
 		virtual void OnMouseUp( int mX, int mY );
 		virtual void OnMouseMove( int mX, int mY, bool mouseState );

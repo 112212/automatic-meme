@@ -6,7 +6,7 @@
 #include "Widget.hpp"
 
 namespace ng {
-Control::Control() : id(0), eine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
+Control::Control() : id(0), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
 interactible(true), visible(true) {
 	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
 }
@@ -15,8 +15,8 @@ Control::~Control() {
 }
 
 const Point Control::getOffset() {
-	if(eine)
-		return eine->sel_widget_offset;
+	if(engine)
+		return engine->sel_widget_offset;
 	else
 		return {0,0};
 }
@@ -25,16 +25,16 @@ void Control::SetZIndex( int zindex ) {
 	if(zindex == z_index) return;
 	if(widget) {
 		widget->setZIndex(this, zindex);
-	} else if(eine) {
-		eine->setZIndex(this, zindex);
+	} else if(engine) {
+		engine->setZIndex(this, zindex);
 	}
 }
 
 void Control::_updateCache(CacheUpdateFlag flag) {
 	if(widget) {
 		widget->updateCache(this,flag);
-	} else if(eine) {
-		eine->updateCache(this,flag);
+	} else if(engine) {
+		engine->updateCache(this,flag);
 	}
 }
 
@@ -71,8 +71,8 @@ void Control::setType( controlType type ) {
 // emit global event
 void Control::emitEvent( int EventID ) {
 	#ifdef USE_EVENT_QUEUE
-	if(eine) {
-		eine->m_events.push( { id, EventID, this } );
+	if(engine) {
+		engine->m_events.push( { id, EventID, this } );
 	}
 	#endif
 	
@@ -90,8 +90,8 @@ void Control::SubscribeEvent( int event_type, std::function<void(Control*)> call
 }
 
 void Control::sendGuiCommand( int eventId ) {
-	if(eine) {
-		eine->processControlEvent(eventId);
+	if(engine) {
+		engine->processControlEvent(eventId);
 	}
 }
 
@@ -102,8 +102,8 @@ const std::vector<Control*> Control::getWidgetControls() {
 		return std::vector<Control*>();
 }
 const std::vector<Control*> Control::getEineControls() {
-	if(eine)
-		return eine->GetControls();
+	if(engine)
+		return engine->GetControls();
 	else
 		return std::vector<Control*>();
 }
@@ -121,11 +121,11 @@ void Control::SetRect( int x, int y, int w, int h ) {
 	onPositionChange();
 
 	Widget* widget = getWidget();
-	GuiEngine* eine = getEine();
+	GuiEngine* engine = getEine();
 	if(widget) {
 		widget->updateCache(this, CacheUpdateFlag::position);
-	} else if(eine) {
-		eine->updateCache(this, CacheUpdateFlag::position);
+	} else if(engine) {
+		engine->updateCache(this, CacheUpdateFlag::position);
 	}
 }
 
@@ -144,7 +144,7 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyDown( sf::Event::KeyEvent &sym ) {}
 	void Control::OnKeyUp( sf::Event::KeyEvent &sym ) {}
 #elif USE_SDL
-	void Control::Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected ) {}
+	void Control::Render( SDL_Rect position, bool isSelected ) {}
 	void Control::OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod ) {}
 	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod &mod ) {}
 #endif

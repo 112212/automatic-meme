@@ -19,7 +19,7 @@ ListBox::~ListBox() {
 		delete m_scrollbar;
 }
 
-void ListBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+void ListBox::Render( SDL_Rect pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	// draw items
@@ -39,7 +39,7 @@ void ListBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 	}
 	//Draw_Rect(surf, x, y, m_rect.w, h, Colors::c_white );
 	if(m_drawscrollbar) {
-		m_scrollbar->Render( ren, pos, false );
+		m_scrollbar->Render( pos, false );
 	}
 	Drawing::Rect(x, y, m_rect.w, m_rect.h, Colors::Gray );
 	

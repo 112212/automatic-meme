@@ -35,7 +35,7 @@ class Container : public Widget {
 		#ifdef USE_SFML
 			void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
-			void Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+			void Render( SDL_Rect position, bool isSelected );
 		#endif
 		void OnMWheel( int updown );
 		void OnMouseDown( int mX, int mY );

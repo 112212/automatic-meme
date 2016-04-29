@@ -166,7 +166,7 @@ void Cache::removeControlFromCache(Control* control) {
 	
 	if(control->isWidget) {
 		Widget* w = static_cast<Widget*>(control);
-		w->set_eine(0);
+		w->set_engine(0);
 	}
 	
 	for(auto j = controls.begin(); j != controls.end(); j++) {

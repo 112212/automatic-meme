@@ -53,6 +53,7 @@ inline void Draw_VLine(SDL_Renderer* ren, int x1, int y1, int x2, Uint32 color )
 
 namespace Drawing {
 	
+	void SetResolution( int w, int h );
 	void Init();
 	void Rect(int x, int y, int w, int h, unsigned int color);
 	void FillRect(int x, int y, int w, int h, unsigned int color);

@@ -19,7 +19,7 @@ TextBox::~TextBox() {
 	m_text = "";
 }
 
-void TextBox::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+void TextBox::Render( SDL_Rect pos, bool isSelected ) {
 	
 	
 	#ifdef SELECTION_MARK

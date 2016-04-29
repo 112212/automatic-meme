@@ -87,7 +87,7 @@ class Control {
 	private:
 		bool isWidget;
 		controlType type;
-		GuiEngine* eine;
+		GuiEngine* engine;
 		Widget* widget;
 		friend class Widget;
 		friend class GuiEngine;
@@ -115,7 +115,7 @@ class Control {
 		void emitEvent( int EventID );
 		void sendGuiCommand( int eventId );
 		inline Widget* getWidget() { return widget; }
-		inline GuiEngine* getEine() { return eine; }
+		inline GuiEngine* getEine() { return engine; }
 		bool check_collision(int x, int y);
 		void setInteractible(bool interactible);
 		const Point getOffset();
@@ -127,13 +127,13 @@ class Control {
 		virtual void onPositionChange();
 		virtual bool customBoundary( int x, int y );
 		
-		// called by gui eine, controls can override these functions
+		// called by gui engine, controls can override these functions
 		#ifdef USE_SFML
 			virtual void Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected );
 			virtual void OnKeyDown( sf::Event::KeyEvent &sym );
 			virtual void OnKeyUp( sf::Event::KeyEvent &sym );
 		#elif USE_SDL
-			virtual void Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+			virtual void Render( SDL_Rect position, bool isSelected );
 			virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod );
 			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod &mod );
 		#endif

@@ -37,7 +37,6 @@ class GuiEngine : public Cache
 #endif
 {
 	private:
-		static bool firstInit;
 		std::map<std::string, Control*> map_name_control;
 		std::map<unsigned int, Control*> map_id_control;
 		
@@ -89,7 +88,7 @@ class GuiEngine : public Cache
 			void OnKeyUp(  sf::Event::KeyEvent &sym );
 			void OnEvent(sf::Event &event);
 		#elif USE_SDL
-			void Render( SDL_Renderer* ren );
+			void Render( );
 			void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 			void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
 			void OnEvent(SDL_Event &event);

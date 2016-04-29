@@ -109,7 +109,7 @@ class ComboBox : public Control {
 			void Render( sf::RenderTarget& ren, sf::RenderStates states, bool isSelected );
 			void OnKeyDown( sf::Event::KeyEvent &sym );
 		#elif USE_SDL
-			void Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+			void Render( SDL_Rect position, bool isSelected );
 			void OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod );
 		#endif
 		
