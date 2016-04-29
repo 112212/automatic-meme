@@ -221,10 +221,10 @@ namespace Drawing {
 		
 	}
 	
-	int sizeX=500, sizeY=500;
+	int sizeX=800, sizeY=800;
 	void SetResolution( int w, int h ) {
-		w = sizeX;
-		h = sizeY;
+		sizeX = w;
+		sizeY = h;
 	}
 
 	void Rect(int x, int y, int w, int h, GLuint color) {
