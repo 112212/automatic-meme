@@ -121,7 +121,7 @@ void Control::SetRect( int x, int y, int w, int h ) {
 	onPositionChange();
 
 	Widget* widget = getWidget();
-	GuiEngine* engine = getEine();
+	GuiEngine* engine = getEngine();
 	if(widget) {
 		widget->updateCache(this, CacheUpdateFlag::position);
 	} else if(engine) {

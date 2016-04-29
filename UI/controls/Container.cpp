@@ -31,11 +31,11 @@ Container::~Container() {
 
 void Container::OnMWheel( int updown ) {
 	// TODO: scroll vertically default and horizontally if pointed on it
-	if(!getEine()) return;
-	if(getEine()->GetSelectedWidget() == (Control*)innerWidget or 
+	if(!getEngine()) return;
+	if(getEngine()->GetSelectedWidget() == (Control*)innerWidget or 
 		isThisWidgetSelected()) {
 			
-		if(m_scroll_v && !(m_scroll_h && getEine()->GetSelectedControl() == m_scroll_h)) {
+		if(m_scroll_v && !(m_scroll_h && getEngine()->GetSelectedControl() == m_scroll_h)) {
 			m_scroll_v->OnMWheel(updown);
 		}
 		else if(m_scroll_h) {

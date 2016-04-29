@@ -115,7 +115,7 @@ class Control {
 		void emitEvent( int EventID );
 		void sendGuiCommand( int eventId );
 		inline Widget* getWidget() { return widget; }
-		inline GuiEngine* getEine() { return engine; }
+		inline GuiEngine* getEngine() { return engine; }
 		bool check_collision(int x, int y);
 		void setInteractible(bool interactible);
 		const Point getOffset();
