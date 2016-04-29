@@ -7,7 +7,7 @@ enum {
 	EVENT_RADIOBUTTON_CHANGE
 };
 
-#define RADIO_BUTTON_RADIUS 7
+#define RADIO_BUTTON_RADIUS 14
 
 class RadioButton : public Control {
 	private:

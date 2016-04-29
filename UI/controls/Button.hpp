@@ -25,7 +25,7 @@ class Button : public Control {
 		const char* ctext;
 		void onPositionChange();
 		#ifdef USE_SDL
-			void update_text(SDL_Renderer* ren);
+			void update_text();
 		#endif
 		void OnSetStyle(std::string& style, std::string& value);
 		void OnMouseDown( int mX, int mY );
@@ -35,7 +35,7 @@ class Button : public Control {
 		#ifdef USE_SFML
 			void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
-			void Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected );
+			void Render( SDL_Rect pos, bool isSelected );
 		#endif
 	public:
 		Button();

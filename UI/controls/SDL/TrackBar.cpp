@@ -50,7 +50,7 @@ void TrackBar::Render( SDL_Rect pos, bool isSelected ) {
 				Drawing::Line(x + dw*i, h-5, x + dw*i, h+5, Colors::White);
 			}
 		}
-		Drawing::FillCircle( x + m_slider_pix, h - 1, 5, m_on_it ? Colors::Yellow : Colors::White);
+		Drawing::FillCircle( x + m_slider_pix, h - 1, 10, m_on_it ? Colors::Yellow : Colors::White);
 	}
 	if(m_surf_num) {
 		// TODO: fix this

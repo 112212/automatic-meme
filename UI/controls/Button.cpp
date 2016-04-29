@@ -1,4 +1,5 @@
-#include <SDL2/SDL2_gfxPrimitives.h>
+// #include <SDL2/SDL2_gfxPrimitives.h>
+#include "../common/SDL/Drawing.hpp"
 #include "Button.hpp"
 
 namespace ng {
@@ -65,19 +66,23 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 	}
 
 #elif USE_SDL
-	void Button::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+	void Button::Render( SDL_Rect pos, bool isSelected ) {
 		int x = m_rect.x + pos.x;
 		int y = m_rect.y + pos.y;
 		
 		if(need_update) {
-			update_text(ren);
+			update_text();
 		}
 		
-		boxColor(ren, x, y, x+m_rect.w, y+m_rect.h, 0xff505050);
+		Drawing::FillRect(x, y, m_rect.w, m_rect.h, Colors::Dgray);
+		// boxColor(ren, x, y, x+m_rect.w, y+m_rect.h, 0xff505050);
+		
 		#ifdef SELECTION_MARK
-			rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, isSelected ?  Colors::Yellow : Colors::White );
+			Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ?  Colors::Yellow : Colors::White);
+			// rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, isSelected ?  Colors::Yellow : Colors::White );
 		#else
-			rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, Colors::White );
+			Drawing::Rect(x, y, m_rect.w, m_rect.h, Colors::White);
+			// rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, Colors::White );
 		#endif
 		
 		// SDL_SetRenderDrawColor(ren,255,0,0,255);
@@ -85,10 +90,14 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 		pos.y = m_text_loc.y + pos.y;
 		pos.w = m_text_loc.w;
 		pos.h = m_text_loc.h;
-		SDL_RenderCopy( ren, tex_text, 0, &pos);
+		
+		// TODO: fix this
+		// SDL_RenderCopy( ren, tex_text, 0, &pos);
 	}
 
-	void Button::update_text(SDL_Renderer* ren) {
+	void Button::update_text() {
+		// TODO: fix this
+		/*
 		if(!font) cout << "Button: font error\n";
 		SDL_Color c;
 		if(m_is_mouseDown)
@@ -104,6 +113,7 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 		}
 
 		tex_text = tex;
+		*/
 	}
 	
 	void Button::SetText( const char* _text ) {
