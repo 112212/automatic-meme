@@ -13,6 +13,7 @@ TextBox::TextBox() {
 	m_cursor_sel = 0;
 	m_first_index = 0;
 	m_is_mouseDown = false;
+	tex_first = tex_middle = tex_last = 0;
 }
 
 TextBox::~TextBox() {
@@ -29,55 +30,32 @@ void TextBox::Render( SDL_Rect pos, bool isSelected ) {
 	#endif
 	
 	
-	// rectangleColor(ren, m_rect.x, m_rect.y, m_rect.x+m_rect.w, m_rect.y+m_rect.h, Colors::Gray );
-	// #ifdef SELECTION_MARK
-		// rectangleColor(ren, m_rect.x, m_rect.y, m_rect.x+m_rect.w, m_rect.y+m_rect.h, isSelected ?  Colors::Yellow : Colors::White );
-	// #else
-		// rectangleColor(ren, m_rect.x, m_rect.y, m_rect.x+m_rect.w, m_rect.y+m_rect.h, Colors::White );
-	// #endif
-	
 	// prvo mora da postoji prvi tekst
 	if(m_surf_first) {
-		// TODO: fix this
 		// CSurface::OnDraw( ren, m_surf_first, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_surf_first->w, m_surf_first->h, tex_first );
 		// ako postoji prvi tekst, da li postoji drugi tekst (selekcija)
 		if(m_surf_middle) {
-			// TODO: fix this
 			// CSurface::OnDraw( ren, m_surf_middle, m_text_loc.x + m_surf_first->w+pos.x, m_text_loc.y+pos.y );
+			Drawing::TexRect( m_text_loc.x + m_surf_first->w+pos.x, m_text_loc.y+pos.y, m_surf_middle->w, m_surf_middle->h, tex_middle );
 			// ako postoji drugi tekst, da li postoji treci tekst (znaci da postoji selekcija negde izmedju)
 			if(m_surf_last) {
-				// TODO: fix this
 				// CSurface::OnDraw( ren, m_surf_last, m_text_loc.x + m_surf_first->w + m_surf_middle->w + pos.x, m_text_loc.y + pos.y );
+				Drawing::TexRect( m_text_loc.x + m_surf_first->w + m_surf_middle->w + pos.x, m_text_loc.y + pos.y, m_surf_last->w, m_surf_last->h, tex_last );
 			}
 		}
 	}
 	
 	//Draw_HLine(surf, m_text_loc.x, m_rect.y+m_rect.h+10, getCharPos( m_maxtext ), CColors::c_yellow );
 	
-	if(isSelected)
+	if(isSelected) {
 		//Draw_VLine(surf, m_cursor_pt, m_rect.y+5, m_rect.y+m_rect.h-5, CColors::c_white ); 
-		Drawing::VLine(m_cursor_pt, m_rect.y+5, m_rect.y+m_rect.h-5, Colors::White); 
+		Drawing::VLine(m_cursor_pt+pos.x, m_rect.y+pos.y+5, m_rect.y+pos.y+m_rect.h-5, Colors::White); 
 		// vlineColor(ren, m_cursor_pt+pos.x, m_rect.y+5+pos.y, m_rect.y+m_rect.h-5+pos.y, Colors::White );
+	}
 }
 
 void TextBox::SetText( std::string text ) {
-	m_text = text;
-	m_text_selection.x = m_text_selection.y = 0;
-	
-	// pocetak teksta ...
-	m_text_loc.x = m_rect.x + 5;
-	m_text_loc.y = m_rect.y + int(m_rect.h * 0.15);
-	
-	m_first_index = 0;
-	m_cursor_sel = m_text.length();
-	
-	updateMaxText();
-	updateCursor();
-	updateSelection();
-}
-
-void TextBox::SetText( const char* text ) {
-	
 	m_text = text;
 	m_text_selection.x = m_text_selection.y = 0;
 	
@@ -102,7 +80,7 @@ void TextBox::SetSelection( int start, int end ) {
 
 void TextBox::OnMouseDown( int mX, int mY ) {
 	sendGuiCommand( GUI_KEYBOARD_LOCK );
-	
+	// std::cout << "mouse down " << mX << " " << mY << "\n";
 	// generisati event za gui mozda ...
 	// ili posetiti callback funkciju :)
 	int sel = getSelectionPoint( mX );
@@ -164,46 +142,63 @@ void TextBox::updateSelection() {
 			maxtext -= len2;
 			
 			
-			m_surf_first = TTF_RenderText_Shaded( my_font, m_text.substr( m_first_index, len2 ).c_str(), {255,255,255}, {100,100,100} );
+			// m_surf_first = TTF_RenderText_Shaded( my_font, m_text.substr( m_first_index, len2 ).c_str(), {255,255,255}, {100,100,100} );
+			m_surf_first = TTF_RenderText_Blended( my_font, m_text.substr( m_first_index, len2 ).c_str(), {255,255,255} );
+			tex_first = Drawing::GetTextureFromSurface(m_surf_first, tex_first);
+			// tex_text = Drawing::GetTextureFromSurface(m_surf_first);
 			// odavde je zavrsena selekcija, handled ...
 			
 			
 			// znaci da postoji samo m_surf_middle(ako nije sve selektovano :) )
 			if(maxtext > 0) {
-				if(m_text_selection.y+1 < m_text.length())
-					m_surf_middle = TTF_RenderText_Solid( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
+				if(m_text_selection.y+1 < m_text.length()) {
+					// m_surf_middle = TTF_RenderText_Solid( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
+					m_surf_middle = TTF_RenderText_Blended( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
+					tex_middle = Drawing::GetTextureFromSurface(m_surf_middle, tex_middle);
+				}
 			}
 		} else { // ako selekcija ne pocinje od pocetka, onda je m_surf_first obican tekst (unselected)
 			//  if(m_text_selection.x < m_first_index + m_maxtext)
 			len2 = std::min( maxtext, m_text_selection.x-m_first_index );
 			maxtext -= len2;
+			// m_surf_first = TTF_RenderText_Blended( my_font, m_text.substr(m_first_index, len2).c_str(), {255,255,255} );
 			m_surf_first = TTF_RenderText_Blended( my_font, m_text.substr(m_first_index, len2).c_str(), {255,255,255} );
+			tex_first = Drawing::GetTextureFromSurface(m_surf_first, tex_first);
+			
 			
 			if(maxtext > 0) {
 				len2 =  std::min(m_text_selection.y-m_text_selection.x+1, maxtext);
 				maxtext -= len2;
 				
 				// dok middle postaje selekcija
-				m_surf_middle = TTF_RenderText_Shaded( my_font, m_text.substr( m_text_selection.x, len2 ).c_str(), {255,255,255}, {100,100,100});
+				// m_surf_middle = TTF_RenderText_Shaded( my_font, m_text.substr( m_text_selection.x, len2 ).c_str(), {255,255,255}, {100,100,100});
+				m_surf_middle = TTF_RenderText_Blended( my_font, m_text.substr( m_text_selection.x, len2 ).c_str(), {255,255,255});
+				tex_middle = Drawing::GetTextureFromSurface(m_surf_middle, tex_middle);
+				
 			}
 			
 			// ako nije do kraja selektovano, znaci da postoji m_surf_last (unselected)
 			if(m_text_selection.y+1 < m_text.length()) {
-				if(maxtext > 0)
-					m_surf_last = TTF_RenderText_Solid( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
+				if(maxtext > 0) {
+					// m_surf_last = TTF_RenderText_Solid( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
+					m_surf_last = TTF_RenderText_Blended( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
+					tex_last = Drawing::GetTextureFromSurface(m_surf_last, tex_last);
+				}
 			}
 		}
 			
 	} else {
 		// ne postoji selekcija
-		if(m_text.size() > 0)
-		m_surf_first = TTF_RenderText_Solid( my_font, m_text.substr(m_first_index, maxtext).c_str(), {255,255,255} );
+		if(m_text.size() > 0) {
+			m_surf_first = TTF_RenderText_Blended( my_font, m_text.substr(m_first_index, maxtext).c_str(), {255,255,255} );
+			tex_first = Drawing::GetTextureFromSurface(m_surf_first, tex_first);
+		}
 	}
 	
 }
 
 void TextBox::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "text")
+	if(style == "value")
 		SetText(value.c_str());
 }
 
@@ -253,8 +248,7 @@ void TextBox::fixSelection() {
 }
 
 void TextBox::onPositionChange() {
-	if(!m_text.empty())
-		SetText( m_text.c_str() ); // update poziciju teksta :)
+	SetText( m_text.c_str() );
 }
 
 
@@ -267,7 +261,6 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod ) {
 	switch(val) {
 		case SDLK_BACKSPACE:
 				if(m_text.length() > 0) {
-					// ako postoji selekcija, brisi sve sto je selektovano
 					if(m_text_selection.x != m_text_selection.y) {
 						if(m_text_selection.x >= 0) {
 							m_text.erase(m_text_selection.x, m_text_selection.y-m_text_selection.x+1);
@@ -275,8 +268,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod ) {
 							// remove selection
 							m_text_selection.x = m_text_selection.y = 0;
 						}
-					} else if(m_cursor_sel > 0) { // ako ne postoji selekcija, brisi tamo gde je kursor
-						// pomeriti cursor
+					} else if(m_cursor_sel > 0) {
 						m_text = m_text.erase(m_cursor_sel-1, 1);
 						m_cursor_sel--;
 						int mtext = getMaxTextBw( m_cursor_sel );
@@ -350,14 +342,12 @@ int TextBox::getCharPos( int num ) {
 void TextBox::updateCursor() {
 
 	if(m_cursor_sel < m_first_index) {
-		// u principu treba da vraca m_first_index
 		if(m_cursor_sel < 0)m_cursor_sel = 0;
 		m_first_index=m_cursor_sel;
 		m_maxtext = getMaxText();
 	} else if(m_cursor_sel-m_first_index > m_maxtext) {
 		m_maxtext = getMaxTextBw( m_cursor_sel );
 		m_first_index = m_cursor_sel - m_maxtext;
-		// treba da inkrementira
 	} else
 		m_maxtext = getMaxText();
 	m_cursor_pt = getCharPos( m_cursor_sel-m_first_index );

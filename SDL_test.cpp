@@ -95,28 +95,28 @@ int main() {
 	
 	XmlLoader::LoadXml(gui, "gui-test.xml");
 	
-	gui.SubscribeEvent(5, EVENT_BUTTON_CLICK, [](Control* c){
+	gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
 		cout << "clicked at 1 \n";
 	});
-	gui.SubscribeEvent(55, EVENT_BUTTON_CLICK, [](Control* c){
+	gui.SubscribeEvent("55", EVENT_BUTTON_CLICK, [](Control* c){
 		cout << "clicked at 3 \n";
 	});
-	gui.SubscribeEvent(56, EVENT_BUTTON_CLICK, [](Control* c){
+	gui.SubscribeEvent("56", EVENT_BUTTON_CLICK, [](Control* c){
 		cout << "clicked at 4 \n";
 	});
 	
-	gui.SubscribeEvent(2, EVENT_BUTTON_CLICK, [](Control* c){
+	gui.SubscribeEvent("2", EVENT_BUTTON_CLICK, [](Control* c){
 		cout << "clicked at nikola\n";
 		Button* b = (Button*)c;
 		b->SetText("you clicked at me");
 		b->SetRect(50,50,200, 50);
 	});
 	
-	gui.SubscribeEvent(546, EVENT_TRACKBAR_CHANGE, [](Control *c) {
-		cout << "trackbar chaed: " << ((TrackBar*)c)->GetValue() << endl;
+	gui.SubscribeEvent("546", EVENT_TRACKBAR_CHANGE, [](Control *c) {
+		cout << "trackbar changed: " << ((TrackBar*)c)->GetValue() << endl;
 	});
 	
-	gui.SubscribeEvent(20, EVENT_SCROLLBAR_CHANGE, [](Control* c) {
+	gui.SubscribeEvent("20", EVENT_SCROLLBAR_CHANGE, [](Control* c) {
 		ScrollBar* s = (ScrollBar*)c;
 		cout << "value is: " << s->GetValue() << endl;
 	});

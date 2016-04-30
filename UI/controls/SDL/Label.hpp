@@ -25,11 +25,16 @@
 namespace ng {
 class Label : public Control {
 	private:
-		std::vector<SDL_Surface*> m_surfs;
-		//~ SDL_Surface* m_surf_text;
-		
 		//const char* m_text;
 		std::string m_text;
+		
+		struct TextLine{
+			Uint32 tex;
+			int w,h;
+		};
+		
+		std::vector<TextLine> text_lines;
+		
 		TTF_Font* m_font;
 		const static int line_height;
 		

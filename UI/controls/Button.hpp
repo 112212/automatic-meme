@@ -13,7 +13,8 @@ class Button : public Control {
 			sf::Text text;
 			sf::RectangleShape rect1;
 		#elif USE_SDL
-			SDL_Texture* tex_text;
+			// SDL_Texture* tex_text;
+			Uint32 tex_text;
 			TTF_Font* font;
 			SDL_Rect m_text_loc;
 			bool need_update;

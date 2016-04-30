@@ -125,14 +125,7 @@ void GuiEngine::UnlockWidget() {
 	m_widget_lock = false;
 }
 
-Control* GuiEngine::GetControlByName(std::string name) {
-	auto it = map_name_control.find(name);
-	if(it != map_name_control.end())
-		return it->second;
-	else
-		return 0;
-}
-Control* GuiEngine::GetControlById(unsigned int id) {
+Control* GuiEngine::GetControlById(std::string id) {
 	auto it = map_id_control.find(id);
 	if(it != map_id_control.end())
 		return it->second;
@@ -194,7 +187,6 @@ void GuiEngine::AddControl( Control* control ) {
 	
 	addControlToCache(control);
 	
-	map_name_control[control->name] = control;
 	map_id_control[control->id] = control;
 }
 
@@ -205,10 +197,8 @@ void GuiEngine::RemoveControl( Control* control ) {
 		unselectControl();
 	}
 	
-	std::string name = control->name;
-	unsigned int id = control->id;
+	std::string id = control->id;
 	
-	map_name_control.erase(name);
 	map_id_control.erase(id);
 	
 	// if its widget, make sure nothi breaks
@@ -550,10 +540,8 @@ void GuiEngine::recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove) 
 		} else {
 			if(add_or_remove) {
 				map_id_control[it->control->id] = it->control;
-				map_name_control[it->control->name] = it->control;
 			} else {
 				map_id_control.erase(it->control->id);
-				map_name_control.erase(it->control->name);
 			}
 		}
 	}
@@ -609,7 +597,7 @@ void GuiEngine::unselectControl() {
 #endif
 
 
-void GuiEngine::SubscribeEvent( int id, int event_type, std::function<void(Control*)> callback ) {
+void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<void(Control*)> callback ) {
 	// subscribers.insert(std::make_pair(std::make_pair(id,event_type), callback));
 	auto it = map_id_control.find(id);
 	if(it != map_id_control.end()) {
@@ -692,7 +680,7 @@ void GuiEngine::OnCleanup() {
 			// selected_control->OnKeyUp( sym, mod );
 		}
 	}
-	void GuiEngine::Render(  ) {
+	void GuiEngine::Render() {
 		bool has_selected_control = false;
 		SDL_Rect pos = {0,0,0,0};
 		for(auto &ca : cache) {
@@ -701,7 +689,7 @@ void GuiEngine::OnCleanup() {
 				
 				#ifdef SELECTED_CONTROL_ON_TOP
 				if(c != selected_control) {
-					c->Render( ren, pos, false );
+					c->Render(pos, false );
 				} else {
 					has_selected_control = true;
 				}
@@ -713,7 +701,7 @@ void GuiEngine::OnCleanup() {
 		
 		#ifdef SELECTED_CONTROL_ON_TOP
 		if(has_selected_control) {
-			selected_control->Render(ren,pos,true);
+			selected_control->Render(pos,true);
 		}
 		#endif
 	}

@@ -17,6 +17,7 @@ class CheckBox : public Control {
 		Point m_text_loc;
 		bool m_isChecked;
 		TTF_Font* m_font;
+		Uint32 tex_text;
 		char* m_text;
 		void onPositionChange();
 		static int m_font_index;

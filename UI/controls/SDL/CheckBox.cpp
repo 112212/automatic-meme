@@ -5,6 +5,7 @@ CheckBox::CheckBox() {
 	setType( TYPE_CHECKBOX );
 	m_surf_text = 0;
 	m_text = 0;
+	tex_text = 0;
 	m_isChecked = false;
 	m_font = Fonts::GetFont( "default", 13 );
 }
@@ -30,6 +31,7 @@ void CheckBox::Render(  SDL_Rect pos, bool isSelected ) {
 	if(m_surf_text) {
 		// TODO: fix this
 		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+		Drawing::TexRect(m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_surf_text->w, m_surf_text->h, tex_text);
 	}
 	
 	if(m_isChecked) {
@@ -59,11 +61,12 @@ void CheckBox::updateText() {
 	if(m_surf_text)
 		SDL_FreeSurface( m_surf_text );
 	
-	m_surf_text = TTF_RenderText_Solid( m_font, m_text, {255,255,255} );
+	m_surf_text = TTF_RenderText_Blended( m_font, m_text, {255,255,255} );
 	if(m_surf_text) {
 		m_text_loc.x = m_rect.x + CHECKBOX_SIZE + 15;
 		m_text_loc.y = m_rect.y;
 	}
+	tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 }
 
 void CheckBox::OnMouseDown( int mX, int mY ) {
@@ -71,14 +74,16 @@ void CheckBox::OnMouseDown( int mX, int mY ) {
 	// ili posetiti callback funkciju :)
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
-		m_surf_text = TTF_RenderText_Solid( m_font, m_text, {0,255,0} );
+		m_surf_text = TTF_RenderText_Blended( m_font, m_text, {0,255,0} );
+		tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	}
 }
 
 void CheckBox::OnMouseUp( int mX, int mY ) {
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
-		m_surf_text = TTF_RenderText_Solid( m_font, m_text, {255,255,255} );
+		m_surf_text = TTF_RenderText_Blended( m_font, m_text, {255,255,255} );
+		tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	}
 	if(check_collision(mX, mY)) {
 		m_isChecked = !m_isChecked;
@@ -96,8 +101,11 @@ void CheckBox::onPositionChange() {
 }
 
 void CheckBox::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "text")
+	if(style == "value") {
 		SetText(value.c_str());
+	} else if(style=="checked") {
+		SetValue( value == "true" ? true : false );
+	}
 }
 
 }

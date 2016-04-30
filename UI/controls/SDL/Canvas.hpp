@@ -12,7 +12,8 @@ enum {
 class Canvas : public Control {
 	private:
 		SDL_Surface* m_drawing;
-		SDL_Texture* m_tex_drawing;
+		Uint32 tex_drawing;
+		int background_color;
 		bool m_is_mouseDown;
 		bool m_is_readonly;
 		void onPositionChange();
@@ -20,6 +21,7 @@ class Canvas : public Control {
 		void put_pixel(int x, int y);
 		void put_pixel_interpolate(int x, int y, int last_x, int last_y);
 		int pixel_color;
+		int grid_color;
 		int last_x, last_y;
 		bool align_to_grid;
 		bool display_grid;
@@ -30,11 +32,13 @@ class Canvas : public Control {
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
+		void OnSetStyle(std::string& style, std::string& value);
 	public:
 		Canvas();
 		~Canvas();
 		
 		void SetPixelSize(int size);
+		void SetBackgroundColor(int color);
 		void SetAlignToGrid(bool align) { align_to_grid = align; }
 		void DisplayGrid( bool grid ) { display_grid = grid; }
 		void SetPixelColor(int color) { pixel_color = color; }

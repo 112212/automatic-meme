@@ -7,6 +7,7 @@ RadioButton::RadioButton() {
 	m_group = 0;
 	m_isSelected = false;
 	m_font = Fonts::GetFont( "default", 13 );
+	tex_text = 0;
 }
 
 
@@ -25,6 +26,7 @@ void RadioButton::Render( SDL_Rect pos, bool isSelected ) {
 	if(m_surf_text) {
 		// TODO: fix this
 		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y-5, m_surf_text->w, m_surf_text->h, tex_text );
 	}
 	if(m_isSelected) {
 		Drawing::FillCircle(x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
@@ -37,7 +39,8 @@ void RadioButton::SetText( std::string text ) {
 	if(m_surf_text)
 		SDL_FreeSurface( m_surf_text );
 	
-	m_surf_text = TTF_RenderText_Solid( m_font, m_text.c_str(), {255,255,255} );
+	m_surf_text = TTF_RenderText_Blended( m_font, m_text.c_str(), {255,255,255} );
+	tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	if(m_surf_text) {
 		m_text_loc.x = m_rect.x + RADIO_BUTTON_RADIUS + 15;
 		m_text_loc.y = m_rect.y + RADIO_BUTTON_RADIUS;
@@ -45,7 +48,7 @@ void RadioButton::SetText( std::string text ) {
 }
 
 void RadioButton::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "text") {
+	if(style == "value") {
 		SetText(value);
 	}
 }
@@ -55,7 +58,8 @@ void RadioButton::OnMouseDown( int mX, int mY ) {
 	// ili posetiti callback funkciju :)
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
-		m_surf_text = TTF_RenderText_Solid( m_font, m_text.c_str(), {0,255,0} );
+		m_surf_text = TTF_RenderText_Blended( m_font, m_text.c_str(), {0,255,0} );
+		tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	}
 	m_is_mouseDown = true;
 }
@@ -65,7 +69,7 @@ void RadioButton::handleRadioButtonChange() {
 	if(getWidget()) {
 		controls = getWidgetControls();
 	} else {
-		controls = getEineControls();
+		controls = getEngineControls();
 	}
 	int len = controls.size();
 	int group = m_group;
@@ -85,7 +89,8 @@ void RadioButton::OnMouseUp( int mX, int mY ) {
 	m_is_mouseDown = false;
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
-		m_surf_text = TTF_RenderText_Solid( m_font, m_text.c_str(), {255,255,255} );
+		m_surf_text = TTF_RenderText_Blended( m_font, m_text.c_str(), {255,255,255} );
+		tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	}
 	if(check_collision(mX, mY)) {
 		if( !m_isSelected ) {

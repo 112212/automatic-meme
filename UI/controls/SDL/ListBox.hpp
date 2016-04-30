@@ -27,7 +27,14 @@ class ListBox : public Control {
 		std::vector<std::string> m_items;
 		
 		// surf text in std::vector
-		std::vector<SDL_Surface*> m_vec_surf_text;
+		// std::vector<SDL_Surface*> m_vec_surf_text;
+		
+		struct TextLine{
+			Uint32 tex;
+			int w,h;
+		};
+		
+		std::vector<TextLine> text_lines;
 		
 		SDL_Rect m_scrollrect;
 		ScrollBar *m_scrollbar; // scrollbar :)
@@ -67,7 +74,6 @@ class ListBox : public Control {
 		
 
 		void Clear() { m_items.clear(); }
-		void AddItem( const char* item );
 		void AddItem( std::string item );
 		int GetSelectedIndex();
 		void SetSelectedIndex( int index );

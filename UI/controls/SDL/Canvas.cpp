@@ -8,41 +8,26 @@ Canvas::Canvas() {
 	pixel_size = 1;
 	pixel_color = 0xffffffff;
 	m_drawing = nullptr;
-	m_tex_drawing = nullptr;
+	tex_drawing = 0;
 	last_x = last_y = -1;
 	m_is_readonly = false;
 	align_to_grid = false;
 	display_grid = false;
-	maketex=false;
+	maketex=true;
+	background_color = 0;
+	grid_color = 0xff808080;
 }
 
 Canvas::~Canvas() {
 }
 
-const int grid_color = 0xff808080;
 void Canvas::Render( SDL_Rect pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	
 	// crtanje sdl draw
-	Drawing::FillRect(x, y, m_rect.w, m_rect.h, 0 );
+	Drawing::FillRect(x, y, m_rect.w, m_rect.h, background_color );
 	Drawing::Rect( x, y, m_rect.w, m_rect.h, Colors::Gray );
-	
-	if(maketex) {
-		if(m_tex_drawing)
-			SDL_DestroyTexture(m_tex_drawing);
-		// TODO: fix this
-		// m_tex_drawing = SDL_CreateTextureFromSurface( ren, m_drawing );
-		maketex = false;
-		SDL_Rect r = { x, y, m_rect.w, m_rect.h };
-		// TODO: fix this
-		// SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
-	} else if(m_drawing && m_tex_drawing)
-		//CSurface::OnDraw( ren, m_drawing, x, y );
-		
-		// TODO: fix this
-		// CSurface::OnDraw(ren, m_tex_drawing, m_drawing, x, y);
-	
 	
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
@@ -64,8 +49,49 @@ void Canvas::Render( SDL_Rect pos, bool isSelected ) {
 		}
 	}
 	
+	if(maketex) {
+		// TODO: fix this
+		// m_tex_drawing = SDL_CreateTextureFromSurface( ren, m_drawing );
+		
+		maketex = false;
+		SDL_Rect r = { x, y, m_rect.w, m_rect.h };
+		// TODO: fix this
+		// SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
+		tex_drawing = Drawing::GetTextureFromSurface( m_drawing, tex_drawing );
+		Drawing::TexRect( r.x, r.y, r.w, r.h, tex_drawing );
+	} else if(m_drawing && tex_drawing) {
+		//CSurface::OnDraw( ren, m_drawing, x, y );
+		
+		// TODO: fix this
+		// CSurface::OnDraw(ren, m_tex_drawing, m_drawing, x, y);
+		
+		Drawing::TexRect( x, y, m_drawing->w, m_drawing->h, tex_drawing );
+	}
+
 	
-	
+}
+
+void Canvas::OnSetStyle(std::string& style, std::string& value) {
+	if(style == "grid") {
+		display_grid = (value == "true" ? true : false);
+		maketex=true;
+	} else if(style == "pixelsize") {
+		SetPixelSize( std::stoi( value ) );
+	} else if(style == "color") {
+		if(value[0] == '#') {
+			SetPixelColor( 0xff000000 | std::stoi(value.substr(1), 0, 16) ); 
+		}
+	} else if(style == "align_to_grid") {
+		SetAlignToGrid( value == "true" ? true : false );
+	} else if(style == "background_color") {
+		SetBackgroundColor( 0xff000000 | std::stol(value.substr(1), 0, 16) );
+	} else if(style == "grid_color") {
+		grid_color = 0xff000000 | std::stoi(value.substr(1), 0, 16);
+	}
+}
+
+void Canvas::SetBackgroundColor(int color) {
+	background_color = color;
 }
 
 void Canvas::SetPixelSize(int size) {
@@ -101,6 +127,7 @@ void Canvas::put_pixel(int x, int y) {
 			}
 		}
 	}
+	maketex = true;
 }
 
 void Canvas::put_pixel_interpolate(int x, int y, int last_x, int last_y) {

@@ -129,7 +129,7 @@ void Widget::RenderWidget( SDL_Rect position, bool isSelected ) {
 			auto &c = ca.control;
 			#ifdef SELECTED_CONTROL_ON_TOP
 				if(c != selected_control) {
-					c->Render( position, false);
+					c->Render( position, false );
 				}
 			#else
 				c->Render( position, c == selected_control);
@@ -139,7 +139,7 @@ void Widget::RenderWidget( SDL_Rect position, bool isSelected ) {
 	
 	#ifdef SELECTED_CONTROL_ON_TOP
 	if(selected_control && selected_control->visible) {
-		selected_control->Render(ren,position,true);
+		selected_control->Render(position,true);
 	}
 	#endif
 }

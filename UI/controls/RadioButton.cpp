@@ -85,7 +85,7 @@ void RadioButton::handleRadioButtonChange() {
 	if(getWidget()) {
 		controls = getWidgetControls();
 	} else {
-		controls = getEineControls();
+		controls = getEngineControls();
 	}
 	int len = controls.size();
 	int group = m_group;

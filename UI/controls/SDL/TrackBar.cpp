@@ -92,6 +92,15 @@ void TrackBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 	}
 }
 
+void TrackBar::OnSetStyle(std::string& style, std::string& value) {
+	if(style == "value") {
+		setValue( std::stoi(value) );
+	} else if(style == "range") {
+		int separator = value.find(",");
+		SetRange( std::stoi(value.substr(0, separator)), std::stoi(value.substr(separator)) ); 
+	}
+}
+
 void TrackBar::OnMouseDown( int mX, int mY ) {
 	if(m_is_readonly || !canChange()) return;
 	

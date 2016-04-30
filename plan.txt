@@ -126,7 +126,7 @@ TODO:
 	remove m_selected_control +
 	widget lock / widget unlock +
 	SDL port of rendering +
-	SDL port of controls -
+	SDL port of controls +
 	control vision (show,hide) +
 	non-interactible controls *
 	get control by id, get control by name +
@@ -138,7 +138,7 @@ TODO:
 	new control widget mover +
 	make compile time option to remove event queue and totally replace it with subscribe event +
 	xml loader +
-	OpenGL port of controls -
+	OpenGL port of controls +
 
 
 Controls API Fix:
@@ -157,8 +157,23 @@ Controls API Fix:
 SDL port of controls:
 	ngButton +
 	ngComboBox +
+	ngCheckBox +
 	ngContainer +
 	ngGridContainer +
+	ngLabel +
+	ngListBox +
+	ngRadioButton +
+	ngScrollBar +
+	ngTabContainer -
+	ngTextBox +
+	ngTrackBar +
+	
+OpenGL port of controls:
+	ngButton +
+	ngComboBox +
+	ngCheckBox +
+	ngContainer +
+	ngGridContainer -
 	ngLabel +
 	ngListBox +
 	ngRadioButton +

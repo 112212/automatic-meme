@@ -70,6 +70,7 @@ namespace XmlLoader {
 			TAGTYPE("scrollbar", ScrollBar);
 			TAGTYPE("widgetmover", WidgetMover);
 			TAGTYPE("checkbox", CheckBox);
+			TAGTYPE("gridcontainer", GridContainer);
 			default: return 0;
 		}
 		return control;
@@ -110,7 +111,7 @@ namespace XmlLoader {
 		try {			
 			doc.parse<0>(data);
 		} catch(parse_error& err) {
-			std::cout << "XML parsi error: " << err.what() << std::endl;
+			std::cout << "XML parsing error: " << err.what() << std::endl;
 			return;
 		}
 		

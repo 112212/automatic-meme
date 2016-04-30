@@ -42,18 +42,15 @@ void Label::Render( SDL_Rect pos, bool isSelected ) {
 		//~ CSurface::OnDraw( surf, m_surf_text, m_rect.x, m_rect.y+5 );
 	// vector<SDL_Surface*>::iterator
 	int j=0;
-	for( auto i = m_surfs.begin(); i != m_surfs.end(); i++,j++) {
+	for( auto i = text_lines.begin(); i != text_lines.end(); i++,j++) {
 		// TODO: fix this
 		// CSurface::OnDraw( ren, *i, m_rect.x, m_rect.y+5+j*line_height );
+		Drawing::TexRect( m_rect.x, m_rect.y+5+j*line_height, i->w, i->h, i->tex);
 	}
 }
 
 void Label::SetText( const char* text ) {
 
-	for( auto i = m_surfs.begin(); i != m_surfs.end(); i++) {
-		SDL_FreeSurface( *i );
-	}
-	m_surfs.clear();
 	m_text = text;
 	//~ if(m_surf_text)
 		//~ SDL_FreeSurface( m_surf_text );
@@ -61,16 +58,27 @@ void Label::SetText( const char* text ) {
 	// multiline check
 	int dummy, advance,last_cut=0,sum=0,i,len = m_text.size();
 	char save;
+	int j = 0;
+	
 	TTF_Font* fnt = m_font;
 	for(i=0; i < len; i++) {
 		TTF_GlyphMetrics( fnt, m_text[i], &dummy, &dummy, &dummy, &dummy, &advance);
 		if( m_text[i] == '\n' or sum > m_rect.w-25) {
+			
 			// TODO: odseci
 			save = m_text[i];
 			m_text[i] = 0;
-			m_surfs.push_back( TTF_RenderText_Solid( 
-			m_font, &m_text[last_cut], 
-			{255,255,255} ) );
+			
+			SDL_Surface* surf = TTF_RenderText_Blended( m_font, &m_text[last_cut], {255,255,255} );
+			if(j < text_lines.size()) {
+				text_lines[j++] = { Drawing::GetTextureFromSurface(surf, text_lines[j].tex),
+					surf->w, surf->h };
+			} else {
+				text_lines.push_back( { Drawing::GetTextureFromSurface(surf, 0),
+					surf->w, surf->h } );
+			}
+			SDL_FreeSurface(surf);
+			
 			last_cut = i+1;
 			m_text[i] = save;
 			
@@ -80,11 +88,19 @@ void Label::SetText( const char* text ) {
 	}
 	save = m_text[i];
 	m_text[i] = 0;
-	m_surfs.push_back( TTF_RenderText_Solid( 
-	m_font, &m_text[last_cut], 
-	{255,255,255} ) );
+	
+	SDL_Surface* surf = TTF_RenderText_Blended( m_font, &m_text[last_cut], {255,255,255} );
+	if(j < text_lines.size()) {
+		text_lines[j++] = { Drawing::GetTextureFromSurface(surf, text_lines[j].tex),
+			surf->w, surf->h };
+	} else {
+		text_lines.push_back( { Drawing::GetTextureFromSurface(surf, 0),
+			surf->w, surf->h } );
+	}
+	SDL_FreeSurface(surf);
 	last_cut = i;
 	m_text[i] = save;
+	
 	//~ m_surf_text = TTF_RenderText_Solid( m_font, m_text, CColors::s_white );
 }
 
@@ -115,7 +131,7 @@ void Label::SetFont( const char* text, int size ) {
 }
 
 void Label::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "text")
+	if(style == "value")
 		SetText(value.c_str());
 }
 }

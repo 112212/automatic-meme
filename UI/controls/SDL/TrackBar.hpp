@@ -35,6 +35,7 @@ class TrackBar : public Control {
 		void updateTextLocation();
 		bool canChange();
 		TTF_Font* m_font;
+		void OnSetStyle(std::string& style, std::string& value);
 		
 		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; onChange(); }
 	public:

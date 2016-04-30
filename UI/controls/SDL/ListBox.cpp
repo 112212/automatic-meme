@@ -25,17 +25,18 @@ void ListBox::Render( SDL_Rect pos, bool isSelected ) {
 	// draw items
 	int h=0,i=0;
 	int offs = getListOffset();
-	for(auto it = m_vec_surf_text.cbegin()+offs; it != m_vec_surf_text.cend(); it++,i++) {
+	for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 		if(i >= m_max_items)
 			break;
 		if(m_selected_index == i+offs) {
-			Drawing::FillRect(  x, y + h, m_rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, 0xffff0000 );
+			Drawing::FillRect(  x, y + h, m_rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
 			
 		} else
-			Drawing::FillRect(  x, y + h, m_rect.w, (*it)->h, 0 );
+			Drawing::FillRect(  x, y + h, m_rect.w, it->h, 0 );
 		// TODO: fix this
 		// CSurface::OnDraw(ren, *it, x+2, y + h);
-		h += (*it)->h;
+		Drawing::TexRect( x+2, y+h, it->w, it->h, it->tex );
+		h += it->h;
 	}
 	//Draw_Rect(surf, x, y, m_rect.w, h, Colors::c_white );
 	if(m_drawscrollbar) {
@@ -52,35 +53,20 @@ void ListBox::Render( SDL_Rect pos, bool isSelected ) {
 
 void ListBox::AddItem( std::string item ) {
 	
-	SDL_Surface* txt = TTF_RenderText_Solid( m_font, clipText( item, m_rect.w ).c_str(), {255,255,255} );
+	SDL_Surface* txt = TTF_RenderText_Blended( m_font, clipText( item, m_rect.w ).c_str(), {255,255,255} );
+	
 	if(txt) {
 		m_items.push_back( item );
-		m_vec_surf_text.push_back( txt );
-		
+		// m_vec_surf_text.push_back( txt );
+		text_lines.push_back( {Drawing::GetTextureFromSurface(txt, 0), txt->w, txt->h} );
+		SDL_FreeSurface(txt);
 		if(m_selected_index == -1) {
 			m_selected_index = 0;
 		}
-	} else {
-		cout << "Error u ubacivanju itema :( ..." << endl;
 	}
-	updateBox();
-}
-void ListBox::AddItem( const char* item ) {
 	
-	SDL_Surface* txt = TTF_RenderText_Solid( m_font, clipText( item, m_rect.w ).c_str(), {255,255,255} );
-	if(txt) {
-		m_items.push_back( std::string(item) );
-		m_vec_surf_text.push_back( txt );
-		
-		if(m_selected_index == -1) {
-			m_selected_index = 0;
-		}
-	} else {
-		cout << "Error u ubacivanju itema :( ..." << endl;
-	}
 	updateBox();
 }
-
 
 void ListBox::OnMouseDown( int mX, int mY ) {
 	m_is_mouseDown = true;
@@ -179,10 +165,10 @@ void ListBox::OnGetFocus() {
 
 int ListBox::getAverageHeight() {
 	int h=0,i=0;
-	for(auto it = m_vec_surf_text.begin(); it != m_vec_surf_text.end(); it++,i++) {
+	for(auto it = text_lines.begin(); it != text_lines.end(); it++,i++) {
 		if(h >= m_rect.h)
 			break;
-		h += (*it)->h;
+		h += it->h;
 	}
 	return h / i;
 }
@@ -230,8 +216,9 @@ void ListBox::updateItemsSize() {
 	for(int i=0; i < m_items.size(); i++) {
 		tmp = clipText( m_items[i], m_rect.w );
 		if( tmp != m_items[i] ) {
-			SDL_FreeSurface( m_vec_surf_text[i] );
-			m_vec_surf_text[i] = TTF_RenderText_Solid( m_font, tmp.c_str(), {255,255,255} );
+			// SDL_FreeSurface( m_vec_surf_text[i] );
+			SDL_Surface* surf = TTF_RenderText_Blended( m_font, tmp.c_str(), {255,255,255} );
+			text_lines[i] = { Drawing::GetTextureFromSurface(surf, text_lines[i].tex), surf->w, surf->h };
 		}
 	}
 }

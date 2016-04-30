@@ -1,11 +1,11 @@
 <gui>
-	<button id="2" rect="50,50,100,50" text="nikola" visible="true"/>
+	<button id="2" rect="50,50,100,50" value="nikola" visible="true"/>
 	
 	<container id="10" rect="100,250,200,200">
 		<container id="20" rect="0,0,150,150">
-			<button id="5" rect="0,0,200,50" text="1"/>
-			<button id="55" rect="0,20,200,50" text="3"></button>
-			<button id="56" rect="0,105,200,50" text="4"></button>
+			<button id="5" rect="0,0,200,50" value="1"/>
+			<button id="55" rect="0,20,200,50" value="3"></button>
+			<button id="56" rect="0,105,200,50" value="4"></button>
 		</container>
 	</container>
 	<combobox rect="350,300,150,30">
@@ -17,12 +17,13 @@
 		<item>ytrytr</item>
 		<item>rwerew</item>
 	</combobox>
-	<textbox rect="350,350,150,30" text=""></textbox>
-	<label rect="50,150,200,100" text="hehehe hahaha lololo cool"></label>
+	<textbox rect="350,350,150,30"></textbox>
+	<label rect="50,150,200,100" value="hehehe hahaha
+lololo cool"></label>
 	<widget rect="500,150,50,200">
-		<radiobutton rect="0,0,50,30" text="haha"></radiobutton>
-		<radiobutton rect="0,50,50,30" text="hehe"></radiobutton>
-		<radiobutton rect="0,100,50,30" text="cool"></radiobutton>
+		<radiobutton rect="0,0,50,30" value="haha"></radiobutton>
+		<radiobutton rect="0,50,50,30" value="hehe"></radiobutton>
+		<radiobutton rect="0,100,50,30" value="cool"></radiobutton>
 		<widgetmover rect="0,0,10,10" zindex="50"></widgetmover>
 	</widget>
 	
@@ -37,8 +38,7 @@
 	
 	<trackbar rect="150,500,200,30" id="546"></trackbar>
 	<scrollbar rect="200,150,300,50" vertical="false" id="20"></scrollbar>
-	<checkbox rect="250,50,100,30" text="hehehe"></checkbox>
-	<checkbox rect="250,100,100,30" text="hgfgfdgd"></checkbox>
-	
-	<canvas rect="580,0,200,200"></canvas>
+	<checkbox rect="250,50,100,30" value="hehehe"></checkbox>
+	<checkbox rect="250,100,100,30" value="hgfgfdgd"></checkbox>
+	<canvas rect="580,0,200,200" grid="false" color="#0021FF" pixelsize="4" align_to_grid="false" grid_color="#220000"></canvas>
 </gui>

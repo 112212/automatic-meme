@@ -1,6 +1,7 @@
 // #include <SDL2/SDL2_gfxPrimitives.h>
 #include "../common/SDL/Drawing.hpp"
 #include "Button.hpp"
+#include <SDL/SDL_opengl.h>
 
 namespace ng {
 Button::Button() {
@@ -26,7 +27,7 @@ Button::~Button() {
 }
 
 void Button::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "text") {
+	if(style == "value") {
 		SetText(value.c_str());
 	}
 }
@@ -93,27 +94,28 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 		
 		// TODO: fix this
 		// SDL_RenderCopy( ren, tex_text, 0, &pos);
+		Drawing::TexRect(pos.x, pos.y, pos.w, pos.h, tex_text);
 	}
 
 	void Button::update_text() {
-		// TODO: fix this
-		/*
-		if(!font) cout << "Button: font error\n";
 		SDL_Color c;
 		if(m_is_mouseDown)
 			c = {0x0,0xff,0x0,0xff};
 		else
 			c = {0xff,0xff,0xff,0xff};
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
 		SDL_Surface* surf = TTF_RenderText_Blended( font, text.c_str(), c );
-		SDL_Texture* tex = SDL_CreateTextureFromSurface( ren, surf );
-		SDL_QueryTexture(tex, 0,0, &m_text_loc.w, &m_text_loc.h);
+		m_text_loc.w = surf->w;
+		m_text_loc.h = surf->h;
+		tex_text = Drawing::GetTextureFromSurface(surf, tex_text);
 		if(surf) {
 			m_text_loc.x = m_rect.x + (m_rect.w - surf->w)/2;
 			m_text_loc.y = m_rect.y + int(m_rect.h * 0.15);
 		}
-
-		tex_text = tex;
-		*/
+		
 	}
 	
 	void Button::SetText( const char* _text ) {

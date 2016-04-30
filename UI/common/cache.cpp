@@ -132,10 +132,10 @@ Rect getRect( int x, int y, int w, int h ) {
 	return r;
 }
 
-void Cache::rescale_z_indices(int spaci) {
+void Cache::rescale_z_indices(int spacing) {
 	int size = cache.size();
 	int cur = 0;
-	for(int i=0; i < size; i++, cur+=spaci) {
+	for(int i=0; i < size; i++, cur+=spacing) {
 		cache[i].z_index = cur;
 		cache[i].control->z_index = cur;
 	}

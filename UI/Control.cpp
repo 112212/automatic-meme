@@ -6,7 +6,7 @@
 #include "Widget.hpp"
 
 namespace ng {
-Control::Control() : id(0), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
+Control::Control() : id("0"), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
 interactible(true), visible(true) {
 	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
 }
@@ -53,13 +53,8 @@ void Control::setInteractible(bool interactible) {
 	}
 }
 
-void Control::SetId(int id) {
-	if(this->id == 0)
-		this->id = id;
-}
-
-void Control::SetName( std::string name ) {
-	this->name = name;
+void Control::SetId(std::string id) {
+	this->id = id;
 }
 
 
@@ -101,7 +96,7 @@ const std::vector<Control*> Control::getWidgetControls() {
 	else
 		return std::vector<Control*>();
 }
-const std::vector<Control*> Control::getEineControls() {
+const std::vector<Control*> Control::getEngineControls() {
 	if(engine)
 		return engine->GetControls();
 	else
@@ -174,10 +169,7 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			SetRect(r.x, r.y, r.w, std::stoi(value));
 			break;
 		case hash("id"):
-			SetId(std::stoi(value));
-			break;
-		case hash("name"):
-			SetName(value);
+			SetId(value);
 			break;
 		case hash("rect"): {
 				int c[4];

@@ -17,6 +17,9 @@ class TextBox : public Control {
 		SDL_Surface* m_surf_first;
 		SDL_Surface* m_surf_middle;
 		SDL_Surface* m_surf_last;
+		Uint32 tex_first;
+		Uint32 tex_middle;
+		Uint32 tex_last;
 		static SDL_Cursor* m_cursor;
 		
 		TTF_Font* m_font;
@@ -59,8 +62,6 @@ class TextBox : public Control {
 		virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod );
 		virtual void OnLostControl();
 		
-
-		void SetText( const char* text );
 		void SetText( std::string text );
 		const char* GetText( );
 		const char* GetSelectedText();

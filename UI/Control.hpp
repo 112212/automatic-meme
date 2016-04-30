@@ -92,10 +92,9 @@ class Control {
 		friend class Widget;
 		friend class GuiEngine;
 		friend class Cache;
-		std::string name;
 		bool visible;
 		bool interactible;
-		unsigned int id;
+		std::string id;
 		std::vector< std::list< std::function<void(Control*)> > > subscribers;
 		// compiler screams ambiguous for this, so had to add _
 		void _updateCache(CacheUpdateFlag flag);
@@ -121,7 +120,7 @@ class Control {
 		const Point getOffset();
 		
 		const std::vector<Control*> getWidgetControls();
-		const std::vector<Control*> getEineControls();
+		const std::vector<Control*> getEngineControls();
 		
 		// internal virtual
 		virtual void onPositionChange();
@@ -160,12 +159,10 @@ class Control {
 		void SetStyle(std::string& style, std::string& value);
 		void SetVisible(bool visible);
 		bool IsVisible() { return visible; }
-		void SetId( int id );
-		int GetId() { return id; }
+		void SetId( std::string id );
+		std::string GetId() { return id; }
 		void SetZIndex( int zindex );
 		int GetZIndex() { return z_index; }
-		void SetName( std::string name );
-		const char* GetName() { return name.c_str(); }
 		void SubscribeEvent( int event_type, std::function<void(Control*)> callback );
 };
 }

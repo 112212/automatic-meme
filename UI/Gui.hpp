@@ -37,8 +37,7 @@ class GuiEngine : public Cache
 #endif
 {
 	private:
-		std::map<std::string, Control*> map_name_control;
-		std::map<unsigned int, Control*> map_id_control;
+		std::map<std::string, Control*> map_id_control;
 		
 		// -- selection info --
 		Control* selected_control;
@@ -88,7 +87,7 @@ class GuiEngine : public Cache
 			void OnKeyUp(  sf::Event::KeyEvent &sym );
 			void OnEvent(sf::Event &event);
 		#elif USE_SDL
-			void Render( );
+			void Render();
 			void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 			void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
 			void OnEvent(SDL_Event &event);
@@ -101,8 +100,7 @@ class GuiEngine : public Cache
 		
 		void LockWidget(Widget* w);
 		void UnlockWidget();
-		Control* GetControlByName(std::string name);
-		Control* GetControlById(unsigned int id);
+		Control* GetControlById(std::string id);
 		
 		Control* GetSelectedControl() { return selected_control; }
 		Widget* GetSelectedWidget() { return last_selected_widget; }
@@ -111,7 +109,7 @@ class GuiEngine : public Cache
 			bool HasEvents( );
 			Event PopEvent();
 		#endif
-		void SubscribeEvent( int id, int event_type, std::function<void(Control*)> callback );
+		void SubscribeEvent( std::string id, int event_type, std::function<void(Control*)> callback );
 		
 		// events
 		void OnMouseDown( int mX, int mY );

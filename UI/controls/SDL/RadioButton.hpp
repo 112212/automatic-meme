@@ -12,6 +12,7 @@ enum {
 class RadioButton : public Control {
 	private:
 		SDL_Surface* m_surf_text;
+		Uint32 tex_text;
 		Point m_text_loc;
 		bool m_is_mouseDown;
 		bool m_isSelected;

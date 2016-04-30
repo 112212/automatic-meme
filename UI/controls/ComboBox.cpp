@@ -271,7 +271,7 @@ void ComboBox::OnMWheel( int updown ) {
 
 int ComboBox::getListOffset() {
 	if(m_drawscrollbar) {
-		//int sz = m_vec_surf_text.size();
+		//int sz = text_lines.size();
 		return m_last_scroll;//min<int>( ((sz-m_max_dropdown_items)*m_last_scroll) / 100, sz - m_max_dropdown_items );
 	} else return 0;
 }
@@ -523,18 +523,18 @@ void ComboBox::openBox() {
 	}
 
 	void ComboBox::AddItem( std::string item ) {
-		SDL_Surface* txt = TTF_RenderText_Solid( m_font, clipText( item, m_max_width ).c_str(), {255,255,255} );
+		SDL_Surface* txt = TTF_RenderText_Blended( m_font, clipText( item, m_max_width ).c_str(), {255,255,255} );
 		if(txt) {
 			m_items.push_back( item );
-			m_vec_surf_text.push_back( txt );
+			text_lines.push_back( { Drawing::GetTextureFromSurface(txt, 0), txt->w, txt->h} );
 			m_font_height = txt->h;
+			
+			SDL_FreeSurface(txt);
 			
 			if(m_selected_index == -1) {
 				m_selected_index = 0;
 				updateSelection();
 			}
-		} else {
-			cout << "Error u ubacivanju itema :( ..." << endl;
 		}
 	}
 	
@@ -560,22 +560,21 @@ void ComboBox::openBox() {
 			// draw items
 			int h=0,i=0;
 			int offs = getListOffset();
-			for(auto it = m_vec_surf_text.cbegin()+offs; it != m_vec_surf_text.cend(); it++,i++) {
+			for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 				if(i >= m_max_dropdown_items)
 					break;
 				if(m_virtual_selected_index == i) {
-					Drawing::FillRect( m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, 0xffff0000 );
+					Drawing::FillRect( m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
 				} else {
-					Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width, (*it)->h, 0);
+					Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width, it->h, 0);
 					// rectangleColor( ren, m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_rect.x+pos.x + m_max_width, m_rect.y+pos.y + (*it)->h, 0);
 				}
 				
-				// TODO: fix this
-				// CSurface::OnDraw(ren, *it, m_rect.x+pos.x+2, m_rect.y+pos.y + m_rect.h + h);
-				
-				h += (*it)->h;
+				Drawing::TexRect( m_rect.x+pos.x+2, m_rect.y+pos.y + m_rect.h + h, it->w, it->h, it->tex );
+				h += it->h;
 			}
 			//Draw_Rect(surf, m_rect.x+pos.x, m_rect.y+pos.y+m_rect.h, m_max_width, h, CColors::c_white );
+			
 			if(m_drawscrollbar) {
 				if(m_scrollrect.h != h) {
 					m_scrollrect.h = h;
@@ -591,6 +590,7 @@ void ComboBox::openBox() {
 		} else if(m_surf_sel_text) {
 			// TODO: fix this
 			// CSurface::OnDraw( ren, m_surf_sel_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
+			Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_surf_sel_text->w, m_surf_sel_text->h, tex_sel );
 		}
 		
 	}
@@ -598,10 +598,10 @@ void ComboBox::openBox() {
 	int ComboBox::getAverageHeight() {
 		if(m_items.size() == 0) return 1;
 		int h=0,i=0;
-		for(auto it = m_vec_surf_text.cbegin(); it != m_vec_surf_text.cend(); it++,i++) {
+		for(auto it = text_lines.cbegin(); it != text_lines.cend(); it++,i++) {
 			if(i >= m_max_dropdown_items)
 				break;
-			h += (*it)->h;	
+			h += it->h;	
 		}
 		return h / i + 1;
 	}
@@ -625,17 +625,15 @@ void ComboBox::openBox() {
 
 	void ComboBox::openBox() {
 		m_font_height = getAverageHeight();
-		//m_max_dropdown = m_max_dropdown_items * m_font_height;
-		// treba prethodno negde izracunati font height preko SDL_ttf
+
 		m_dropdown_size = m_items.size() * m_font_height;
 		if(m_items.size() > m_max_dropdown_items) {
-			// treba implementirati scrollbar :)
+
 			if(!m_scrollbar) {
 				m_scrollbar = new ScrollBar;
 				m_scrollbar->SetVertical( true );
 			}
-			//cout << "need scrollbar :) " << endl;
-			//m_dropdown_size = m_max_dropdown;
+
 			int scrollbar_width = 10;
 			m_scrollrect = getRect( m_rect.x + m_max_width - scrollbar_width, m_rect.y+m_rect.h, scrollbar_width, m_dropdown_size );
 			m_scrollbar->SetRect( m_scrollrect );
@@ -647,41 +645,14 @@ void ComboBox::openBox() {
 		}
 	}
 
-	/*
-	void ComboBox::openBox() {
-		m_font_height = getAverageHeight();
-		//~ m_max_dropdown = m_max_dropdown_items * m_font_height;
-		
-		// TODO: proveri da li ovo zahteva ogranicavanje na m_max_dropdown_items
-		m_dropdown_size = std::min<int>( m_items.size(), m_max_dropdown_items ) * m_font_height;
-		if(m_items.size() > m_max_dropdown_items) {
-			// treba implementirati scrollbar :)
-			if(!m_scrollbar) {
-				m_scrollbar = new ScrollBar;
-				m_scrollbar->SetVertical( true );
-			}
-			//cout << "need scrollbar :) " << endl;
-			//m_dropdown_size = m_max_dropdown;
-			const int scrollbar_width = 10;
-			m_scrollrect = getRect( m_rect.x + m_max_width - scrollbar_width, m_rect.y+m_rect.h, scrollbar_width, m_dropdown_size );
-			m_scrollbar->SetRect( m_scrollrect );
-			
-			m_scrollbar->SetSliderSize( std::max<int>(10, std::min<int>( ( (m_max_dropdown_items*100)/m_items.size()), m_scrollrect.h - 10) ) );
-			m_scrollbar->SetMaxRange( m_items.size() - m_max_dropdown_items );
-			m_scrollbar->SetMouseWheelConstant( std::max<int>( m_max_dropdown_items/3, 1 ) );
-			m_drawscrollbar = true;
-		} else {
-			m_drawscrollbar = false;
-		}
-	}
-	*/
 	void ComboBox::updateItemsSize() {
 		std::string tmp;
 		for(int i=0; i < m_items.size(); i++) {
 			tmp = clipText( m_items[i], m_max_width );
 			if( tmp != m_items[i] ) {
-				SDL_FreeSurface( m_vec_surf_text[i] );
-				m_vec_surf_text[i] = TTF_RenderText_Solid( m_font, tmp.c_str(), {255,255,255});
+				// SDL_FreeSurface( text_lines[i] );
+				SDL_Surface* surf = TTF_RenderText_Blended( m_font, tmp.c_str(), {255,255,255});
+				text_lines[i] = { Drawing::GetTextureFromSurface(surf, text_lines[i].tex), surf->w, surf->h };
 			}
 		}
 	}
@@ -706,7 +677,8 @@ void ComboBox::openBox() {
 		if(m_is_textbox_mode) {
 			m_textbox->SetText( m_items[ m_selected_index ] );
 		} else {
-			m_surf_sel_text = TTF_RenderText_Solid(  m_font, clipText( m_items[ m_selected_index ], m_rect.w-KVADRAT_SIZE ).c_str(), {255,255,255} );
+			m_surf_sel_text = TTF_RenderText_Blended(  m_font, clipText( m_items[ m_selected_index ], m_rect.w-KVADRAT_SIZE ).c_str(), {255,255,255} );
+			tex_sel = Drawing::GetTextureFromSurface( m_surf_sel_text, tex_sel );
 		}
 		
 	}
