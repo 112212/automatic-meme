@@ -182,6 +182,8 @@ OpenGL port of controls:
 	ngTextBox +
 	ngTrackBar +
 
+TO FIX:
+
 Plan XML:
 	<gui>
 		<button id="1" background=""/>

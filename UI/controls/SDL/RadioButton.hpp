@@ -27,7 +27,7 @@ class RadioButton : public Control {
 		void OnMouseDown( int mX, int mY );
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
-		void OnSetStyle(std::string& style, std::string& value);
+		void STYLE_FUNC(value);
 	public:
 		RadioButton();
 		~RadioButton();

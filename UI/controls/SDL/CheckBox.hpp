@@ -22,7 +22,7 @@ class CheckBox : public Control {
 		void onPositionChange();
 		static int m_font_index;
 		void updateText();
-		
+		void STYLE_FUNC(value);
 		
 	public:
 		CheckBox();
@@ -35,7 +35,6 @@ class CheckBox : public Control {
 		
 		bool IsSelected() { return m_isChecked; }
 		void SetText( const char* text );
-		void OnSetStyle(std::string& style, std::string& value);
 		void Uncheck() { m_isChecked = false; }
 		void Check() { m_isChecked = true; emitEvent( EVENT_CHECKBOX_CHANGE ); }
 		void SetValue( bool check ) { m_isChecked = check; }

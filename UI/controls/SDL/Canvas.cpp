@@ -71,22 +71,21 @@ void Canvas::Render( SDL_Rect pos, bool isSelected ) {
 	
 }
 
-void Canvas::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "grid") {
-		display_grid = (value == "true" ? true : false);
-		maketex=true;
-	} else if(style == "pixelsize") {
-		SetPixelSize( std::stoi( value ) );
-	} else if(style == "color") {
-		if(value[0] == '#') {
-			SetPixelColor( 0xff000000 | std::stoi(value.substr(1), 0, 16) ); 
-		}
-	} else if(style == "align_to_grid") {
-		SetAlignToGrid( value == "true" ? true : false );
-	} else if(style == "background_color") {
-		SetBackgroundColor( 0xff000000 | std::stol(value.substr(1), 0, 16) );
-	} else if(style == "grid_color") {
-		grid_color = 0xff000000 | std::stoi(value.substr(1), 0, 16);
+void Canvas::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("grid"):
+			display_grid = (value == "true" );
+			maketex=true;
+		_case("pixel_size"):
+			SetPixelSize( std::stoi( value ) );
+		_case("align_to_grid"):
+			SetAlignToGrid( value == "true" );
+		_case("color"):
+			if(value[0] == '#') SetPixelColor( 0xff000000 | std::stoi(value.substr(1), 0, 16) ); 
+		_case("background_color"):
+			SetBackgroundColor( 0xff000000 | std::stol(value.substr(1), 0, 16) );
+		_case("grid_color"):
+			grid_color = 0xff000000 | std::stoi(value.substr(1), 0, 16);
 	}
 }
 
@@ -100,19 +99,13 @@ void Canvas::SetPixelSize(int size) {
 
 
 void Canvas::OnMouseDown( int mX, int mY ) {
-	// generisati event za gui mozda ...
-	// ili posetiti callback funkciju :)
-	
 	if(!m_is_readonly)
-		// put pixel
 		put_pixel(mX-m_rect.x, mY-m_rect.y);
 	
 	m_is_mouseDown = true;
 }
 
 void Canvas::put_pixel(int x, int y) {
-	
-	//debug("putti pixel at: " << x << ", " << y);
 	if(align_to_grid) {
 		x = x - x%pixel_size;
 		y = y - y%pixel_size;

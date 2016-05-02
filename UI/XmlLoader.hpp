@@ -6,8 +6,8 @@
 namespace ng {
 class GuiEngine;
 namespace XmlLoader {
-	void LoadXml(GuiEngine &eine, std::string filename);
-	void LoadXml(GuiEngine &eine, std::istream& input_xml);
+	void LoadXml(GuiEngine &engine, std::string filename);
+	void LoadXml(GuiEngine &engine, std::istream& input_xml);
 }
 }
 #endif

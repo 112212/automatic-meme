@@ -4,6 +4,10 @@
 #include <SFML/OpenGL.hpp>
 #include "../Gui.hpp"
 
+// select only one
+#define CLIP_METHOD_STENCIL
+// #define CLIP_METHOD_SCISSOR
+
 namespace ng {
 Container::Container() {
 	m_is_mouseDown = false;
@@ -59,7 +63,7 @@ void Container::OnMouseMove( int x, int y, bool lmb ) {
 	// intercept();
 }
 
-int Container::depth = 0;
+int Container::depth = -1;
 
 
 const int thickness = 8;
@@ -68,12 +72,6 @@ const int thickness = 8;
 void Container::Render( sf::RenderTarget& ren, sf::RenderStates states, bool isSelected ) {
 	int x = m_rect.x;
 	int y = m_rect.y;
-	
-	/*
-	int test;
-	glGetIntegerv( GL_STENCIL_BITS, &test);
-	debug(test);
-	*/
 	
 	int w = m_rect.w;
 	int h = m_rect.h;
@@ -132,6 +130,20 @@ void Container::onPositionChange() {
 }
 
 #elif USE_SDL
+
+#ifdef CLIP_METHOD_SCISSOR
+Rect getIntersectingRectangle(Rect &a, Rect &b) {
+	int Ax = std::max(a.x, b.x);
+	int Ay = std::max(a.y, b.y);
+	int Bx = std::min(a.x+a.w,b.x+b.w);
+	int By = std::min(a.y+a.h,b.y+b.h);
+	if(Ax < Bx && Ay < By) {
+		return {Ax,Ay,Bx-Ax,By-Ay};
+	}
+	return {0,0,0,0};
+}
+#endif
+
 void Container::Render(  SDL_Rect pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
@@ -149,32 +161,89 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 	}
 	
 	Drawing::Rect(x,y,m_rect.w, m_rect.h, 0xffffffff);
-	// rectangleColor(ren, x, y, x+m_rect.w, y+m_rect.h, 0xffffffff);
 	
-	if(depth == 0) {
+#ifdef CLIP_METHOD_STENCIL
+	bool was_enabled = glIsEnabled( GL_STENCIL_TEST );
+	if(depth == -1) {
 		glClearStencil( 0 );
 		glClear( GL_STENCIL_BUFFER_BIT );
-	} else if(depth > 150) {
-		glClearStencil( 0 );
 		depth = 0;
-		glClear( GL_STENCIL_BUFFER_BIT );
+	}
+#endif
+	
+#ifdef CLIP_METHOD_SCISSOR
+	Rect clipRect = {x,y,w,m_rect.h};
+	bool was_enabled = glIsEnabled( GL_SCISSOR_TEST );
+	Rect old_box;
+	
+	int x1,y1;
+	Drawing::GetResolution(x1,y1);
+	
+	if(was_enabled) {
+		glGetIntegerv( GL_SCISSOR_BOX, (GLint*)&old_box );
+		old_box.y = y1 - (old_box.y+old_box.h);
+		clipRect = getIntersectingRectangle(old_box, clipRect);
+	} else {
+		glEnable( GL_SCISSOR_TEST );
 	}
 	
-	glEnable( GL_STENCIL_TEST );
+	glScissor( clipRect.x, y1-(clipRect.y+clipRect.h), clipRect.w, clipRect.h );
+#endif
+	
+#ifdef CLIP_METHOD_STENCIL
+	int old_depth;
+	if(was_enabled) {
+		glGetIntegerv( GL_STENCIL_REF, &old_depth );
+	} else {
+		glEnable( GL_STENCIL_TEST );
+	}
+	
 	glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
-	glStencilOp( GL_INCR, GL_INCR, GL_INCR );
-	glStencilFunc( GL_NEVER, 0, 0 );
+	
+	
+	if(!was_enabled) {
+		glStencilFunc( GL_LESS, 1, 0xffffffff );
+		glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+	} else {
+		glStencilFunc( GL_LEQUAL, depth, 0xffffffff );
+		glStencilOp( GL_KEEP, GL_INCR, GL_INCR );
+	}
 	
 	Drawing::FillRect(x, y, w, h, 0);
-	// boxColor(ren, x, y, x+w, y+h, 0);
 	
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
-	glStencilFunc( GL_LESS, depth++, 0xffffffff );
+
+	glStencilFunc( GL_LESS, depth, 0xffffffff );
+	depth++;
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
-	
+#endif
+
 	innerWidget->Render({x,y},isSelected);
 	
-	glDisable( GL_STENCIL_TEST );
+	
+#ifdef CLIP_METHOD_STENCIL
+	if(was_enabled) {
+		glStencilFunc( GL_LESS, old_depth, 0xffffffff );
+	} else {
+		glEnable( GL_STENCIL_TEST );
+		glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+		depth = 0;
+		glStencilFunc( GL_ALWAYS, 0, 0xffffffff );
+		glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+		Drawing::FillRect(x, y, w, h, 0);
+		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+		glDisable( GL_STENCIL_TEST );
+	}
+#endif
+	
+#ifdef CLIP_METHOD_SCISSOR
+	if(!was_enabled) {
+		glDisable( GL_SCISSOR_TEST );
+	} else {
+		glScissor( old_box.x, y1-(old_box.y+old_box.h), old_box.w, old_box.h );
+	}
+#endif
+	
 	
 	RenderWidget(pos, isSelected);
 }
@@ -183,7 +252,6 @@ void Container::onPositionChange() {
 	if( m_rect.w > max_h ) max_h = 0; //m_rect.w;
 	if( m_rect.h > max_v ) max_v = 0; //m_rect.h;
 	
-	// TODO: maybe intercept on move to actually unselect widget if it leaves area
 	innerWidget->SetRect(0,0, m_rect.w-10, m_rect.h-10);
 }
 

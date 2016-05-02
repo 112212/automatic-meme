@@ -14,7 +14,7 @@
 #endif
 
 // ---- GUI configuration ---
-// #define SELECTED_CONTROL_ON_TOP
+#define SELECTED_CONTROL_ON_TOP
 #define OVERLAPPING_CHECK
 // #define USE_EVENT_QUEUE
 // --------------------------
@@ -25,7 +25,7 @@
 namespace ng {
 #ifdef USE_EVENT_QUEUE
 struct Event {
-	unsigned int id;
+	std::string id;
 	int event_type;
 	Control* control;
 };
@@ -63,7 +63,7 @@ class GuiEngine : public Cache
 		
 		void check_for_new_collision( int mX, int mY );
 		int depth;
-		bool checkngControl_collision( Control* control, int mX, int mY );
+		bool check_control_collision( Control* control, int mX, int mY );
 		
 		#ifdef USE_EVENT_QUEUE
 			std::queue<Event> m_events;

@@ -56,9 +56,9 @@ int main() {
 	
 	int sizeX = 1280;
 	int sizeY = 768;
-	SDL_Window* win = SDL_CreateWindow("win name", 100, 100, sizeX, sizeY, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+	SDL_Window* win = SDL_CreateWindow("gui sdl test", 100, 100, sizeX, sizeY, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 	if(!win) {
-		cout << "win error\n";
+		cout << "creating window error\n";
 		SDL_Quit();
 		return 1;
 	}
@@ -126,7 +126,7 @@ int main() {
 	
 	glViewport(0, 0, sizeX, sizeY);
 
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(0);
 	
 	bool running = true;
 	while(running) {

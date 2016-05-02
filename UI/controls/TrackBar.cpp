@@ -112,7 +112,7 @@ void TrackBar::SetRange( int _min, int _max ) {
 	
 	int last = m_value;
 	// vrednost mora da ostane u granicama
-	m_value = std::min( std::max( m_value, m_slider_min ), m_slider_max );
+	m_value = std::min( std::max( m_value, m_slider_min ), m_slider_max+m_slider_min );
 	if(last != m_value) {
 		//cout << "chae of rae caused chae of value ... " << endl;
 		onChange();

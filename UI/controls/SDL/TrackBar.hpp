@@ -35,9 +35,9 @@ class TrackBar : public Control {
 		void updateTextLocation();
 		bool canChange();
 		TTF_Font* m_font;
-		void OnSetStyle(std::string& style, std::string& value);
+		Uint32 tex_text;
+		void STYLE_FUNC(value);
 		
-		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; onChange(); }
 	public:
 		TrackBar();
 		~TrackBar();
@@ -47,6 +47,7 @@ class TrackBar : public Control {
 		void OnMouseDown( int mX, int mY );
 		void OnLostFocus();
 		
+		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; onChange(); }
 		int GetPercentageValue();
 		int GetValue();
 		int GetDifference();

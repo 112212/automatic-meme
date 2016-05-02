@@ -511,7 +511,7 @@ namespace rapidxml
             result->value(source->value(), source->value_size());
 
             // Clone child nodes and attributes
-            for (xml_node<Ch> *child = source->first_node(); child; child = child->next_sibli())
+            for (xml_node<Ch> *child = source->first_node(); child; child = child->next_sibling())
                 result->append_node(clone_node(child));
             for (xml_attribute<Ch> *attr = source->first_attribute(); attr; attr = attr->next_attribute())
                 result->append_attribute(allocate_attribute(attr->name(), attr->value(), attr->name_size(), attr->value_size()));
@@ -939,7 +939,7 @@ namespace rapidxml
             {
                 if (name_size == 0)
                     name_size = internal::measure(name);
-                for (xml_node<Ch> *child = m_first_node; child; child = child->next_sibli())
+                for (xml_node<Ch> *child = m_first_node; child; child = child->next_sibling())
                     if (internal::compare(child->name(), child->name_size(), name, name_size, case_sensitive))
                         return child;
                 return 0;
@@ -1001,20 +1001,20 @@ namespace rapidxml
         //! \param name_size Size of name, in characters, or 0 to have size calculated automatically from stri
         //! \param case_sensitive Should name comparison be case-sensitive; non case-sensitive comparison works properly only for ASCII characters
         //! \return Pointer to found sibli, or 0 if not found.
-        xml_node<Ch> *next_sibli(const Ch *name = 0, std::size_t name_size = 0, bool case_sensitive = true) const
+        xml_node<Ch> *next_sibling(const Ch *name = 0, std::size_t name_size = 0, bool case_sensitive = true) const
         {
             assert(this->m_parent);     // Cannot query for siblis if node has no parent
             if (name)
             {
                 if (name_size == 0)
                     name_size = internal::measure(name);
-                for (xml_node<Ch> *sibli = m_next_sibli; sibli; sibli = sibli->m_next_sibli)
+                for (xml_node<Ch> *sibli = m_next_sibling; sibli; sibli = sibli->m_next_sibling)
                     if (internal::compare(sibli->name(), sibli->name_size(), name, name_size, case_sensitive))
                         return sibli;
                 return 0;
             }
             else
-                return m_next_sibli;
+                return m_next_sibling;
         }
 
         //! Gets first attribute of node, optionally matchi attribute name.
@@ -1078,12 +1078,12 @@ namespace rapidxml
             assert(child && !child->parent() && child->type() != node_document);
             if (first_node())
             {
-                child->m_next_sibli = m_first_node;
+                child->m_next_sibling = m_first_node;
                 m_first_node->m_prev_sibli = child;
             }
             else
             {
-                child->m_next_sibli = 0;
+                child->m_next_sibling = 0;
                 m_last_node = child;
             }
             m_first_node = child;
@@ -1100,7 +1100,7 @@ namespace rapidxml
             if (first_node())
             {
                 child->m_prev_sibli = m_last_node;
-                m_last_node->m_next_sibli = child;
+                m_last_node->m_next_sibling = child;
             }
             else
             {
@@ -1109,7 +1109,7 @@ namespace rapidxml
             }
             m_last_node = child;
             child->m_parent = this;
-            child->m_next_sibli = 0;
+            child->m_next_sibling = 0;
         }
 
         //! Inserts a new child node at specified place inside the node. 
@@ -1127,8 +1127,8 @@ namespace rapidxml
             else
             {
                 child->m_prev_sibli = where->m_prev_sibli;
-                child->m_next_sibli = where;
-                where->m_prev_sibli->m_next_sibli = child;
+                child->m_next_sibling = where;
+                where->m_prev_sibli->m_next_sibling = child;
                 where->m_prev_sibli = child;
                 child->m_parent = this;
             }
@@ -1141,9 +1141,9 @@ namespace rapidxml
         {
             assert(first_node());
             xml_node<Ch> *child = m_first_node;
-            m_first_node = child->m_next_sibli;
-            if (child->m_next_sibli)
-                child->m_next_sibli->m_prev_sibli = 0;
+            m_first_node = child->m_next_sibling;
+            if (child->m_next_sibling)
+                child->m_next_sibling->m_prev_sibli = 0;
             else
                 m_last_node = 0;
             child->m_parent = 0;
@@ -1159,7 +1159,7 @@ namespace rapidxml
             if (child->m_prev_sibli)
             {
                 m_last_node = child->m_prev_sibli;
-                child->m_prev_sibli->m_next_sibli = 0;
+                child->m_prev_sibli->m_next_sibling = 0;
             }
             else
                 m_first_node = 0;
@@ -1178,8 +1178,8 @@ namespace rapidxml
                 remove_last_node();
             else
             {
-                where->m_prev_sibli->m_next_sibli = where->m_next_sibli;
-                where->m_next_sibli->m_prev_sibli = where->m_prev_sibli;
+                where->m_prev_sibli->m_next_sibling = where->m_next_sibling;
+                where->m_next_sibling->m_prev_sibli = where->m_prev_sibli;
                 where->m_parent = 0;
             }
         }
@@ -1187,7 +1187,7 @@ namespace rapidxml
         //! Removes all child nodes (but not attributes).
         void remove_all_nodes()
         {
-            for (xml_node<Ch> *node = first_node(); node; node = node->m_next_sibli)
+            for (xml_node<Ch> *node = first_node(); node; node = node->m_next_sibling)
                 node->m_parent = 0;
             m_first_node = 0;
         }
@@ -1332,7 +1332,7 @@ namespace rapidxml
         // The rules are as follows:
         // 1. first_node and first_attribute contain valid pointers, or 0 if node has no children/attributes respectively
         // 2. last_node and last_attribute are valid only if node has at least one child/attribute respectively, otherwise they contain garbage
-        // 3. prev_sibli and next_sibli are valid only if node has a parent, otherwise they contain garbage
+        // 3. prev_sibli and next_sibling are valid only if node has a parent, otherwise they contain garbage
 
         node_type m_type;                       // Type of node; always valid
         xml_node<Ch> *m_first_node;             // Pointer to first child node, or 0 if none; always valid
@@ -1340,7 +1340,7 @@ namespace rapidxml
         xml_attribute<Ch> *m_first_attribute;   // Pointer to first attribute of node, or 0 if none; always valid
         xml_attribute<Ch> *m_last_attribute;    // Pointer to last attribute of node, or 0 if none; this value is only valid if m_first_attribute is non-zero
         xml_node<Ch> *m_prev_sibli;           // Pointer to previous sibli of node, or 0 if none; this value is only valid if m_parent is non-zero
-        xml_node<Ch> *m_next_sibli;           // Pointer to next sibli of node, or 0 if none; this value is only valid if m_parent is non-zero
+        xml_node<Ch> *m_next_sibling;           // Pointer to next sibli of node, or 0 if none; this value is only valid if m_parent is non-zero
 
     };
 

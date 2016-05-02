@@ -197,9 +197,12 @@ void TextBox::updateSelection() {
 	
 }
 
-void TextBox::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "value")
-		SetText(value.c_str());
+void TextBox::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetText(value);
+	}
+		
 }
 
 int TextBox::getSelectionPoint( int &mX ) {

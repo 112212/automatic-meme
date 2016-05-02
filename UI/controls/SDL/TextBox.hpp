@@ -45,7 +45,7 @@ class TextBox : public Control {
 		int getMaxTextBw( int indx );
 		void updateMaxText();
 		void setFirstIndex( int index );
-		void OnSetStyle(std::string& style, std::string& value);
+		void STYLE_FUNC(value);
 		
 		
 	public:

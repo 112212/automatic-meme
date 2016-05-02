@@ -21,6 +21,8 @@ class Widget : public Cache, public Control {
 		#endif
 		Control* selected_control;
 		Point cached_absolute_offset;
+		
+		void setRect( int x, int y, int w, int h );
 	protected:
 		enum imask {
 			mouse_up = 0x01,
@@ -38,7 +40,6 @@ class Widget : public Cache, public Control {
 		Control* getSelectedControl() { return selected_control; }
 		const Point& getAbsoluteOffset() { return cached_absolute_offset; };
 		Point offset;
-		
 	public:
 		Widget();
 		~Widget();
@@ -56,7 +57,6 @@ class Widget : public Cache, public Control {
 		#elif USE_SDL
 			virtual void Render(  SDL_Rect position, bool isSelected );
 		#endif
-		
 		
 		virtual void AddControl( Control* control );
 		void RemoveControl( Control* control );

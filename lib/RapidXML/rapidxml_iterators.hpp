@@ -49,7 +49,7 @@ namespace rapidxml
         node_iterator& operator++()
         {
             assert(m_node);
-            m_node = m_node->next_sibli();
+            m_node = m_node->next_sibling();
             return *this;
         }
 

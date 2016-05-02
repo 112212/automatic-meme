@@ -37,6 +37,7 @@ class Label : public Control {
 		
 		TTF_Font* m_font;
 		const static int line_height;
+		void STYLE_FUNC(value);
 		
 		void Render( SDL_Rect pos, bool isSelected );
 	public:
@@ -45,7 +46,6 @@ class Label : public Control {
 
 		void SetText( const char* text );
 		void SetFont( const char* text, int size );
-		void OnSetStyle(std::string& style, std::string& value);
 };
 }
 #endif

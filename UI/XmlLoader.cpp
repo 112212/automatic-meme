@@ -27,24 +27,24 @@ namespace XmlLoader {
 	using std::cout;
 	using std::endl;
 	using namespace rapidxml;
-	void LoadXml(GuiEngine& eine, std::string filename) {
+	void LoadXml(GuiEngine& engine, std::string filename) {
 		std::fstream f;
 		f.open(filename);
-		LoadXml(eine, f);
+		LoadXml(engine, f);
 		f.close();
 	}
 	#define PUT_CONTROL \
-		if(eine) eine->AddControl(control); \
+		if(engine) engine->AddControl(control); \
 		else widget->AddControl(control);
 	
 	
 	void processListBoxItems(ListBox* lb, xml_node<>* node) {
-		for(xml_node<>* n = node->first_node("item"); n; n=n->next_sibli()) {
+		for(xml_node<>* n = node->first_node("item"); n; n=n->next_sibling()) {
 			lb->AddItem(n->value());
 		}
 	}
 	void processComboBoxItems(ComboBox* lb, xml_node<>* node) {
-		for(xml_node<>* n = node->first_node("item"); n; n=n->next_sibli()) {
+		for(xml_node<>* n = node->first_node("item"); n; n=n->next_sibling()) {
 			lb->AddItem(n->value());
 		}
 	}
@@ -57,9 +57,11 @@ namespace XmlLoader {
 		
 		Control* control;
 		switch(hash(tag)) {
+			TAGTYPE("control", Control);
+			TAGTYPE("widget", Widget);
+			// TAGTYPE("dialog", Dialog);
 			TAGTYPE("button", Button);
 			TAGTYPE("textbox", TextBox);
-			TAGTYPE("widget", Widget);
 			TAGTYPE("canvas", Canvas);
 			TAGTYPE("listbox", ListBox);
 			TAGTYPE("radiobutton", RadioButton);
@@ -75,9 +77,9 @@ namespace XmlLoader {
 		}
 		return control;
 	}
-	void loadXmlRecursive(GuiEngine* eine, Widget* widget, xml_node<>* node) {
+	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node) {
 		Control* control = nullptr;
-		for(; node; node = node->next_sibli()) {
+		for(; node; node = node->next_sibling()) {
 			control = createControlByXmlTag(node->name());
 			if(!control) continue;
 			
@@ -96,7 +98,7 @@ namespace XmlLoader {
 			PUT_CONTROL
 		}
 	}
-	void LoadXml(GuiEngine& eine, std::istream& input_xml) {
+	void LoadXml(GuiEngine& engine, std::istream& input_xml) {
 		xml_document<> doc;
 		
 		int data_size;
@@ -115,7 +117,7 @@ namespace XmlLoader {
 			return;
 		}
 		
-		loadXmlRecursive(&eine, 0, doc.first_node("gui")->first_node());
+		loadXmlRecursive(&engine, 0, doc.first_node("gui")->first_node());
 		
 		delete[] data;
 	}

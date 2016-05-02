@@ -130,8 +130,10 @@ void Label::SetFont( const char* text, int size ) {
 	}
 }
 
-void Label::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "value")
-		SetText(value.c_str());
+void Label::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetText(value.c_str());
+	}
 }
 }

@@ -32,7 +32,7 @@ class Canvas : public Control {
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
-		void OnSetStyle(std::string& style, std::string& value);
+		void STYLE_FUNC(value);
 	public:
 		Canvas();
 		~Canvas();

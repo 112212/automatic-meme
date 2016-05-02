@@ -54,6 +54,7 @@ class ComboBox : public Control {
 		#elif USE_SDL
 			SDL_Surface* m_surf_sel_text;
 			Uint32 tex_sel;
+			int background_color;
 			// SDL_Texture* m_sel_text;
 			TTF_Font* m_font;
 			std::vector<SDL_Texture*> m_texts;

@@ -23,21 +23,26 @@
 namespace ng {
 struct Point {
 	union{
-	int x,min;
+		int x,min;
 	};
 	union {
-	int y,max;
+		int y,max;
 	};
+	Point() {}
+	Point(int _x, int _y) : x(_x),y(_y) {}
 };
 
 struct Rect : Point {
-	int w,h;
+	int w;
+	int h;
+	Rect() {}
+	Rect(int _x, int _y, int _w, int _h) : Point(_x,_y),w(_w),h(_h) {}
 };
 Rect getRect( int x, int y, int w, int h );
 
 
 
-#define SSTR( x ) dynamic_cast< std::ostringstream & >( ( std::ostringstream() << std::dec << x ) ).str()
+// #define SSTR( x ) dynamic_cast< std::ostringstream & >( ( std::ostringstream() << std::dec << x ) ).str()
 
 
 
@@ -96,6 +101,7 @@ class Control {
 		bool interactible;
 		std::string id;
 		std::vector< std::list< std::function<void(Control*)> > > subscribers;
+		
 		// compiler screams ambiguous for this, so had to add _
 		void _updateCache(CacheUpdateFlag flag);
 		// void updateCache() {}
@@ -103,7 +109,7 @@ class Control {
 		int minor_type;
 		int z_index;
 		
-		// this shouldn't be chaed manually
+		// this shouldn't be changed manually
 		// TODO: put this to private, and make everythi use GetRect()
 		Rect m_rect;
 		static bool custom_check;
@@ -143,7 +149,7 @@ class Control {
 		virtual void OnGetFocus();
 		virtual void OnLostControl();
 		virtual void OnMWheel( int updown );
-		virtual void OnSetStyle(std::string& style, std::string& value);
+		virtual void STYLE_FUNC(value);
 		
 	public:
 		Control();
@@ -160,7 +166,7 @@ class Control {
 		void SetVisible(bool visible);
 		bool IsVisible() { return visible; }
 		void SetId( std::string id );
-		std::string GetId() { return id; }
+		std::string GetId() { return this->id; }
 		void SetZIndex( int zindex );
 		int GetZIndex() { return z_index; }
 		void SubscribeEvent( int event_type, std::function<void(Control*)> callback );

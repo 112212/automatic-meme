@@ -168,7 +168,7 @@ namespace rapidxml
         template<class OutIt, class Ch>
         inline OutIt print_children(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
-            for (xml_node<Ch> *child = node->first_node(); child; child = child->next_sibli())
+            for (xml_node<Ch> *child = node->first_node(); child; child = child->next_sibling())
                 out = print_node(out, child, flags, indent);
             return out;
         }
@@ -269,7 +269,7 @@ namespace rapidxml
                     // If node has no children, only print its value without indenti
                     out = copy_and_expand_chars(node->value(), node->value() + node->value_size(), Ch(0), out);
                 }
-                else if (child->next_sibli() == 0 && child->type() == node_data)
+                else if (child->next_sibling() == 0 && child->type() == node_data)
                 {
                     // If node has a sole data child, only print its value without indenti
                     out = copy_and_expand_chars(child->value(), child->value() + child->value_size(), Ch(0), out);

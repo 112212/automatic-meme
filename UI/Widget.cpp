@@ -74,6 +74,13 @@ void Widget::RemoveControl( Control* control ) {
 		removeControlFromCache(control);
 }
 
+void Widget::setRect( int x, int y, int w, int h ) {
+	if(isThisWidgetInSelectedBranch()) {
+		engine->sel_widget_offset.x += x-m_rect.x;
+		engine->sel_widget_offset.y += y-m_rect.y;
+	}
+}
+
 void Widget::SetOffset(int x, int y) {
 	if(isThisWidgetInSelectedBranch()) {
 		engine->sel_widget_offset.x += x-offset.x;
@@ -90,12 +97,7 @@ void Widget::Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelec
 void Widget::RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected) {
 	
 	state.transform.translate( m_rect.x + offset.x, m_rect.y + offset.y );
-	// rect.setSize(sf::Vector2f(m_rect.w, m_rect.h));
-	// rect.setFillColor(sf::Color::Transparent);
-	// rect.setOutlineColor(sf::Color::White);
-	// rect.setOutlineThickness( 1 );
-	// ren.draw(rect, state);
-	
+
 	for(auto &ca : cache) {
 		if(ca.visible) {
 			auto &c = ca.control;

@@ -32,7 +32,7 @@ class ScrollBar : public Control {
 		#elif USE_SDL
 			SDL_Rect m_slider;
 		#endif
-		
+		void OnSetStyle(std::string& style, std::string& value);
 	public:
 		ScrollBar();
 		~ScrollBar();

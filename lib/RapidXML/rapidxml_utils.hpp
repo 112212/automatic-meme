@@ -97,7 +97,7 @@ namespace rapidxml
         while (child)
         {
             ++count;
-            child = child->next_sibli();
+            child = child->next_sibling();
         }
         return count;
     }

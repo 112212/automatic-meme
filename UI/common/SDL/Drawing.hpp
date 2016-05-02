@@ -5,7 +5,9 @@ namespace ng {
 
 namespace Drawing {
 
+	
 	void SetResolution( int w, int h );
+	void GetResolution( int &w, int &h );
 	void Init();
 	void Rect(int x, int y, int w, int h, unsigned int color);
 	void FillRect(int x, int y, int w, int h, unsigned int color);

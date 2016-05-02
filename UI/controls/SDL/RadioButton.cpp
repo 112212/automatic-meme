@@ -47,15 +47,14 @@ void RadioButton::SetText( std::string text ) {
 	}
 }
 
-void RadioButton::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "value") {
-		SetText(value);
+void RadioButton::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetText(value);
 	}
 }
 
 void RadioButton::OnMouseDown( int mX, int mY ) {
-	// generisati event za gui mozda ...
-	// ili posetiti callback funkciju :)
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
 		m_surf_text = TTF_RenderText_Blended( m_font, m_text.c_str(), {0,255,0} );
@@ -108,7 +107,7 @@ void RadioButton::OnLostFocus() {
 
 void RadioButton::onPositionChange() {
 	if(m_text.size())
-		SetText( m_text ); // update poziciju teksta :)
+		SetText( m_text );
 }
 
 }

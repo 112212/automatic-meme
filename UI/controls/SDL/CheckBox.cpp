@@ -100,11 +100,12 @@ void CheckBox::onPositionChange() {
 		updateText(); // update poziciju teksta :)
 }
 
-void CheckBox::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "value") {
-		SetText(value.c_str());
-	} else if(style=="checked") {
-		SetValue( value == "true" ? true : false );
+void CheckBox::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetText(value.c_str());
+		_case("checked"):
+			SetValue( value == "true" );
 	}
 }
 

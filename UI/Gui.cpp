@@ -1,10 +1,6 @@
 #include "Gui.hpp"
 #include "Widget.hpp"
 
-#ifdef USE_SDL
-#include "common/SDL/Drawing.hpp"
-#endif
-
 #define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSans.ttf"
 
 #define MAX_BASIC_EVENTS 6
@@ -301,7 +297,7 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 			}
 		}
 
-		if( checkngControl_collision(selected_control, control_coords.x, control_coords.y) ) {
+		if( check_control_collision(selected_control, control_coords.x, control_coords.y) ) {
 			// selected_control->OnMouseDown( control_coords.x, control_coords.y );
 			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y ));
 		} else {
@@ -336,10 +332,10 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 		
 		#ifdef OVERLAPPING_CHECK
 		if(!m_keyboard_lock) {
-			Control *lastngControl = selected_control;
+			Control *last_control = selected_control;
 			check_for_new_collision( mX, mY );
 			if(selected_control) {				
-				if(lastngControl != selected_control) {
+				if(last_control != selected_control) {
 					INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
 					return;
 				}
@@ -352,7 +348,7 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 		
 		if(selected_control->custom_check ? 
 			selected_control->customBoundary(control_coords.x, control_coords.y) : 
-			checkngControl_collision(selected_control, control_coords.x, control_coords.y))
+			check_control_collision(selected_control, control_coords.x, control_coords.y))
 		{
 			// selected_control->OnMouseMove( control_coords.x, control_coords.y, m_mouse_down );
 			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
@@ -383,7 +379,7 @@ void GuiEngine::OnMWheel( int updown ) {
 }
 
 
-bool GuiEngine::checkngControl_collision( Control* c, int mX, int mY ) {
+bool GuiEngine::check_control_collision( Control* c, int mX, int mY ) {
 	Rect r = c->m_rect;
 	if( mX > r.x && mX < r.x + r.w ) {
 		if( mY > r.y && mY < r.y + r.h ) {
@@ -394,7 +390,7 @@ bool GuiEngine::checkngControl_collision( Control* c, int mX, int mY ) {
 }
 void GuiEngine::check_for_new_collision( int x, int y ) {
 	
-	Control* lastngControl = selected_control;
+	Control* last_control = selected_control;
 	Point offset;
 	Point &o = offset;
 	Widget *p = 0;
@@ -457,7 +453,8 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 	Widget* last_widget = p;
 	last_selected_widget = p;
 	sel_widget_offset = o;
-	// --- big iterations ---
+	
+	// --- descending tree ---
 	while(it != it_end) {
 		if(!it->interactible) { it++; continue; }
 		bool in = false;
@@ -521,9 +518,9 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 	for(int i=0; i < depth; i++)
 		sel_intercept |= sel_intercept_vector[i].intercept_mask;
 		
-	if(lastngControl != selected_control) {
-		if(lastngControl)
-			lastngControl->OnLostControl();
+	if(last_control != selected_control) {
+		if(last_control)
+			last_control->OnLostControl();
 		if(selected_control) {
 			selected_control->OnGetFocus();
 			m_focus = true;

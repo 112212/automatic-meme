@@ -109,11 +109,16 @@ bool Control::check_collision(int x, int y) {
 }
 
 void Control::SetRect( int x, int y, int w, int h ) {
+	int old_x = m_rect.x;
+	int old_y = m_rect.y;
+	
+	if(isWidget)
+		((Widget*)this)->setRect(x,y,w,h);
+	
 	m_rect.x = x;
 	m_rect.y = y;
 	m_rect.w = w;
 	m_rect.h = h;
-	onPositionChange();
 
 	Widget* widget = getWidget();
 	GuiEngine* engine = getEngine();
@@ -122,6 +127,8 @@ void Control::SetRect( int x, int y, int w, int h ) {
 	} else if(engine) {
 		engine->updateCache(this, CacheUpdateFlag::position);
 	}
+	
+	onPositionChange();
 }
 
 bool Control::custom_check = false;
@@ -155,23 +162,18 @@ bool Control::customBoundary( int x, int y ) {}
 void Control::SetStyle(std::string& style, std::string& value) {
 	const Rect& r = GetRect();
 	
-	switch(hash(style.c_str())) {
-		case hash("x"):
+	STYLE_SWITCH {
+		_case("x"):
 			SetRect(std::stoi(value), r.y, r.w, r.h);
-			break;
-		case hash("y"):
+		_case("y"):
 			SetRect(r.x, std::stoi(value), r.w, r.h);
-			break;
-		case hash("w"):
+		_case("w"):
 			SetRect(r.x, r.y, std::stoi(value), r.h);
-			break;
-		case hash("h"):
+		_case("h"):
 			SetRect(r.x, r.y, r.w, std::stoi(value));
-			break;
-		case hash("id"):
+		_case("id"):
 			SetId(value);
-			break;
-		case hash("rect"): {
+		_case("rect"): {
 				int c[4];
 				int num=0;
 				std::string::size_type tokenOff = 0, sepOff = 0;
@@ -189,15 +191,13 @@ void Control::SetStyle(std::string& style, std::string& value) {
 				if(num == 4)
 					SetRect(c[0],c[1],c[2],c[3]);
 			}
-			break;
-		case hash("visible"):
+		_case("visible"):
 			SetVisible(value=="true");
-			break;
 		default:
 			OnSetStyle(style, value);
 	}
 
 }
 
-void Control::OnSetStyle(std::string& style, std::string& value) {}
+void Control::STYLE_FUNC(value) {}
 }

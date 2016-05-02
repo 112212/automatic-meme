@@ -161,6 +161,10 @@ namespace Drawing {
 		sizeX = w;
 		sizeY = h;
 	}
+	void GetResolution( int &w, int &h ) {
+		w = sizeX;
+		h = sizeY;
+	}
 
 	void Rect(int x, int y, int w, int h, GLuint color) {
 		glUseProgram(shader);

@@ -71,6 +71,26 @@ void ScrollBar::Render( SDL_Rect pos, bool isSelected ) {
 	// rectangleColor(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.x+pos.x+m_rect.w, pos.y+m_rect.y+m_rect.h, Colors::White);
 }
 
+void ScrollBar::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetValue( std::stoi(value) );
+		_case("maxrange"):
+			SetMaxRange( std::stoi(value) );
+		_case("slider_size"):
+			if(m_is_vertical)
+				m_slider.h = std::stoi(value);
+			else
+				m_slider.w = std::stoi(value);
+			updateSlider();
+		_case("orientation"):
+			if(value == "vertical" || value == "horizontal") {
+				SetVertical( value == "vertical" );
+				updateSlider();
+			}
+	}
+}
+
 void ScrollBar::updateSlider() {
 	// pomeraj slidera
 	m_slider_pix = (m_value * ((m_is_vertical ? m_rect.h : m_rect.w) - m_slider_size)) / m_slider_max;
@@ -184,8 +204,6 @@ Rect ScrollBar::getSliderRect() {
 	}
 	return r;
 }
-
-
 
 void ScrollBar::OnMWheel( int updown ) {
 	m_value = std::max<int>(0, std::min<int>(m_slider_max, m_value - updown * m_mwheel_const));
