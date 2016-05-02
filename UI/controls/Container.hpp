@@ -14,7 +14,7 @@ class Container : public Widget {
 		#endif
 		int m_grid_w, m_grid_h;
 		bool m_is_mouseDown;
-		int m_numngControls;
+		int m_num_controls;
 		int m_tx, m_ty;
 		int max_v, max_h;
 		bool overflow_v, overflow_h;

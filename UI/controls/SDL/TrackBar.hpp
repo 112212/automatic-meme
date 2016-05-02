@@ -17,7 +17,7 @@ class TrackBar : public Control {
 		int m_slider_pix;
 		int m_slider_radius;
 		Point m_text_loc;
-		
+		bool show_num;
 		SDL_Surface* m_surf_num;
 		
 		int m_last;

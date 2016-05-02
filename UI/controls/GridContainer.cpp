@@ -13,7 +13,7 @@ GridContainer::GridContainer() {
 		m_rectShape.setOutlineColor( sf::Color::White );
 		m_rectShape.setOutlineThickness( 1 );
 	#endif
-	m_numngControls = 0;
+	m_num_controls = 0;
 }
 
 
@@ -21,7 +21,7 @@ GridContainer::GridContainer() {
 int GridContainer::getPointedControl( int x, int y ) {
 	int sel = ((x-m_rect.x) / (m_rect.w / m_grid_w)) % m_grid_w +
 			 ((y-m_rect.y) / (m_rect.h / m_grid_h)) * m_grid_w;
-	if( m_numngControls > sel )
+	if( m_num_controls > sel )
 		return sel;
 	else
 		return -1;
@@ -48,20 +48,20 @@ int GridContainer::getPointedControl( int x, int y ) {
 #endif
 
 void GridContainer::AddItem( Control* control ) {
-	if( m_numngControls >= m_grid_w * m_grid_h )
+	if( m_num_controls >= m_grid_w * m_grid_h )
 		return;
 		
 	int max_w = m_rect.w / m_grid_w;
 	int max_h = m_rect.h / m_grid_h;
 	
-	int x = m_numngControls % m_grid_w;
-	int y = m_numngControls / m_grid_w;
+	int x = m_num_controls % m_grid_w;
+	int y = m_num_controls / m_grid_w;
 	
 	Rect rect = control->GetRect();
 	control->SetRect( x * max_w, y * max_h, std::min( rect.w, max_w ), std::min( rect.h, max_h ) );
 
 	this->AddControl( control );
-	m_numngControls++;
+	m_num_controls++;
 }
 
 void GridContainer::SetGrid( int x, int y ) {

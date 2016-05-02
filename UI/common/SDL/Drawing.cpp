@@ -153,7 +153,9 @@ namespace Drawing {
 		glGenBuffers(1, &vbo_color);
 		glGenBuffers(1, &ebo);
 		glBindVertexArray(0);
-
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	int sizeX=800, sizeY=800;

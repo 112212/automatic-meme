@@ -11,6 +11,7 @@ TrackBar::TrackBar() {
 	m_last = 0;
 	m_slider_radius = 10;
 	m_is_vertical = false;
+	show_num = true;
 	m_surf_num = 0;
 	m_is_readonly = false;
 	m_on_it = false;
@@ -20,7 +21,8 @@ TrackBar::TrackBar() {
 }
 
 TrackBar::~TrackBar() {
-	SDL_FreeSurface( m_surf_num );
+	if(m_surf_num)
+		SDL_FreeSurface( m_surf_num );
 }
 
 void TrackBar::Render( SDL_Rect pos, bool isSelected ) {
@@ -54,13 +56,13 @@ void TrackBar::Render( SDL_Rect pos, bool isSelected ) {
 		Drawing::FillCircle( x + m_slider_pix, h - 1, m_slider_radius, m_on_it ? Colors::Yellow : Colors::White);
 	}
 	if(m_surf_num) {
-		// TODO: fix this
-		// CSurface::OnDraw( ren, m_surf_num, m_text_loc.x, m_text_loc.y );
-		if(m_is_vertical)
-			pos.x += m_slider_radius;
-		else
-			pos.y += m_slider_radius;
-		Drawing::TexRect(m_text_loc.x+pos.x, m_text_loc.y+pos.y+(m_slider_radius>>1), m_surf_num->w, m_surf_num->h, tex_text);
+		if(m_is_vertical) {
+			pos.x += m_slider_radius+2;
+			pos.y += m_slider_radius/2;
+		} else {
+			pos.y += m_slider_radius/2;
+		}
+		Drawing::TexRect(m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_surf_num->w, m_surf_num->h, tex_text);
 	}
 }
 
@@ -116,7 +118,12 @@ void TrackBar::STYLE_FUNC(value) {
 			}
 		_case("slider_size"):
 			m_slider_radius = std::stoi(value);
+			updateTextLocation();
 			updateSlider();
+		_case("show_number"):
+			show_num = (value == "true");
+			if(!show_num)
+				m_surf_num = 0;
 	}
 }
 
@@ -165,7 +172,6 @@ void TrackBar::SetRange( int _min, int _max ) {
 	m_slider_max = std::max(_max-_min, 0);
 	
 	int last = m_value;
-	// vrednost mora da ostane u granicama
 	m_value = std::min( std::max( m_value, m_slider_min ), m_slider_max+m_slider_min );
 	updateSlider();
 	onChange();
@@ -174,12 +180,14 @@ void TrackBar::SetRange( int _min, int _max ) {
 void TrackBar::onChange() {
 	m_value = getValue();
 	
-	if(m_surf_num)
-		SDL_FreeSurface( m_surf_num );
-	m_surf_num = TTF_RenderText_Blended( m_font, std::to_string( m_value ).c_str(), {255,255,255} );
-	tex_text = Drawing::GetTextureFromSurface(m_surf_num, tex_text);
+	if(show_num) {
+		if(m_surf_num)
+			SDL_FreeSurface( m_surf_num );
+		m_surf_num = TTF_RenderText_Blended( m_font, std::to_string( m_value ).c_str(), {255,255,255} );
+		tex_text = Drawing::GetTextureFromSurface(m_surf_num, tex_text);
+		updateTextLocation();
+	}
 	
-	updateTextLocation();
 	emitEvent( EVENT_TRACKBAR_CHANGE );
 }
 
@@ -214,13 +222,12 @@ void TrackBar::onPositionChange() {
 }
 
 void TrackBar::setValue( int value ) {
-	int last = m_value;
 	// filter
 	m_value = std::min( std::max(value, m_slider_min), m_slider_max );
-
-	if(last != m_value) {
+	cout << "wtf " << m_value << " : " << GetId() << "\n";
+	if(show_num) {
 		if(m_surf_num)
-		SDL_FreeSurface( m_surf_num );
+			SDL_FreeSurface( m_surf_num );
 		m_surf_num = TTF_RenderText_Blended( m_font, std::to_string(m_value).c_str(), {255,255,255} );
 		tex_text = Drawing::GetTextureFromSurface(m_surf_num, tex_text);
 		updateSlider();
@@ -229,7 +236,6 @@ void TrackBar::setValue( int value ) {
 
 void TrackBar::updateSlider() {
 	int last = m_slider_pix;
-	// pomeraj slidera
 	if(m_slider_max > 0) {
 		m_slider_pix = ((m_value - m_slider_min) * (m_is_vertical ? m_rect.h : m_rect.w)) / m_slider_max;
 	}

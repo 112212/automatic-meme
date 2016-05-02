@@ -37,8 +37,8 @@ lololo cool"></label>
 		<item>777</item>
 	</listbox>
 	
-	<trackbar rect="150,500,200,30" id="546" range="100,300" value="150"></trackbar>
-	<trackbar rect="60,530,30,100" id="546"  orientation="vertical" slidersize="15"></trackbar>
+	<trackbar rect="150,500,200,30" id="549" range="100,300" value="150"></trackbar>
+	<trackbar rect="60,530,30,100" id="546"   orientation="vertical" slidersize="15" show_number="true"></trackbar>
 	<scrollbar rect="200,150,300,50" vertical="false" id="20" orientation="vertical"></scrollbar>
 	<checkbox rect="250,50,100,30" value="hehehe"></checkbox>
 	<checkbox rect="250,100,100,30" value="hahaha" checked="true"></checkbox>

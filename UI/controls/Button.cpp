@@ -104,9 +104,6 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 		else
 			c = {0xff,0xff,0xff,0xff};
 		
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
 		SDL_Surface* surf = TTF_RenderText_Blended( font, text.c_str(), c );
 		m_text_loc.w = surf->w;
 		m_text_loc.h = surf->h;
@@ -140,11 +137,6 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 	}
 
 #endif
-
-
-
-
-
 
 
 void Button::OnGetFocus() {

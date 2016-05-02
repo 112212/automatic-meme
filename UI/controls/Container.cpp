@@ -17,7 +17,7 @@ Container::Container() {
 		m_rectShape.setOutlineThickness( 1 );
 	#elif USE_SDL
 	#endif
-	m_numngControls = 0;
+	m_num_controls = 0;
 	overflow_h = overflow_v = false;
 	m_scroll_h = m_scroll_v = 0;
 	max_v = max_h = 0;
@@ -278,7 +278,7 @@ void Container::AddItem( Control* control ) {
 		overflow_v = true; // vertical overflow
 	}
 	onOverflow();
-	m_numngControls++;
+	m_num_controls++;
 }
 
 void Container::onOverflow() {
