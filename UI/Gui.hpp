@@ -94,7 +94,7 @@ class GuiEngine : public Cache
 		#endif
 		
 		
-		
+		void UnselectControl() { unselectControl(); }
 		void AddControl( Control* cntrl );
 		void RemoveControl( Control* control );
 		

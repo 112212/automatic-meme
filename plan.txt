@@ -184,7 +184,8 @@ OpenGL port of controls:
 	TrackBar +
 
 TO FIX:
-
+	textbox 3 part to 1 part + background selection rect
+	
 Plan XML:
 	<gui>
 		<button id="1" background=""/>
