@@ -692,7 +692,7 @@ void ComboBox::openBox() {
 void ComboBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("background_color"):
-			background_color = std::stoi(value);
+			background_color = Colors::ParseColor(value);
 	}
 }
 

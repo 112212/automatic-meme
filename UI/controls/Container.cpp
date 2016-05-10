@@ -163,15 +163,6 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 	
 	Drawing::Rect(x,y,m_rect.w, m_rect.h, 0xffffffff);
 	
-#ifdef CLIP_METHOD_STENCIL
-	bool was_enabled = glIsEnabled( GL_STENCIL_TEST );
-	if(depth == -1) {
-		glClearStencil( 0 );
-		glClear( GL_STENCIL_BUFFER_BIT );
-		depth = 0;
-	}
-#endif
-	
 #ifdef CLIP_METHOD_SCISSOR
 	Rect clipRect = {x,y,w,m_rect.h};
 	bool was_enabled = glIsEnabled( GL_SCISSOR_TEST );
@@ -193,6 +184,14 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 #endif
 	
 #ifdef CLIP_METHOD_STENCIL
+
+	bool was_enabled = glIsEnabled( GL_STENCIL_TEST );
+	if(depth == -1) {
+		glClearStencil( 0 );
+		glClear( GL_STENCIL_BUFFER_BIT );
+		depth = 0;
+	}
+	
 	int old_depth;
 	if(was_enabled) {
 		glGetIntegerv( GL_STENCIL_REF, &old_depth );
@@ -200,40 +199,45 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 		glEnable( GL_STENCIL_TEST );
 	}
 	
-	// glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+	glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
 	
+	glStencilMask(0xff);
 	
 	if(!was_enabled) {
-		glStencilFunc( GL_LESS, 1, 0xffffffff );
+		glStencilFunc( GL_LESS, 1, 0xff);
 		glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
 	} else {
-		glStencilFunc( GL_LEQUAL, depth, 0xffffffff );
+		glStencilFunc( GL_LEQUAL, depth, 0xff );
 		glStencilOp( GL_KEEP, GL_INCR, GL_INCR );
 	}
 	
 	Drawing::FillRect(x, y, w, h, background_color);
 	
-	// glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
-	glStencilFunc( GL_LESS, depth, 0xffffffff );
+	glStencilFunc( GL_LESS, depth, 0xff );
 	depth++;
+	glStencilMask(0);
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 #endif
-
+	Drawing::FillRect(x, y, w, h, background_color);
 	innerWidget->Render({x,y},isSelected);
 	
 	
 #ifdef CLIP_METHOD_STENCIL
 	if(was_enabled) {
-		glStencilFunc( GL_LESS, old_depth, 0xffffffff );
+		glStencilFunc( GL_LESS, old_depth, 0xff );
 	} else {
 		glEnable( GL_STENCIL_TEST );
 		glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+		// glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 		depth = 0;
-		glStencilFunc( GL_ALWAYS, 0, 0xffffffff );
+		glStencilMask(0xff);
+		glStencilFunc( GL_NEVER, 0, 0xff );
 		glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
 		Drawing::FillRect(x, y, w, h, 0);
 		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+		glStencilMask(0);
 		glDisable( GL_STENCIL_TEST );
 	}
 #endif
@@ -314,7 +318,7 @@ void Container::onOverflow() {
 void Container::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("background_color"):
-			background_color = std::stoi(value);
+			background_color = Colors::ParseColor(value);
 	}
 }
 

@@ -83,9 +83,9 @@ void Canvas::STYLE_FUNC(value) {
 		_case("color"):
 			if(value[0] == '#') SetPixelColor( 0xff000000 | std::stoi(value.substr(1), 0, 16) ); 
 		_case("background_color"):
-			SetBackgroundColor( 0xff000000 | std::stol(value.substr(1), 0, 16) );
+			SetBackgroundColor( Colors::ParseColor(value) );
 		_case("grid_color"):
-			grid_color = 0xff000000 | std::stoi(value.substr(1), 0, 16);
+			grid_color = Colors::ParseColor(value);
 	}
 }
 

@@ -2,6 +2,7 @@
 #define CCOLORS_H
 
 #include "common.hpp"
+#include <string>
 
 namespace Colors {
 	
@@ -16,6 +17,7 @@ namespace Colors {
 		// init
 		void InitColors( );
 		Uint32 GetColor(unsigned char r, unsigned char g, unsigned char b);
+		Uint32 ParseColor(std::string str);
 };
 
 #endif

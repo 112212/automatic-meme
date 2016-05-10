@@ -1,7 +1,7 @@
 <gui>
 	<button id="2" rect="50,50,100,50" value="nikola" visible="true"/>
 	
-	<container id="100" rect="100,250,200,200">
+	<container id="100" rect="100,250,200,200" backgroundcolor="#ff200000">
 		<container id="20" rect="0,0,150,150">
 			<button id="5" rect="0,0,200,50" value="1"/>
 			<button id="55" rect="0,20,200,50" value="3"></button>
