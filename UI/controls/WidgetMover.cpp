@@ -8,17 +8,16 @@ WidgetMover::WidgetMover() {
 void WidgetMover::OnMouseMove( int mX, int mY, bool mouseState ) {
 	if(mouseState) {
 		const Rect &r = getWidget()->GetRect();
-		getWidget()->SetPosition(mX + r.x - m_rect.x, mY + r.y - m_rect.y);
+		getWidget()->SetPosition(mX + r.x - last_pos.x, mY + r.y - last_pos.y);
 	}
 }
 void WidgetMover::OnMouseDown( int mX, int mY ) {
 	if(!getWidget()) return;
 	
-	last_pos = getWidget()->GetRect();
+	last_pos = {mX,mY,0,0};
 }
 void WidgetMover::OnMouseUp( int mX, int mY ) {
 	
-	last_pos = getWidget()->GetRect();
 }
 
 void WidgetMover::Render( SDL_Rect pos, bool isSelected ) {

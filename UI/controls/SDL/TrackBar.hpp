@@ -46,6 +46,7 @@ class TrackBar : public Control {
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY );
 		void OnLostFocus();
+		void OnLostControl();
 		
 		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; onChange(); }
 		int GetPercentageValue();

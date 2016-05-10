@@ -18,6 +18,7 @@ class Container : public Widget {
 		int m_tx, m_ty;
 		int max_v, max_h;
 		bool overflow_v, overflow_h;
+		Uint32 background_color;
 		ScrollBar* m_scroll_v;
 		ScrollBar* m_scroll_h;
 		void onPositionChange();
@@ -28,6 +29,7 @@ class Container : public Widget {
 		static int depth;
 		Widget* innerWidget;
 		
+		void STYLE_FUNC(value);
 	public:
 		Container();
 		~Container();
@@ -44,7 +46,6 @@ class Container : public Widget {
 		
 		void AddItem( Control* control );
 		void AddControl( Control* control );
-		
 };
 
 }

@@ -147,8 +147,8 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyUp( sf::Event::KeyEvent &sym ) {}
 #elif USE_SDL
 	void Control::Render( SDL_Rect position, bool isSelected ) {}
-	void Control::OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod ) {}
-	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod &mod ) {}
+	void Control::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {}
+	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {}
 #endif
 void Control::OnLostFocus() {}
 void Control::onPositionChange() {}

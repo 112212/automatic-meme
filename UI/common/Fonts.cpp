@@ -77,6 +77,38 @@ std::map< std::string, std::string > Fonts::fonts_path;
 			return f->second;
 	}
 	
+	
+	int Fonts::getMaxText( TTF_Font* font, const std::string &text, int width ) {
+		
+		int dummy, advance;
+		int len = text.length();
+		int sum=0;
+		for(int i=0; i < len; i++) {
+			TTF_GlyphMetrics( font, text[i], &dummy, &dummy, &dummy, &dummy, &advance);
+			if( sum > width-25 ) {
+				return i+1;
+			}
+			sum += advance;
+		}
+		return len;
+	}
+
+
+	int Fonts::getMaxTextBw(TTF_Font* font, const std::string &text, int width) {
+		
+		int dummy, advance;
+		int len = text.length();
+		int sum=0;
+		for(int i=len-1; i >= 0; i--) {
+			TTF_GlyphMetrics( font, text[i], &dummy, &dummy, &dummy, &dummy, &advance);
+			if( sum > width-25 ) {
+				return len-i;
+			}
+			sum += advance;
+		}
+		return len;
+	}
+	
 	bool Fonts::FontExists( std::string short_name, int font_size ) {
 		auto key = make_pair(short_name, font_size);
 		return fonts.find( key ) != fonts.end();

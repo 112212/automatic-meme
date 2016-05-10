@@ -22,10 +22,10 @@
 	<label rect="50,150,200,100" value="hehehe hahaha
 lololo cool"></label>
 	<widget rect="500,150,100,200">
-		<radiobutton rect="0,0,100,30" value="haha"></radiobutton>
-		<radiobutton rect="0,50,100,30" value="hehe"></radiobutton>
-		<radiobutton rect="0,100,100,30" value="cool"></radiobutton>
-		<widgetmover rect="0,0,10,10" zindex="50"></widgetmover>
+		<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
+		<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>
+		<radiobutton rect="0,120,100,30" value="cool"></radiobutton>
+		<widgetmover rect="0,0,100,20" zindex="50"></widgetmover>
 	</widget>
 	
 	<listbox id="200" rect="500,400,200,200">
@@ -42,5 +42,5 @@ lololo cool"></label>
 	<scrollbar rect="200,150,300,50" vertical="false" id="20" orientation="vertical"></scrollbar>
 	<checkbox rect="250,50,100,30" value="hehehe"></checkbox>
 	<checkbox rect="250,100,100,30" value="hahaha" checked="true"></checkbox>
-	<canvas rect="580,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" gridcolor="#220000"></canvas>
+	<canvas rect="580,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000"></canvas>
 </gui>

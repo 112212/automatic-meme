@@ -1,4 +1,5 @@
 #include "TextBox.hpp"
+#include <cctype> // toupper
 namespace ng {
 TextBox::TextBox() {
 	setType( TYPE_TEXTBOX );
@@ -28,6 +29,8 @@ void TextBox::Render( SDL_Rect pos, bool isSelected ) {
 	#else
 		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
 	#endif
+	
+	
 	
 	
 	// prvo mora da postoji prvi tekst
@@ -134,9 +137,7 @@ void TextBox::updateSelection() {
 	int maxtext = m_maxtext;
 	int len2;
 	
-	// ako postoji selekcija
 	if(m_text_selection.x != m_text_selection.y) {
-		// ako selekcija pocinje od pocetka, onda je m_surf_first shaded
 		if(m_text_selection.x <= m_first_index) {
 			len2 = std::min( m_text_selection.y-m_text_selection.x+1, maxtext );
 			maxtext -= len2;
@@ -146,10 +147,8 @@ void TextBox::updateSelection() {
 			m_surf_first = TTF_RenderText_Blended( my_font, m_text.substr( m_first_index, len2 ).c_str(), {255,255,255} );
 			tex_first = Drawing::GetTextureFromSurface(m_surf_first, tex_first);
 			// tex_text = Drawing::GetTextureFromSurface(m_surf_first);
-			// odavde je zavrsena selekcija, handled ...
 			
 			
-			// znaci da postoji samo m_surf_middle(ako nije sve selektovano :) )
 			if(maxtext > 0) {
 				if(m_text_selection.y+1 < m_text.length()) {
 					// m_surf_middle = TTF_RenderText_Solid( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
@@ -157,7 +156,7 @@ void TextBox::updateSelection() {
 					tex_middle = Drawing::GetTextureFromSurface(m_surf_middle, tex_middle);
 				}
 			}
-		} else { // ako selekcija ne pocinje od pocetka, onda je m_surf_first obican tekst (unselected)
+		} else {
 			//  if(m_text_selection.x < m_first_index + m_maxtext)
 			len2 = std::min( maxtext, m_text_selection.x-m_first_index );
 			maxtext -= len2;
@@ -169,15 +168,13 @@ void TextBox::updateSelection() {
 			if(maxtext > 0) {
 				len2 =  std::min(m_text_selection.y-m_text_selection.x+1, maxtext);
 				maxtext -= len2;
-				
-				// dok middle postaje selekcija
+
 				// m_surf_middle = TTF_RenderText_Shaded( my_font, m_text.substr( m_text_selection.x, len2 ).c_str(), {255,255,255}, {100,100,100});
 				m_surf_middle = TTF_RenderText_Blended( my_font, m_text.substr( m_text_selection.x, len2 ).c_str(), {255,255,255});
 				tex_middle = Drawing::GetTextureFromSurface(m_surf_middle, tex_middle);
 				
 			}
 			
-			// ako nije do kraja selektovano, znaci da postoji m_surf_last (unselected)
 			if(m_text_selection.y+1 < m_text.length()) {
 				if(maxtext > 0) {
 					// m_surf_last = TTF_RenderText_Solid( my_font, m_text.substr( m_text_selection.y+1, maxtext ).c_str(), {255,255,255} );
@@ -188,7 +185,7 @@ void TextBox::updateSelection() {
 		}
 			
 	} else {
-		// ne postoji selekcija
+
 		if(m_text.size() > 0) {
 			m_surf_first = TTF_RenderText_Blended( my_font, m_text.substr(m_first_index, maxtext).c_str(), {255,255,255} );
 			tex_first = Drawing::GetTextureFromSurface(m_surf_first, tex_first);
@@ -255,88 +252,131 @@ void TextBox::onPositionChange() {
 }
 
 
-void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod ) {
+void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	int val = sym;
 	
-	if(val >= 256 && val <= 265) val -= 208;
-	if(val == SDLK_KP_PERIOD) val = SDLK_PERIOD;
-	//cout << val << endl;
+	// if(val >= 256 && val <= 265) val -= 208;
+	
+	// cout << val << endl;
 	switch(val) {
 		case SDLK_BACKSPACE:
-				if(m_text.length() > 0) {
-					if(m_text_selection.x != m_text_selection.y) {
-						if(m_text_selection.x >= 0) {
-							m_text.erase(m_text_selection.x, m_text_selection.y-m_text_selection.x+1);
-							m_cursor_sel = m_text_selection.x;
-							// remove selection
-							m_text_selection.x = m_text_selection.y = 0;
-						}
-					} else if(m_cursor_sel > 0) {
-						m_text = m_text.erase(m_cursor_sel-1, 1);
-						m_cursor_sel--;
-						int mtext = getMaxTextBw( m_cursor_sel );
-						if(mtext != m_maxtext) {
-							m_maxtext = mtext;
-							m_first_index = m_cursor_sel - mtext;
-						}
-					}
-					updateCursor();
-					emitEvent( EVENT_TEXTBOX_CHANGE );
-				}
-				break;
-			case SDLK_LEFT:
-				if(m_cursor_sel >= 0) {
-					m_cursor_sel--;
-					updateCursor();
-				}
-				break;
-			case SDLK_RIGHT:
-				if(m_cursor_sel < m_text.length()) {
-					m_cursor_sel++;
-					updateCursor();
-				}
-				break;
-			case SDLK_END:
-				m_cursor_sel = m_text.length();
-				updateCursor();
-				break;
-			case SDLK_HOME:
-				setFirstIndex(0);
-				m_cursor_sel = 0;
-				updateCursor();
-				break;
-			case SDLK_RETURN:
-			case SDLK_KP_ENTER:
-				emitEvent( EVENT_TEXTBOX_ENTER );
-				break;
-			default:
-			
+			if(m_text.length() > 0) {
 				if(m_text_selection.x != m_text_selection.y) {
-					m_text.erase(m_text_selection.x, m_text_selection.y-m_text_selection.x+1);
-					m_cursor_sel = m_text_selection.x;
-					m_text_selection.x = m_text_selection.y = 0;
+					if(m_text_selection.x >= 0) {
+						m_text.erase(m_text_selection.x, m_text_selection.y-m_text_selection.x+1);
+						m_cursor_sel = m_text_selection.x;
+						// remove selection
+						m_text_selection.x = m_text_selection.y = 0;
+					}
+				} else if(m_cursor_sel > 0) {
+					m_text = m_text.erase(m_cursor_sel-1, 1);
+					m_cursor_sel--;
+					int mtext = Fonts::getMaxTextBw( m_font, m_text.substr(0,m_cursor_sel), m_rect.w );
+					if(mtext != m_maxtext) {
+						m_maxtext = mtext;
+						m_first_index = m_cursor_sel - mtext;
+					}
 				}
-				
-				m_text.insert(m_cursor_sel, 1, val);
-				
-				// pomeriti cursor
+				updateCursor();
+				emitEvent( event::textbox_change );
+			}
+			break;
+		case SDLK_LEFT:
+			if(m_cursor_sel >= 0) {
+				m_cursor_sel--;
+				updateCursor();
+			}
+			break;
+		case SDLK_RIGHT:
+			if(m_cursor_sel < m_text.length()) {
 				m_cursor_sel++;
 				updateCursor();
-				
-				emitEvent( EVENT_TEXTBOX_CHANGE );
+			}
+			break;
+		case SDLK_END:
+			m_cursor_sel = m_text.length();
+			updateCursor();
+			break;
+		case SDLK_HOME:
+			setFirstIndex(0);
+			m_cursor_sel = 0;
+			updateCursor();
+			break;
+		case SDLK_RETURN:
+		case SDLK_KP_ENTER:
+			emitEvent( event::textbox_enter );
+			break;
+			
+		case SDLK_LSHIFT:
+		case SDLK_RSHIFT:
+		case SDLK_LCTRL:
+		case SDLK_RCTRL:
+		case SDLK_LALT:
+		case SDLK_RALT:
+		
+			break;
+			
+		default:
+		
+			if(mod & KMOD_CTRL) {
+				switch(val) {
+					case 'c': // copy
+						cout << "Ctrl-c\n";
+						break;
+					case 'v': // paste
+						cout << "Ctrl-v\n";
+						break;
+					case 'a': // select all
+						cout << "Ctrl-a\n";
+						break;
+				}
 				break;
+			}
+			
+			if(val == SDLK_KP_0) {
+				val = '0';
+			} else if(val >= SDLK_KP_1 && val <= SDLK_KP_9) {
+				val = val - SDLK_KP_1 + 0x31;
+			} else if(val == SDLK_KP_DIVIDE) {
+				val = '/';
+			}
+		
+			if(val == SDLK_KP_PERIOD) 
+				val = SDLK_PERIOD;
+				
+			if(mod & KMOD_SHIFT) {
+				val = toupper(val);
+			}
+			
+			
+			if(m_text_selection.x != m_text_selection.y) {
+				m_text.erase(m_text_selection.x, m_text_selection.y-m_text_selection.x+1);
+				m_cursor_sel = m_text_selection.x;
+				m_text_selection.x = m_text_selection.y = 0;
+			}
+			
+			m_text.insert(m_cursor_sel, 1, val);
+			
+			// pomeriti cursor
+			m_cursor_sel++;
+			updateCursor();
+			
+			emitEvent( event::textbox_change );
+			break;
 	}
 	updateSelection();
 }
 
 int TextBox::getCharPos( int num ) {
 	int sum=m_text_loc.x;
-	TTF_Font* fnt = m_font;
+	
+	
+	// TODO: replace this with small version
 	
 	int dummy, advance;
 	int len = m_first_index+num;
 	for(int i=m_first_index; i < len; i++) {
-		TTF_GlyphMetrics( fnt, m_text[i], &dummy, &dummy, &dummy, &dummy, &advance);
+		TTF_GlyphMetrics( m_font, m_text[i], &dummy, &dummy, &dummy, &dummy, &advance);
 		sum += advance;
 	}
 	return sum;
@@ -347,54 +387,23 @@ void TextBox::updateCursor() {
 	if(m_cursor_sel < m_first_index) {
 		if(m_cursor_sel < 0)m_cursor_sel = 0;
 		m_first_index=m_cursor_sel;
-		m_maxtext = getMaxText();
+		m_maxtext = Fonts::getMaxText(m_font, m_text.substr(m_first_index), m_rect.w);
 	} else if(m_cursor_sel-m_first_index > m_maxtext) {
-		m_maxtext = getMaxTextBw( m_cursor_sel );
+		m_maxtext = Fonts::getMaxTextBw( m_font, m_text.substr(0,m_cursor_sel), m_rect.w );
 		m_first_index = m_cursor_sel - m_maxtext;
 	} else
-		m_maxtext = getMaxText();
+		m_maxtext = Fonts::getMaxText(m_font, m_text.substr(m_first_index), m_rect.w);
 	m_cursor_pt = getCharPos( m_cursor_sel-m_first_index );
 }
 
-int TextBox::getMaxText( ) {
-	TTF_Font* fnt = m_font;
-	
-	int dummy, advance;
-	int len = m_text.length() - m_first_index;
-	int sum=0;
-	for(int i=0; i < len; i++) {
-		TTF_GlyphMetrics( fnt, m_text[m_first_index+i], &dummy, &dummy, &dummy, &dummy, &advance);
-		if( sum > m_rect.w-25 ) {
-			return i+1;
-		}
-		sum += advance;
-	}
-	return len;
-}
-
-int TextBox::getMaxTextBw( int indx ) {
-	TTF_Font* fnt = m_font;
-	
-	int dummy, advance;
-	int len = indx;
-	int sum=0;
-	for(int i=len-1; i >= 0; i--) {
-		TTF_GlyphMetrics( fnt, m_text[i], &dummy, &dummy, &dummy, &dummy, &advance);
-		if( sum > m_rect.w-25 ) {
-			return len-i;
-		}
-		sum += advance;
-	}
-	return len;
-}
 
 void TextBox::updateMaxText() {
-	m_maxtext = getMaxText( );
+	m_maxtext = Fonts::getMaxText(m_font, m_text.substr(m_first_index), m_rect.w);
 }
 
 void TextBox::setFirstIndex( int index ) {
 	m_first_index = index;
-	m_maxtext = getMaxText( );
+	m_maxtext = Fonts::getMaxText(m_font, m_text.substr(m_first_index), m_rect.w);
 }
 
 const char* TextBox::GetText( ) {

@@ -139,8 +139,8 @@ class Control {
 			virtual void OnKeyUp( sf::Event::KeyEvent &sym );
 		#elif USE_SDL
 			virtual void Render( SDL_Rect position, bool isSelected );
-			virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod );
-			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod &mod );
+			virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
+			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
 		#endif
 		virtual void OnMouseMove( int mX, int mY, bool mouseState );
 		virtual void OnMouseDown( int mX, int mY );

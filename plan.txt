@@ -102,86 +102,89 @@ Requirements:
 
 
 TODO:
-	cache_entry struct +
-	widget control +
-	widget struct +
-	control changes +
-	gui engine struct changes +
-	adding widget +
-	remove control/widget +
-	move controls +
-	move widget +
-	controls render inside widget +
-	select +
-	custom boundary +
-	radio button +
-	draw widget +
-	lock2 combobox (focus lock) +
-	lock1 textbox (keyboard lock) +
-	control to gui events +
-	global control events for specific gui instance +
-	fix controls to work on this api +
-	introduce z-index and make rendering strictly ordered +
-	make selected control render last along with its recursively parent widgets +
-	remove m_selected_control +
-	widget lock / widget unlock +
-	SDL port of rendering +
-	SDL port of controls +
-	control vision (show,hide) +
-	non-interactible controls *
-	get control by id, get control by name +
-	user input redirect to widget +
-	control selection and deselection optimization in widget +
-	speed up updating cache by using binary search on z-index key, make z-index unique +
-	flexible input redirect to widget +
-	overlapping check compile time option +
-	new control widget mover +
-	make compile time option to remove event queue and totally replace it with subscribe event +
-	xml loader +
-	OpenGL port of controls +
-	
++ 	cache_entry struct
++ 	widget control
++ 	widget struct
++ 	control changes
++ 	gui engine struct changes
++ 	adding widget
++ 	remove control/widget
++ 	move controls
++ 	move widget
++ 	controls render inside widget
++ 	select
++ 	custom boundary
++ 	radio button
++ 	draw widget
++ 	lock2 combobox (focus lock)
++ 	lock1 textbox (keyboard lock)
++ 	control to gui events
++ 	global control events for specific gui instance
++ 	fix controls to work on this api
++ 	introduce z-index and make rendering strictly ordered
++ 	make selected control render last along with its recursively parent widgets
++ 	remove m_selected_control
++ 	widget lock / widget unlock
++ 	SDL port of rendering
++ 	SDL port of controls
++ 	control vision (show,hide)
+* 	non-interactible controls
++ 	get control by id, get control by name
++ 	user input redirect to widget
++ 	control selection and deselection optimization in widget
++ 	speed up updating cache by using binary search on z-index key, make z-index unique
++ 	flexible input redirect to widget
++ 	overlapping check compile time option
++ 	new control widget mover
++ 	make compile time option to remove event queue and totally replace it with subscribe event
++ 	xml loader
++ 	OpenGL port of controls
+-	support for unicode in textbox
+- 	optional multiline textbox with scrollbars
+- 	format text with colors on Drawing::
+- 	copy & paste for textbox
 
 
 Controls API Fix:
-	Button +
-	ComboBox +
-	Container *
-	GridContainer *
-	Label +
-	ListBox +
-	RadioButton +
-	ScrollBar +
-	TabContainer +
-	TextBox +
-	TrackBar +
++ 	Button
++ 	ComboBox
+* 	Container
+* 	GridContainer
++ 	Label
++ 	ListBox
++ 	RadioButton
++ 	ScrollBar
++ 	TabContainer
++ 	TextBox
++ 	TrackBar
 
 SDL port of controls:
-	Button +
-	ComboBox +
-	CheckBox +
-	Container +
-	GridContainer +
-	Label +
-	ListBox +
-	RadioButton +
-	ScrollBar +
-	TabContainer -
-	TextBox +
-	TrackBar +
++ 	Button
++ 	ComboBox
++ 	CheckBox
++ 	Container
++ 	GridContainer
++ 	Label
++ 	ListBox
++ 	RadioButton
++ 	ScrollBar
+- 	TabContainer
++ 	TextBox
++ 	TrackBar
 	
 OpenGL port of controls:
-	Button +
-	ComboBox +
-	CheckBox +
-	Container +
-	GridContainer -
-	Label +
-	ListBox +
-	RadioButton +
-	ScrollBar +
-	TabContainer -
-	TextBox +
-	TrackBar +
++ 	Button
++ 	ComboBox
++ 	CheckBox
++ 	Container
+- 	GridContainer
++ 	Label
++ 	ListBox
++ 	RadioButton
++ 	ScrollBar
+- 	TabContainer
++ 	TextBox
++ 	TrackBar
 
 TO FIX:
 	textbox 3 part to 1 part + background selection rect

@@ -144,7 +144,6 @@ void TrackBar::OnMouseDown( int mX, int mY ) {
 		else if(x > m_rect.w) x = m_rect.w;
 		if(x != m_slider_pix) {
 			m_slider_pix = x;
-			
 			onChange();
 		}
 	}
@@ -163,6 +162,10 @@ int TrackBar::GetValue() {
 }
 
 void TrackBar::OnLostFocus() {
+	m_on_it = false;
+}
+
+void TrackBar::OnLostControl() {
 	m_on_it = false;
 }
 
@@ -224,7 +227,6 @@ void TrackBar::onPositionChange() {
 void TrackBar::setValue( int value ) {
 	// filter
 	m_value = std::min( std::max(value, m_slider_min), m_slider_max );
-	cout << "wtf " << m_value << " : " << GetId() << "\n";
 	if(show_num) {
 		if(m_surf_num)
 			SDL_FreeSurface( m_surf_num );

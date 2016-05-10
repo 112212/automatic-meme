@@ -24,6 +24,7 @@ Container::Container() {
 	m_tx = m_ty = 0;
 	innerWidget = new Widget;
 	innerWidget->SetVisible(false);
+	background_color = 0;
 	Widget::AddControl(innerWidget);
 	setInterceptMask(mwheel | mouse_down | mouse_move);
 }
@@ -176,9 +177,10 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 	bool was_enabled = glIsEnabled( GL_SCISSOR_TEST );
 	Rect old_box;
 	
+	Drawing::FillRect(x, y, w, h, background_color);
+	
 	int x1,y1;
 	Drawing::GetResolution(x1,y1);
-	
 	if(was_enabled) {
 		glGetIntegerv( GL_SCISSOR_BOX, (GLint*)&old_box );
 		old_box.y = y1 - (old_box.y+old_box.h);
@@ -198,7 +200,7 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 		glEnable( GL_STENCIL_TEST );
 	}
 	
-	glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+	// glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
 	
 	
 	if(!was_enabled) {
@@ -209,9 +211,9 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 		glStencilOp( GL_KEEP, GL_INCR, GL_INCR );
 	}
 	
-	Drawing::FillRect(x, y, w, h, 0);
+	Drawing::FillRect(x, y, w, h, background_color);
 	
-	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+	// glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
 	glStencilFunc( GL_LESS, depth, 0xffffffff );
 	depth++;
@@ -306,6 +308,13 @@ void Container::onOverflow() {
 			innerWidget->SetOffset(m_tx, innerWidget->GetOffset().y);
 		});
 		Widget::AddControl(m_scroll_h);
+	}
+}
+
+void Container::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("background_color"):
+			background_color = std::stoi(value);
 	}
 }
 
