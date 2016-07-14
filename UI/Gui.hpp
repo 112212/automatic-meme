@@ -11,6 +11,11 @@
 #ifdef USE_SFML
 	#include <SFML/Window.hpp>
 	#include <SFML/Graphics.hpp>
+	#include <SFML/OpenGL.hpp>
+#endif
+
+#ifdef USE_SDL
+	#include <SDL2/SDL_opengl.h>
 #endif
 
 // ---- GUI configuration ---

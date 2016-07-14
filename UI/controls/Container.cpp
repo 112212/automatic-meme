@@ -1,7 +1,6 @@
 // #include <SDL2/SDL2_gfxPrimitives.h>
 #include "../common/SDL/Drawing.hpp"
 #include "Container.hpp"
-#include <SFML/OpenGL.hpp>
 #include "../Gui.hpp"
 
 // select only one
