@@ -1,51 +1,49 @@
 -----------------------
 Requirements:
 
-	add +
+	+ add
 	; adding widget to gui engine makes all widgets and controls recursively get engine pointer
 	; adding widget to widget just sets backref and adds it to cache and control vector
 
-	remove +
+	+ remove
 	; update all cache from underlying widget/engine
 
-	move +
+	+ move
 	; update cache from underlying widget/engine
 
-	move widget +
+	+ move widget
 	; using control backref to widget, set rect of underlying widget and if has underlying widget,
 	  call its function, otherwise send gui command for refreshing it cache entry for that moved widget
 
-	select +
+	+ select
 	; recursively searching for controls which have mouse pointer inside it
 
-	custom boundary +
+	+ custom boundary
 	; by marking 'custom_check' boolean to true
 
-	radio button +
+	+ radio button
 	; handled by control by using backref to widget and widgets vector of controls
 
-	draw widget +
+	+ draw widget
 	; since widget is actually control, no addional code is needed
 	; drawing widget will make widget draws its own controls and widgets
 
-	lock2 combobox +
+	+ lock2 combobox
 	; cannot hover or select other controls
 
-	lock1 textbox +
+	+ lock1 textbox
 	; can hover and select other controls, keyboard events sent only if mouse not on control
 
-	control to gui events +
+	+ control to gui events
 	; by gui being friend with control base class and allowing it to call gui's private function to send event
 
-	global control events for specific gui instance +
+	+ global control events for specific gui instance
 	; every control has gui engine pointer, control base class has function for sending events
 
-	themes *
-	; possible
-	; but yet unknown ... should use css, json, lua or no theme engine and leave all to C++?
+	- themes
+	; only default values setting in xml + registering new controls to gui
 
-
-	make selected branch be rendered last to be on Top Most +
+	+ make selected branch be rendered last to be on Top Most
 	; sel_widget will now point to first depth widget so that it can be skipped and rendered last
 	; every widget will have 'sel_control' which points to widget where target control is, or
 	; i points that control itself. These widgets or controls pointed by sel_control will
@@ -53,36 +51,36 @@ Requirements:
 	; on control deselection, its necessary to go from selected control and walk up the tree to
 	; reset sel_control to 0
 
-	z-index +
+	+ z-index
 	; sort elements by z-index in m_controls and then just render in ascending order
 
-	widget lock +
+	+ widget lock
 	; widget gets locked so that only controls inside this widget are active
 	; something like m_focus_lock but widget-wise
 	; perhaps (sel_widget -> target widget) + (m_widget_lock = true)
 
-	non-interactible controls
+	+ non-interactible controls
 	; control won't be added to cache for checking mouse collision
 	; not affected by z-index because of not being in same cache and sorted
 	; always drawn before other controls, so always appear in background
 	; used for decoration and non-selectable text
 	; has to be in cache
 
-	control invisibility
+	+ control invisibility
 	; hide, show control
 	; has to be in cache
 
-	user input redirect to widget
+	+ user input redirect to widget
 	; widget has to be able to activate input interception and can block it
 	; from reaching selected control
 
-	control selection and deselection optimization in widget
+	+ control selection and deselection optimization in widget
 	; same way as checking whether mouse pointer is still in control
 	; it can be checked whether mouse pointer is still in widget and
 	; continue checking from there, if pointer is not in this widget, check if it
 	; is in parents widget and so on
 
-	flexible input redirect to widget
+	+ flexible input redirect to widget
 	; on control or widget selection it will be generated vector of lists.
 	; each list if not empty contains widgets to call for intercepting
 	; command from control, and if one of them chooses to intercept then stop
@@ -90,16 +88,24 @@ Requirements:
 	; with predefined capacity but not limited.
 	; vector with pointers are null terminated
 
-	speed up updating cache by using binary search on z-index key
+	+ speed up updating cache by using binary search on z-index key
 	; make z-index unique, if its chosen to make control have same z-index
 	; as some other control, then simply put it next to it (or before it)
 	; ** make its z-index be in middle of 2 surrounding z-indices **
-	; ex: 10 add_here 20, if new control asks for index 10
+	; ex: 10 (add here) 20, if new control asks for index 10
 	; new control will get z-index (10+20)/2 = 15
 	; to have bigger equidistant holes between 2 controls z-indices
 	; so if collision happens, first check whether control can be placed next to
 	; control which was collided with, if not then rescale all
 
+	- anchoring
+	; combinations {L,R,M,a%+b','}{T,B,M,c%+d}
+	; SetRect will unapply anchoring (marking isAnchored = false)
+	; new per control functions
+	; new functions SetAnchor( A, B ), SetAnchor( bool ) ; A, B - those combinations
+	; setting size can be done by percentage + offset (added sizePercent, sizeOffset)
+	; new function ApplyAnchors()
+	
 
 TODO:
 + 	cache_entry struct
@@ -141,9 +147,14 @@ TODO:
 + 	OpenGL port of controls
 -	support for unicode in textbox
 - 	optional multiline textbox with scrollbars
+-	console style textbox (separate class inheriting textbox?)
 - 	format text with colors on Drawing::
 - 	copy & paste for textbox
-
+- 	anchoring (group anchor, single element anchor)
+-	theme loader (default values)
+-	xml defining borders, background color polygon or image and its bounding area (clickable area)
+-	label blinking?
+-	new control registration to xml
 
 Controls API Fix:
 + 	Button
@@ -171,7 +182,7 @@ SDL port of controls:
 - 	TabContainer
 + 	TextBox
 + 	TrackBar
-	
+
 OpenGL port of controls:
 + 	Button
 + 	ComboBox
@@ -187,8 +198,9 @@ OpenGL port of controls:
 + 	TrackBar
 
 TO FIX:
-	textbox 3 part to 1 part + background selection rect
-	
+	- textbox 3 part to 1 part + background selection rect
+	- centering value on trackbar
+
 Plan XML:
 	<gui>
 		<button id="1" background=""/>
@@ -199,6 +211,9 @@ Plan XML:
 	</gui>
 
 
-
-
+hey, few notes: it would be good to set the size and color for the text
+<label></label> and also some possibility to blink/flash text with amount of time,
+lets say, show="2" and hide="3" so it hides visible text every 2 seconds and is
+3seconds not drawn, then it draws it, waits 2 seconds and stops drawing for 3
+seconds. 
 

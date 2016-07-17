@@ -16,7 +16,7 @@ GuiEngine::GuiEngine() {
 	#elif USE_SDL
 		if( !Fonts::FontExists( "default" , 13 ) ) {
 			if(!Fonts::LoadFont( DEFAULT_FONT, "default", 13 )) {
-				cout << "[GUI] default font loadi failed\n";
+				cout << "[GUI] default font loading failed\n";
 			}
 			Colors::InitColors();
 		}
