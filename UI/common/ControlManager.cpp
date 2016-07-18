@@ -1,4 +1,4 @@
-#include "cache.hpp"
+#include "ControlManager.hpp"
 #include "../Widget.hpp"
 
 namespace ng {
@@ -14,10 +14,10 @@ namespace ng {
 	  control->m_rect, \
 	  control }
 	  
-Cache::Cache() : next_z_index(0) {
+ControlManager::ControlManager() : next_z_index(0) {
 }
 
-Cache::~Cache() {
+ControlManager::~ControlManager() {
 	cache.clear();
 	int len = controls.size();
 	for(int i=0; i < len; i++) {
@@ -26,7 +26,7 @@ Cache::~Cache() {
 	controls.clear();
 }
 
-int Cache::binary_search(int z_index) {
+int ControlManager::binary_search(int z_index) {
 	int size = cache.size();
 	if(size == 0) return -1;
 	int a=0,b=size-1,m=size>>1;
@@ -50,7 +50,7 @@ int Cache::binary_search(int z_index) {
 	return m;
 }
 
-void Cache::setZIndex(Control* control, int new_z_index) {
+void ControlManager::setZIndex(Control* control, int new_z_index) {
 	
 	cache_entry e;
 	int old = binary_search(control->z_index);
@@ -109,7 +109,7 @@ void Cache::setZIndex(Control* control, int new_z_index) {
 	
 }
 
-void Cache::updateCache(Control* control, CacheUpdateFlag flag) {
+void ControlManager::updateCache(Control* control, CacheUpdateFlag flag) {
 	int index = binary_search(control->z_index);
 	
 	if(flag == CacheUpdateFlag::position) {
@@ -132,7 +132,7 @@ Rect getRect( int x, int y, int w, int h ) {
 	return r;
 }
 
-void Cache::rescale_z_indices(int spacing) {
+void ControlManager::rescale_z_indices(int spacing) {
 	int size = cache.size();
 	int cur = 0;
 	for(int i=0; i < size; i++, cur+=spacing) {
@@ -143,7 +143,7 @@ void Cache::rescale_z_indices(int spacing) {
 }
 
 
-void Cache::addControlToCache(Control* control) {
+void ControlManager::addControlToCache(Control* control) {
 	int z_index = control->z_index;
 	if(z_index == 0 or z_index >= next_z_index) {
 		control->z_index = next_z_index;
@@ -160,7 +160,7 @@ void Cache::addControlToCache(Control* control) {
 	controls.push_back(control);
 }
 
-void Cache::removeControlFromCache(Control* control) {
+void ControlManager::removeControlFromCache(Control* control) {
 	int idx = binary_search(control->z_index);
 	cache.erase(cache.begin()+idx);
 	

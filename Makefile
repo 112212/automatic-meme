@@ -6,7 +6,7 @@ cpp = \
 	UI/Gui.cpp \
 	UI/Control.cpp \
 	UI/Widget.cpp \
-	UI/common/cache.cpp \
+	UI/common/ControlManager.cpp \
 	\
 	UI/common/debug.cpp \
 	UI/common/common.cpp \
@@ -14,7 +14,6 @@ cpp = \
 	UI/common/Fonts.cpp \
 	\
 	UI/XmlLoader.cpp \
-
 
 
 exe := 

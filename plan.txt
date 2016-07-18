@@ -200,6 +200,7 @@ OpenGL port of controls:
 TO FIX:
 	- textbox 3 part to 1 part + background selection rect
 	- centering value on trackbar
+	- scrollbar dragging should work correctly (clicking and holding mouse on scrollbar handle shouldn't move it anywhere yet)
 
 Plan XML:
 	<gui>

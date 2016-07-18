@@ -6,7 +6,7 @@
 
 #include "Control.hpp"
 // #include "Widget.hpp"
-#include "common/cache.hpp"
+#include "common/ControlManager.hpp"
 
 #ifdef USE_SFML
 	#include <SFML/Window.hpp>
@@ -36,7 +36,7 @@ struct Event {
 };
 #endif
 
-class GuiEngine : public Cache
+class GuiEngine : public ControlManager
 #ifdef USE_SFML
 	, public sf::Drawable 
 #endif

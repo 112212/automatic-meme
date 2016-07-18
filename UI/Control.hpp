@@ -96,7 +96,7 @@ class Control {
 		Widget* widget;
 		friend class Widget;
 		friend class GuiEngine;
-		friend class Cache;
+		friend class ControlManager;
 		bool visible;
 		bool interactible;
 		std::string id;

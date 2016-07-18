@@ -1,5 +1,5 @@
-#ifndef _INTERNAL_GUI_CACHE_
-#define _INTERNAL_GUI_CACHE_
+#ifndef _INTERNAL_GUI_CONTROL_MANAGER_
+#define _INTERNAL_GUI_CONTROL_MANAGER_
 
 
 #include "../Control.hpp"
@@ -19,7 +19,7 @@ struct cache_entry {
 };
 
 
-class Cache {
+class ControlManager {
 	private:
 		int next_z_index;
 		int binary_search(int z_index);
@@ -36,8 +36,8 @@ class Cache {
 	public:
 		inline const std::vector<Control*> GetControls() { return controls; }
 		
-		Cache();
-		~Cache();
+		ControlManager();
+		~ControlManager();
 };
 }
 #endif

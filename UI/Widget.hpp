@@ -2,18 +2,18 @@
 #define WIDGET 
 
 #include "Control.hpp"
-#include "common/cache.hpp"
+#include "common/ControlManager.hpp"
 
 namespace ng {
 class GuiEngine;
 
-class Widget : public Cache, public Control {
+class Widget : public ControlManager, public Control {
 	
 	private:
 		unsigned int intercept_mask;
 		friend class GuiEngine;
 		friend class Control;
-		friend class Cache;
+		friend class ControlManager;
 		void set_engine(GuiEngine* engine);
 		
 		#ifdef USE_SFML
