@@ -105,6 +105,7 @@ Requirements:
 	; new functions SetAnchor( A, B ), SetAnchor( bool ) ; A, B - those combinations
 	; setting size can be done by percentage + offset (added sizePercent, sizeOffset)
 	; new function ApplyAnchors()
+	; - adding new control applies anchoring automatically
 	
 
 TODO:
@@ -146,7 +147,7 @@ TODO:
 + 	xml loader
 + 	OpenGL port of controls
 -	support for unicode in textbox
-- 	optional multiline textbox with scrollbars
+- 	optional multiline textbox with scrollbars (like rich textbox)
 -	console style textbox (separate class inheriting textbox?)
 - 	format text with colors on Drawing::
 - 	copy & paste for textbox
@@ -154,7 +155,7 @@ TODO:
 -	theme loader (default values)
 -	xml defining borders, background color polygon or image and its bounding area (clickable area)
 -	label blinking?
--	new control registration to xml
+*	new control registration to xml
 
 Controls API Fix:
 + 	Button

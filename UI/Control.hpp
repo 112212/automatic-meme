@@ -40,7 +40,12 @@ struct Rect : Point {
 };
 Rect getRect( int x, int y, int w, int h );
 
-
+struct Anchor {
+	Point coord;
+	int x,y;
+	float W,w,H,h;
+	float sW,sH;
+};
 
 // #define SSTR( x ) dynamic_cast< std::ostringstream & >( ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -101,6 +106,7 @@ class Control {
 		bool interactible;
 		std::string id;
 		std::vector< std::list< std::function<void(Control*)> > > subscribers;
+		Anchor anchor;
 		
 		// compiler screams ambiguous for this, so had to add _
 		void _updateCache(CacheUpdateFlag flag);
@@ -158,6 +164,11 @@ class Control {
 		const Rect& GetRect( ) { return m_rect; } 
 		void SetRect( int x, int y, int w, int h );
 		void SetPosition( int x, int y ) { SetRect(x, y, m_rect.w, m_rect.h); }
+		
+		void SetAnchor( float W, float w, int x, float H, float h, int y );
+		void SetAnchor( const Anchor& anchor );
+		const Anchor& GetAnchor();
+		void ApplyAnchor();
 		
 		controlType GetType() { return type; }
 		

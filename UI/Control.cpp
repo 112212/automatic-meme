@@ -137,6 +137,21 @@ void Control::SetRect( Rect r ) {
 	SetRect(r.x, r.y, r.w, r.h);
 }
 
+void Control::ApplyAnchor() {
+	
+}
+void Control::SetAnchor( float W, float w, int x, float H, float h, int y ) {
+	this->anchor = (Anchor){ .coord = anchor.coord, .x = x, .y = y, .W = W, .w = w, .H = H, .h = h  };
+}
+
+void Control::SetAnchor( const Anchor& anchor ) {
+	this->anchor = anchor;
+}
+const Anchor& Control::GetAnchor() {
+	return anchor;
+}
+
+
 // make these virtuals optional
 void Control::OnMouseMove( int mX, int mY, bool mouseState ) {}
 void Control::OnMouseDown( int mX, int mY ) {}
@@ -192,7 +207,7 @@ void Control::SetStyle(std::string& style, std::string& value) {
 					SetRect(c[0],c[1],c[2],c[3]);
 			}
 		_case("visible"):
-			SetVisible(value=="true");
+			SetVisible(value=="true"); break;
 		default:
 			OnSetStyle(style, value);
 	}

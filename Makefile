@@ -110,6 +110,6 @@ dirs:
 	@mkdir -p $(build)/UI/controls/SFML
 	
 $(build)/%.o: %.cpp
-	g++ -c $< -o $@ -std=c++11 $(flags) $(defs) $(inc)
+	g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc)
 
 

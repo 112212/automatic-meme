@@ -19,6 +19,7 @@ struct cache_entry {
 };
 
 
+
 class ControlManager {
 	private:
 		int next_z_index;

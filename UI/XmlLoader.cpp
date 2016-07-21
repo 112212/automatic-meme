@@ -33,9 +33,7 @@ namespace XmlLoader {
 		LoadXml(engine, f);
 		f.close();
 	}
-	#define PUT_CONTROL \
-		if(engine) engine->AddControl(control); \
-		else widget->AddControl(control);
+	
 	
 	
 	void processListBoxItems(ListBox* lb, xml_node<>* node) {
@@ -47,6 +45,17 @@ namespace XmlLoader {
 		for(xml_node<>* n = node->first_node("item"); n; n=n->next_sibling()) {
 			lb->AddItem(n->value());
 		}
+	}
+	
+	std::map<std::string, std::function<Control*()>> m_extended_tags; 
+	void RegisterControl(std::string tag, std::function<Control*()> control_constructor) {
+		if(m_extended_tags.find(tag) != m_extended_tags.end()) return;
+		m_extended_tags[tag] = control_constructor;
+	}
+	Control* tryExtendedTags(const char* tag) {
+		auto it = m_extended_tags.find(tag);
+		if(it != m_extended_tags.end()) return it->second();
+		return 0;
 	}
 	
 	Control* createControlByXmlTag(const char* tag) {
@@ -73,10 +82,14 @@ namespace XmlLoader {
 			TAGTYPE("widgetmover", WidgetMover);
 			TAGTYPE("checkbox", CheckBox);
 			TAGTYPE("gridcontainer", GridContainer);
-			default: return 0;
+			default: return tryExtendedTags(tag);
 		}
 		return control;
 	}
+	
+	#define PUT_CONTROL \
+		if(engine) engine->AddControl(control); \
+		else widget->AddControl(control);
 	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node) {
 		Control* control = nullptr;
 		for(; node; node = node->next_sibling()) {
