@@ -7,7 +7,7 @@
 
 namespace ng {
 Control::Control() : id("0"), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
-interactible(true), visible(true) {
+interactible(true), visible(true), anchor({{0,0},0}) {
 	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
 }
 
@@ -137,11 +137,8 @@ void Control::SetRect( Rect r ) {
 	SetRect(r.x, r.y, r.w, r.h);
 }
 
-void Control::ApplyAnchor() {
-	
-}
-void Control::SetAnchor( float W, float w, int x, float H, float h, int y ) {
-	this->anchor = (Anchor){ .coord = anchor.coord, .x = x, .y = y, .W = W, .w = w, .H = H, .h = h  };
+void Control::SetAnchor( float W, float w, float x, float H, float h, float y ) {
+	this->anchor = (Anchor){ .coord = anchor.coord, .x = x, .y = y, .W = W, .w = w, .H = H, .h = h };
 }
 
 void Control::SetAnchor( const Anchor& anchor ) {
@@ -173,6 +170,9 @@ void Control::OnLostControl() {}
 void Control::OnMWheel( int updown ) {}
 bool Control::customBoundary( int x, int y ) {}
 
+Control* Control::Clone() {
+	return new Control;
+}
 
 void Control::SetStyle(std::string& style, std::string& value) {
 	const Rect& r = GetRect();
@@ -215,4 +215,30 @@ void Control::SetStyle(std::string& style, std::string& value) {
 }
 
 void Control::STYLE_FUNC(value) {}
+
+Anchor& Anchor::operator+=(const Anchor& b) {
+		W += b.W;
+		w += b.w;
+		x += b.x;
+		
+		H += b.H;
+		h += b.h;
+		y += b.y;
+		
+		isrelative = isrelative ^ b.isrelative;
+		ax = b.ax;
+		ay = b.ay;
+		
+		return *this;
 }
+
+std::ostream& operator<< (std::ostream& stream, const Anchor& a) {
+	return stream << a.W << ", " << a.w << ", " << a.x << " ; " <<
+				a.H << ", " << a.h << ", " << a.y << " ; " <<
+				a.sW<< "+" << a.sx << ", " << a.sH << "+" << a.sy << " ; (" << a.coord.x << ", " << a.coord.y << ") adv (" << a.ax << ", " << a.ay << ")" << endl;
+}
+
+
+}
+
+

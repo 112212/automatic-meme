@@ -1,46 +1,49 @@
 <gui>
-	<button id="2" rect="50,50,100,50" value="nikola" visible="true"/>
 	
-	<container id="100" rect="100,250,200,200" backgroundcolor="#ff200000">
-		<container id="20" rect="0,0,150,150">
-			<button id="5" rect="0,0,200,50" value="1"/>
-			<button id="55" rect="0,20,200,50" value="3"></button>
-			<button id="56" rect="0,105,200,50" value="4"></button>
+	<anchor pos="R,T" relative="true">
+		<button id="2" rect="0,0,100,50" value="nikola" visible="true"/>
+		
+		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000">
+			<container id="20" rect="0,0,150,150">
+				<button id="5" rect="0,0,200,50" value="1"/>
+				<button id="55" rect="0,20,200,50" value="3"></button>
+				<button id="56" rect="0,105,200,50" value="4"></button>
+			</container>
+			<widgetmover rect="180,0,10,10"/>
 		</container>
-		<widgetmover rect="180,0,10,10"/>
-	</container>
-	<combobox rect="350,300,150,30">
-		<item>heheheeh</item>
-		<item>hghfghf</item>
-		<item>jhgjghjhg</item>
-		<item>kjhkhj</item>
-		<item>ljklj</item>
-		<item>ytrytr</item>
-		<item>rwerew</item>
-	</combobox>
-	<textbox rect="350,350,150,30"></textbox>
-	<label rect="50,150,200,100" value="hehehe hahaha
-lololo cool"></label>
-	<widget rect="500,150,100,200">
-		<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
-		<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>
-		<radiobutton rect="0,120,100,30" value="cool"></radiobutton>
-		<widgetmover rect="0,0,100,20" zindex="50"></widgetmover>
-	</widget>
-	
-	<listbox id="200" rect="500,400,200,200">
-		<item>hehehehe</item>
-		<item>hghgfhf</item>
-		<item>jhjhg</item>
-		<item>343</item>
-		<item>564645</item>
-		<item>777</item>
-	</listbox>
-	
-	<trackbar rect="150,500,200,30" id="549" range="100,300" value="150"></trackbar>
-	<trackbar rect="60,530,30,100" id="546"   orientation="vertical" slidersize="15" show_number="true"></trackbar>
-	<scrollbar rect="200,150,300,50" vertical="false" id="20" orientation="vertical"></scrollbar>
-	<checkbox rect="250,50,100,30" value="hehehe"></checkbox>
-	<checkbox rect="250,100,100,30" value="hahaha" checked="true"></checkbox>
-	<canvas rect="580,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000"></canvas>
+		<combobox rect="0,0,-5%+150,30">
+			<item>heheheeh</item>
+			<item>hghfghf</item>
+			<item>jhgjghjhg</item>
+			<item>kjhkhj</item>
+			<item>ljklj</item>
+			<item>ytrytr</item>
+			<item>rwerew</item>
+		</combobox>
+		<textbox rect="0,0,150,30"></textbox>
+		<label rect="0,0,150,100" value="hehehe hahaha
+	lololo cool"></label>
+		<widget rect="0,150,100,200">
+			<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
+			<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>
+			<radiobutton rect="0,120,100,30" value="cool"></radiobutton>
+			<widgetmover rect="0,0,100,20" zindex="50"></widgetmover>
+		</widget>
+		
+		<listbox id="200" rect="0,0,200,200">
+			<item>hehehehe</item>
+			<item>hghgfhf</item>
+			<item>jhjhg</item>
+			<item>343</item>
+			<item>564645</item>
+			<item>777</item>
+		</listbox>
+		
+		<trackbar rect="0,0,200,30" id="549" range="100,300" value="150"></trackbar>
+		<trackbar rect="0,0,30,100" id="546"   orientation="vertical" slidersize="15" show_number="true"></trackbar>
+		<scrollbar rect="0,0,300,50" vertical="false" id="20" orientation="vertical"></scrollbar>
+		<checkbox rect="0,0,100,30" value="hehehe"></checkbox>
+		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
+		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000"></canvas>
+	</anchor>
 </gui>

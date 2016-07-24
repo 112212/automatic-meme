@@ -16,9 +16,8 @@
 #define SELECTION_MARK
 
 #include "common/debug.hpp"
-#include <sstream>
-#include <queue>
-#include <list>
+#include <vector>
+#include <ostream>
 
 namespace ng {
 struct Point {
@@ -30,6 +29,7 @@ struct Point {
 	};
 	Point() {}
 	Point(int _x, int _y) : x(_x),y(_y) {}
+	bool operator< (const Point& b) const { return x < b.x || (x == b.x && y < b.y); }
 };
 
 struct Rect : Point {
@@ -42,9 +42,14 @@ Rect getRect( int x, int y, int w, int h );
 
 struct Anchor {
 	Point coord;
-	int x,y;
+	float x,y;
 	float W,w,H,h;
 	float sW,sH;
+	float sx,sy;
+	bool isrelative;
+	int ax,ay;
+	Anchor& operator+=(const Anchor& b);
+	friend std::ostream& operator<< (std::ostream& stream, const Anchor& anchor);
 };
 
 // #define SSTR( x ) dynamic_cast< std::ostringstream & >( ( std::ostringstream() << std::dec << x ) ).str()
@@ -105,7 +110,7 @@ class Control {
 		bool visible;
 		bool interactible;
 		std::string id;
-		std::vector< std::list< std::function<void(Control*)> > > subscribers;
+		std::vector< std::vector< std::function<void(Control*)> > > subscribers;
 		Anchor anchor;
 		
 		// compiler screams ambiguous for this, so had to add _
@@ -160,15 +165,15 @@ class Control {
 	public:
 		Control();
 		~Control();
+		virtual Control* Clone();
 		void SetRect( Rect r );
 		const Rect& GetRect( ) { return m_rect; } 
 		void SetRect( int x, int y, int w, int h );
 		void SetPosition( int x, int y ) { SetRect(x, y, m_rect.w, m_rect.h); }
 		
-		void SetAnchor( float W, float w, int x, float H, float h, int y );
+		void SetAnchor( float W, float w, float x, float H, float h, float y );
 		void SetAnchor( const Anchor& anchor );
 		const Anchor& GetAnchor();
-		void ApplyAnchor();
 		
 		controlType GetType() { return type; }
 		

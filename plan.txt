@@ -151,11 +151,12 @@ TODO:
 -	console style textbox (separate class inheriting textbox?)
 - 	format text with colors on Drawing::
 - 	copy & paste for textbox
-- 	anchoring (group anchor, single element anchor)
++ 	anchoring (group anchor, single element anchor)
 -	theme loader (default values)
 -	xml defining borders, background color polygon or image and its bounding area (clickable area)
 -	label blinking?
 *	new control registration to xml
+-	resizable widget
 
 Controls API Fix:
 + 	Button

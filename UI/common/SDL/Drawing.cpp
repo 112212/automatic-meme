@@ -8,15 +8,11 @@
 #include <glm/glm.hpp>
 
 namespace ng {
-
-
-
 namespace Drawing {
 
 	// shaders
 	static unsigned int readShader(std::string shaderStr, unsigned int shaderType)
 	{
-
 		const std::string &shaderString = shaderStr;
 		const char *shaderSource = shaderString.c_str();
 		GLint shaderLength = shaderString.size();

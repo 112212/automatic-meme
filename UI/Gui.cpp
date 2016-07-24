@@ -7,7 +7,7 @@
 namespace ng {
 	
 
-GuiEngine::GuiEngine() {
+GuiEngine::GuiEngine() : ControlManager(0) {
 	#ifdef USE_SFML
 		if( !Fonts::FontExists( "default" ) ) {
 			Fonts::LoadFont( DEFAULT_FONT, "default" );
@@ -605,6 +605,8 @@ void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<vo
 
 void GuiEngine::OnCleanup() {
 }
+
+// ------------------------------------------------------------------------------
 
 #ifdef USE_SFML
 	void GuiEngine::draw(sf::RenderTarget& target, sf::RenderStates states) const {

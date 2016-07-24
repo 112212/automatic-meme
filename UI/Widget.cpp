@@ -2,7 +2,7 @@
 #include "Gui.hpp"
 
 namespace ng {
-Widget::Widget() : Control(), 
+Widget::Widget() : Control(), ControlManager(this), 
 	selected_control(0), intercept_mask(0) {
 	setType(TYPE_WIDGET);
 	isWidget = true;

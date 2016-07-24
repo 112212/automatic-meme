@@ -124,6 +124,8 @@ int main() {
 	Drawing::SetResolution( sizeX, sizeY );
 	Drawing::Init();
 	
+	gui.ApplyAnchoring();
+	
 	glViewport(0, 0, sizeX, sizeY);
 
 	SDL_GL_SetSwapInterval(0);

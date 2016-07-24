@@ -1,6 +1,9 @@
 #include "ControlManager.hpp"
 #include "../Widget.hpp"
-
+#include <map>
+#include <algorithm>
+#include <list>
+#include "SDL/Drawing.hpp"
 namespace ng {
 #define CACHE_SPACING 5
 
@@ -14,7 +17,7 @@ namespace ng {
 	  control->m_rect, \
 	  control }
 	  
-ControlManager::ControlManager() : next_z_index(0) {
+ControlManager::ControlManager(Control* c) : next_z_index(0), this_control(c) {
 }
 
 ControlManager::~ControlManager() {
@@ -176,4 +179,79 @@ void ControlManager::removeControlFromCache(Control* control) {
 		}
 	}
 }
+
+void ControlManager::ApplyAnchoring() {
+	std::map<Point,std::list<Control*>> grouping;
+	int wres, hres;
+	if(this_control) {
+		const Rect &r = this_control->GetRect();
+		wres = r.x;
+		hres = r.y;
+	} else {
+		Drawing::GetResolution(wres, hres);	
+	}
+	for(Control* control : controls) {
+		const Anchor &a = control->GetAnchor();
+		const Rect &r = control->GetRect();
+		const Point &coord = a.coord;
+		control->SetRect( 0, 0, a.sx == 0 && a.sW == 0 ? r.w : wres * a.sW + a.sx, a.sy == 0 && a.sH == 0 ? r.h : hres * a.sH + a.sy );
+		Point p(a.W * wres, 
+				a.H * hres);
+		if(a.isrelative) {
+			grouping[p].push_back(control);
+		} else {
+			control->SetPosition(p.x + a.w * r.w + a.x, p.y + a.h * r.h + a.y);
+		}
+		
+		if(control->IsWidget()) reinterpret_cast<Widget*>(control)->ApplyAnchoring();
+	}
+	
+	for(auto &kv : grouping) {
+		const Point &pt = kv.first;
+		std::list<Control*> &l = kv.second;
+		
+		l.sort([](Control* a, Control* b) -> bool {
+			const Point &p1 = a->GetAnchor().coord;
+			const Point &p2 = b->GetAnchor().coord;
+			return p1.x < p2.x || (p1.x == p2.x && p1.x < p2.x);
+		});
+		
+		int lastx = 0, lasty = 0;
+		int min_x = pt.x, min_y = pt.y;
+		int max_x = min_x, max_y = min_y;
+		
+		for(Control* c : l) {
+			const Anchor& a = c->GetAnchor();
+			const Rect &r = c->GetRect();
+			const Point &p = a.coord;
+			
+			if(p.y != lasty || (
+			(a.ax >= 0 && max_x + a.x + r.w > wres) ||
+			(a.ax < 0 && max_x - a.x - r.w < 0))) {
+				lasty = p.y;
+				lastx = 0;
+				max_x = min_x;
+				min_y = max_y;
+			}
+			int yc = (a.ay >= 0) ? 0 : (- r.h - a.y);
+			if(a.ax >= 0) {
+				c->SetPosition(max_x + a.x, min_y + yc);
+				max_x += a.x + r.w;
+			} else {
+				c->SetPosition(max_x - a.x - r.w, min_y + yc);
+				max_x -= a.x + r.w;
+			}
+				
+			
+			if(a.ay >= 0) {
+				max_y = std::max<int>(min_y + r.h, max_y);
+			} else {
+				max_y = std::min<int>(min_y - r.h, max_y);
+			}
+			lastx++;
+		}
+	}
 }
+
+}
+

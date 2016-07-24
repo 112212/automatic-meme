@@ -24,7 +24,9 @@ class ControlManager {
 	private:
 		int next_z_index;
 		int binary_search(int z_index);
-		void rescale_z_indices(int spaci);
+		void rescale_z_indices(int spacing);
+		Control* this_control;
+		
 	protected:
 		std::vector<Control*> controls;
 		std::vector<cache_entry> cache;
@@ -32,12 +34,12 @@ class ControlManager {
 		void updateCache(Control* control, CacheUpdateFlag flag);
 		void setZIndex(Control* control, int new_z_index);
 		void addControlToCache(Control* control);
-		
 		void removeControlFromCache(Control* control);
 	public:
 		inline const std::vector<Control*> GetControls() { return controls; }
+		void ApplyAnchoring();
 		
-		ControlManager();
+		ControlManager(Control* c);
 		~ControlManager();
 };
 }
