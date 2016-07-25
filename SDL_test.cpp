@@ -56,7 +56,7 @@ int main() {
 	
 	int sizeX = 1280;
 	int sizeY = 768;
-	SDL_Window* win = SDL_CreateWindow("gui sdl test", 100, 100, sizeX, sizeY, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+	SDL_Window* win = SDL_CreateWindow("gui sdl test", 100, 100, sizeX, sizeY, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if(!win) {
 		cout << "creating window error\n";
 		SDL_Quit();
@@ -126,7 +126,6 @@ int main() {
 	
 	gui.ApplyAnchoring();
 	
-	glViewport(0, 0, sizeX, sizeY);
 
 	SDL_GL_SetSwapInterval(0);
 	
@@ -142,6 +141,8 @@ int main() {
 			}
 			gui.OnEvent(e);
 		}
+		Drawing::GetResolution(sizeX, sizeY);
+		glViewport(0, 0, sizeX, sizeY);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         

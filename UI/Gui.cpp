@@ -1,6 +1,10 @@
 #include "Gui.hpp"
 #include "Widget.hpp"
 
+#ifdef USE_SDL
+	#include "common/SDL/Drawing.hpp"
+#endif
+
 #define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSans.ttf"
 
 #define MAX_BASIC_EVENTS 6
@@ -724,6 +728,13 @@ void GuiEngine::OnCleanup() {
 			case SDL_MOUSEWHEEL:
 				OnMWheel( event.wheel.y );
 				break;
+			case SDL_WINDOWEVENT:
+				switch(event.window.event) {
+					case SDL_WINDOWEVENT_RESIZED:
+						Drawing::SetResolution(event.window.data1, event.window.data2);
+						ApplyAnchoring();
+						break;
+				}
 		}
 	}
 #endif

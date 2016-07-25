@@ -219,12 +219,10 @@ void ControlManager::ApplyAnchoring() {
 		int lastx = 0, lasty = 0;
 		int min_x = pt.x, min_y = pt.y;
 		int max_x = min_x, max_y = min_y;
-		
 		for(Control* c : l) {
 			const Anchor& a = c->GetAnchor();
 			const Rect &r = c->GetRect();
 			const Point &p = a.coord;
-			
 			if(p.y != lasty || (
 			(a.ax >= 0 && max_x + a.x + r.w > wres) ||
 			(a.ax < 0 && max_x - a.x - r.w < 0))) {
@@ -233,7 +231,7 @@ void ControlManager::ApplyAnchoring() {
 				max_x = min_x;
 				min_y = max_y;
 			}
-			int yc = (a.ay >= 0) ? 0 : (- r.h - a.y);
+			int yc = (a.ay >= 0) ? a.y : (- r.h - a.y);
 			if(a.ax >= 0) {
 				c->SetPosition(max_x + a.x, min_y + yc);
 				max_x += a.x + r.w;

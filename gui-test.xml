@@ -1,6 +1,6 @@
 <gui>
 	
-	<anchor pos="R,T" relative="true">
+	<anchor pos="rL+50,T+100">
 		<button id="2" rect="0,0,100,50" value="nikola" visible="true"/>
 		
 		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000">

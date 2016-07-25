@@ -204,7 +204,7 @@ namespace XmlLoader {
 						}
 					}
 				}
-				anchor1.isrelative = relative;
+				anchor1.isrelative += relative;
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
 				
 			} else if(!strcmp(node->name(), "theme")) {
