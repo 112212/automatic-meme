@@ -21,8 +21,12 @@
 			<item>rwerew</item>
 		</combobox>
 		<textbox rect="0,0,150,30"></textbox>
-		<label rect="0,0,150,100" value="hehehe hahaha
-	lololo cool"></label>
+		<label rect="0,0,150,60" value="
+	test1
+test2
+test3
+hehehe
+fddgdf"></label>
 		<widget rect="0,150,100,200">
 			<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
 			<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>

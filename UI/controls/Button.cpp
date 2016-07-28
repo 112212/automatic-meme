@@ -131,6 +131,7 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 	}
 	
 	void Button::onPositionChange() {
+		need_update = true;
 	}
 
 #endif

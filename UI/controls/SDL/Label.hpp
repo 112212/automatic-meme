@@ -25,7 +25,6 @@
 namespace ng {
 class Label : public Control {
 	private:
-		//const char* m_text;
 		std::string m_text;
 		
 		struct TextLine{
@@ -36,7 +35,6 @@ class Label : public Control {
 		std::vector<TextLine> text_lines;
 		
 		TTF_Font* m_font;
-		const static int line_height;
 		void STYLE_FUNC(value);
 		
 		void Render( SDL_Rect pos, bool isSelected );
@@ -44,8 +42,8 @@ class Label : public Control {
 		Label();
 		~Label();
 
-		void SetText( const char* text );
-		void SetFont( const char* text, int size );
+		void SetText( std::string text );
+		void SetFont( std::string text, int size );
 };
 }
 #endif

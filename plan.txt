@@ -157,19 +157,7 @@ TODO:
 -	label blinking?
 *	new control registration to xml
 -	resizable widget
-
-Controls API Fix:
-+ 	Button
-+ 	ComboBox
-* 	Container
-* 	GridContainer
-+ 	Label
-+ 	ListBox
-+ 	RadioButton
-+ 	ScrollBar
-+ 	TabContainer
-+ 	TextBox
-+ 	TrackBar
+-	text size for label
 
 SDL port of controls:
 + 	Button

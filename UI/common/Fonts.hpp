@@ -40,7 +40,8 @@ class Fonts {
 			static TTF_Font* LoadFont( std::string full_path_name, std::string short_name, int font_size );
 			static bool FontExists( std::string short_name, int font_size );
 			static int getMaxText( TTF_Font* font, const std::string &text, int width );
-			static int getMaxTextBw(TTF_Font* font, const std::string &text, int width );
+			static int getMaxTextBw( TTF_Font* font, const std::string &text, int width );
+			// static int get
 		#endif
 		
 };

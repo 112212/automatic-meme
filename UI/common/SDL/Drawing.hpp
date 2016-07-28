@@ -19,6 +19,7 @@ namespace Drawing {
 	unsigned int GetTextureFromSurface(SDL_Surface* surface, unsigned int textureID);
 	void DeleteTexture(unsigned int textureID);
 	void TexRect(int x, int y, int w, int h, unsigned int texture);
+
 }
 
 }

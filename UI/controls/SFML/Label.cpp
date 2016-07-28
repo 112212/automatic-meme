@@ -62,7 +62,7 @@ void Label::SetText( const char* text ) {
 		}
 		sum += g.advance;
 	}
-	txt.setStri( m_text.substr( last_ind, m_texts.size() - last_ind ) );
+	txt.setString( m_text.substr( last_ind, m_texts.size() - last_ind ) );
 	txt.setFont( fnt );
 	txt.setCharacterSize( characterSize );
 	txt.setPosition( m_rect.x, m_rect.y + line*line_height );

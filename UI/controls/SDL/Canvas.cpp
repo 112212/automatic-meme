@@ -175,8 +175,10 @@ void Canvas::onPositionChange() {
 		G=0x0000ff00,
 		B=0x000000ff,
 		A=0xff000000;
-	m_drawing = SDL_CreateRGBSurface(0,m_rect.w,m_rect.h,32,R,G,B,A );
-	maketex = true;
-	SDL_FillRect( m_drawing, NULL, 0 );
+	if(!m_drawing) {
+		m_drawing = SDL_CreateRGBSurface(0,m_rect.w,m_rect.h,32,R,G,B,A );
+		maketex = true;
+		SDL_FillRect( m_drawing, NULL, 0 );
+	}
 }
 }
