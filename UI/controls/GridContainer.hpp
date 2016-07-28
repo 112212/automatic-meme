@@ -33,7 +33,7 @@ class GridContainer : public Widget {
 		#ifdef USE_SFML
 		void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
-		void Render( SDL_Renderer* ren, SDL_Rect position, bool isSelected );
+		void Render( Point position, bool isSelected );
 		#endif
 		
 		

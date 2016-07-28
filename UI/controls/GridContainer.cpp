@@ -39,7 +39,7 @@ int GridContainer::getPointedControl( int x, int y ) {
 		m_rectShape.setSize( sf::Vector2f( m_rect.w, m_rect.h ) );
 	}
 #elif USE_SDL
-	void GridContainer::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
+	void GridContainer::Render( Point pos, bool isSelected ) {
 		// rectangleColor(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.x+m_rect.w+pos.x, m_rect.y+m_rect.h+pos.y, 0xffffffff);
 		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, 0xffffffff);
 		RenderWidget(pos,isSelected);

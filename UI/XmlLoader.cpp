@@ -146,7 +146,14 @@ namespace XmlLoader {
 					break;
 				case 'T': break;
 				case 'U': break;
-				
+				case 'M':
+					if(part == Part::x) {
+						a.w = -0.5;
+						a.W = 0.5;
+					} else if(part == Part::y) {
+						a.h = -0.5;
+						a.W = 0.5;
+					}
 				case 'D':
 				case 'B':
 					a.ay = -1;
@@ -204,7 +211,7 @@ namespace XmlLoader {
 						}
 					}
 				}
-				anchor1.isrelative += relative;
+				anchor1.isrelative ^= relative;
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
 				
 			} else if(!strcmp(node->name(), "theme")) {

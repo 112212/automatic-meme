@@ -118,13 +118,12 @@ void Widget::RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool i
 	#endif
 }
 #elif USE_SDL
-void Widget::Render( SDL_Rect position, bool isSelected ) {
+void Widget::Render( Point position, bool isSelected ) {
 	RenderWidget(position,isSelected);
 }
-void Widget::RenderWidget( SDL_Rect position, bool isSelected ) {
+void Widget::RenderWidget( Point position, bool isSelected ) {
 	
-	position.x += m_rect.x + offset.x;
-	position.y += m_rect.y + offset.y;
+	position = position.Offset(m_rect).Offset(offset);
 	
 	for(auto &ca : cache) {
 		if(ca.visible) {

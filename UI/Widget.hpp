@@ -55,7 +55,7 @@ class Widget : public ControlManager, public Control {
 		#ifdef USE_SFML
 			virtual void Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
-			virtual void Render(  SDL_Rect position, bool isSelected );
+			virtual void Render( Point position, bool isSelected );
 		#endif
 		
 		virtual void AddControl( Control* control );
@@ -64,7 +64,7 @@ class Widget : public ControlManager, public Control {
 		#ifdef USE_SFML
 			void RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected);
 		#elif USE_SDL
-			void RenderWidget( SDL_Rect position, bool isSelected );
+			void RenderWidget( Point position, bool isSelected );
 		#endif
 		void SetOffset(int x, int y);
 		const Point& GetOffset() { return offset; }

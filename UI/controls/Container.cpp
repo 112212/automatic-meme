@@ -144,7 +144,7 @@ Rect getIntersectingRectangle(Rect &a, Rect &b) {
 }
 #endif
 
-void Container::Render(  SDL_Rect pos, bool isSelected ) {
+void Container::Render( Point pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	
@@ -220,7 +220,7 @@ void Container::Render(  SDL_Rect pos, bool isSelected ) {
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 #endif
 	Drawing::FillRect(x, y, w, h, background_color);
-	innerWidget->Render({x,y},isSelected);
+	innerWidget->Render(Point(x,y),isSelected);
 	
 	
 #ifdef CLIP_METHOD_STENCIL

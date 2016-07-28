@@ -9,61 +9,47 @@ namespace ng {
 class TextBox : public Control {
 	private:
 	
-		// first.middle.last
 		
-		//########## TODO: REMOVE #####
-		SDL_Surface* m_surf_first;
-		SDL_Surface* m_surf_middle;
-		SDL_Surface* m_surf_last;
-		Uint32 tex_first;
-		Uint32 tex_middle;
-		Uint32 tex_last;
-		std::string m_text;
-		
-		Point m_text_loc;
-		Point m_text_selection;
-		
-		int m_last_sel;
-		int m_cursor_sel;
-		int m_cursor_pt;
-		int m_first_index;
-		int m_maxtext;
-		
-		void updateSelection();
-		void fixSelection();
-		int getSelectionPoint( int &mX );
-		int getCharPos( int num );
-		void updateCursor();
-		int getMaxText( );
-		int getMaxTextBw( int indx );
-		void updateMaxText();
-		void setFirstIndex( int index );
-		// static SDL_Cursor* m_cursor;
-		//#######################3
-		
-		//~~~~ TODO: implement
 		struct TextLine {
 			unsigned int tex;
-			SDL_Surface* surf;
+			int w,h;
 			std::string text;
+			TextLine() : tex(0xffffffff) {}
 		};
 		std::vector<TextLine> m_lines;
 		
 		// position of window
 		Point m_position;
-		// anchor for selection (no selection if -1,-1)
+		// anchor for selection (no selection if x,y = -1,-1)
 		Point m_anchor;
-		// blinking cursor
+		
 		Point m_cursor;
+		int m_line_max;
+		int m_cursor_max_x;
+		int m_cursor_blink_counter;
+		int m_cursor_blinking_rate;
+		
+		int m_text_max;
+		int m_lines_max;
+		int m_line_height;
+		
+		
+		void updatePosition();
+		void onFontChange();
+		void updateTexture(TextLine&,bool = false);
+		void sortPoints(Point &p1, Point &p2);
+		void deleteSelection();
 		
 		// config
-		bool isMultiline;
-		bool parseTags;
-		bool copyPasteRemoveTags; // remove color tags ( ^r red color ^w white again ^5 some color )
-		bool terminalMode;
-		//~~~~
+		bool m_multiline;
+		
+		// terminal mode
+		bool m_terminal_mode;
+		int m_terminal_max_messages;
+		int m_ring_head;
 		
 		TTF_Font* m_font;
+		
 		bool m_mousedown;
 
 		void onPositionChange();
@@ -81,7 +67,7 @@ class TextBox : public Control {
 		~TextBox();
 		
 		//
-		virtual void Render( SDL_Rect position, bool isSelected );
+		virtual void Render( Point position, bool isSelected );
 		virtual void OnMouseDown( int mX, int mY );
 		virtual void OnMouseUp( int mX, int mY );
 		virtual void OnMouseMove( int mX, int mY, bool mouseState );
@@ -95,8 +81,16 @@ class TextBox : public Control {
 		std::string GetText();
 		std::string GetSelectedText();
 		
+		void PutTextAtCursor(std::string text);
+		
 		void SetSelection( Point start, Point end );
 		void SetCursor( SDL_Cursor* curs );
+		void SetMultilineMode( bool tf );
+		void SetCursorBlinkingRate( int rate );
+		
+		void SetTerminalMode( bool tf );
+		void SetTerminalHistoryBuffer(int n_messages);
+		void TerminalAddMessage( std::string msg );
 };
 }
 #endif

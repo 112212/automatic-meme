@@ -42,7 +42,7 @@ class TrackBar : public Control {
 		TrackBar();
 		~TrackBar();
 		
-		void Render( SDL_Rect pos, bool isSelected );
+		void Render( Point pos, bool isSelected );
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY );
 		void OnLostFocus();

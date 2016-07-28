@@ -222,10 +222,10 @@ namespace Drawing {
 			x2, -y1,
 		};
 
-		float cr = (float)((color >> 24) & 0xff) / 255;
-		float cg = (float)((color >> 16) & 0xff) / 255;
-		float cb = (float)((color >> 8) & 0xff) / 255;
-		float ca = (float)(color & 0xff) / 255;
+		float cr = (float)((color >> 24) & 0xff) / 255.0f;
+		float cg = (float)((color >> 16) & 0xff) / 255.0f;
+		float cb = (float)((color >> 8) & 0xff) / 255.0f;
+		float ca = (float)(color & 0xff) / 255.0f;
 
 		GLfloat colors[] = {
 			 cr, cg, cb,

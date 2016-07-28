@@ -536,7 +536,7 @@ void ComboBox::openBox() {
 		}
 	}
 	
-	void ComboBox::Render( SDL_Rect pos, bool isSelected ) {
+	void ComboBox::Render( Point pos, bool isSelected ) {
 	
 		#ifdef SELECTION_MARK
 			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );

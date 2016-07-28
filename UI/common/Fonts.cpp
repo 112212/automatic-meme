@@ -80,28 +80,52 @@ std::map< std::string, std::string > Fonts::fonts_path;
 	
 	int Fonts::getMaxText( TTF_Font* font, const std::string &text, int width ) {
 		
-		int dummy, advance;
+		int advance;
 		int len = text.length();
 		int sum=0;
 		for(int i=0; i < len; i++) {
-			TTF_GlyphMetrics( font, text[i], &dummy, &dummy, &dummy, &dummy, &advance);
-			if( sum > width-25 ) {
-				return i+1;
+			TTF_GlyphMetrics( font, text[i], 0, 0, 0, 0, &advance);
+			if( sum > width ) {
+				return i;
 			}
 			sum += advance;
 		}
 		return len;
 	}
+	
+	int Fonts::getMaxTextRep( TTF_Font* font, char c, int width ) {
+		
+		int advance;
+		int sum=0;
+		int i=0;
+		do {
+			TTF_GlyphMetrics( font, c, 0, 0, 0, 0, &advance);
+			sum += advance;
+			i++;
+		} while( sum < width );
+				
+		return i+1;
+	}
+	
+	int Fonts::getTextSize( TTF_Font* font, const std::string &text ) {
+		int wx = 0;
+		int advance;
+		for(auto it = text.begin(); it != text.end(); it++) {
+			TTF_GlyphMetrics( font, *it, 0, 0, 0, 0, &advance);
+			wx += advance;
+		}
+		return wx;
+	}
 
 
 	int Fonts::getMaxTextBw(TTF_Font* font, const std::string &text, int width) {
 		
-		int dummy, advance;
+		int advance;
 		int len = text.length();
 		int sum=0;
 		for(int i=len-1; i >= 0; i--) {
-			TTF_GlyphMetrics( font, text[i], &dummy, &dummy, &dummy, &dummy, &advance);
-			if( sum > width-25 ) {
+			TTF_GlyphMetrics( font, text[i], 0, 0, 0, 0, &advance);
+			if( sum > width ) {
 				return len-i;
 			}
 			sum += advance;

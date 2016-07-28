@@ -149,8 +149,9 @@ TODO:
 -	support for unicode in textbox
 - 	optional multiline textbox with scrollbars (like rich textbox)
 -	console style textbox (separate class inheriting textbox?)
+-	textbox text wrapping
 - 	format text with colors on Drawing::
-- 	copy & paste for textbox
++ 	copy & paste for textbox
 + 	anchoring (group anchor, single element anchor)
 -	theme loader (default values)
 -	xml defining borders, background color polygon or image and its bounding area (clickable area)

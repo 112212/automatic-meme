@@ -30,6 +30,7 @@ struct Point {
 	Point() {}
 	Point(int _x, int _y) : x(_x),y(_y) {}
 	bool operator< (const Point& b) const { return x < b.x || (x == b.x && y < b.y); }
+	Point Offset(const Point& r) { return Point(x+r.x, y+r.y); }
 };
 
 struct Rect : Point {
@@ -37,6 +38,7 @@ struct Rect : Point {
 	int h;
 	Rect() {}
 	Rect(int _x, int _y, int _w, int _h) : Point(_x,_y),w(_w),h(_h) {}
+	
 };
 Rect getRect( int x, int y, int w, int h );
 
@@ -149,7 +151,7 @@ class Control {
 			virtual void OnKeyDown( sf::Event::KeyEvent &sym );
 			virtual void OnKeyUp( sf::Event::KeyEvent &sym );
 		#elif USE_SDL
-			virtual void Render( SDL_Rect position, bool isSelected );
+			virtual void Render( Point position, bool isSelected );
 			virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
 		#endif

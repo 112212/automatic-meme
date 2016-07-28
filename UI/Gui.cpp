@@ -685,7 +685,7 @@ void GuiEngine::OnCleanup() {
 	}
 	void GuiEngine::Render() {
 		bool has_selected_control = false;
-		SDL_Rect pos = {0,0,0,0};
+		Rect pos(0,0,0,0);
 		for(auto &ca : cache) {
 			if(ca.visible) {
 				Control* const &c = ca.control;

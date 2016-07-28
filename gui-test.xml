@@ -20,7 +20,38 @@
 			<item>ytrytr</item>
 			<item>rwerew</item>
 		</combobox>
-		<textbox rect="0,0,150,30"></textbox>
+		<textbox id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
+Usually a server is a dedicated host that runs the game and is authoritative about world simulation, 
+game rules, and player input processing. A client is a player's computer connected to a game server. 
+The client and server communicate with each other by sending small data packets at a high frequency 
+
+(usually 20 to 30 packets per second). A client receives the current world state from the server and g
+enerates video and audio output based on these updates. The client also samples data from input devices 
+(keyboard, mouse, microphone, etc.) and sends these input samples back 
+to the server for further processing. Clients only communicate with the 
+game server and not between each other (like in a peer-to-peer 
+
+application). In contrast with a single player game, a multiplayer game 
+has to deal with a variety of new problems caused by packet-based 
+communication.  Network bandwidth is limited, so the server can't send 
+a new update packet to all clients for every single world change. 
+Instead, the server takes snapshots of the current world state at a 
+constant rate and broadcasts these snapshots to the clients. Network 
+
+packets take a certain amount of time to travel between the client and 
+the server (i.e. half the ping time). This means that the client time 
+is always a little bit behind the server time. Furthermore, client 
+input packets are also delayed on their way back, so the server is 
+processing temporally delayed user commands. In addition, each client 
+
+has a different network delay which varies over time due to other 
+background traffic and the client's framerate. These time differences 
+between server and client causes logical problems, becoming worse with 
+increasing network latencies. In fast-paced action games, even a delay 
+of a few milliseconds can cause a laggy gameplay feeling and make it 
+hard to hit other players or interact with moving objects. Besides 
+bandwidth limitations and network latencies, information can get lost 
+due to network packet loss. "></textbox>
 		<label rect="0,0,150,60" value="
 	test1
 test2

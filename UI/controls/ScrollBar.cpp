@@ -58,7 +58,7 @@ void ScrollBar::onPositionChange() {
 	updateSlider();
 }
 #elif USE_SDL
-void ScrollBar::Render( SDL_Rect pos, bool isSelected ) {
+void ScrollBar::Render( Point pos, bool isSelected ) {
 	#ifdef SELECTION_MARK
 		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
 	#else

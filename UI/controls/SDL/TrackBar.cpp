@@ -25,7 +25,7 @@ TrackBar::~TrackBar() {
 		SDL_FreeSurface( m_surf_num );
 }
 
-void TrackBar::Render( SDL_Rect pos, bool isSelected ) {
+void TrackBar::Render( Point pos, bool isSelected ) {
 	int x = m_rect.x + pos.x;
 	int y = m_rect.y + pos.y;
 	#ifdef SELECTION_MARK
