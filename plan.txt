@@ -147,10 +147,10 @@ TODO:
 + 	xml loader
 + 	OpenGL port of controls
 -	support for unicode in textbox
-- 	optional multiline textbox with scrollbars (like rich textbox)
--	console style textbox (separate class inheriting textbox?)
++ 	optional multiline textbox with scrollbars (like rich textbox)
+-	console style textbox (separate control)
 -	textbox text wrapping
-- 	format text with colors on Drawing::
+- 	colored text
 + 	copy & paste for textbox
 + 	anchoring (group anchor, single element anchor)
 -	theme loader (default values)
@@ -158,7 +158,8 @@ TODO:
 -	label blinking?
 *	new control registration to xml
 -	resizable widget
--	text size for label
++	setting font by parsing it
+-	implement default font directory for linux and windows and make it as search path for fonts
 
 SDL port of controls:
 + 	Button
@@ -189,15 +190,6 @@ OpenGL port of controls:
 + 	TrackBar
 
 TO FIX:
-
-Plan XML:
-	<gui>
-		<button id="1" background=""/>
-		<container>
-			<textbox id="5" rect="1,4,200,200"/>
-			<tabcontainer id="6" rect="1,5,700,200" style="background:45454;gfgdf:hgfhgf;"/>
-		</container>
-	</gui>
 
 
 hey, few notes: it would be good to set the size and color for the text

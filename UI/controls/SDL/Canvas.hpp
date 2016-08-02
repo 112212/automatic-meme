@@ -27,7 +27,7 @@ class Canvas : public Control {
 		bool display_grid;
 		bool maketex;
 		
-		void Render( SDL_Rect pos, bool isSelected );
+		void Render( Point pos, bool isSelected );
 		void OnMouseDown( int mX, int mY );
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseUp( int mX, int mY );

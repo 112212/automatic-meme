@@ -16,7 +16,7 @@ CheckBox::~CheckBox() {
 		delete[] m_text;
 }
 
-void CheckBox::Render(  SDL_Rect pos, bool isSelected ) {
+void CheckBox::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
@@ -107,6 +107,9 @@ void CheckBox::STYLE_FUNC(value) {
 			SetText(value.c_str());
 		_case("checked"):
 			SetValue( value == "true" );
+		_case("font"):
+			TTF_Font* fnt = Fonts::GetParsedFont( value );
+			if(fnt) m_font = fnt;
 	}
 }
 

@@ -11,7 +11,7 @@
 namespace ng {
 	
 
-GuiEngine::GuiEngine() : ControlManager(0) {
+GuiEngine::GuiEngine() : ControlManager(this) {
 	#ifdef USE_SFML
 		if( !Fonts::FontExists( "default" ) ) {
 			Fonts::LoadFont( DEFAULT_FONT, "default" );

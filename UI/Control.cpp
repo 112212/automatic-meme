@@ -141,6 +141,15 @@ void Control::SetAnchor( float W, float w, float x, float H, float h, float y ) 
 	this->anchor = (Anchor){ .coord = anchor.coord, .x = x, .y = y, .W = W, .w = w, .H = H, .h = h };
 }
 
+void Control::SetAnchor( Rect r ) {
+	Anchor a{{0,0},0};
+	a.x = r.x;
+	a.y = r.y;
+	a.sx = r.w;
+	a.sy = r.h;
+	this->anchor = a;
+}
+
 void Control::SetAnchor( const Anchor& anchor ) {
 	this->anchor = anchor;
 }
@@ -234,8 +243,10 @@ Anchor& Anchor::operator+=(const Anchor& b) {
 
 std::ostream& operator<< (std::ostream& stream, const Anchor& a) {
 	return stream << a.W << ", " << a.w << ", " << a.x << " ; " <<
-				a.H << ", " << a.h << ", " << a.y << " ; " <<
-				a.sW<< "+" << a.sx << ", " << a.sH << "+" << a.sy << " ; (" << a.coord.x << ", " << a.coord.y << ") adv (" << a.ax << ", " << a.ay << ")" << endl;
+		a.H << ", " << a.h << ", " << a.y << " ; " <<
+		a.sW<< "+" << a.sx << ", " << a.sH << "+" << a.sy << " ; (" << 
+		a.coord.x << ", " << a.coord.y << ") adv (" << a.ax << ", " << 
+		a.ay << ")" << " r: " << a.isrelative << endl;
 }
 
 

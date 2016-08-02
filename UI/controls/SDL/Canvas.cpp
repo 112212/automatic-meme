@@ -21,7 +21,7 @@ Canvas::Canvas() {
 Canvas::~Canvas() {
 }
 
-void Canvas::Render( SDL_Rect pos, bool isSelected ) {
+void Canvas::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;

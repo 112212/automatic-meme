@@ -26,7 +26,7 @@ class ComboBox : public Control {
 		//~ SDL_Surface* m_surf_sel_text;
 		
 		// start x,y
-		Point m_text_loc;
+		Rect m_text_loc;
 		
 		bool m_is_mouseDown;
 		bool m_is_onarrow;
@@ -52,12 +52,9 @@ class ComboBox : public Control {
 			// surf text in vector
 			std::vector<sf::Text> m_texts;
 		#elif USE_SDL
-			SDL_Surface* m_surf_sel_text;
 			Uint32 tex_sel;
 			int background_color;
-			// SDL_Texture* m_sel_text;
 			TTF_Font* m_font;
-			std::vector<SDL_Texture*> m_texts;
 			
 			struct TextLine{
 				Uint32 tex;
@@ -65,7 +62,6 @@ class ComboBox : public Control {
 			};
 			
 			std::vector<TextLine> text_lines;
-			// std::vector<SDL_Surface*> m_vec_surf_text;
 		#endif
 		
 		Rect m_scrollrect;

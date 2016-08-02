@@ -301,6 +301,10 @@ void Container::onOverflow() {
 			// innerWidget->SetPosition(innerWidget->GetRect().x, m_ty);
 			innerWidget->SetOffset(innerWidget->GetOffset().x, m_ty);
 		});
+		Anchor a = m_scroll_v->GetAnchor();
+		a.x = r.w-thickness;
+		a.y = 0;
+		m_scroll_v->SetAnchor(a);
 		Widget::AddControl(m_scroll_v);
 	}
 	if( !m_scroll_h && overflow_h ) {
@@ -313,6 +317,10 @@ void Container::onOverflow() {
 			// innerWidget->SetPosition(m_tx, innerWidget->GetRect().y);
 			innerWidget->SetOffset(m_tx, innerWidget->GetOffset().y);
 		});
+		Anchor a = m_scroll_h->GetAnchor();
+		a.x = 0;
+		a.y = r.h-thickness;
+		m_scroll_h->SetAnchor(a);
 		Widget::AddControl(m_scroll_h);
 	}
 }

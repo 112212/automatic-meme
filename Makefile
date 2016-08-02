@@ -12,8 +12,6 @@ cpp = \
 	UI/common/common.cpp \
 	UI/common/Colors.cpp \
 	UI/common/Fonts.cpp \
-	\
-	UI/XmlLoader.cpp \
 
 
 exe := 

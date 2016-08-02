@@ -1,9 +1,9 @@
 <gui>
 	
 	<anchor pos="rL+50,T+100">
-		<button id="2" rect="0,0,100,50" value="nikola" visible="true"/>
+		<button id="2" rect="0,0,100,50" value="nikola" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" visible="true"/>
 		
-		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000">
+		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000" id="w1">
 			<container id="20" rect="0,0,150,150">
 				<button id="5" rect="0,0,200,50" value="1"/>
 				<button id="55" rect="0,20,200,50" value="3"></button>
@@ -11,7 +11,7 @@
 			</container>
 			<widgetmover rect="180,0,10,10"/>
 		</container>
-		<combobox rect="0,0,-5%+150,30">
+		<combobox rect="0,0,-5%+150,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" >
 			<item>heheheeh</item>
 			<item>hghfghf</item>
 			<item>jhgjghjhg</item>
@@ -20,7 +20,7 @@
 			<item>ytrytr</item>
 			<item>rwerew</item>
 		</combobox>
-		<textbox id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
+		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
 Usually a server is a dedicated host that runs the game and is authoritative about world simulation, 
 game rules, and player input processing. A client is a player's computer connected to a game server. 
 The client and server communicate with each other by sending small data packets at a high frequency 
@@ -52,20 +52,19 @@ of a few milliseconds can cause a laggy gameplay feeling and make it
 hard to hit other players or interact with moving objects. Besides 
 bandwidth limitations and network latencies, information can get lost 
 due to network packet loss. "></textbox>
-		<label rect="0,0,150,60" value="
-	test1
-test2
+		<label rect="0,0,150,80" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1
+	test2
 test3
 hehehe
 fddgdf"></label>
-		<widget rect="0,150,100,200">
+		<widget rect="0,0,100,200">
 			<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
 			<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>
 			<radiobutton rect="0,120,100,30" value="cool"></radiobutton>
 			<widgetmover rect="0,0,100,20" zindex="50"></widgetmover>
 		</widget>
 		
-		<listbox id="200" rect="0,0,200,200">
+		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4">
 			<item>hehehehe</item>
 			<item>hghgfhf</item>
 			<item>jhjhg</item>
@@ -78,7 +77,7 @@ fddgdf"></label>
 		<trackbar rect="0,0,30,100" id="546" orientation="vertical" slidersize="15" show_number="true"></trackbar>
 		<scrollbar rect="0,0,300,50" id="20" orientation="vertical"></scrollbar>
 		<scrollbar rect="0,0,50,300" id="25" minvalue="50" orientation="vertical" slidersize="30"></scrollbar>
-		<checkbox rect="0,0,100,30" value="hehehe"></checkbox>
+		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000"></canvas>
 	</anchor>

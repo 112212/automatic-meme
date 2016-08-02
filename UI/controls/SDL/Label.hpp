@@ -37,7 +37,7 @@ class Label : public Control {
 		TTF_Font* m_font;
 		void STYLE_FUNC(value);
 		
-		void Render( SDL_Rect pos, bool isSelected );
+		void Render( Point pos, bool isSelected );
 	public:
 		Label();
 		~Label();

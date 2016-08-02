@@ -33,7 +33,7 @@ Label::~Label() {
 }
 
 
-void Label::Render( SDL_Rect pos, bool isSelected ) {
+void Label::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int j=0;
 	int line_height = TTF_FontHeight(m_font);
@@ -106,6 +106,9 @@ void Label::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value.c_str());
+		_case("font"):
+			TTF_Font* fnt = Fonts::GetParsedFont( value );
+			if(fnt) m_font = fnt;
 	}
 }
 }

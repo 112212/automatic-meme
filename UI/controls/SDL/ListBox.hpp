@@ -66,6 +66,7 @@ class ListBox : public Control {
 		virtual void OnMWheel( int updown );
 		void OnLostControl();
 		void OnMouseMove( int mX, int mY, bool mouseState );
+		void STYLE_FUNC(value);
 		
 	public:
 		ListBox();

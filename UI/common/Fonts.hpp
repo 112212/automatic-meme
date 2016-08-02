@@ -38,6 +38,7 @@ class Fonts {
 		
 			static TTF_Font* GetFont( std::string short_name, int font_size );
 			static TTF_Font* LoadFont( std::string full_path_name, std::string short_name, int font_size );
+			static TTF_Font* GetParsedFont( std::string fontString );
 			static bool FontExists( std::string short_name, int font_size );
 			static int getMaxText( TTF_Font* font, const std::string &text, int width );
 			static int getMaxTextRep( TTF_Font* font, char c, int width );

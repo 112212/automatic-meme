@@ -127,9 +127,11 @@ void TextBox::STYLE_FUNC(value) {
 			SetText(value);
 		_case("multiline"):
 			SetMultilineMode(value == "true");
-		_case("terminal_mode"):
-			SetTerminalMode(value == "true");
-			
+		// _case("terminal_mode"):
+			// SetTerminalMode(value == "true");
+		_case("font"):
+			TTF_Font* fnt = Fonts::GetParsedFont( value );
+			if(fnt) m_font = fnt;
 	}
 		
 }

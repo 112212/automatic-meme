@@ -232,5 +232,15 @@ void ListBox::SetSelectedIndex( int index ) {
 	m_selected_index = index;
 }
 
+void ListBox::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetSelectedIndex(std::stoi(value));
+		_case("font"):
+			TTF_Font* fnt = Fonts::GetParsedFont( value );
+			if(fnt) m_font = fnt;
+	}
+}
+
 
 }

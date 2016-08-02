@@ -4,8 +4,8 @@
 
 #include "../Control.hpp"
 #include <vector>
-
-
+#include <string>
+#include <istream>
 namespace ng {
 struct cache_entry {
 	controlType type;
@@ -19,13 +19,16 @@ struct cache_entry {
 };
 
 
+class GuiEngine;
+class Widget;
 
 class ControlManager {
 	private:
 		int next_z_index;
 		int binary_search(int z_index);
 		void rescale_z_indices(int spacing);
-		Control* this_control;
+		Widget* this_widget;
+		GuiEngine* this_engine;
 		
 	protected:
 		std::vector<Control*> controls;
@@ -38,8 +41,13 @@ class ControlManager {
 	public:
 		inline const std::vector<Control*> GetControls() { return controls; }
 		void ApplyAnchoring();
+		static void RegisterControl(std::string tag, std::function<Control*()> control_constructor);
+		static Control* CreateControl(std::string tag);
+		void LoadXml(std::string xml_filename);
+		void LoadXml(std::istream& stream);
 		
-		ControlManager(Control* c);
+		ControlManager(Widget* c);
+		ControlManager(GuiEngine* c);
 		~ControlManager();
 };
 }

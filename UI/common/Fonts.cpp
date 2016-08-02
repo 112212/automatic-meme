@@ -77,6 +77,15 @@ std::map< std::string, std::string > Fonts::fonts_path;
 			return f->second;
 	}
 	
+	TTF_Font* Fonts::GetParsedFont( std::string fontString ) {
+		size_t sep = fontString.find(",");
+		int font_size = 13;
+		if(sep != fontString.npos) {
+			font_size = std::stoi(fontString.substr(sep+1));
+		}
+		std::string font_name = fontString.substr(0, sep);
+		return LoadFont( font_name, font_name, font_size );
+	}
 	
 	int Fonts::getMaxText( TTF_Font* font, const std::string &text, int width ) {
 		

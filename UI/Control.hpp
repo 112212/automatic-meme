@@ -167,6 +167,7 @@ class Control {
 		void SetPosition( int x, int y ) { SetRect(x, y, m_rect.w, m_rect.h); }
 		
 		void SetAnchor( float W, float w, float x, float H, float h, float y );
+		void SetAnchor( Rect r );
 		void SetAnchor( const Anchor& anchor );
 		const Anchor& GetAnchor();
 		

@@ -16,9 +16,10 @@
 #include "UI/controls/Canvas.hpp"
 #include "UI/controls/CheckBox.hpp"
 #include "UI/controls/WidgetMover.hpp"
-#include "UI/XmlLoader.hpp"
 
 #include "UI/common/SDL/Drawing.hpp"
+
+#include <sstream>
 
 #include <iostream>
 using namespace std;
@@ -93,7 +94,7 @@ int main() {
 	
 	GuiEngine gui;
 	
-	XmlLoader::LoadXml(gui, "gui-test.xml");
+	gui.LoadXml("gui-test.xml");
 	
 	gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
 		cout << "clicked at 1 \n";
@@ -123,6 +124,21 @@ int main() {
 	
 	Drawing::SetResolution( sizeX, sizeY );
 	Drawing::Init();
+	
+	Button* btn = (Button*)ControlManager::CreateControl("button");
+	Anchor a = btn->GetAnchor();
+	a.sx = 300;
+	a.sy = 100;
+	a.isrelative = true;
+	btn->SetAnchor(a);
+	btn->SetText("test create button");
+	btn->SetId("36");
+	gui.AddControl(btn);
+	
+	Widget* w1 = (Widget*)gui.GetControlById("w1");
+	
+	std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
+	w1->LoadXml(s);
 	
 	gui.ApplyAnchoring();
 	

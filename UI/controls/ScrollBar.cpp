@@ -141,6 +141,7 @@ void ScrollBar::OnMouseDown( int mX, int mY ) {
 			if(m_on_it)
 				m_slider_click_offset = y - m_slider_pix;
 			else {
+				m_on_it = true;
 				m_slider_pix = std::max(0, std::min(rect.h - m_slider_size, y - m_slider_click_offset));
 				onChange();
 			}
@@ -152,6 +153,7 @@ void ScrollBar::OnMouseDown( int mX, int mY ) {
 			if(m_on_it)
 				m_slider_click_offset = x - m_slider_pix;
 			else {
+				m_on_it = true;
 				m_slider_pix = std::max(0, std::min(rect.w - m_slider_size, x - m_slider_click_offset));
 				onChange();
 			}

@@ -13,22 +13,21 @@ class Button : public Control {
 			sf::Text text;
 			sf::RectangleShape rect1;
 		#elif USE_SDL
-			// SDL_Texture* tex_text;
 			Uint32 tex_text;
-			TTF_Font* font;
-			SDL_Rect m_text_loc;
+			TTF_Font* m_font;
+			Rect m_text_rect;
 			bool need_update;
 			std::string text;
 		#endif
+		int backcolor;
 		Point text_loc;
 		bool m_is_mouseDown;
 		
-		const char* ctext;
 		void onPositionChange();
 		#ifdef USE_SDL
 			void update_text();
 		#endif
-		void OnSetStyle(std::string& style, std::string& value);
+		void STYLE_FUNC(value);
 		void OnMouseDown( int mX, int mY );
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
@@ -36,13 +35,13 @@ class Button : public Control {
 		#ifdef USE_SFML
 			void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
-			void Render( SDL_Rect pos, bool isSelected );
+			void Render( Point pos, bool isSelected );
 		#endif
 	public:
 		Button();
 		~Button();
 		
-		void SetText( const char* text );
+		void SetText( std::string text );
 };
 }
 #endif

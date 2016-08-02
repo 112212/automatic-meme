@@ -12,8 +12,6 @@ ComboBox::ComboBox() {
 	characterSize = 13;
 	
 	
-	//m_text = 0;
-	//m_surf_text = 0;
 	m_is_onarrow = false;
 	m_is_opened = false;
 	m_scrollbar = 0;
@@ -27,7 +25,7 @@ ComboBox::ComboBox() {
 	
 	m_max_width = 0;
 	m_dropdown_size = GetRect().h;
-	//~ m_surf_sel_text = 0;
+	tex_sel = 0;
 	m_last_scroll = 0;
 	m_is_textbox_mode = false;
 	background_color = 0x000000ff;
@@ -45,7 +43,6 @@ ComboBox::ComboBox() {
 		m_highlight.setFillColor( sf::Color::Blue );
 		m_background.setFillColor( sf::Color::Black );
 	#elif USE_SDL
-		m_surf_sel_text = 0;
 		m_font = Fonts::GetFont( "default", characterSize );
 	#endif
 }
@@ -268,14 +265,12 @@ int ComboBox::getListOffset() {
 
 
 std::string ComboBox::clipText( std::string s, int w ) {
-	int maxtext = getMaxText( s, w );
+	int maxtext = Fonts::getMaxText( m_font, s, w-15 );
 	if( maxtext < s.size() )
-		return s.substr( 0, maxtext-3 ) + "..";
+		return s.substr( 0, maxtext-2 ) + "...";
 	else
 		return s;
 }
-
-
 
 
 /*
@@ -374,7 +369,6 @@ int ComboBox::getMaxText( std::string txt, int w ) {
 	}
 	return len;
 }
-// not portable
 void ComboBox::Render( sf::RenderTarget& ren, sf::RenderStates states, bool isSelected ) {
 	
 	ren.draw( m_rectShape, states );
@@ -520,8 +514,8 @@ void ComboBox::openBox() {
 			
 			if(m_selected_index == -1) {
 				m_selected_index = 0;
-				updateSelection();
 			}
+			updateSelection();
 		}
 	}
 	
@@ -580,10 +574,8 @@ void ComboBox::openBox() {
 		
 		if(m_is_textbox_mode) {
 			m_textbox->Render( pos, m_textbox_focus );
-		} else if(m_surf_sel_text) {
-			// TODO: fix this
-			// CSurface::OnDraw( ren, m_surf_sel_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
-			Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_surf_sel_text->w, m_surf_sel_text->h, tex_sel );
+		} else if(tex_sel != 0) {
+			Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_text_loc.w, m_text_loc.h, tex_sel );
 		}
 		
 	}
@@ -599,21 +591,21 @@ void ComboBox::openBox() {
 		return h / i + 1;
 	}
 
-	int ComboBox::getMaxText( std::string txt, int w ) {
-		TTF_Font* fnt = m_font;
+	// int ComboBox::getMaxText( std::string txt, int w ) {
+		// TTF_Font* fnt = m_font;
 		
-		int dummy, advance;
-		int len = txt.length();
-		int sum=0;
-		for(int i=0; i < len; i++) {
-			TTF_GlyphMetrics( fnt, txt[i], &dummy, &dummy, &dummy, &dummy, &advance);
-			if( sum > w-15 ) {
-				return i+1;
-			}
-			sum += advance;
-		}
-		return len;
-	}
+		// int dummy, advance;
+		// int len = txt.length();
+		// int sum=0;
+		// for(int i=0; i < len; i++) {
+			// TTF_GlyphMetrics( fnt, txt[i], &dummy, &dummy, &dummy, &dummy, &advance);
+			// if( sum > w-15 ) {
+				// return i+1;
+			// }
+			// sum += advance;
+		// }
+		// return len;
+	// }
 
 
 	void ComboBox::openBox() {
@@ -644,9 +636,9 @@ void ComboBox::openBox() {
 		for(int i=0; i < m_items.size(); i++) {
 			tmp = clipText( m_items[i], m_max_width );
 			if( tmp != m_items[i] ) {
-				// SDL_FreeSurface( text_lines[i] );
 				SDL_Surface* surf = TTF_RenderText_Blended( m_font, tmp.c_str(), {255,255,255});
 				text_lines[i] = { Drawing::GetTextureFromSurface(surf, text_lines[i].tex), surf->w, surf->h };
+				SDL_FreeSurface(surf);
 			}
 		}
 	}
@@ -664,30 +656,31 @@ void ComboBox::openBox() {
 	}
 
 	void ComboBox::updateSelection() {
-		
-		if(m_surf_sel_text)
-			SDL_FreeSurface( m_surf_sel_text );
-		m_surf_sel_text = 0;
-
+		if(m_selected_index >= m_items.size()) return;
 		if(m_is_textbox_mode) {
 			m_textbox->SetText( m_items[ m_selected_index ] );
 		} else {
-			m_surf_sel_text = TTF_RenderText_Blended(  m_font, clipText( m_items[ m_selected_index ], GetRect().w-KVADRAT_SIZE ).c_str(), {255,255,255} );
-			tex_sel = Drawing::GetTextureFromSurface( m_surf_sel_text, tex_sel );
+			SDL_Surface* surf = TTF_RenderText_Blended(  m_font, clipText( m_items[ m_selected_index ], GetRect().w-KVADRAT_SIZE ).c_str(), {255,255,255} );
+			tex_sel = Drawing::GetTextureFromSurface( surf, tex_sel );
+			m_text_loc.w = surf->w;
+			m_text_loc.h = surf->h;
+			SDL_FreeSurface(surf);
 		}
 		
 	}
 #endif
 
-
 void ComboBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("background_color"):
 			background_color = Colors::ParseColor(value);
+		_case("value"):
+			SetSelectedIndex(std::stoi(value));
+		_case("font"):
+			TTF_Font* fnt = Fonts::GetParsedFont( value );
+			if(fnt) m_font = fnt;
 	}
 }
-
-
 
 
 }
