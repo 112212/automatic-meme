@@ -16,20 +16,21 @@ RadioButton::~RadioButton() {
 }
 
 void RadioButton::Render( SDL_Rect pos, bool isSelected ) {
-	int x = m_rect.x + pos.x;
-	int y = m_rect.y + pos.y;
+	const Rect& rect = GetRect();
+	int x = rect.x + pos.x;
+	int y = rect.y + pos.y;
 	#ifdef SELECTION_MARK
 	if(isSelected)
-		Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
+		Drawing::Rect(x, y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
 	#endif
-	Drawing::Circle( x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
+	Drawing::Circle( x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
 	if(m_surf_text) {
 		// TODO: fix this
 		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
 		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y-5, m_surf_text->w, m_surf_text->h, tex_text );
 	}
 	if(m_isSelected) {
-		Drawing::FillCircle(x+RADIO_BUTTON_RADIUS, y+m_rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
+		Drawing::FillCircle(x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
 	}
 }
 
@@ -42,8 +43,8 @@ void RadioButton::SetText( std::string text ) {
 	m_surf_text = TTF_RenderText_Blended( m_font, m_text.c_str(), {255,255,255} );
 	tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	if(m_surf_text) {
-		m_text_loc.x = m_rect.x + RADIO_BUTTON_RADIUS + 15;
-		m_text_loc.y = m_rect.y + RADIO_BUTTON_RADIUS;
+		m_text_loc.x = GetRect().x + RADIO_BUTTON_RADIUS + 15;
+		m_text_loc.y = GetRect().y + RADIO_BUTTON_RADIUS;
 	}
 }
 

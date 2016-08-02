@@ -31,7 +31,7 @@ class ControlManager {
 		std::vector<Control*> controls;
 		std::vector<cache_entry> cache;
 		
-		void updateCache(Control* control, CacheUpdateFlag flag);
+		void updateCache(Control* control, Control::CacheUpdateFlag flag);
 		void setZIndex(Control* control, int new_z_index);
 		void addControlToCache(Control* control);
 		void removeControlFromCache(Control* control);

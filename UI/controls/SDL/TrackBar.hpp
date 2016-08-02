@@ -16,11 +16,9 @@ class TrackBar : public Control {
 		int m_slider_max;
 		int m_slider_pix;
 		int m_slider_radius;
-		Point m_text_loc;
+		Rect m_text_rect;
 		bool show_num;
-		SDL_Surface* m_surf_num;
 		
-		int m_last;
 		bool m_on_it;
 		bool m_is_vertical;
 		bool m_is_readonly;
@@ -51,7 +49,6 @@ class TrackBar : public Control {
 		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; onChange(); }
 		int GetPercentageValue();
 		int GetValue();
-		int GetDifference();
 		Range GetRange() { return (Range){m_slider_min,m_slider_max}; }
 		int GetRangeMax() { return m_slider_max; }
 		void SetValue( int value );

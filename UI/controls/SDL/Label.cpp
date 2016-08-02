@@ -34,11 +34,12 @@ Label::~Label() {
 
 
 void Label::Render( SDL_Rect pos, bool isSelected ) {
+	const Rect& rect = GetRect();
 	int j=0;
 	int line_height = TTF_FontHeight(m_font);
 	for( auto i = text_lines.begin(); i != text_lines.end(); i++,j++) {
-		if(5+j*line_height+i->h > m_rect.h) break;
-		Drawing::TexRect( m_rect.x, m_rect.y+5+j*line_height, i->w, i->h, i->tex);
+		if(5+j*line_height+i->h > rect.h) break;
+		Drawing::TexRect( rect.x, rect.y+5+j*line_height, i->w, i->h, i->tex);
 	}
 }
 
@@ -60,7 +61,7 @@ void Label::SetText( std::string text ) {
 	char save;
 	int j = 0;
 	
-	int max_text_width = m_rect.w-25;
+	int max_text_width = GetRect().w-25;
 
 	TTF_Font* fnt = m_font;
 	for(i=0; i <= len; i++) {

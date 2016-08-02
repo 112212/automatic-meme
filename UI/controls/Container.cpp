@@ -145,13 +145,14 @@ Rect getIntersectingRectangle(Rect &a, Rect &b) {
 #endif
 
 void Container::Render( Point pos, bool isSelected ) {
-	int x = m_rect.x + pos.x;
-	int y = m_rect.y + pos.y;
+	const Rect& r = GetRect();
+	int x = r.x + pos.x;
+	int y = r.y + pos.y;
 	
 	bool overflow = overflow_h || overflow_v;
 	
-	int w = m_rect.w;
-	int h = m_rect.h;
+	int w = r.w;
+	int h = r.h;
 	
 	if(overflow_h) {
 		h -= thickness + 1;
@@ -160,10 +161,10 @@ void Container::Render( Point pos, bool isSelected ) {
 		w -= thickness + 1;
 	}
 	
-	Drawing::Rect(x,y,m_rect.w, m_rect.h, 0xffffffff);
+	Drawing::Rect(x, y, r.w, r.h, 0xffffffff);
 	
 #ifdef CLIP_METHOD_SCISSOR
-	Rect clipRect = {x,y,w,m_rect.h};
+	Rect clipRect = {x,y,w,r.h};
 	bool was_enabled = glIsEnabled( GL_SCISSOR_TEST );
 	Rect old_box;
 	
@@ -254,10 +255,11 @@ void Container::Render( Point pos, bool isSelected ) {
 }
 
 void Container::onPositionChange() {
-	if( m_rect.w > max_h ) max_h = 0; //m_rect.w;
-	if( m_rect.h > max_v ) max_v = 0; //m_rect.h;
+	const Rect& r = GetRect();
+	if( r.w > max_h ) max_h = 0; //m_rect.w;
+	if( r.h > max_v ) max_v = 0; //m_rect.h;
 	
-	innerWidget->SetRect(0,0, m_rect.w-10, m_rect.h-10);
+	innerWidget->SetRect(0,0, r.w-10, r.h-10);
 }
 
 #endif
@@ -268,17 +270,17 @@ void Container::AddControl( Control* control ) {
 void Container::AddItem( Control* control ) {
 
 	innerWidget->AddControl( control );
-	
+	const Rect& r2 = GetRect();
 	// detect overflow
 	const Rect &r = control->GetRect();
-	if( r.x + r.w > m_rect.w ) {
-		if( r.x + r.w - m_rect.w > max_h )
-			max_h = r.x + r.w - m_rect.w;
+	if( r.x + r.w > r2.w ) {
+		if( r.x + r.w - r2.w > max_h )
+			max_h = r.x + r.w - r2.w;
 		overflow_h = true; // horizontal overflow
 	}
-	if( r.y + r.h > m_rect.h ) {
-		if( r.y + r.h - m_rect.h > max_v ) {
-			max_v = r.y + r.h - m_rect.h;
+	if( r.y + r.h > r2.h ) {
+		if( r.y + r.h - r2.h > max_v ) {
+			max_v = r.y + r.h - r2.h;
 		}
 		overflow_v = true; // vertical overflow
 	}
@@ -287,10 +289,11 @@ void Container::AddItem( Control* control ) {
 }
 
 void Container::onOverflow() {
+	const Rect& r = GetRect();
 	if( !m_scroll_v && overflow_v ) {
 		m_scroll_v = new ScrollBar();
 		m_scroll_v->SetVertical( true );
-		m_scroll_v->SetRect( m_rect.w-thickness, 0, thickness, m_rect.h - thickness );
+		m_scroll_v->SetRect( r.w-thickness, 0, thickness, r.h - thickness );
 		m_scroll_v->SubscribeEvent( EVENT_SCROLLBAR_CHANGE, [this](Control *c) {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();
@@ -302,7 +305,7 @@ void Container::onOverflow() {
 	}
 	if( !m_scroll_h && overflow_h ) {
 		m_scroll_h = new ScrollBar();
-		m_scroll_h->SetRect( 0, m_rect.h-thickness, m_rect.w - thickness, thickness );
+		m_scroll_h->SetRect( 0, r.h-thickness, r.w - thickness, thickness );
 		m_scroll_h->SubscribeEvent( EVENT_SCROLLBAR_CHANGE, [this](Control* c) {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();

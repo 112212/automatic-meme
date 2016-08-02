@@ -20,21 +20,22 @@ TextBox::~TextBox() {
 
 void TextBox::Render( Point pos, bool selected ) {
 	
-	Point r = m_rect.Offset(pos);
+	const Rect& rect = this->GetRect();
+	Point r = rect.Offset(pos);
 	
-	Drawing::FillRect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, 0x05055050 );
+	Drawing::FillRect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, 0x05055050 );
 	
 	#ifdef SELECTION_MARK
-		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, selected ? Colors::Blue : Colors::GetColor(50,50,100) );
+		Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, selected ? Colors::Blue : Colors::GetColor(50,50,100) );
 	#else
-		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+		Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, Colors::White );
 	#endif
 	
 	
 	int w,h;
 	Drawing::GetResolution(w,h);
 	// TODO: tweak scissor a little
-	glScissor(r.x, h-(r.y+m_rect.h), m_rect.w, m_rect.h);
+	glScissor(r.x, h-(r.y+rect.h), rect.w, rect.h);
 	glEnable(GL_SCISSOR_TEST);
 	
 	int j;
@@ -47,7 +48,7 @@ void TextBox::Render( Point pos, bool selected ) {
 		sortPoints(p1,p2);
 		int yy=m_position.y;
 		for( auto i = m_lines.begin()+m_position.y; i != m_lines.end(); i++,j++,yy++) {
-			if(5+j*m_line_height+i->h > m_rect.h) break;
+			if(5+j*m_line_height+i->h > rect.h) break;
 			if(yy < p1.y || yy > p2.y) continue;
 			
 			if(yy == p1.y && p1.y == p2.y) {
@@ -55,17 +56,17 @@ void TextBox::Render( Point pos, bool selected ) {
 				std::string pd1 = m_lines[yy].text.substr(0, p1.x);
 				int selw = Fonts::getTextSize( m_font, pd );
 				int selw1 = Fonts::getTextSize( m_font, pd1 );
-				Drawing::FillRect( m_rect.x-sz+5+selw1, m_rect.y+5+j*m_line_height, selw, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5+selw1, rect.y+5+j*m_line_height, selw, i->h, 0x808080);
 			} else if(yy == p1.y) {
 				std::string pd = m_lines[yy].text.substr(p1.x);
 				int selw = Fonts::getTextSize( m_font, pd );
-				Drawing::FillRect( m_rect.x-sz+5+i->w-selw, m_rect.y+5+j*m_line_height, selw, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5+i->w-selw, rect.y+5+j*m_line_height, selw, i->h, 0x808080);
 			} else if(yy == p2.y) {
 				std::string pd = m_lines[yy].text.substr(0,p2.x);
 				int selw = Fonts::getTextSize( m_font, pd );
-				Drawing::FillRect( m_rect.x-sz+5, m_rect.y+5+j*m_line_height, selw, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5, rect.y+5+j*m_line_height, selw, i->h, 0x808080);
 			} else {
-				Drawing::FillRect( m_rect.x-sz+5, m_rect.y+5+j*m_line_height, i->w, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5, rect.y+5+j*m_line_height, i->w, i->h, 0x808080);
 			}
 		}
 	}
@@ -73,8 +74,8 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 	j=0;
 	for( auto i = m_lines.begin()+m_position.y; i != m_lines.end(); i++,j++) {
-		if(5+j*m_line_height+i->h > m_rect.h) break;
-		Drawing::TexRect( m_rect.x-sz+5, m_rect.y+5+j*m_line_height, i->w, i->h, i->tex);
+		if(5+j*m_line_height+i->h > rect.h) break;
+		Drawing::TexRect( rect.x-sz+5, rect.y+5+j*m_line_height, i->w, i->h, i->tex);
 	}
 	
 	glDisable(GL_SCISSOR_TEST);
@@ -83,8 +84,8 @@ void TextBox::Render( Point pos, bool selected ) {
 		if(m_cursor_blink_counter > 2*m_cursor_blinking_rate)
 			m_cursor_blink_counter = 0;
 		std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x);
-		Drawing::Rect(Fonts::getTextSize( m_font, piece )+m_rect.x+5, 
-			(m_cursor.y-m_position.y)*m_line_height+m_rect.y+5, 1, m_line_height, 0xffffffff);
+		Drawing::Rect(Fonts::getTextSize( m_font, piece )+rect.x+5, 
+			(m_cursor.y-m_position.y)*m_line_height+rect.y+5, 1, m_line_height, 0xffffffff);
 	}
 	
 	
@@ -134,9 +135,9 @@ void TextBox::STYLE_FUNC(value) {
 }
 
 void TextBox::onFontChange() {
-	m_text_max = Fonts::getMaxTextRep( m_font, 'A', m_rect.w );
+	m_text_max = Fonts::getMaxTextRep( m_font, 'A', GetRect().w );
 	m_line_height = TTF_FontHeight(m_font);
-	m_lines_max = m_rect.h / m_line_height;
+	m_lines_max = GetRect().h / m_line_height;
 }
 void TextBox::onPositionChange() {
 	onFontChange();
@@ -148,16 +149,17 @@ void TextBox::OnGetFocus() {
 
 void TextBox::OnMouseDown( int x, int y ) {
 	sendGuiCommand( GUI_KEYBOARD_LOCK );
+	const Rect& rect = GetRect();
 	if(check_collision(x,y)) {
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
 		int sz = Fonts::getTextSize( m_font, piece );
-		pt.y = (y-m_rect.y-10) / m_line_height + m_position.y;
+		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
 		if(pt.y < 0) pt.y = 0;
 		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
 		
-		pt.x = (x-m_rect.x-10) + sz;
+		pt.x = (x-rect.x-10) + sz;
 		if(pt.x > 0) pt.x = Fonts::getMaxText( m_font, m_lines[pt.y].text, pt.x );
 		
 		if(pt.x < 0) pt.x = 0;
@@ -165,27 +167,30 @@ void TextBox::OnMouseDown( int x, int y ) {
 		
 		m_anchor = pt;
 		m_cursor = pt;
+		m_cursor_max_x = m_cursor.x;
 		updatePosition();
 	}
 }
 
 void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 	if(mouseState) {
+		const Rect& rect = GetRect();
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
 		int sz = Fonts::getTextSize( m_font, piece );
-		pt.y = (y-m_rect.y-10) / m_line_height + m_position.y;
+		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
 		if(pt.y < 0) pt.y = 0;
 		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
 		
-		pt.x = (x-m_rect.x-10) + sz;
+		pt.x = (x-rect.x-10) + sz;
 		if(pt.x > 0) pt.x = Fonts::getMaxText( m_font, m_lines[pt.y].text, pt.x );
 		
 		if(pt.x < 0) pt.x = 0;
 		else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
 		
 		m_cursor = pt;
+		m_cursor_max_x = m_cursor.x;
 		updatePosition();
 	}
 }
@@ -202,10 +207,11 @@ void TextBox::sortPoints(Point &p1, Point &p2) {
 
 void TextBox::updatePosition() {
 	TextLine &line = m_lines[m_cursor.y];
+	const Rect& rect = GetRect();
 	if(m_position.x > line.text.size()) {
-		m_text_max = Fonts::getMaxTextBw(m_font, line.text, m_rect.w-25);
+		m_text_max = Fonts::getMaxTextBw(m_font, line.text, rect.w-20);
 	} else {
-		m_text_max = Fonts::getMaxText(m_font, line.text.substr(m_position.x), m_rect.w-25);
+		m_text_max = Fonts::getMaxText(m_font, line.text.substr(m_position.x), rect.w-20);
 	}
 	
 	if(m_cursor.x > m_position.x + m_text_max ) {
@@ -226,10 +232,14 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	if(line.tex == 0xffffffff)
 		new_tex = true;
 	SDL_Surface* surf = TTF_RenderText_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	// SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    // SDL_BlitSurface(surf, 0, tempSurface, 0);
 	line.tex = Drawing::GetTextureFromSurface(surf, new_tex ? 0 : line.tex);
 	line.w = surf->w;
 	line.h = surf->h;
 	SDL_FreeSurface(surf);
+	// SDL_FreeSurface(tempSurface);
 }
 
 

@@ -112,27 +112,18 @@ void ControlManager::setZIndex(Control* control, int new_z_index) {
 	
 }
 
-void ControlManager::updateCache(Control* control, CacheUpdateFlag flag) {
+void ControlManager::updateCache(Control* control, Control::CacheUpdateFlag flag) {
 	int index = binary_search(control->z_index);
 	
-	if(flag == CacheUpdateFlag::position) {
+	if(flag == Control::CacheUpdateFlag::position) {
 		cache[index].rect = control->m_rect;
-	} else if(flag == CacheUpdateFlag::all) {
+	} else if(flag == Control::CacheUpdateFlag::all) {
 		cache[index] = CONTROL_CACHE(control);
-	} else if(flag == CacheUpdateFlag::attributes) {
+	} else if(flag == Control::CacheUpdateFlag::attributes) {
 		cache_entry &e = cache[index];
 		e.interactible = control->interactible;
 		e.visible = control->visible;
 	}
-}
-
-Rect getRect( int x, int y, int w, int h ) {
-	Rect r;
-	r.x = x;
-	r.y = y;
-	r.w = w;
-	r.h = h;
-	return r;
 }
 
 void ControlManager::rescale_z_indices(int spacing) {

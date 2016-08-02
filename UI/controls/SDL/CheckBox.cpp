@@ -17,12 +17,13 @@ CheckBox::~CheckBox() {
 }
 
 void CheckBox::Render(  SDL_Rect pos, bool isSelected ) {
-	int x = m_rect.x + pos.x;
-	int y = m_rect.y + pos.y;
+	const Rect& rect = GetRect();
+	int x = rect.x + pos.x;
+	int y = rect.y + pos.y;
 	
 	#ifdef SELECTION_MARK
 		if(isSelected)
-			Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
+			Drawing::Rect(x, y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
 	#endif
 	
 	
@@ -63,8 +64,8 @@ void CheckBox::updateText() {
 	
 	m_surf_text = TTF_RenderText_Blended( m_font, m_text, {255,255,255} );
 	if(m_surf_text) {
-		m_text_loc.x = m_rect.x + CHECKBOX_SIZE + 15;
-		m_text_loc.y = m_rect.y;
+		m_text_loc.x = GetRect().x + CHECKBOX_SIZE + 15;
+		m_text_loc.y = GetRect().y;
 	}
 	tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 }

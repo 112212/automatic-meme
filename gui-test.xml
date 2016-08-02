@@ -74,9 +74,10 @@ fddgdf"></label>
 			<item>777</item>
 		</listbox>
 		
-		<trackbar rect="0,0,200,30" id="549" range="100,300" value="150"></trackbar>
-		<trackbar rect="0,0,30,100" id="546"   orientation="vertical" slidersize="15" show_number="true"></trackbar>
-		<scrollbar rect="0,0,300,50" vertical="false" id="20" orientation="vertical"></scrollbar>
+		<trackbar rect="0,0,200,30" id="549" range="1,300" value="150"></trackbar>
+		<trackbar rect="0,0,30,100" id="546" orientation="vertical" slidersize="15" show_number="true"></trackbar>
+		<scrollbar rect="0,0,300,50" id="20" orientation="vertical"></scrollbar>
+		<scrollbar rect="0,0,50,300" id="25" minvalue="50" orientation="vertical" slidersize="30"></scrollbar>
 		<checkbox rect="0,0,100,30" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000"></canvas>

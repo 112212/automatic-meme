@@ -5,7 +5,7 @@
 	#include "common/SDL/Drawing.hpp"
 #endif
 
-#define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSans.ttf"
+#define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSansMono.ttf"
 
 #define MAX_BASIC_EVENTS 6
 namespace ng {

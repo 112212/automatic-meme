@@ -11,14 +11,15 @@ class ScrollBar : public Control {
 	private:
 		int m_slider_pix;
 		int m_slider_size;
-		int m_slider_max;
 		
-		int m_last;
 		bool m_on_it;
 		bool m_is_vertical;
 		bool m_is_readonly;
+		int m_min_value;
+		int m_max_value;
 		int m_value;
 		int m_mwheel_const;
+		int m_slider_click_offset;
 		
 		Rect getSliderRect();
 		void onChange();
@@ -44,20 +45,18 @@ class ScrollBar : public Control {
 		#endif
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY );
+		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
 		void OnMWheel( int updown );
 		
-		
 		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; }
 		
-		int GetPercentageValue();
-		float GetPercentageValueFloat();
+		float GetPercentageValue();
 		int GetValue();
-		int GetDifference();
 		void SetValue( int value );
 		void SetSliderSize( int s ) { m_slider_size = s; }
 		void SetReadOnly( bool isReadOnly ) { m_is_readonly = isReadOnly; }
-		void SetMaxRange( int vmax );
+		void SetRange( int min, int max );
 		void SetMouseWheelConstant( int mw ) { m_mwheel_const = mw; }
 };
 }

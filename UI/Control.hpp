@@ -30,7 +30,7 @@ struct Point {
 	Point() {}
 	Point(int _x, int _y) : x(_x),y(_y) {}
 	bool operator< (const Point& b) const { return x < b.x || (x == b.x && y < b.y); }
-	Point Offset(const Point& r) { return Point(x+r.x, y+r.y); }
+	Point Offset(const Point& r) const { return Point(x+r.x, y+r.y); }
 };
 
 struct Rect : Point {
@@ -40,7 +40,6 @@ struct Rect : Point {
 	Rect(int _x, int _y, int _w, int _h) : Point(_x,_y),w(_w),h(_h) {}
 	
 };
-Rect getRect( int x, int y, int w, int h );
 
 struct Anchor {
 	Point coord;
@@ -53,10 +52,6 @@ struct Anchor {
 	Anchor& operator+=(const Anchor& b);
 	friend std::ostream& operator<< (std::ostream& stream, const Anchor& anchor);
 };
-
-// #define SSTR( x ) dynamic_cast< std::ostringstream & >( ( std::ostringstream() << std::dec << x ) ).str()
-
-
 
 enum controlType {
 	TYPE_CONTROL = 0,
@@ -93,12 +88,6 @@ struct Event;
 
 class GuiEngine;
 
-// cache related
-enum CacheUpdateFlag {
-	all = 0,
-	position = 1,
-	attributes = 2
-};
 
 class Control {
 	private:
@@ -114,7 +103,13 @@ class Control {
 		std::string id;
 		std::vector< std::vector< std::function<void(Control*)> > > subscribers;
 		Anchor anchor;
+		Rect m_rect;
 		
+		enum CacheUpdateFlag {
+			all = 0,
+			position = 1,
+			attributes = 2
+		};
 		// compiler screams ambiguous for this, so had to add _
 		void _updateCache(CacheUpdateFlag flag);
 		// void updateCache() {}
@@ -122,9 +117,7 @@ class Control {
 		int minor_type;
 		int z_index;
 		
-		// this shouldn't be changed manually
-		// TODO: put this to private, and make everythi use GetRect()
-		Rect m_rect;
+		
 		static bool custom_check;
 		
 		// functions used by controls

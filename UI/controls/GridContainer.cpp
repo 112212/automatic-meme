@@ -19,8 +19,9 @@ GridContainer::GridContainer() {
 
 
 int GridContainer::getPointedControl( int x, int y ) {
-	int sel = ((x-m_rect.x) / (m_rect.w / m_grid_w)) % m_grid_w +
-			 ((y-m_rect.y) / (m_rect.h / m_grid_h)) * m_grid_w;
+	const Rect& r = GetRect();
+	int sel = ((x-r.x) / (r.w / m_grid_w)) % m_grid_w +
+			 ((y-r.y) / (r.h / m_grid_h)) * m_grid_w;
 	if( m_num_controls > sel )
 		return sel;
 	else
@@ -40,8 +41,9 @@ int GridContainer::getPointedControl( int x, int y ) {
 	}
 #elif USE_SDL
 	void GridContainer::Render( Point pos, bool isSelected ) {
+		const Rect& r = GetRect();
 		// rectangleColor(ren, m_rect.x+pos.x, m_rect.y+pos.y, m_rect.x+m_rect.w+pos.x, m_rect.y+m_rect.h+pos.y, 0xffffffff);
-		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, 0xffffffff);
+		Drawing::Rect(r.x+pos.x, r.y+pos.y, r.w, r.h, 0xffffffff);
 		RenderWidget(pos,isSelected);
 	}
 	void GridContainer::onPositionChange() {}
@@ -50,9 +52,10 @@ int GridContainer::getPointedControl( int x, int y ) {
 void GridContainer::AddItem( Control* control ) {
 	if( m_num_controls >= m_grid_w * m_grid_h )
 		return;
-		
-	int max_w = m_rect.w / m_grid_w;
-	int max_h = m_rect.h / m_grid_h;
+	
+	const Rect& r = GetRect();
+	int max_w = r.w / m_grid_w;
+	int max_h = r.h / m_grid_h;
 	
 	int x = m_num_controls % m_grid_w;
 	int y = m_num_controls / m_grid_w;

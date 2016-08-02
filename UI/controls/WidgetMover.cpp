@@ -22,9 +22,9 @@ void WidgetMover::OnMouseUp( int mX, int mY ) {
 
 void WidgetMover::Render( SDL_Rect pos, bool isSelected ) {
 	#ifdef SELECTION_MARK
-		Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+		Drawing::Rect(GetRect().x+pos.x, GetRect().y+pos.y, GetRect().w, GetRect().h, isSelected ? Colors::Yellow : Colors::White );
 	#else
-		Drawing::Rect( m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+		Drawing::Rect( GetRect().x+pos.x, GetRect().y+pos.y, GetRect().w, GetRect().h, Colors::White );
 	#endif
 }
 }

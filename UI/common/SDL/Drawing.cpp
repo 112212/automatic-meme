@@ -358,7 +358,7 @@ namespace Drawing {
 		glUseProgram(shader2);
 		glBindVertexArray(vao);
 
-		float x1 = (float)(x + 0.5) / sizeX * 2.0 - 1.0;
+		float x1 = (float)(x) / sizeX * 2.0 - 1.0;
 		float y1 = (float)(y) / sizeY * 2.0 - 1.0;
 		float x2 = (float)(x+w) / sizeX * 2.0 - 1.0;
 		float y2 = (float)(y+h) / sizeY * 2.0 - 1.0;

@@ -68,20 +68,21 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 
 #elif USE_SDL
 	void Button::Render( SDL_Rect pos, bool isSelected ) {
-		int x = m_rect.x + pos.x;
-		int y = m_rect.y + pos.y;
+		const Rect& r = GetRect();
+		int x = r.x + pos.x;
+		int y = r.y + pos.y;
 		
 		if(need_update) {
 			update_text();
 			need_update = false;
 		}
 		
-		Drawing::FillRect(x, y, m_rect.w, m_rect.h, Colors::Dgray);
+		Drawing::FillRect(x, y, r.w, r.h, Colors::Dgray);
 		
 		#ifdef SELECTION_MARK
-			Drawing::Rect(x, y, m_rect.w, m_rect.h, isSelected ?  Colors::Yellow : Colors::White);
+			Drawing::Rect(x, y, r.w, r.h, isSelected ?  Colors::Yellow : Colors::White);
 		#else
-			Drawing::Rect(x, y, m_rect.w, m_rect.h, Colors::White);
+			Drawing::Rect(x, y, r.w, r.h, Colors::White);
 		#endif
 		
 		pos.x = m_text_loc.x + pos.x;
@@ -93,6 +94,7 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 	}
 
 	void Button::update_text() {
+		const Rect& r = GetRect();
 		SDL_Color c;
 		if(m_is_mouseDown)
 			c = {0x0,0xff,0x0,0xff};
@@ -105,8 +107,8 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 		tex_text = Drawing::GetTextureFromSurface(surf, tex_text);
 		SDL_FreeSurface(surf);
 		if(surf) {
-			m_text_loc.x = m_rect.x + (m_rect.w - surf->w)/2;
-			m_text_loc.y = m_rect.y + int(m_rect.h * 0.15);
+			m_text_loc.x = r.x + (r.w - surf->w)/2;
+			m_text_loc.y = r.y + int(r.h * 0.15);
 		}
 		
 	}

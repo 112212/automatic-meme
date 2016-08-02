@@ -26,7 +26,7 @@ ComboBox::ComboBox() {
 	m_max_dropdown_items = 5;
 	
 	m_max_width = 0;
-	m_dropdown_size = m_rect.h;
+	m_dropdown_size = GetRect().h;
 	//~ m_surf_sel_text = 0;
 	m_last_scroll = 0;
 	m_is_textbox_mode = false;
@@ -62,15 +62,14 @@ ComboBox::~ComboBox() {
 
 
 void ComboBox::OnMouseDown( int mX, int mY ) {
+	const Rect& r = GetRect();
 	if(m_is_opened) {
 		if(m_drawscrollbar) {
 			if( isOnScrollbar( mX, mY ) ) {
 				m_scrollbar->OnMouseDown( mX, mY );
 				m_virtual_selected_index = -1;
 				m_scrollbar_focus = true;
-				if(m_scrollbar->GetDifference()) {
-					m_last_scroll = m_scrollbar->GetValue();
-				}
+				m_last_scroll = m_scrollbar->GetValue();
 				return;
 			} else if(m_scrollbar_focus) {
 				m_scrollbar->OnLostFocus();
@@ -79,10 +78,10 @@ void ComboBox::OnMouseDown( int mX, int mY ) {
 		}
 		
 		
-		if(mX > m_rect.x && mX < m_rect.x + m_max_width) {
-			if(mY > m_rect.y+m_rect.h && mY < m_rect.y+m_rect.h + m_dropdown_size ) {
+		if(mX > r.x && mX < r.x + m_max_width) {
+			if(mY > r.y+r.h && mY < r.y+r.h + m_dropdown_size ) {
 
-				int relative_selection = (mY - (m_rect.y+m_rect.h))/m_font_height;
+				int relative_selection = (mY - (r.y+r.h))/m_font_height;
 				int absolute_selection = relative_selection + getListOffset();
 				if(absolute_selection != m_selected_index) {
 					m_selected_index = absolute_selection;
@@ -106,8 +105,8 @@ void ComboBox::OnMouseDown( int mX, int mY ) {
 		if( isOnArrow( mX, mY ) ) {
 			m_is_opened = !m_is_opened;
 		} else if( isOnText( mX, mY ) ) {
-			if( mX > m_rect.x && mX < m_rect.x + m_rect.w - KVADRAT_SIZE ) {
-				if( mY > m_rect.y && mY < m_rect.y + m_rect.h ) {
+			if( mX > r.x && mX < r.x + r.w - KVADRAT_SIZE ) {
+				if( mY > r.y && mY < r.y + r.h ) {
 					sendGuiCommand( GUI_KEYBOARD_LOCK );
 					m_textbox_focus = true;
 					m_textbox->OnMouseDown( mX, mY );
@@ -137,15 +136,14 @@ void ComboBox::OnMouseUp( int x, int y ) {
 }
 
 void ComboBox::OnMouseMove( int mX, int mY, bool mouseState ) {
+	const Rect& r = GetRect();
 	if(m_is_opened) {
 		if(m_drawscrollbar) {
 			if( isOnScrollbar( mX, mY ) ) {
 				m_scrollbar->OnMouseMove( mX, mY, mouseState );
 				m_scrollbar_focus = true;
-				if(m_scrollbar->GetDifference()) {
-					m_last_scroll = m_scrollbar->GetValue();
-				}
-				// just moved scrollbar, no need to do anythi else
+				m_last_scroll = m_scrollbar->GetValue();
+				// just moved scrollbar, no need to do anything else
 				return;
 			} else {
 				if(m_scrollbar_focus) {
@@ -154,10 +152,9 @@ void ComboBox::OnMouseMove( int mX, int mY, bool mouseState ) {
 				}
 			}
 		}
-		if(mX > m_rect.x && mX < m_rect.x + m_max_width) {
-			if(mY > m_rect.y+m_rect.h && mY < m_rect.y+m_rect.h + m_dropdown_size ) {
-				// u dropdownu smo, treba pronaci na cemu drzimo mis u postaviti "selekciju"
-				int relative_selection = (mY - (m_rect.y+m_rect.h))/m_font_height;
+		if(mX > r.x && mX < r.x + m_max_width) {
+			if(mY > r.y+r.h && mY < r.y+r.h + m_dropdown_size ) {
+				int relative_selection = (mY - (r.y+r.h))/m_font_height;
 				m_virtual_selected_index = relative_selection;
 			}
 		}
@@ -165,27 +162,20 @@ void ComboBox::OnMouseMove( int mX, int mY, bool mouseState ) {
 		m_is_onarrow = isOnArrow( mX, mY );
 		if(m_is_textbox_mode) {
 			// TODO: check if this is correct solution
-			//if( isOnText( mX, mY ) ) {
-				if(!m_textbox_focus) {
-					m_textbox_focus = true;
-					m_textbox->OnGetFocus();
-				}
-				m_textbox->OnMouseMove( mX, mY, mouseState );
-				/*
-			} else {
-				if(m_textbox_focus) {
-					m_textbox_focus = false;
-					m_textbox->OnLostFocus();
-				}
-			}*/
+			if(!m_textbox_focus) {
+				m_textbox_focus = true;
+				m_textbox->OnGetFocus();
+			}
+			m_textbox->OnMouseMove( mX, mY, mouseState );
 		}
 	}
 }
 
 
 bool ComboBox::isOnArrow( int mX, int mY ) {
-	if( mX > m_rect.x+m_rect.w - KVADRAT_SIZE && mX < m_rect.x+m_rect.w ) {
-		if( mY > m_rect.y && mY < m_rect.y + m_rect.h ) {
+	const Rect& r = GetRect();
+	if( mX > r.x+r.w - KVADRAT_SIZE && mX < r.x+r.w ) {
+		if( mY > r.y && mY < r.y + r.h ) {
 			return true;
 		}
 	}
@@ -194,8 +184,9 @@ bool ComboBox::isOnArrow( int mX, int mY ) {
 
 
 bool ComboBox::isOnText( int mX, int mY ) {
-	if( mX > m_rect.x && mX < m_rect.x + m_rect.w - KVADRAT_SIZE ) {
-		if( mY > m_rect.y && mY < m_rect.y + m_rect.h ) {
+	const Rect& r = GetRect();
+	if( mX > r.x && mX < r.x + r.w - KVADRAT_SIZE ) {
+		if( mY > r.y && mY < r.y + r.h ) {
 			return true;
 		}
 	}
@@ -259,9 +250,7 @@ void ComboBox::OnGetFocus() {
 void ComboBox::OnMWheel( int updown ) {
 	if(m_drawscrollbar) {
 		m_scrollbar->OnMWheel( updown );
-		if(m_scrollbar->GetDifference()) {
-			m_last_scroll = m_scrollbar->GetValue();
-		}
+		m_last_scroll = m_scrollbar->GetValue();
 	}
 }
 
@@ -322,8 +311,8 @@ void ComboBox::SetTextEditableMode( bool editablemode ) {
 	if(editablemode) {
 		if(!m_textbox)
 			m_textbox = new TextBox;
-		
-		m_textbox->SetRect( m_rect.x, m_rect.y, m_rect.w-KVADRAT_SIZE, m_rect.h );
+		const Rect& r = GetRect();
+		m_textbox->SetRect( r.x, r.y, r.w-KVADRAT_SIZE, r.h );
 		if(m_selected_index != -1)
 			m_textbox->SetText( m_items[ m_selected_index ] );
 	} else {
@@ -342,7 +331,7 @@ void ComboBox::SetMaxDropdown( int drp ) {
 
 
 void ComboBox::SetMaxWidth( int w ) {
-	m_max_width = std::max<int>( m_rect.w, w );
+	m_max_width = std::max<int>( GetRect().w, w );
 	updateItemsSize();
 }
 
@@ -537,22 +526,22 @@ void ComboBox::openBox() {
 	}
 	
 	void ComboBox::Render( Point pos, bool isSelected ) {
-	
+		const Rect& rect = GetRect();
 		#ifdef SELECTION_MARK
-			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, isSelected ? Colors::Yellow : Colors::White );
+			Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::White );
 		#else
-			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, Colors::White );
+			Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, Colors::White );
 		#endif
 		
-		Drawing::VLine( m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE, m_rect.y+pos.y, m_rect.y+pos.y+m_rect.h, Colors::Gray );
+		Drawing::VLine( rect.x+pos.x+rect.w - KVADRAT_SIZE, rect.y+pos.y, rect.y+pos.y+rect.h, Colors::Gray );
 		
 		if(m_is_textbox_mode ?  m_is_onarrow : isSelected) {
-			Drawing::FillRect(m_rect.x+pos.x+m_rect.w-KVADRAT_SIZE+1, m_rect.y+pos.y+1, KVADRAT_SIZE-2, m_rect.h-2, 0x336633 );
+			Drawing::FillRect(rect.x+pos.x+rect.w-KVADRAT_SIZE+1, rect.y+pos.y+1, KVADRAT_SIZE-2, rect.h-2, 0x336633 );
 		}
 		
 		
-		Drawing::Line(m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE + INNER_X, m_rect.y+pos.y+INNER_Y, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE/2, m_rect.y+pos.y+m_rect.h-INNER_Y, Colors::Gray );
-		Drawing::Line(m_rect.x+pos.x+m_rect.w - INNER_X, m_rect.y+pos.y+INNER_Y, m_rect.x+pos.x+m_rect.w - KVADRAT_SIZE/2, m_rect.y+pos.y+m_rect.h-INNER_Y, Colors::Gray );
+		Drawing::Line(rect.x+pos.x+rect.w - KVADRAT_SIZE + INNER_X, rect.y+pos.y+INNER_Y, rect.x+pos.x+rect.w - KVADRAT_SIZE/2, rect.y+pos.y+rect.h-INNER_Y, Colors::Gray );
+		Drawing::Line(rect.x+pos.x+rect.w - INNER_X, rect.y+pos.y+INNER_Y, rect.x+pos.x+rect.w - KVADRAT_SIZE/2, rect.y+pos.y+rect.h-INNER_Y, Colors::Gray );
 		
 		if(m_is_opened) {
 			// draw items
@@ -564,18 +553,18 @@ void ComboBox::openBox() {
 					break;
 				h += it->h;
 			}
-			Drawing::FillRect( m_rect.x + pos.x, m_rect.y + pos.y + m_rect.h, m_rect.w, m_rect.h + h, background_color);
+			Drawing::FillRect( rect.x + pos.x, rect.y + pos.y + rect.h, rect.w, rect.h + h, background_color);
 			h=i=0;
 			for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 				if(i >= m_max_dropdown_items)
 					break;
 				if(m_virtual_selected_index == i) {
-					Drawing::FillRect( m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
+					Drawing::FillRect( rect.x+pos.x, rect.y+pos.y + rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
 				} else {
-					Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y + m_rect.h + h, m_max_width, it->h, 0);
+					Drawing::Rect(rect.x+pos.x, rect.y+pos.y + rect.h + h, m_max_width, it->h, 0);
 				}
 				
-				Drawing::TexRect( m_rect.x+pos.x+2, m_rect.y+pos.y + m_rect.h + h, it->w, it->h, it->tex );
+				Drawing::TexRect( rect.x+pos.x+2, rect.y+pos.y + rect.h + h, it->w, it->h, it->tex );
 				h += it->h;
 			}
 			
@@ -628,6 +617,7 @@ void ComboBox::openBox() {
 
 
 	void ComboBox::openBox() {
+		const Rect& rect = GetRect();
 		m_font_height = getAverageHeight();
 
 		m_dropdown_size = m_items.size() * m_font_height;
@@ -639,11 +629,11 @@ void ComboBox::openBox() {
 			}
 
 			int scrollbar_width = 10;
-			m_scrollrect = getRect( m_rect.x + m_max_width - scrollbar_width, m_rect.y+m_rect.h, scrollbar_width, m_dropdown_size );
+			m_scrollrect = Rect( rect.x + m_max_width - scrollbar_width, rect.y+rect.h, scrollbar_width, m_dropdown_size );
 			m_scrollbar->SetRect( m_scrollrect );
 			
 			m_scrollbar->SetSliderSize( std::max<int>(10, std::min<int>( ( (m_max_dropdown_items*100)/m_items.size()), m_scrollrect.h - 10) ) );
-			m_scrollbar->SetMaxRange( m_items.size() - m_max_dropdown_items );
+			m_scrollbar->SetRange( 0, m_items.size() - m_max_dropdown_items );
 			m_scrollbar->SetMouseWheelConstant( std::max<int>( m_max_dropdown_items/3, 1 ) );
 			m_drawscrollbar = true;
 		}
@@ -662,14 +652,15 @@ void ComboBox::openBox() {
 	}
 
 	void ComboBox::onPositionChange() {
+		const Rect& rect = GetRect();
 		if(!m_max_width)
-			m_max_width = m_rect.w;
+			m_max_width = rect.w;
 			
-		m_text_loc.x = m_rect.x + 5;
-		m_text_loc.y = m_rect.y + 2;
+		m_text_loc.x = rect.x + 5;
+		m_text_loc.y = rect.y + 2;
 		
 		if(m_is_textbox_mode)
-			m_textbox->SetRect( m_rect.x, m_rect.y, m_rect.w-KVADRAT_SIZE, m_rect.h );
+			m_textbox->SetRect( rect.x, rect.y, rect.w-KVADRAT_SIZE, rect.h );
 	}
 
 	void ComboBox::updateSelection() {
@@ -681,7 +672,7 @@ void ComboBox::openBox() {
 		if(m_is_textbox_mode) {
 			m_textbox->SetText( m_items[ m_selected_index ] );
 		} else {
-			m_surf_sel_text = TTF_RenderText_Blended(  m_font, clipText( m_items[ m_selected_index ], m_rect.w-KVADRAT_SIZE ).c_str(), {255,255,255} );
+			m_surf_sel_text = TTF_RenderText_Blended(  m_font, clipText( m_items[ m_selected_index ], GetRect().w-KVADRAT_SIZE ).c_str(), {255,255,255} );
 			tex_sel = Drawing::GetTextureFromSurface( m_surf_sel_text, tex_sel );
 		}
 		

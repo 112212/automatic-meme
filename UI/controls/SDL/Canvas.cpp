@@ -22,28 +22,29 @@ Canvas::~Canvas() {
 }
 
 void Canvas::Render( SDL_Rect pos, bool isSelected ) {
-	int x = m_rect.x + pos.x;
-	int y = m_rect.y + pos.y;
+	const Rect& rect = GetRect();
+	int x = rect.x + pos.x;
+	int y = rect.y + pos.y;
 	
 	// crtanje sdl draw
-	Drawing::FillRect(x, y, m_rect.w, m_rect.h, background_color );
-	Drawing::Rect( x, y, m_rect.w, m_rect.h, Colors::Gray );
+	Drawing::FillRect(x, y, rect.w, rect.h, background_color );
+	Drawing::Rect( x, y, rect.w, rect.h, Colors::Gray );
 	
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
 		int w = m_drawing->w;
 		int h;
 		// horizontalno
-		for(int y=0; y < m_rect.h; y+=pixel_size) {
+		for(int y=0; y < rect.h; y+=pixel_size) {
 			h = y*w;
-			for(int x=0; x < m_rect.w; x++) {
+			for(int x=0; x < rect.w; x++) {
 				p[x + h] = grid_color;
 			}
 		}
 		// vertikalno
-		for(int y=0; y < m_rect.h; y++) {
+		for(int y=0; y < rect.h; y++) {
 			h = y*w;
-			for(int x=0; x < m_rect.w; x+=pixel_size) {
+			for(int x=0; x < rect.w; x+=pixel_size) {
 				p[x + h] = grid_color;
 			}
 		}
@@ -54,7 +55,7 @@ void Canvas::Render( SDL_Rect pos, bool isSelected ) {
 		// m_tex_drawing = SDL_CreateTextureFromSurface( ren, m_drawing );
 		
 		maketex = false;
-		SDL_Rect r = { x, y, m_rect.w, m_rect.h };
+		SDL_Rect r = { x, y, rect.w, rect.h };
 		// TODO: fix this
 		// SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
 		tex_drawing = Drawing::GetTextureFromSurface( m_drawing, tex_drawing );
@@ -100,7 +101,7 @@ void Canvas::SetPixelSize(int size) {
 
 void Canvas::OnMouseDown( int mX, int mY ) {
 	if(!m_is_readonly)
-		put_pixel(mX-m_rect.x, mY-m_rect.y);
+		put_pixel(mX-GetRect().x, mY-GetRect().y);
 	
 	m_is_mouseDown = true;
 }
@@ -142,8 +143,8 @@ void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
 	
 	if(!m_is_readonly && mouseState && check_collision(mX, mY)) {
 		
-		int x = mX - m_rect.x;
-		int y = mY - m_rect.y;
+		int x = mX - GetRect().x;
+		int y = mY - GetRect().y;
 		
 		if(last_x < 0 || last_y < 0) {
 			last_x = x;
@@ -176,7 +177,7 @@ void Canvas::onPositionChange() {
 		B=0x000000ff,
 		A=0xff000000;
 	if(!m_drawing) {
-		m_drawing = SDL_CreateRGBSurface(0,m_rect.w,m_rect.h,32,R,G,B,A );
+		m_drawing = SDL_CreateRGBSurface(0,GetRect().w,GetRect().h,32,R,G,B,A );
 		maketex = true;
 		SDL_FillRect( m_drawing, NULL, 0 );
 	}
