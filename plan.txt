@@ -190,11 +190,3 @@ OpenGL port of controls:
 + 	TrackBar
 
 TO FIX:
-
-
-hey, few notes: it would be good to set the size and color for the text
-<label></label> and also some possibility to blink/flash text with amount of time,
-lets say, show="2" and hide="3" so it hides visible text every 2 seconds and is
-3seconds not drawn, then it draws it, waits 2 seconds and stops drawing for 3
-seconds. 
-

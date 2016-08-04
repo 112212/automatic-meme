@@ -24,7 +24,7 @@ class TrackBar : public Control {
 		bool m_is_readonly;
 		int m_value;
 		
-		SDL_Rect getSliderRect();
+		Rect getSliderRect();
 		void onChange();
 		void onPositionChange();
 		void setValue( int value );

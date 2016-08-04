@@ -32,7 +32,7 @@ namespace Colors {
 	Uint32 ParseColor(std::string str) {
 		long val = std::stol(str.substr(1,8), 0, 16);
 		Uint32 color = val << 8;
-		if(val & 0xff000000 == 0)
+		if(str.size() < 9)
 			color |= 0xff000000;
 		return color;
 	}

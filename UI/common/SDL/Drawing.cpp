@@ -436,8 +436,6 @@ namespace Drawing {
 	void DeleteTexture(GLuint textureID) {
 		if(glIsTexture(textureID)) {
 			glDeleteTextures(1, &textureID);
-
-			std::cout << "deleting texture" << std::endl;
 		}
 	}
 

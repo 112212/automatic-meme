@@ -1,5 +1,8 @@
 <gui>
-	
+	<theme>
+		<button backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
+		<listbox id="200" rect="0,0,200,200" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
+	</theme>
 	<anchor pos="rL+50,T+100">
 		<button id="2" rect="0,0,100,50" value="nikola" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" visible="true"/>
 		

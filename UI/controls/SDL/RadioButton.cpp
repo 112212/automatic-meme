@@ -25,8 +25,6 @@ void RadioButton::Render( Point pos, bool isSelected ) {
 	#endif
 	Drawing::Circle( x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
 	if(m_surf_text) {
-		// TODO: fix this
-		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
 		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y-5, m_surf_text->w, m_surf_text->h, tex_text );
 	}
 	if(m_isSelected) {

@@ -23,11 +23,9 @@ class ListBox : public Control {
 		
 		TTF_Font* m_font;
 		
-		// items
 		std::vector<std::string> m_items;
 		
-		// surf text in std::vector
-		// std::vector<SDL_Surface*> m_vec_surf_text;
+		int backcolor;
 		
 		struct TextLine{
 			Uint32 tex;
@@ -79,6 +77,7 @@ class ListBox : public Control {
 		int GetSelectedIndex();
 		void SetSelectedIndex( int index );
 		std::string GetText();
+		Control* Clone();
 };
 }
 #endif

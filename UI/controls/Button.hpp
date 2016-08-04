@@ -32,6 +32,7 @@ class Button : public Control {
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
 		void OnGetFocus();
+		
 		#ifdef USE_SFML
 			void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
 		#elif USE_SDL
@@ -42,6 +43,8 @@ class Button : public Control {
 		~Button();
 		
 		void SetText( std::string text );
+		
+		Control* Clone();
 };
 }
 #endif

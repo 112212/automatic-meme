@@ -18,7 +18,7 @@ class Canvas : public Control {
 		bool m_is_readonly;
 		void onPositionChange();
 		int pixel_size;
-		void put_pixel(int x, int y);
+		
 		void put_pixel_interpolate(int x, int y, int last_x, int last_y);
 		int pixel_color;
 		int grid_color;
@@ -37,6 +37,7 @@ class Canvas : public Control {
 		Canvas();
 		~Canvas();
 		
+		void PutPixel(int x, int y);
 		void SetPixelSize(int size);
 		void SetBackgroundColor(int color);
 		void SetAlignToGrid(bool align) { align_to_grid = align; }

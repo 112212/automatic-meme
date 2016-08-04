@@ -12,6 +12,7 @@ ListBox::ListBox() {
 	m_scrollbar_focus = false;
 	
 	m_last_scroll = 0;
+	backcolor = 0;
 }
 
 ListBox::~ListBox() {
@@ -31,9 +32,8 @@ void ListBox::Render( Point pos, bool isSelected ) {
 			break;
 		if(m_selected_index == i+offs) {
 			Drawing::FillRect(  x, y + h, rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
-			
 		} else
-			Drawing::FillRect(  x, y + h, rect.w, it->h, 0 );
+			Drawing::FillRect(  x, y + h, rect.w, it->h, backcolor );
 		Drawing::TexRect( x+2, y+h, it->w, it->h, it->tex );
 		h += it->h;
 	}
@@ -168,7 +168,6 @@ void ListBox::updateBox() {
 	m_font_height = getAverageHeight();
 	m_max_items = rect.h / m_font_height;
 	if(m_items.size() > m_max_items) {
-		// treba implementirati scrollbar :)
 		if(!m_scrollbar) {
 			m_scrollbar = new ScrollBar;
 			m_scrollbar->SetVertical( true );
@@ -236,10 +235,19 @@ void ListBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetSelectedIndex(std::stoi(value));
-		_case("font"):
+		_case("font"): {
 			TTF_Font* fnt = Fonts::GetParsedFont( value );
 			if(fnt) m_font = fnt;
+		}
+		_case("background_color"):
+			backcolor = Colors::ParseColor(value);
 	}
+}
+
+Control* ListBox::Clone() {
+	ListBox* lb = new ListBox;
+	*lb = *this;
+	return lb;
 }
 
 

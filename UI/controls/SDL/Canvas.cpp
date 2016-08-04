@@ -19,6 +19,7 @@ Canvas::Canvas() {
 }
 
 Canvas::~Canvas() {
+	Drawing::DeleteTexture(tex_drawing);
 }
 
 void Canvas::Render( Point pos, bool isSelected ) {
@@ -26,22 +27,21 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
 	
-	// crtanje sdl draw
 	Drawing::FillRect(x, y, rect.w, rect.h, background_color );
-	Drawing::Rect( x, y, rect.w, rect.h, Colors::Gray );
+	
 	
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
 		int w = m_drawing->w;
 		int h;
-		// horizontalno
+		// horizontal
 		for(int y=0; y < rect.h; y+=pixel_size) {
 			h = y*w;
 			for(int x=0; x < rect.w; x++) {
 				p[x + h] = grid_color;
 			}
 		}
-		// vertikalno
+		// vertical
 		for(int y=0; y < rect.h; y++) {
 			h = y*w;
 			for(int x=0; x < rect.w; x+=pixel_size) {
@@ -51,23 +51,16 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	}
 	
 	if(maketex) {
-		// TODO: fix this
-		// m_tex_drawing = SDL_CreateTextureFromSurface( ren, m_drawing );
 		
 		maketex = false;
 		SDL_Rect r = { x, y, rect.w, rect.h };
-		// TODO: fix this
-		// SDL_RenderCopy( ren, m_tex_drawing, NULL, &r );
 		tex_drawing = Drawing::GetTextureFromSurface( m_drawing, tex_drawing );
 		Drawing::TexRect( r.x, r.y, r.w, r.h, tex_drawing );
 	} else if(m_drawing && tex_drawing) {
-		//CSurface::OnDraw( ren, m_drawing, x, y );
-		
-		// TODO: fix this
-		// CSurface::OnDraw(ren, m_tex_drawing, m_drawing, x, y);
-		
 		Drawing::TexRect( x, y, m_drawing->w, m_drawing->h, tex_drawing );
 	}
+	
+	Drawing::Rect( x, y, rect.w, rect.h, Colors::Gray );
 
 	
 }
@@ -82,7 +75,7 @@ void Canvas::STYLE_FUNC(value) {
 		_case("align_to_grid"):
 			SetAlignToGrid( value == "true" );
 		_case("color"):
-			if(value[0] == '#') SetPixelColor( 0xff000000 | std::stoi(value.substr(1), 0, 16) ); 
+			if(value[0] == '#') SetPixelColor( Colors::ParseColor(value)  ); 
 		_case("background_color"):
 			SetBackgroundColor( Colors::ParseColor(value) );
 		_case("grid_color"):
@@ -101,12 +94,12 @@ void Canvas::SetPixelSize(int size) {
 
 void Canvas::OnMouseDown( int mX, int mY ) {
 	if(!m_is_readonly)
-		put_pixel(mX-GetRect().x, mY-GetRect().y);
+		PutPixel(mX-GetRect().x, mY-GetRect().y);
 	
 	m_is_mouseDown = true;
 }
 
-void Canvas::put_pixel(int x, int y) {
+void Canvas::PutPixel(int x, int y) {
 	if(align_to_grid) {
 		x = x - x%pixel_size;
 		y = y - y%pixel_size;
@@ -117,6 +110,7 @@ void Canvas::put_pixel(int x, int y) {
 		for(i=0; i < pixel_size; i++) {
 			if(y+i < m_drawing->h)
 			for(j=0; j < pixel_size; j++) {
+				if(x+j < m_drawing->w)
 				pixels[(y+i)*m_drawing->w + x+j] = pixel_color;
 			}
 		}
@@ -130,7 +124,7 @@ void Canvas::put_pixel_interpolate(int x, int y, int last_x, int last_y) {
 	float step = 1/(float)std::max(abs(diffx), abs(diffy));
 	float interp;
 	for(interp=0; interp < 1; interp+=step) {
-		put_pixel(x+diffx*interp, y+diffy*interp);
+		PutPixel(x+diffx*interp, y+diffy*interp);
 	}
 }
 

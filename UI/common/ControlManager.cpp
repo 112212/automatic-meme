@@ -454,6 +454,7 @@ namespace XmlLoader {
 				std::string value = std::string(attr->value());
 				control->SetStyle(style, value);
 			}
+			m_control_templates[node->name()] = control;
 		}
 	}
 	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node, const Anchor &anchor) {

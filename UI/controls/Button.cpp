@@ -106,6 +106,7 @@ void Button::STYLE_FUNC(value) {
 			c = {0xff,0xff,0xff,0xff};
 		
 		SDL_Surface* surf = TTF_RenderText_Blended( m_font, text.c_str(), c );
+		if(!surf) return;
 		tex_text = Drawing::GetTextureFromSurface(surf, tex_text);
 		m_text_rect.w = surf->w;
 		m_text_rect.h = surf->h;
@@ -139,6 +140,12 @@ void Button::STYLE_FUNC(value) {
 	}
 
 #endif
+
+Control* Button::Clone() {
+	Button *btn = new Button;
+	*btn = *this;
+	return btn;
+}
 
 
 void Button::OnGetFocus() {

@@ -87,7 +87,7 @@ void TrackBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 			}
 		}
 	} else {
-		SDL_Rect sr = getSliderRect();
+		Rect sr = getSliderRect();
 		int x = mX - (sr.x+sr.w/2);
 		int y = mY - (sr.y+sr.h/2);
 		if(x*x + y*y < m_slider_radius*m_slider_radius) {
@@ -196,7 +196,7 @@ void TrackBar::onChange() {
 
 void TrackBar::updateTextLocation() {
 	
-	SDL_Rect sl = getSliderRect();
+	Rect sl = getSliderRect();
 	if(m_is_vertical) {
 		m_text_rect.y = sl.y;
 		m_text_rect.x = sl.x + 15 - m_text_rect.w/2;
@@ -206,8 +206,8 @@ void TrackBar::updateTextLocation() {
 	}
 }
 
-SDL_Rect TrackBar::getSliderRect() {
-	SDL_Rect r;
+Rect TrackBar::getSliderRect() {
+	Rect r;
 	const Rect& rect = GetRect();
 	if( m_is_vertical ) {
 		r.x = rect.x + rect.w/2 - m_slider_radius;

@@ -142,7 +142,6 @@ int main() {
 	
 	gui.ApplyAnchoring();
 	
-
 	SDL_GL_SetSwapInterval(0);
 	
 	bool running = true;
