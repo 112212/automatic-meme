@@ -13,7 +13,6 @@ class Canvas : public Control {
 	private:
 		SDL_Surface* m_drawing;
 		Uint32 tex_drawing;
-		int background_color;
 		bool m_is_mouseDown;
 		bool m_is_readonly;
 		void onPositionChange();

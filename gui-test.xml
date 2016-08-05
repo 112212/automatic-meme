@@ -2,6 +2,7 @@
 	<theme>
 		<button backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
 		<listbox id="200" rect="0,0,200,200" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
+		<textbox backgroundcolor="#ff050550" />
 	</theme>
 	<anchor pos="rL+50,T+100">
 		<button id="2" rect="0,0,100,50" value="nikola" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" visible="true"/>
@@ -14,7 +15,7 @@
 			</container>
 			<widgetmover rect="180,0,10,10"/>
 		</container>
-		<combobox rect="0,0,-5%+150,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" >
+		<combobox rect="0,0,-5%+200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" >
 			<item>heheheeh</item>
 			<item>hghfghf</item>
 			<item>jhgjghjhg</item>

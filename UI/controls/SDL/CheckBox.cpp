@@ -19,20 +19,13 @@ CheckBox::~CheckBox() {
 void CheckBox::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
-	int y = rect.y + pos.y;
-	
-	#ifdef SELECTION_MARK
-		if(isSelected)
-			Drawing::Rect(x, y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
-	#endif
+	int y = rect.y + pos.y + 5;
 	
 	
 	Drawing::Rect(x+CHECKBOX_SHIFT, y, CHECKBOX_SIZE, CHECKBOX_SIZE, Colors::White );
 	
 	if(m_surf_text) {
-		// TODO: fix this
-		// CSurface::OnDraw( ren, m_surf_text, m_text_loc.x+pos.x, m_text_loc.y+pos.y );
-		Drawing::TexRect(m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_surf_text->w, m_surf_text->h, tex_text);
+		Drawing::TexRect(m_text_loc.x+pos.x, m_text_loc.y+pos.y + 4, m_surf_text->w, m_surf_text->h, tex_text);
 	}
 	
 	if(m_isChecked) {
@@ -41,13 +34,12 @@ void CheckBox::Render( Point pos, bool isSelected ) {
 		int x2 = x+CHECKBOX_SIZE-CHECKBOX_OKVIR+CHECKBOX_SHIFT;
 		int y2 = y+CHECKBOX_SIZE-CHECKBOX_OKVIR;
 		
-		
 		Drawing::Line(x1, y1, x2, y2, Colors::Yellow );
 		Drawing::Line(x1, y2, x2, y1, Colors::Yellow );
 		
 	}
 	
-	
+	Control::Render(pos,isSelected);
 	
 }
 
@@ -71,8 +63,6 @@ void CheckBox::updateText() {
 }
 
 void CheckBox::OnMouseDown( int mX, int mY ) {
-	// generisati event za gui mozda ...
-	// ili posetiti callback funkciju :)
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
 		m_surf_text = TTF_RenderText_Blended( m_font, m_text, {0,255,0} );

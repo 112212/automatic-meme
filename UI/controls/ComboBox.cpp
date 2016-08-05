@@ -28,7 +28,8 @@ ComboBox::ComboBox() {
 	tex_sel = 0;
 	m_last_scroll = 0;
 	m_is_textbox_mode = false;
-	background_color = 0x000000ff;
+	m_backcolor = 0x00000000;
+	m_selection_color = 0xff3E398E;
 	
 	#ifdef USE_SFML
 		// not portable
@@ -200,8 +201,6 @@ bool ComboBox::isOnScrollbar( int mX, int mY ) {
 	return false;
 }
 
-
-
 void ComboBox::OnLostFocus() {
 	m_is_mouseDown = false;
 	m_is_onarrow = false;
@@ -215,10 +214,6 @@ void ComboBox::OnLostFocus() {
 	}
 }
 
-
-
-
-
 void ComboBox::OnLostControl() {
 	m_is_opened = false;
 	if(m_is_textbox_mode) {
@@ -226,9 +221,6 @@ void ComboBox::OnLostControl() {
 		m_textbox->OnLostControl();
 	}
 }
-
-
-
 
 void ComboBox::OnGetFocus() {
 	if(m_is_textbox_mode) {
@@ -238,12 +230,6 @@ void ComboBox::OnGetFocus() {
 
 }
 
-
-
-
-
-
-
 void ComboBox::OnMWheel( int updown ) {
 	if(m_drawscrollbar) {
 		m_scrollbar->OnMWheel( updown );
@@ -251,18 +237,12 @@ void ComboBox::OnMWheel( int updown ) {
 	}
 }
 
-
-
 int ComboBox::getListOffset() {
 	if(m_drawscrollbar) {
 		//int sz = text_lines.size();
 		return m_last_scroll;//min<int>( ((sz-m_max_dropdown_items)*m_last_scroll) / 100, sz - m_max_dropdown_items );
 	} else return 0;
 }
-
-
-
-
 
 std::string ComboBox::clipText( std::string s, int w ) {
 	int maxtext = Fonts::getMaxText( m_font, s, w-15 );
@@ -272,11 +252,9 @@ std::string ComboBox::clipText( std::string s, int w ) {
 		return s;
 }
 
-
 /*
 	-------------[ PUBLIC METHODS ]-----------
 */
-
 
 int ComboBox::GetSelectedIndex() {
 	return m_selected_index;
@@ -294,13 +272,10 @@ std::string ComboBox::GetText() {
 	}
 }
 
-
 void ComboBox::SetSelectedIndex( int index ) {
 	m_selected_index = index;
 	updateSelection();
 }
-
-
 
 void ComboBox::SetTextEditableMode( bool editablemode ) {
 	if(editablemode) {
@@ -355,6 +330,7 @@ void ComboBox::onPositionChange() {
 	if(m_is_textbox_mode)
 		m_textbox->SetRect( m_rect.x, m_rect.y, m_rect.w-KVADRAT_SIZE, m_rect.h );
 }
+
 // not portable
 const int textMargin = 17;
 int ComboBox::getMaxText( std::string txt, int w ) {
@@ -369,15 +345,11 @@ int ComboBox::getMaxText( std::string txt, int w ) {
 	}
 	return len;
 }
+
 void ComboBox::Render( sf::RenderTarget& ren, sf::RenderStates states, bool isSelected ) {
 	
 	ren.draw( m_rectShape, states );
-	
-	if(m_is_textbox_mode ?  m_is_onarrow : isSelected) {
-		// FIXME: what was here?
-		//Draw_FillRect(ren, m_rect.x+m_rect.w-KVADRAT_SIZE+1, m_rect.y+1, KVADRAT_SIZE-2, m_rect.h-2, 0x336633 );
-	}
-	
+		
 	sf::Vertex vertices[4] = { 
 			sf::Vector2f( m_rect.x + m_rect.w - KVADRAT_SIZE + INNER_X, m_rect.y + INNER_Y ), 
 			sf::Vector2f( m_rect.x + m_rect.w - KVADRAT_SIZE/2, m_rect.y + INNER_Y*2), 
@@ -427,6 +399,7 @@ void ComboBox::Render( sf::RenderTarget& ren, sf::RenderStates states, bool isSe
 	}
 	
 }
+
 // not portable
 int ComboBox::getAverageHeight() {
 	return m_texts.begin()->getLocalBounds().height + lineMargin;
@@ -457,6 +430,7 @@ void ComboBox::updateItemsSize() {
 		}
 	}
 }
+
 // not portable
 void ComboBox::updateSelection() {
 	
@@ -467,12 +441,10 @@ void ComboBox::updateSelection() {
 	}
 	
 }
+
 // not portable
 void ComboBox::openBox() {
 	m_font_height = getAverageHeight();
-	//~ m_max_dropdown = m_max_dropdown_items * m_font_height;
-	
-	// TODO: proveri da li ovo zahteva ogranicavanje na m_max_dropdown_items
 	
 	m_dropdown_size = std::min<int>( m_items.size(), m_max_dropdown_items ) * m_font_height;
 	m_background.setPosition( m_rect.x, m_rect.y + m_rect.h );
@@ -521,11 +493,6 @@ void ComboBox::openBox() {
 	
 	void ComboBox::Render( Point pos, bool isSelected ) {
 		const Rect& rect = GetRect();
-		#ifdef SELECTION_MARK
-			Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::White );
-		#else
-			Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, Colors::White );
-		#endif
 		
 		Drawing::VLine( rect.x+pos.x+rect.w - KVADRAT_SIZE, rect.y+pos.y, rect.y+pos.y+rect.h, Colors::Gray );
 		
@@ -547,13 +514,13 @@ void ComboBox::openBox() {
 					break;
 				h += it->h;
 			}
-			Drawing::FillRect( rect.x + pos.x, rect.y + pos.y + rect.h, rect.w, rect.h + h, background_color);
+			Drawing::FillRect( rect.x + pos.x, rect.y + pos.y + rect.h, rect.w, rect.h + h, m_backcolor);
 			h=i=0;
 			for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 				if(i >= m_max_dropdown_items)
 					break;
 				if(m_virtual_selected_index == i) {
-					Drawing::FillRect( rect.x+pos.x, rect.y+pos.y + rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
+					Drawing::FillRect( rect.x+pos.x, rect.y+pos.y + rect.h + h, m_max_width - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, m_selection_color );
 				} else {
 					Drawing::Rect(rect.x+pos.x, rect.y+pos.y + rect.h + h, m_max_width, it->h, 0);
 				}
@@ -578,6 +545,8 @@ void ComboBox::openBox() {
 			Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y, m_text_loc.w, m_text_loc.h, tex_sel );
 		}
 		
+		Control::Render(pos, isSelected);
+		
 	}
 
 	int ComboBox::getAverageHeight() {
@@ -590,23 +559,6 @@ void ComboBox::openBox() {
 		}
 		return h / i + 1;
 	}
-
-	// int ComboBox::getMaxText( std::string txt, int w ) {
-		// TTF_Font* fnt = m_font;
-		
-		// int dummy, advance;
-		// int len = txt.length();
-		// int sum=0;
-		// for(int i=0; i < len; i++) {
-			// TTF_GlyphMetrics( fnt, txt[i], &dummy, &dummy, &dummy, &dummy, &advance);
-			// if( sum > w-15 ) {
-				// return i+1;
-			// }
-			// sum += advance;
-		// }
-		// return len;
-	// }
-
 
 	void ComboBox::openBox() {
 		const Rect& rect = GetRect();
@@ -672,13 +624,16 @@ void ComboBox::openBox() {
 
 void ComboBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {
-		_case("background_color"):
-			background_color = Colors::ParseColor(value);
 		_case("value"):
 			SetSelectedIndex(std::stoi(value));
-		_case("font"):
+		_case("font"): {
 			TTF_Font* fnt = Fonts::GetParsedFont( value );
 			if(fnt) m_font = fnt;
+			}
+		_case("selection_color"):
+			m_selection_color = Colors::ParseColor(value);
+		_case("dropdown_size"):
+			m_max_width = std::stoi(value);
 	}
 }
 

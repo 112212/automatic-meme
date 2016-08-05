@@ -5,14 +5,20 @@
 #include "Gui.hpp"
 #include "Widget.hpp"
 
+#ifdef USE_SDL
+	#include "common/SDL/Drawing.hpp"
+#endif
+
 namespace ng {
 Control::Control() : id("0"), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
-interactible(true), visible(true), anchor({{0,0},0}) {
+interactible(true), visible(true), anchor({{0,0},0}), m_bordercolor(0xff333376), m_hoverbordercolor(0xff1228D1), m_backcolor(0) {
 	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
 }
 
 Control::~Control() {
 }
+
+// int Control::m_hoverbordercolor = 0xff1D1DBB;
 
 const Point Control::getOffset() {
 	if(engine)
@@ -167,7 +173,13 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyDown( sf::Event::KeyEvent &sym ) {}
 	void Control::OnKeyUp( sf::Event::KeyEvent &sym ) {}
 #elif USE_SDL
-	void Control::Render( Point position, bool isSelected ) {}
+	void Control::Render( Point pos, bool selected ) {
+		#ifdef SELECTION_MARK
+			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, selected ? m_hoverbordercolor : m_bordercolor );
+		#else
+			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, m_bordercolor );
+		#endif
+	}
 	void Control::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {}
 	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {}
 #endif
@@ -217,6 +229,12 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			}
 		_case("visible"):
 			SetVisible(value=="true"); break;
+		_case("bordercolor"):
+			m_bordercolor = Colors::ParseColor(value);
+		_case("background_color"):
+			m_backcolor = Colors::ParseColor(value);
+		_case("hoverbordercolor"):
+			m_hoverbordercolor = Colors::ParseColor(value);
 		default:
 			OnSetStyle(style, value);
 	}

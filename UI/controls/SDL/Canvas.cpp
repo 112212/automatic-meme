@@ -14,7 +14,7 @@ Canvas::Canvas() {
 	align_to_grid = false;
 	display_grid = false;
 	maketex=true;
-	background_color = 0;
+	m_backcolor = 0;
 	grid_color = 0xff808080;
 }
 
@@ -27,8 +27,7 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
 	
-	Drawing::FillRect(x, y, rect.w, rect.h, background_color );
-	
+	Drawing::FillRect(x, y, rect.w, rect.h, m_backcolor );
 	
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
@@ -60,9 +59,7 @@ void Canvas::Render( Point pos, bool isSelected ) {
 		Drawing::TexRect( x, y, m_drawing->w, m_drawing->h, tex_drawing );
 	}
 	
-	Drawing::Rect( x, y, rect.w, rect.h, Colors::Gray );
-
-	
+	Control::Render(pos, isSelected);	
 }
 
 void Canvas::STYLE_FUNC(value) {
@@ -76,15 +73,15 @@ void Canvas::STYLE_FUNC(value) {
 			SetAlignToGrid( value == "true" );
 		_case("color"):
 			if(value[0] == '#') SetPixelColor( Colors::ParseColor(value)  ); 
-		_case("background_color"):
-			SetBackgroundColor( Colors::ParseColor(value) );
 		_case("grid_color"):
 			grid_color = Colors::ParseColor(value);
+		_case("readonly"):
+			SetReadOnly( value == "true" );
 	}
 }
 
 void Canvas::SetBackgroundColor(int color) {
-	background_color = color;
+	m_backcolor = color;
 }
 
 void Canvas::SetPixelSize(int size) {
@@ -162,7 +159,6 @@ void Canvas::OnMouseUp( int mX, int mY ) {
 void Canvas::OnLostFocus() {
 	m_is_mouseDown = false;
 }
-
 
 void Canvas::onPositionChange() {
 

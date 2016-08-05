@@ -21,6 +21,7 @@ ScrollBar::ScrollBar() {
 	m_max_value = 100;
 	m_mwheel_const = 4;
 	m_slider_click_offset = 0;
+	// m_bordercolor = 0xffffffff;
 		
 	#ifdef USE_SFML
 		m_outline.setFillColor( sf::Color::Transparent );
@@ -57,13 +58,8 @@ ScrollBar::~ScrollBar() {
 
 void ScrollBar::Render( Point pos, bool isSelected ) {
 	const Rect& r = GetRect();
-	#ifdef SELECTION_MARK
-		Drawing::Rect(r.x+pos.x, r.y+pos.y, r.w, r.h, isSelected ? Colors::Yellow : Colors::White );
-	#else
-		Drawing::Rect(r.x+pos.x, r.y+pos.y, r.w, r.h, Colors::White );
-	#endif
-	
 	Drawing::FillRect(m_slider.x+pos.x, m_slider.y+pos.y, m_slider.w, m_slider.h, Colors::White);
+	Control::Render(pos, isSelected);
 }
 
 #endif

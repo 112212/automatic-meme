@@ -25,8 +25,7 @@ class ListBox : public Control {
 		
 		std::vector<std::string> m_items;
 		
-		int backcolor;
-		
+		int m_selection_color;
 		struct TextLine{
 			Uint32 tex;
 			int w,h;

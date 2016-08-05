@@ -67,9 +67,9 @@ namespace Drawing {
 	#version 330\n\
 	\n\
 	layout (location = 0) in vec2 position;\n\
-	layout (location = 1) in vec3 color;\n\
+	layout (location = 1) in vec4 color;\n\
 	\n\
-	out vec3 inColor;\n\
+	out vec4 inColor;\n\
 	\n\
 	void main() {\n\
 		gl_Position = vec4( position, 0.0, 1.0 );\n\
@@ -81,12 +81,12 @@ namespace Drawing {
 	static const char* fragmentShader_code =
 	"#version 330\n\
 	\n\
-	in vec3 inColor;\n\
+	in vec4 inColor;\n\
 	\n\
 	out vec4 color;\n\
 	\n\
 	void main() {\n\
-		color = vec4(inColor, 1.0f);\n\
+		color = vec4(inColor);\n\
 	}\n\
 	";
 	
@@ -166,7 +166,7 @@ namespace Drawing {
 		glUseProgram(shader);
 		glBindVertexArray(vao);
 
-		float x1 = (float)(x+0.5) / sizeX * 2.0 - 1.0;
+		float x1 = (float)(x) / sizeX * 2.0 - 1.0;
 		float y1 = (float)(y) / sizeY * 2.0 - 1.0;
 		float x2 = (float)(x+w) / sizeX * 2.0 - 1.0;
 		float y2 = (float)(y+h) / sizeY * 2.0 - 1.0;
@@ -178,16 +178,16 @@ namespace Drawing {
 			x2, -y1,
 		};
 
-		float cr = (float)((color >> 24) & 0xff) / 255;
-		float cg = (float)((color >> 16) & 0xff) / 255;
-		float cb = (float)((color >> 8) & 0xff) / 255;
-		float ca = (float)(color & 0xff) / 255;
+		float cr = (float)((color >> 16) & 0xff) / 255.0f;
+		float cg = (float)((color >> 8) & 0xff) / 255.0f;
+		float cb = (float)((color) & 0xff) / 255.0f;
+		float ca = (float)(color >> 24) / 255.0f;
 
 		GLfloat colors[] = {
-			 cr, cg, cb,
-			 cr, cg, cb,
-			 cr, cg, cb,
-			 cr, cg, cb,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca,
 		};
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
@@ -198,7 +198,7 @@ namespace Drawing {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glDrawArrays(GL_LINE_LOOP, 0, 4);
 
@@ -222,16 +222,16 @@ namespace Drawing {
 			x2, -y1,
 		};
 
-		float cr = (float)((color >> 24) & 0xff) / 255.0f;
-		float cg = (float)((color >> 16) & 0xff) / 255.0f;
-		float cb = (float)((color >> 8) & 0xff) / 255.0f;
-		float ca = (float)(color & 0xff) / 255.0f;
+		float cr = (float)((color >> 16) & 0xff) / 255.0f;
+		float cg = (float)((color >> 8) & 0xff) / 255.0f;
+		float cb = (float)((color) & 0xff) / 255.0f;
+		float ca = (float)(color >> 24) / 255.0f;
 
 		GLfloat colors[] = {
-			 cr, cg, cb,
-			 cr, cg, cb,
-			 cr, cg, cb,
-			 cr, cg, cb,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca,
 		};
 
 		GLuint indices[] = {
@@ -247,7 +247,7 @@ namespace Drawing {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -271,12 +271,12 @@ namespace Drawing {
 		float x2 = (float)(x+radius) / sizeX * 2.0 - 1.0;
 		float y2 = (float)(y+radius) / sizeY * 2.0 - 1.0;
 
-		float cr = (float)((color >> 24) & 0xff) / 255;
-		float cg = (float)((color >> 16) & 0xff) / 255;
-		float cb = (float)((color >> 8) & 0xff) / 255;
-		float ca = (float)(color & 0xff) / 255;
+		float cr = (float)((color >> 16) & 0xff) / 255.0f;
+		float cg = (float)((color >> 8) & 0xff) / 255.0f;
+		float cb = (float)((color) & 0xff) / 255.0f;
+		float ca = (float)(color >> 24) / 255.0f;
 
-		std::vector<glm::vec3> colors;
+		std::vector<glm::vec4> colors;
 		std::vector<glm::vec2> positions;
 
 		glm::vec2 centerPos = glm::vec2(x1, -y1);
@@ -289,7 +289,7 @@ namespace Drawing {
 			);
 
 			positions.push_back(pos);
-			colors.push_back(glm::vec3(cr, cg, cb));
+			colors.emplace_back(cr, cg, cb, ca);
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
@@ -298,9 +298,9 @@ namespace Drawing {
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * colors.size(), &colors[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * colors.size(), &colors[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, triangleAmount+2);
 
@@ -320,12 +320,12 @@ namespace Drawing {
 		float x2 = (float)(x+radius) / sizeX * 2.0 - 1.0;
 		float y2 = (float)(y+radius) / sizeY * 2.0 - 1.0;
 
-		float cr = (float)((color >> 24) & 0xff) / 255;
-		float cg = (float)((color >> 16) & 0xff) / 255;
-		float cb = (float)((color >> 8) & 0xff) / 255;
-		float ca = (float)(color & 0xff) / 255;
+		float cr = (float)((color >> 16) & 0xff) / 255.0f;
+		float cg = (float)((color >> 8) & 0xff) / 255.0f;
+		float cb = (float)((color) & 0xff) / 255.0f;
+		float ca = (float)(color >> 24) / 255.0f;
 
-		std::vector<glm::vec3> colors;
+		std::vector<glm::vec4> colors;
 		std::vector<glm::vec2> positions;
 
 		for(int i = 0; i <= triangleAmount;i++) {
@@ -335,7 +335,7 @@ namespace Drawing {
 			);
 
 			positions.push_back(pos);
-			colors.push_back(glm::vec3(cr, cg, cb));
+			colors.push_back(glm::vec4(cr, cg, cb, ca));
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
@@ -344,9 +344,9 @@ namespace Drawing {
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * colors.size(), &colors[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * colors.size(), &colors[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glDrawArrays(GL_LINE_LOOP, 0, triangleAmount+1);
 
@@ -448,10 +448,10 @@ namespace Drawing {
 		float x2 = (float)(xB) / sizeX * 2.0 - 1.0;
 		float y2 = (float)(yB) / sizeY * 2.0 - 1.0;
 
-		float cr = (float)((color >> 24) & 0xff) / 255;
-		float cg = (float)((color >> 16) & 0xff) / 255;
-		float cb = (float)((color >> 8) & 0xff) / 255;
-		float ca = (float)(color & 0xff) / 255;
+		float cr = (float)((color >> 16) & 0xff) / 255.0f;
+		float cg = (float)((color >> 8) & 0xff) / 255.0f;
+		float cb = (float)((color) & 0xff) / 255.0f;
+		float ca = (float)(color >> 24) / 255.0f;
 
 		GLfloat positions[] = {
 			x1, -y1,
@@ -459,8 +459,8 @@ namespace Drawing {
 		};
 
 		GLfloat colors[] = {
-			 cr, cg, cb,
-			 cr, cg, cb,
+			 cr, cg, cb, ca,
+			 cr, cg, cb, ca
 		};
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
@@ -471,7 +471,7 @@ namespace Drawing {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glDrawArrays(GL_LINES, 0, 2);
 

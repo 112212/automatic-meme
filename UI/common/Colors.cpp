@@ -1,7 +1,5 @@
 #include "Colors.hpp"
 
-
-// CColors
 namespace Colors {
 	Uint32 White;
 	Uint32 Gray;
@@ -11,8 +9,8 @@ namespace Colors {
 	Uint32 Yellow;
 	Uint32 Blue;
 
-	Uint32 GetColor(unsigned char r, unsigned char g, unsigned char b) {
-		return (((unsigned int)(r) << 24) | ((unsigned int)(g) << 16) | (unsigned int)(b) << 8) | 0x000000ff;
+	Uint32 GetColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+		return (((unsigned int)(r) << 16) | ((unsigned int)(g) << 8) | (unsigned int)(b) & 0xff) | ((unsigned int)a << 24);
 	}
 	
 	bool is_inited = false;
@@ -31,7 +29,7 @@ namespace Colors {
 	
 	Uint32 ParseColor(std::string str) {
 		long val = std::stol(str.substr(1,8), 0, 16);
-		Uint32 color = val << 8;
+		Uint32 color = val;
 		if(str.size() < 9)
 			color |= 0xff000000;
 		return color;

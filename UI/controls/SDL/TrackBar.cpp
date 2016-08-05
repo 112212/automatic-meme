@@ -16,6 +16,7 @@ TrackBar::TrackBar() {
 	m_value = 0;
 	m_font = Fonts::GetFont( "default", 13 );
 	tex_text = 0;
+	m_bordercolor = 0;
 }
 
 TrackBar::~TrackBar() {
@@ -25,10 +26,7 @@ void TrackBar::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
-	#ifdef SELECTION_MARK
-	if(isSelected)
-		Drawing::Rect( x, y, rect.w, rect.h, Colors::Yellow);
-	#endif
+
 	if(m_is_vertical) {
 		int x2 = x + rect.w/2;
 		Drawing::Line( x2, y, x2, y+rect.h, Colors::White);
@@ -53,6 +51,8 @@ void TrackBar::Render( Point pos, bool isSelected ) {
 		Drawing::FillCircle( x + m_slider_pix, h - 1, m_slider_radius, m_on_it ? Colors::Yellow : Colors::White);
 	}
 	
+	Control::Render(pos,isSelected);
+	
 	if(tex_text != 0) {
 		if(m_is_vertical) {
 			pos.x += m_slider_radius+2;
@@ -62,6 +62,7 @@ void TrackBar::Render( Point pos, bool isSelected ) {
 		}
 		Drawing::TexRect(m_text_rect.x+pos.x, m_text_rect.y+pos.y, m_text_rect.w, m_text_rect.h, tex_text);
 	}
+	
 }
 
 

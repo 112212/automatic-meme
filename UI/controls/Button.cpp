@@ -20,8 +20,8 @@ Button::Button() {
 		m_font = Fonts::GetFont( "default", 25 );
 		need_update = false;
 	#endif
-	backcolor = Colors::Dgray;
 	m_is_mouseDown = false;
+	m_backcolor = Colors::Dgray;
 }
 
 Button::~Button() {
@@ -30,8 +30,6 @@ Button::~Button() {
 
 void Button::STYLE_FUNC(value) {
 	STYLE_SWITCH {
-		_case("background_color"):
-			backcolor = Colors::ParseColor(value);
 		_case("value"):
 			SetText(value);
 		_case("font"):
@@ -86,13 +84,9 @@ void Button::STYLE_FUNC(value) {
 			need_update = false;
 		}
 		
-		Drawing::FillRect(x, y, r.w, r.h, backcolor);
+		Drawing::FillRect(x, y, r.w, r.h, m_backcolor);
 		
-		#ifdef SELECTION_MARK
-			Drawing::Rect(x, y, r.w, r.h, isSelected ?  Colors::Yellow : Colors::White);
-		#else
-			Drawing::Rect(x, y, r.w, r.h, Colors::White);
-		#endif
+		Control::Render(pos,isSelected);
 		
 		Drawing::TexRect(m_text_rect.x + pos.x, m_text_rect.y + pos.y, m_text_rect.w, m_text_rect.h, tex_text);
 	}

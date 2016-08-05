@@ -19,10 +19,7 @@ void RadioButton::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
-	#ifdef SELECTION_MARK
-	if(isSelected)
-		Drawing::Rect(x, y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::Yellow );
-	#endif
+	
 	Drawing::Circle( x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
 	if(m_surf_text) {
 		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y-5, m_surf_text->w, m_surf_text->h, tex_text );
@@ -30,6 +27,8 @@ void RadioButton::Render( Point pos, bool isSelected ) {
 	if(m_isSelected) {
 		Drawing::FillCircle(x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
 	}
+	
+	Control::Render(pos,isSelected);
 }
 
 

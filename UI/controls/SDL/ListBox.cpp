@@ -12,7 +12,7 @@ ListBox::ListBox() {
 	m_scrollbar_focus = false;
 	
 	m_last_scroll = 0;
-	backcolor = 0;
+	m_selection_color = 0xff0414CA;
 }
 
 ListBox::~ListBox() {
@@ -24,29 +24,26 @@ void ListBox::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
+	
+	
+	Drawing::FillRect(  x, y, rect.w, rect.h, m_backcolor );
+	
 	// draw items
 	int h=0,i=0;
 	int offs = getListOffset();
 	for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 		if(i >= m_max_items)
 			break;
-		if(m_selected_index == i+offs) {
-			Drawing::FillRect(  x, y + h, rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, 0x50500000 );
-		} else
-			Drawing::FillRect(  x, y + h, rect.w, it->h, backcolor );
+		if(m_selected_index == i+offs)
+			Drawing::FillRect(  x, y + h, rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, m_selection_color );
 		Drawing::TexRect( x+2, y+h, it->w, it->h, it->tex );
 		h += it->h;
 	}
 	if(m_drawscrollbar) {
 		m_scrollbar->Render( pos, false );
 	}
-	Drawing::Rect(x, y, rect.w, rect.h, Colors::Gray );
 	
-	#ifdef SELECTION_MARK
-		Drawing::Rect(x, y, rect.w, rect.h, isSelected ? Colors::Yellow : Colors::White );
-	#else
-		Drawing::Rect( x, y, rect.w, rect.h, Colors::White );
-	#endif
+	Control::Render(pos,isSelected);
 }
 
 void ListBox::AddItem( std::string item ) {
@@ -239,8 +236,6 @@ void ListBox::STYLE_FUNC(value) {
 			TTF_Font* fnt = Fonts::GetParsedFont( value );
 			if(fnt) m_font = fnt;
 		}
-		_case("background_color"):
-			backcolor = Colors::ParseColor(value);
 	}
 }
 

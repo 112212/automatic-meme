@@ -21,10 +21,6 @@ void WidgetMover::OnMouseUp( int mX, int mY ) {
 }
 
 void WidgetMover::Render( Point pos, bool isSelected ) {
-	#ifdef SELECTION_MARK
-		Drawing::Rect(GetRect().x+pos.x, GetRect().y+pos.y, GetRect().w, GetRect().h, isSelected ? Colors::Yellow : Colors::White );
-	#else
-		Drawing::Rect( GetRect().x+pos.x, GetRect().y+pos.y, GetRect().w, GetRect().h, Colors::White );
-	#endif
+	Control::Render(pos,isSelected);
 }
 }

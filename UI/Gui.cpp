@@ -100,6 +100,7 @@ void GuiEngine::UnlockWidget() {
 		w = w->widget;
 		d++;
 	}
+	
 	// fix intercept vector
 	// shift intercept vector
 	for(int i=depth; i >= 0; i--) {
@@ -243,12 +244,12 @@ void GuiEngine::RemoveControl( Control* control ) {
 }
 
 #define INTERCEPT_HOOK(action_enum,action) {						\
-	if((sel_intercept & Widget::imask::action_enum) != 0) {  	\
+	if((sel_intercept & Widget::imask::action_enum) != 0) {  		\
 		for(int i=0; !hasIntercepted; i++) {                        \
 			interceptInfo &v = sel_intercept_vector[i];             \
 			if(!v.widget) break;                                    \
 			if((v.intercept_mask                                    \
-				& Widget::imask::action_enum) != 0) {          \
+				& Widget::imask::action_enum) != 0) {          		\
 				v.widget->action;                                   \
 			}                                                       \
 		}                                                           \
@@ -259,14 +260,14 @@ void GuiEngine::RemoveControl( Control* control ) {
 		selected_control->action;										\
 	}
 	
-#define WIDGET_HOOK(action_enum,action) if(last_selected_widget) { 	\
-	if((sel_intercept & Widget::imask::action_enum) != 0) {		\
+#define WIDGET_HOOK(action_enum,action) if(last_selected_widget) { 		\
+	if((sel_intercept & Widget::imask::action_enum) != 0) {				\
 		/*sel_first_depth_widget->action;*/								\
 		for(int i=0; !hasIntercepted; i++) {                        	\
 			interceptInfo &v = sel_intercept_vector[i];             	\
 			if(!v.widget) break;                                    	\
 			if((v.intercept_mask                                    	\
-				& Widget::imask::action_enum) != 0) {          	\
+				& Widget::imask::action_enum) != 0) {          			\
 				v.widget->action;                                   	\
 			}                                                       	\
 		}    															\
@@ -292,7 +293,6 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 	if( selected_control ) {
 		if(m_focus_lock) {
 			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y ));
-			// selected_control->OnMouseDown( control_coords.x, control_coords.y );
 			if(m_focus_lock)
 				return;
 			if(m_lock_once) {
@@ -302,14 +302,12 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 		}
 
 		if( check_control_collision(selected_control, control_coords.x, control_coords.y) ) {
-			// selected_control->OnMouseDown( control_coords.x, control_coords.y );
 			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y ));
 		} else {
 			unselectControl();
 			check_for_new_collision( mX, mY );
 			if(selected_control) {
 				selected_control->OnGetFocus();
-				// selected_control->OnMouseDown( control_coords.x, control_coords.y );
 				INTERCEPT_HOOK(mouse_down, OnMouseDown( mX-sel_widget_offset.x, mY-sel_widget_offset.y ));
 			}
 		}
@@ -321,7 +319,6 @@ void GuiEngine::OnMouseUp( int mX, int mY ) {
 	m_mouse_down = false;
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	if( selected_control )
-		// selected_control->OnMouseUp( control_coords.x, control_coords.y );
 		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y ));
 }
 
@@ -329,7 +326,6 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	if(selected_control) {
 		if( m_mouse_down || m_focus_lock ) {
-			// selected_control->OnMouseMove( control_coords.x, control_coords.y, m_mouse_down );
 			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
 			return;
 		}
@@ -354,7 +350,6 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 			selected_control->customBoundary(control_coords.x, control_coords.y) : 
 			check_control_collision(selected_control, control_coords.x, control_coords.y))
 		{
-			// selected_control->OnMouseMove( control_coords.x, control_coords.y, m_mouse_down );
 			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
 			if(!m_focus) {
 				selected_control->OnGetFocus();
@@ -378,7 +373,6 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 void GuiEngine::OnMWheel( int updown ) {
 	if(selected_control) {
 		INTERCEPT_HOOK(mwheel, OnMWheel( updown ));
-		// selected_control->OnMWheel( updown );
 	} else WIDGET_HOOK(mwheel, OnMWheel( updown ));
 }
 
@@ -511,9 +505,6 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 		sel_widget_offset = offset;
 	}
 	
-	// if(last_selected_widget)
-	// cout << "widget: " << last_selected_widget->id << ", " << " depth: " << depth << ", selected_control: " << (selected_control != 0) << endl;
-	// else cout << "depth: " << depth << endl;
 	
 	sel_intercept_vector[depth].widget = 0;
 	
@@ -553,7 +544,6 @@ void GuiEngine::unselectWidget() {
 		if(selected_control)
 			unselectControl();
 		Widget* w = last_selected_widget;
-		// w->selected_control = 0;
 		w = w->widget;
 		last_selected_widget = w;
 		depth--;
@@ -599,7 +589,6 @@ void GuiEngine::unselectControl() {
 
 
 void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<void(Control*)> callback ) {
-	// subscribers.insert(std::make_pair(std::make_pair(id,event_type), callback));
 	auto it = map_id_control.find(id);
 	if(it != map_id_control.end()) {
 		it->second->SubscribeEvent(event_type, callback);
@@ -659,28 +648,24 @@ void GuiEngine::OnCleanup() {
 	void GuiEngine::OnKeyDown( sf::Event::KeyEvent &sym ) {
 		if(selected_control) {
 			INTERCEPT_HOOK(key_down, OnKeyDown( sym ));
-			// selected_control->OnKeyDown( sym );
 		}
 	}
 
 	void GuiEngine::OnKeyUp( sf::Event::KeyEvent &sym ) {
 		if(selected_control) {
 			INTERCEPT_HOOK(key_up, OnKeyUp( sym ));
-			// selected_control->OnKeyUp( sym );
 		}
 	}
 #elif USE_SDL
 	void GuiEngine::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod) {
 		if(selected_control) {
 			INTERCEPT_HOOK(key_down, OnKeyDown( sym, mod ));
-			// selected_control->OnKeyDown( sym, mod );
 		}
 	}
 
 	void GuiEngine::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {
 		if(selected_control) {
 			INTERCEPT_HOOK(key_up, OnKeyUp( sym, mod ));
-			// selected_control->OnKeyUp( sym, mod );
 		}
 	}
 	void GuiEngine::Render() {
@@ -731,6 +716,7 @@ void GuiEngine::OnCleanup() {
 			case SDL_WINDOWEVENT:
 				switch(event.window.event) {
 					case SDL_WINDOWEVENT_RESIZED:
+					// case SDL_WINDOWEVENT_SIZE_CHANGED: // probably not needed
 						Drawing::SetResolution(event.window.data1, event.window.data2);
 						ApplyAnchoring();
 						break;

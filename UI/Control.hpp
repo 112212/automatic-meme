@@ -117,6 +117,9 @@ class Control {
 		int minor_type;
 		int z_index;
 		
+		int m_bordercolor;
+		int m_backcolor;
+		int m_hoverbordercolor;
 		
 		static bool custom_check;
 		

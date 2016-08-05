@@ -53,7 +53,6 @@ class ComboBox : public Control {
 			std::vector<sf::Text> m_texts;
 		#elif USE_SDL
 			Uint32 tex_sel;
-			int background_color;
 			TTF_Font* m_font;
 			
 			struct TextLine{
@@ -68,11 +67,10 @@ class ComboBox : public Control {
 		ScrollBar *m_scrollbar;
 		TextBox *m_textbox;
 		
-		// min, max dropdown
-		//int m_max_dropdown;
 		int m_max_dropdown_items;
 		int m_dropdown_size;
 		int m_last_scroll;
+		int m_selection_color;
 		
 		int m_max_width;
 		

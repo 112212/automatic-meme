@@ -19,7 +19,6 @@ class Button : public Control {
 			bool need_update;
 			std::string text;
 		#endif
-		int backcolor;
 		Point text_loc;
 		bool m_is_mouseDown;
 		

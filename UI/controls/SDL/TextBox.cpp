@@ -3,15 +3,16 @@
 #include <cctype> // toupper
 #include <list>
 namespace ng {
-TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_anchor{-1,-1}, 
-	m_cursor_max_x(0) {
+TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_anchor{-1,-1} /*textboxes anchor*/, 
+		m_cursor_max_x(0) {
+	setType( TYPE_TEXTBOX );
 	m_multiline = false;
 	m_terminal_mode = false;
-	setType( TYPE_TEXTBOX );
 	m_font = Fonts::GetFont( "default", 13 );
 	m_cursor_blink_counter = 0;
 	m_cursor_blinking_rate = 300;
 	m_terminal_max_messages = 100;
+	m_backcolor = 0;
 }
 
 TextBox::~TextBox() {
@@ -23,14 +24,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	const Rect& rect = this->GetRect();
 	Point r = rect.Offset(pos);
 	
-	Drawing::FillRect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, 0x05055050 );
-	
-	#ifdef SELECTION_MARK
-		Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, selected ? Colors::Blue : Colors::GetColor(50,50,100) );
-	#else
-		Drawing::Rect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, Colors::White );
-	#endif
-	
+	Drawing::FillRect(rect.x+pos.x, rect.y+pos.y, rect.w, rect.h, m_backcolor );
 	
 	int w,h;
 	Drawing::GetResolution(w,h);
@@ -56,17 +50,17 @@ void TextBox::Render( Point pos, bool selected ) {
 				std::string pd1 = m_lines[yy].text.substr(0, p1.x);
 				int selw = Fonts::getTextSize( m_font, pd );
 				int selw1 = Fonts::getTextSize( m_font, pd1 );
-				Drawing::FillRect( rect.x-sz+5+selw1, rect.y+5+j*m_line_height, selw, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5+selw1, rect.y+5+j*m_line_height, selw, i->h, m_selection_color);
 			} else if(yy == p1.y) {
 				std::string pd = m_lines[yy].text.substr(p1.x);
 				int selw = Fonts::getTextSize( m_font, pd );
-				Drawing::FillRect( rect.x-sz+5+i->w-selw, rect.y+5+j*m_line_height, selw, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5+i->w-selw, rect.y+5+j*m_line_height, selw, i->h, m_selection_color);
 			} else if(yy == p2.y) {
 				std::string pd = m_lines[yy].text.substr(0,p2.x);
 				int selw = Fonts::getTextSize( m_font, pd );
-				Drawing::FillRect( rect.x-sz+5, rect.y+5+j*m_line_height, selw, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5, rect.y+5+j*m_line_height, selw, i->h, m_selection_color);
 			} else {
-				Drawing::FillRect( rect.x-sz+5, rect.y+5+j*m_line_height, i->w, i->h, 0x808080);
+				Drawing::FillRect( rect.x-sz+5, rect.y+5+j*m_line_height, i->w, i->h, m_selection_color);
 			}
 		}
 	}
@@ -88,8 +82,11 @@ void TextBox::Render( Point pos, bool selected ) {
 			(m_cursor.y-m_position.y)*m_line_height+rect.y+5, 1, m_line_height, 0xffffffff);
 	}
 	
-	
+	Control::Render(pos, selected);
 }
+
+int TextBox::m_cursor_color = 0xffffffff;
+int TextBox::m_selection_color = 0xff808080;
 
 void TextBox::SetText( std::string text ) {
 	if(m_lines.size() > 0)
@@ -129,9 +126,12 @@ void TextBox::STYLE_FUNC(value) {
 			SetMultilineMode(value == "true");
 		// _case("terminal_mode"):
 			// SetTerminalMode(value == "true");
-		_case("font"):
+		_case("font"): {
 			TTF_Font* fnt = Fonts::GetParsedFont( value );
 			if(fnt) m_font = fnt;
+			}
+		_case("selection_color"):
+			m_selection_color = Colors::ParseColor(value);
 	}
 		
 }
@@ -541,6 +541,12 @@ void TextBox::PutTextAtCursor(std::string text) {
 	m_cursor_max_x = m_cursor.x;
 	updatePosition();
 	
+}
+
+TextBox* TextBox::Clone() {
+	TextBox* t = new TextBox;
+	*t = *this;
+	return t;
 }
 
 void TextBox::SetTerminalMode( bool tf ) {

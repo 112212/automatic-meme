@@ -32,7 +32,8 @@ class TextBox : public Control {
 		int m_text_max;
 		int m_lines_max;
 		int m_line_height;
-		
+		static int m_selection_color;
+		static int m_cursor_color;
 		
 		void updatePosition();
 		void onFontChange();
@@ -77,6 +78,7 @@ class TextBox : public Control {
 		virtual void OnLostControl();
 		//
 				
+		TextBox* Clone();
 		void SetText(std::string text);
 		std::string GetText();
 		std::string GetSelectedText();
