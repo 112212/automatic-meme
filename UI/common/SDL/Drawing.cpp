@@ -238,7 +238,10 @@ namespace Drawing {
 			0, 1, 3,
 			1, 2, 3,
 		};
-
+	
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);

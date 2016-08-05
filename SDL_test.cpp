@@ -177,7 +177,7 @@ int main() {
 		SDL_GL_SwapWindow(win); 
 	}
 	
-	SDL_DestroyRenderer(ren);
+	// SDL_DestroyRenderer(ren);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
 }

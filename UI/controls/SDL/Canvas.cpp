@@ -96,6 +96,7 @@ void Canvas::OnMouseDown( int mX, int mY ) {
 }
 
 void Canvas::PutPixel(int x, int y) {
+	if(x < 0 or y < 0) return;
 	if(align_to_grid) {
 		x = x - x%pixel_size;
 		y = y - y%pixel_size;
