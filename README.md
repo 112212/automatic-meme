@@ -1,2 +1,4 @@
 # simple-gui-engine
-This is my new simple gui for renderi in SDL, SFML or OpenGL.
+This is my new simple gui for rendering in OpenGL, (SFML easy to implement).
+
+## if imgui is bloatfree, this is bloat-bloatfree

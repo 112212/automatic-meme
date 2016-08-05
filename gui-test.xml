@@ -1,8 +1,9 @@
 <gui>
 	<theme>
-		<button backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
-		<listbox id="200" rect="0,0,200,200" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
-		<textbox backgroundcolor="#ff050550" />
+		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
+		<listbox id="200" rect="0,0,200,200" backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
+		<textbox backgroundcolor="#050550" />
+		<canvas backgroundcolor="#050550" />
 	</theme>
 	<anchor pos="rL+50,T+100">
 		<button id="2" rect="0,0,100,50" value="nikola" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" visible="true"/>
@@ -83,6 +84,6 @@ fddgdf"></label>
 		<scrollbar rect="0,0,50,300" id="25" minvalue="50" orientation="vertical" slidersize="30"></scrollbar>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
-		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000"></canvas>
+		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
 	</anchor>
 </gui>

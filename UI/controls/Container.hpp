@@ -39,6 +39,8 @@ class Container : public Widget {
 		#elif USE_SDL
 			void Render( Point position, bool isSelected );
 		#endif
+		
+		Container* Clone();
 		void OnMWheel( int updown );
 		void OnMouseDown( int mX, int mY );
 		void OnMouseUp( int x, int y );

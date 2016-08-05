@@ -34,7 +34,7 @@ class RadioButton : public Control {
 		
 		bool IsSelected() { return m_isSelected; }
 
-		
+		RadioButton* Clone();
 		void SetText( std::string text );
 		void SetGroup( int group ) { m_group = group; }
 		void Unselect() { m_isSelected = false; }

@@ -22,6 +22,12 @@ TrackBar::TrackBar() {
 TrackBar::~TrackBar() {
 }
 
+TrackBar* TrackBar::Clone() {
+	TrackBar* t = new TrackBar;
+	*t = *this;
+	return t;
+}
+
 void TrackBar::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;

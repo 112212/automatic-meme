@@ -28,6 +28,7 @@ class CheckBox : public Control {
 		CheckBox();
 		~CheckBox();
 		
+		CheckBox* Clone();
 		void Render( Point pos, bool isSelected );
 		void OnMouseDown( int mX, int mY );
 		void OnMouseUp( int mX, int mY );

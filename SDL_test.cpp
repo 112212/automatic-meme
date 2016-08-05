@@ -94,36 +94,48 @@ int main() {
 	
 	GuiEngine gui;
 	
-	gui.LoadXml("gui-test.xml");
+	gui.LoadXml("gui2.xml");
 	
-	gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
-		cout << "clicked at 1 \n";
-	});
-	gui.SubscribeEvent("55", EVENT_BUTTON_CLICK, [](Control* c){
-		cout << "clicked at 3 \n";
-	});
-	gui.SubscribeEvent("56", EVENT_BUTTON_CLICK, [](Control* c){
-		cout << "clicked at 4 \n";
-	});
+	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
+		// cout << "clicked at 1 \n";
+	// });
+	// gui.SubscribeEvent("55", EVENT_BUTTON_CLICK, [](Control* c){
+		// cout << "clicked at 3 \n";
+	// });
+	// gui.SubscribeEvent("56", EVENT_BUTTON_CLICK, [](Control* c){
+		// cout << "clicked at 4 \n";
+	// });
 	
-	gui.SubscribeEvent("2", EVENT_BUTTON_CLICK, [](Control* c){
-		cout << "clicked at nikola\n";
-		Button* b = (Button*)c;
-		b->SetText("you clicked at me");
-		b->SetRect(50,50,200, 50);
-	});
+	// gui.SubscribeEvent("2", EVENT_BUTTON_CLICK, [](Control* c){
+		// cout << "clicked at nikola\n";
+		// Button* b = (Button*)c;
+		// b->SetText("you clicked at me");
+		// b->SetRect(50,50,200, 50);
+	// });
 	
-	gui.SubscribeEvent("546", EVENT_TRACKBAR_CHANGE, [](Control *c) {
-		cout << "trackbar changed: " << ((TrackBar*)c)->GetValue() << endl;
-	});
+	// gui.SubscribeEvent("546", EVENT_TRACKBAR_CHANGE, [](Control *c) {
+		// cout << "trackbar changed: " << ((TrackBar*)c)->GetValue() << endl;
+	// });
 	
-	gui.SubscribeEvent("20", EVENT_SCROLLBAR_CHANGE, [](Control* c) {
-		ScrollBar* s = (ScrollBar*)c;
-		cout << "value is: " << s->GetValue() << endl;
-	});
+	// gui.SubscribeEvent("20", EVENT_SCROLLBAR_CHANGE, [](Control* c) {
+		// ScrollBar* s = (ScrollBar*)c;
+		// cout << "value is: " << s->GetValue() << endl;
+	// });
 	
-	Drawing::SetResolution( sizeX, sizeY );
-	Drawing::Init();
+	// Drawing::SetResolution( sizeX, sizeY );
+	gui.SetSize(sizeX, sizeY);
+	// Drawing::Init();
+	
+	TextBox* tb_debug = (TextBox*)gui.GetControlById("debug");
+	//tb_debug->SetText("text");
+	//tb_debug->SetRect(0, 0, 100, 50);
+	
+	Canvas* cv_minimap = (Canvas*)gui.GetControlById("minimap");
+	// cv_minimap->SetBackgroundColor(0x00000000);
+	cv_minimap->SetPixelColor(0x00ff0000);
+	cv_minimap->PutPixel(1,1);
+	cv_minimap->SetPixelColor(0xff00ff00);
+	cv_minimap->PutPixel(2,2);
 	
 	Button* btn = (Button*)ControlManager::CreateControl("button");
 	Anchor a = btn->GetAnchor();
@@ -135,10 +147,10 @@ int main() {
 	btn->SetId("36");
 	gui.AddControl(btn);
 	
-	Widget* w1 = (Widget*)gui.GetControlById("w1");
+	// Widget* w1 = (Widget*)gui.GetControlById("w1");
 	
-	std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
-	w1->LoadXml(s);
+	// std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
+	// w1->LoadXml(s);
 	
 	gui.ApplyAnchoring();
 	

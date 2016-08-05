@@ -43,6 +43,8 @@ class ScrollBar : public Control {
 		#elif USE_SDL
 			void Render( Point position, bool isSelected );
 		#endif
+		
+		ScrollBar* Clone();
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY );
 		void OnMouseUp( int mX, int mY );

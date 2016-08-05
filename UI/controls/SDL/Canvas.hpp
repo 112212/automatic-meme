@@ -36,6 +36,7 @@ class Canvas : public Control {
 		Canvas();
 		~Canvas();
 		
+		Canvas* Clone();
 		void PutPixel(int x, int y);
 		void SetPixelSize(int size);
 		void SetBackgroundColor(int color);

@@ -135,7 +135,7 @@ void Button::STYLE_FUNC(value) {
 
 #endif
 
-Control* Button::Clone() {
+Button* Button::Clone() {
 	Button *btn = new Button;
 	*btn = *this;
 	return btn;

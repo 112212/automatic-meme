@@ -1,7 +1,6 @@
 #include "Canvas.hpp"
 #include "../../common/SDL/Drawing.hpp"
 
-//#define SELECTION_MARK
 namespace ng {
 Canvas::Canvas() {
 	setType( TYPE_CANVAS );
@@ -129,6 +128,11 @@ void Canvas::Clear(int color) {
 	SDL_FillRect(m_drawing, 0, color);
 }
 
+Canvas* Canvas::Clone() {
+	Canvas* c = new Canvas;
+	*c = *this;
+	return c;
+}
 
 void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
 	

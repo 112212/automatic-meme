@@ -114,6 +114,12 @@ void ScrollBar::OnMouseUp( int mX, int mY ) {
 	sendGuiCommand( GUI_UNLOCK );
 }
 
+ScrollBar* ScrollBar::Clone() {
+	ScrollBar* s = new ScrollBar;
+	*s = *this;
+	return s;
+}
+
 void ScrollBar::OnMouseDown( int mX, int mY ) {
 	if(m_is_readonly) return;
 	const Rect& rect = GetRect();

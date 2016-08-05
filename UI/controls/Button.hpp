@@ -43,7 +43,7 @@ class Button : public Control {
 		
 		void SetText( std::string text );
 		
-		Control* Clone();
+		Button* Clone();
 };
 }
 #endif

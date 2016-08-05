@@ -86,6 +86,12 @@ void CheckBox::OnLostFocus() {
 }
 
 
+CheckBox* CheckBox::Clone() {
+	CheckBox* c = new CheckBox;
+	*c = *this;
+	return c;
+}
+
 void CheckBox::onPositionChange() {
 	if(m_text)
 		updateText(); // update poziciju teksta :)

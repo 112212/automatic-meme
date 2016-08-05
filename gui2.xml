@@ -1,0 +1,8 @@
+<gui>
+	<anchor pos="rL+50,T+50">
+		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" id="debug" multiline="true" terminal_mode="false" rect="0,0,400,200" value=":)" backgroundcolor="#00ff0000"></textbox>
+	</anchor>
+	<anchor pos="R,B">
+		<canvas rect="0,0,250,250" id="minimap" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" backgroundcolor="#ffFF0000"></canvas>
+	</anchor>
+</gui>

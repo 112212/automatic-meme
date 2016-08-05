@@ -41,6 +41,13 @@ GuiEngine::GuiEngine() : ControlManager(this) {
 	sel_intercept = 0;
 	sel_intercept_vector.resize(15);
 	
+	Drawing::Init();
+}
+
+
+void GuiEngine::SetSize(int w, int h) {
+	Drawing::SetResolution(w, h);
+	ApplyAnchoring();
 }
 
 void GuiEngine::LockWidget(Widget* widget) {

@@ -42,6 +42,7 @@ class Label : public Control {
 		Label();
 		~Label();
 
+		Control* Clone();
 		void SetText( std::string text );
 		void SetFont( std::string text, int size );
 };

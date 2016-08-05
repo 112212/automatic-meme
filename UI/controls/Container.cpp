@@ -325,6 +325,12 @@ void Container::onOverflow() {
 	}
 }
 
+Container* Container::Clone() {
+	Container* c = new Container;
+	*c = *this;
+	return c;
+}
+
 void Container::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("background_color"):

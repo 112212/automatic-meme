@@ -102,6 +102,12 @@ void Label::SetFont( std::string text, int size ) {
 	}
 }
 
+Control* Label::Clone() {
+	Label* l = new Label;
+	*l = *this;
+	return l;
+}
+
 void Label::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):

@@ -106,6 +106,7 @@ class GuiEngine : public ControlManager
 		void LockWidget(Widget* w);
 		void UnlockWidget();
 		Control* GetControlById(std::string id);
+		void SetSize(int w, int h);
 		
 		Control* GetSelectedControl() { return selected_control; }
 		Widget* GetSelectedWidget() { return last_selected_widget; }

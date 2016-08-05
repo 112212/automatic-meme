@@ -40,6 +40,7 @@ class TrackBar : public Control {
 		TrackBar();
 		~TrackBar();
 		
+		TrackBar* Clone();
 		void Render( Point pos, bool isSelected );
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY );

@@ -108,4 +108,11 @@ void RadioButton::onPositionChange() {
 		SetText( m_text );
 }
 
+RadioButton* RadioButton::Clone() {
+	RadioButton* r = new RadioButton;
+	*r = *this;
+	return r;
+}
+
+
 }
