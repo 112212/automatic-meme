@@ -13,6 +13,7 @@ TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_ancho
 	m_cursor_blinking_rate = 300;
 	m_terminal_max_messages = 100;
 	m_backcolor = 0;
+	m_readonly = false;
 }
 
 TextBox::~TextBox() {
@@ -77,9 +78,11 @@ void TextBox::Render( Point pos, bool selected ) {
 	if(++m_cursor_blink_counter > m_cursor_blinking_rate && m_cursor.y-m_position.y < m_lines.size()) {
 		if(m_cursor_blink_counter > 2*m_cursor_blinking_rate)
 			m_cursor_blink_counter = 0;
-		std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x);
-		Drawing::Rect(Fonts::getTextSize( m_font, piece )+rect.x+5, 
-			(m_cursor.y-m_position.y)*m_line_height+rect.y+5, 1, m_line_height, 0xffffffff);
+		if(m_cursor.x-m_position.x >= 0) {
+			std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x);
+			Drawing::Rect(Fonts::getTextSize( m_font, piece )+rect.x+5, 
+				(m_cursor.y-m_position.y)*m_line_height+rect.y+5, 1, m_line_height, 0xffffffff);
+		}
 	}
 	
 	Control::Render(pos, selected);
@@ -126,12 +129,10 @@ void TextBox::STYLE_FUNC(value) {
 			SetMultilineMode(value == "true");
 		// _case("terminal_mode"):
 			// SetTerminalMode(value == "true");
-		_case("font"): {
-			TTF_Font* fnt = Fonts::GetParsedFont( value );
-			if(fnt) m_font = fnt;
-			}
 		_case("selection_color"):
 			m_selection_color = Colors::ParseColor(value);
+		_case("readonly"):
+			SetReadOnly(value == "true");
 	}
 		
 }
@@ -247,8 +248,8 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 
 
 void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
+	if(m_readonly) return;
 	int val = sym;
-	
 	// if(val >= 256 && val <= 265) val -= 208;
 	// cout << val << endl;
 	m_cursor_blink_counter = m_cursor_blinking_rate;
@@ -383,7 +384,8 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				switch(val) {
 					case 'c': // copy
 						handled = true;
-						SDL_SetClipboardText( GetSelectedText().c_str() );
+						if(GetSelectedText().size() > 0)
+							SDL_SetClipboardText( GetSelectedText().c_str() );
 						break;
 					case 'v': // paste
 						handled = true;
@@ -438,6 +440,7 @@ std::string TextBox::GetSelectedText() {
 	Point p1,p2;
 	sortPoints(p1,p2);
 	
+	if(p1.x == -1 or p2.x == -1) return std::string("");
 	std::string str = m_lines[p1.y].text.substr(p1.x, p2.y == p1.y ? (p2.x - p1.x) : std::string::npos);
 	if(p1.y != p2.y) {
 		for(auto it = m_lines.begin()+p1.y+1; it != m_lines.begin()+p2.y; it++) {
@@ -471,6 +474,7 @@ void TextBox::deleteSelection() {
 	
 	m_cursor = p1;
 	m_anchor.x = -1;
+	updatePosition();
 }
 
 static void find_and_replace(std::string& source, std::string const& find, std::string const& replace) {
@@ -503,8 +507,6 @@ void TextBox::PutTextAtCursor(std::string text) {
 		m_line_max = std::max<int>(m_line_max, line.text.size());
 		lines.push_back(line);
 	}
-	
-	
 	
 	Point next_cursor;
 	next_cursor.y = m_cursor.y + lines.size() - 1;
@@ -571,6 +573,10 @@ void TextBox::SetTerminalHistoryBuffer(int n_messages) {
 }
 
 void TextBox::TerminalAddMessage( std::string msg ) {
+}
+
+void TextBox::SetReadOnly( bool readonly ) {
+	m_readonly = readonly;
 }
 
 }

@@ -68,6 +68,7 @@ sdl_test_cpp := $(cpp) SDL_test.cpp \
 		UI/controls/SDL/Canvas.cpp \
 		UI/controls/SDL/CheckBox.cpp \
 		UI/controls/WidgetMover.cpp \
+		UI/controls/Terminal.cpp \
 		UI/common/SDL/Drawing.cpp \
 		
 sdl_test_obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(sdl_test_cpp)))

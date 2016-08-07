@@ -232,18 +232,16 @@ void ListBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetSelectedIndex(std::stoi(value));
-		_case("font"): {
-			TTF_Font* fnt = Fonts::GetParsedFont( value );
-			if(fnt) m_font = fnt;
-		}
 	}
 }
 
-Control* ListBox::Clone() {
+ListBox* ListBox::Clone() {
 	ListBox* lb = new ListBox;
 	*lb = *this;
 	return lb;
 }
 
-
 }
+
+
+

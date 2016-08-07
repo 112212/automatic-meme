@@ -28,6 +28,7 @@ class TextBox : public Control {
 		int m_cursor_max_x;
 		int m_cursor_blink_counter;
 		int m_cursor_blinking_rate;
+		int m_readonly;
 		
 		int m_text_max;
 		int m_lines_max;
@@ -93,6 +94,7 @@ class TextBox : public Control {
 		void SetTerminalMode( bool tf );
 		void SetTerminalHistoryBuffer(int n_messages);
 		void TerminalAddMessage( std::string msg );
+		void SetReadOnly( bool );
 };
 }
 #endif

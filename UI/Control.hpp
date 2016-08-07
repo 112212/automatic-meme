@@ -121,6 +121,8 @@ class Control {
 		int m_backcolor;
 		int m_hoverbordercolor;
 		
+		
+		
 		static bool custom_check;
 		
 		// functions used by controls
@@ -147,6 +149,7 @@ class Control {
 			virtual void OnKeyDown( sf::Event::KeyEvent &sym );
 			virtual void OnKeyUp( sf::Event::KeyEvent &sym );
 		#elif USE_SDL
+			TTF_Font* m_font;
 			virtual void Render( Point position, bool isSelected );
 			virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
@@ -172,6 +175,11 @@ class Control {
 		void SetAnchor( float W, float w, float x, float H, float h, float y );
 		void SetAnchor( Rect r );
 		void SetAnchor( const Anchor& anchor );
+#ifdef USE_SDL
+		void SetFont( TTF_Font* fnt ) { if(fnt) m_font = fnt; }
+		void SetFont( std::string name, int size );
+		TTF_Font* GetFont() { return m_font; }
+#endif
 		const Anchor& GetAnchor();
 		
 		controlType GetType() { return type; }

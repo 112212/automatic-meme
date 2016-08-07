@@ -103,9 +103,6 @@ void CheckBox::STYLE_FUNC(value) {
 			SetText(value.c_str());
 		_case("checked"):
 			SetValue( value == "true" );
-		_case("font"):
-			TTF_Font* fnt = Fonts::GetParsedFont( value );
-			if(fnt) m_font = fnt;
 	}
 }
 

@@ -44,7 +44,6 @@ class Label : public Control {
 
 		Control* Clone();
 		void SetText( std::string text );
-		void SetFont( std::string text, int size );
 };
 }
 #endif

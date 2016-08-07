@@ -76,7 +76,7 @@ class ListBox : public Control {
 		int GetSelectedIndex();
 		void SetSelectedIndex( int index );
 		std::string GetText();
-		Control* Clone();
+		ListBox* Clone();
 };
 }
 #endif

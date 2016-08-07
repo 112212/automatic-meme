@@ -11,7 +11,7 @@
 
 namespace ng {
 Control::Control() : id("0"), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
-interactible(true), visible(true), anchor({{0,0},0}), m_bordercolor(0xff333376), m_hoverbordercolor(0xff1228D1), m_backcolor(0) {
+interactible(true), visible(true), anchor({{0,0},0}), m_bordercolor(0xff333376), m_hoverbordercolor(0xff1228D1), m_backcolor(0), m_font(0) {
 	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
 }
 
@@ -182,6 +182,11 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	}
 	void Control::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {}
 	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {}
+	void Control::SetFont( std::string name, int size ) { 
+		TTF_Font* f = Fonts::GetFont(name, size); 
+		if(f) 
+			m_font = f; 
+	}
 #endif
 void Control::OnLostFocus() {}
 void Control::onPositionChange() {}
@@ -235,6 +240,8 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			m_backcolor = Colors::ParseColor(value);
 		_case("hoverbordercolor"):
 			m_hoverbordercolor = Colors::ParseColor(value);
+		_case("font"):
+			m_font = Fonts::GetParsedFont(value);
 		default:
 			OnSetStyle(style, value);
 	}

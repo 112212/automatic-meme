@@ -135,21 +135,25 @@ namespace Drawing {
 	GLuint shader2 = 0;
 
 	void Init() {
-		try {
-			shader = loadShader( vertexShader_code, fragmentShader_code );
-			shader2 = loadShader( vertexShader2_code, fragmentShader2_code );
-		} catch( std::string& e ) {
-			std::cout << e << std::endl;
-		}
-
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		glGenBuffers(1, &vbo_position);
-		glGenBuffers(1, &vbo_color);
-		glGenBuffers(1, &ebo);
-		glBindVertexArray(0);
+		static bool inited = false;
 		
+		if(!inited) {			
+			try {
+				shader = loadShader( vertexShader_code, fragmentShader_code );
+				shader2 = loadShader( vertexShader2_code, fragmentShader2_code );
+			} catch( std::string& e ) {
+				std::cout << e << std::endl;
+			}
+
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
+
+			glGenBuffers(1, &vbo_position);
+			glGenBuffers(1, &vbo_color);
+			glGenBuffers(1, &ebo);
+			glBindVertexArray(0);
+			
+		}
 	}
 
 	int sizeX=800, sizeY=800;

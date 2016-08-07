@@ -126,6 +126,7 @@ int main() {
 	gui.SetSize(sizeX, sizeY);
 	// Drawing::Init();
 	
+	/*
 	TextBox* tb_debug = (TextBox*)gui.GetControlById("debug");
 	//tb_debug->SetText("text");
 	//tb_debug->SetRect(0, 0, 100, 50);
@@ -136,6 +137,7 @@ int main() {
 	cv_minimap->PutPixel(1,1);
 	cv_minimap->SetPixelColor(0xff00ff00);
 	cv_minimap->PutPixel(2,2);
+	*/
 	
 	Button* btn = (Button*)ControlManager::CreateControl("button");
 	Anchor a = btn->GetAnchor();

@@ -626,10 +626,6 @@ void ComboBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetSelectedIndex(std::stoi(value));
-		_case("font"): {
-			TTF_Font* fnt = Fonts::GetParsedFont( value );
-			if(fnt) m_font = fnt;
-			}
 		_case("selection_color"):
 			m_selection_color = Colors::ParseColor(value);
 		_case("dropdown_size"):

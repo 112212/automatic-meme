@@ -95,12 +95,6 @@ void Label::SetText( std::string text ) {
 
 }
 
-void Label::SetFont( std::string text, int size ) {
-	TTF_Font* fnt = Fonts::GetFont( text, size );
-	if(fnt) {
-		m_font = fnt;
-	}
-}
 
 Control* Label::Clone() {
 	Label* l = new Label;
@@ -112,9 +106,6 @@ void Label::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value.c_str());
-		_case("font"):
-			TTF_Font* fnt = Fonts::GetParsedFont( value );
-			if(fnt) m_font = fnt;
 	}
 }
 }
