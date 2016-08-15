@@ -31,7 +31,7 @@ const std::string& Terminal::GetText() {
 
 void Terminal::WriteLog(const std::string& s) {
 	m_log->PutCursorAt(Point(9999,9999));
-	m_log->PutTextAtCursor(s);
+	m_log->PutTextAtCursor(s+"\n");
 }
 
 void Terminal::OnMouseDown( int x, int y ) {

@@ -16,6 +16,7 @@
 #include "UI/controls/Canvas.hpp"
 #include "UI/controls/CheckBox.hpp"
 #include "UI/controls/WidgetMover.hpp"
+#include "UI/controls/Terminal.hpp"
 
 #include "UI/common/SDL/Drawing.hpp"
 
@@ -157,6 +158,12 @@ int main() {
 	// std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
 	// w1->LoadXml(s);
 	
+	Terminal &t = *((Terminal*)gui.GetControlById("term"));
+	t.SubscribeEvent( Terminal::event::command, [](Control* c) {
+		Terminal* t = (Terminal*)c;
+		cout << "command: " << t->GetText() << endl;
+	});
+		
 	gui.ApplyAnchoring();
 	
 	SDL_GL_SetSwapInterval(0);

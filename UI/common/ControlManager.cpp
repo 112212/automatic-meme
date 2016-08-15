@@ -200,7 +200,8 @@ void ControlManager::ApplyAnchoring() {
 		const Anchor &a = control->GetAnchor();
 		const Rect &r = control->GetRect();
 		const Point &coord = a.coord;
-		control->SetRect( 0, 0, wres * a.sW + a.sx, hres * a.sH + a.sy );
+		control->SetRect( 0, 0, a.sx == 0 && a.sW == 0 ? r.w : wres * a.sW + a.sx,
+								a.sy == 0 && a.sH == 0 ? r.h : hres * a.sH + a.sy );
 		Point p(a.W * wres, 
 				a.H * hres);
 		if(a.isrelative) {
@@ -424,6 +425,7 @@ namespace XmlLoader {
 					a.H = 1;
 					a.h = -1;
 					break;
+				
 				case 'x': n = &a.x; break;
 				case 'y': n = &a.y; break;
 				case 'w': n = &a.w; break;
@@ -444,9 +446,9 @@ namespace XmlLoader {
 				break;
 			
 		}
-		// cout << a << endl;
 		return a;
 	}
+	
 	void loadTheme(xml_node<>* node) {
 		for(; node; node = node->next_sibling()) {
 			Control *control = createControlByXmlTag(node->name());
@@ -459,9 +461,10 @@ namespace XmlLoader {
 			m_control_templates[node->name()] = control;
 		}
 	}
-	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node, const Anchor &anchor) {
+	
+	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node, Anchor anchor) {
 		Control* control = nullptr;
-		
+		Point c;
 		for(; node; node = node->next_sibling()) {
 			if(!strcmp(node->name(), "anchor")) {
 				Anchor anchor1{{0,0},0};
@@ -476,11 +479,13 @@ namespace XmlLoader {
 						}
 					}
 				}
-				anchor1.isrelative ^= relative;
+				anchor1.isrelative |= relative;
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
-				
 			} else if(!strcmp(node->name(), "theme")) {
 				loadTheme(node->first_node());
+			} else if(!strcmp(node->name(), "br")) {
+				c.x = 0;
+				c.y++;
 			}
 			
 			control = createControlByXmlTag(node->name());
@@ -492,6 +497,7 @@ namespace XmlLoader {
 				if(style == "rect") {
 					Anchor a = parseRect(value);
 					a += anchor;
+					a.coord = c;
 					control->SetAnchor(a);
 					control->SetRect(a.x, a.y, a.sx, a.sy);
 					continue;
@@ -512,6 +518,7 @@ namespace XmlLoader {
 			} else if(widget) {
 				widget->AddControl(control);
 			}
+			c.x++;
 		}
 	}
 	
@@ -533,8 +540,7 @@ namespace XmlLoader {
 			std::cout << "XML parsing error: " << err.what() << std::endl;
 			return;
 		}
-		Anchor anchor{{0,0},0};
-		loadXmlRecursive(engine, widget, doc.first_node("gui")->first_node(), anchor);
+		loadXmlRecursive(engine, widget, doc.first_node("gui")->first_node(), {{0,0},0});
 		
 		delete[] data;
 	}

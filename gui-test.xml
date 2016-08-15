@@ -7,7 +7,6 @@
 	</theme>
 	<anchor pos="rL+50,T+100">
 		<button id="2" rect="0,0,100,50" value="nikola" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" visible="true"/>
-		
 		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000" id="w1">
 			<container id="20" rect="0,0,150,150">
 				<button id="5" rect="0,0,200,50" value="1"/>
@@ -16,6 +15,7 @@
 			</container>
 			<widgetmover rect="180,0,10,10"/>
 		</container>
+
 		<combobox rect="0,0,-5%+200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" >
 			<item>heheheeh</item>
 			<item>hghfghf</item>
@@ -85,6 +85,6 @@ fddgdf"></label>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
-		<terminal rect="0,0,200,200" />
+		<terminal rect="0,0,200,200" id="term" />
 	</anchor>
 </gui>

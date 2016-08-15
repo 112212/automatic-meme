@@ -85,9 +85,7 @@ class Widget;
 class Control;
 struct Event;
 
-
 class GuiEngine;
-
 
 class Control {
 	private:
@@ -120,8 +118,6 @@ class Control {
 		int m_bordercolor;
 		int m_backcolor;
 		int m_hoverbordercolor;
-		
-		
 		
 		static bool custom_check;
 		

@@ -44,7 +44,6 @@ void Widget::AddControl( Control* control ) {
 	}
 	
 	addControlToCache(control);
-	
 }
 
 bool Widget::isThisWidgetSelected() {

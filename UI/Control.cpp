@@ -221,25 +221,6 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			SetRect(r.x, r.y, r.w, std::stoi(value));
 		_case("id"):
 			SetId(value);
-		/*
-		_case("rect"): {
-				int c[4];
-				int num=0;
-				std::string::size_type tokenOff = 0, sepOff = 0;
-				while (sepOff != std::string::npos)
-				{
-					sepOff = value.find(',', sepOff);
-					std::string::size_type tokenLen = (sepOff == std::string::npos) ? sepOff : sepOff++ - tokenOff;
-					std::string token = value.substr(tokenOff, tokenLen);
-					if (!token.empty()) {
-						c[num++] = std::stoi(token);
-					}
-					tokenOff = sepOff;
-				}
-				if(num == 4)
-					SetRect(c[0],c[1],c[2],c[3]);
-			}
-		*/
 		_case("visible"):
 			SetVisible(value=="true"); break;
 		_case("bordercolor"):
