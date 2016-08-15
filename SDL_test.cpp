@@ -91,9 +91,11 @@ int main() {
 	SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencil);
 	cout << "stencil: " << stencil << endl;
 	
-	
-	GuiEngine gui(sizeX,sizeY);
-	
+	// Drawing::Init();
+	// Drawing::SetResolution( sizeX, sizeY );
+	GuiEngine gui;
+	gui = GuiEngine(sizeX, sizeY);
+	// gui.SetSize(sizeX, sizeY);
 	gui.LoadXml("gui-test.xml");
 	
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){

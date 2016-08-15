@@ -45,6 +45,7 @@ class GuiEngine : public ControlManager
 		std::map<std::string, Control*> map_id_control;
 		
 		// -- selection info --
+		
 		Control* selected_control;
 		Widget* sel_first_depth_widget; // first widget, or widget lock
 		Point sel_widget_offset; // for widget lock
@@ -86,6 +87,10 @@ class GuiEngine : public ControlManager
 	public:
 		GuiEngine();
 		GuiEngine(int xsize, int ysize);
+		~GuiEngine();
+		GuiEngine& operator=(GuiEngine const& o) = default;
+		GuiEngine& operator=(GuiEngine && o);
+		
 		#ifdef USE_SFML
 			void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 			void OnKeyDown( sf::Event::KeyEvent &sym );

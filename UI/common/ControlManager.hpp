@@ -27,10 +27,9 @@ class ControlManager {
 		int next_z_index;
 		int binary_search(int z_index);
 		void rescale_z_indices(int spacing);
+	protected:
 		Widget* this_widget;
 		GuiEngine* this_engine;
-		
-	protected:
 		std::vector<Control*> controls;
 		std::vector<cache_entry> cache;
 		

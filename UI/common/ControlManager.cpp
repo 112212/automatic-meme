@@ -507,8 +507,11 @@ namespace XmlLoader {
 				loadXmlRecursive(0, (Widget*)control, node->first_node(), anchor1);
 			}
 			
-			if(engine) engine->AddControl(control);
-			else if(widget) widget->AddControl(control);
+			if(engine) {
+				engine->AddControl(control);
+			} else if(widget) {
+				widget->AddControl(control);
+			}
 		}
 	}
 	

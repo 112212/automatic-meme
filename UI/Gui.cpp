@@ -45,6 +45,16 @@ GuiEngine::GuiEngine(int xsize, int ysize) : GuiEngine() {
 	SetSize(xsize, ysize);
 }
 
+GuiEngine& GuiEngine::operator=(GuiEngine && engine) {
+	*this = engine;
+	this_engine = this;
+	return *this;
+}
+
+GuiEngine::~GuiEngine() {
+	Clear();
+}
+
 void GuiEngine::Clear() {
 	for(Control* c : controls) {
 		RemoveControl(c);
