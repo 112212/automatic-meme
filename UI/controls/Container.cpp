@@ -267,6 +267,7 @@ void Container::onPositionChange() {
 void Container::AddControl( Control* control ) {
 	AddItem(control);
 }
+
 void Container::AddItem( Control* control ) {
 
 	innerWidget->AddControl( control );

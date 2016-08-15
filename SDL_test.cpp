@@ -93,8 +93,7 @@ int main() {
 	
 	// Drawing::Init();
 	// Drawing::SetResolution( sizeX, sizeY );
-	GuiEngine gui;
-	gui = GuiEngine(sizeX, sizeY);
+	GuiEngine gui(sizeX, sizeY);
 	// gui.SetSize(sizeX, sizeY);
 	gui.LoadXml("gui-test.xml");
 	

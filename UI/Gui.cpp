@@ -10,19 +10,7 @@
 #define MAX_BASIC_EVENTS 6
 namespace ng {
 GuiEngine::GuiEngine() : ControlManager(this) {
-	#ifdef USE_SFML
-		if( !Fonts::FontExists( "default" ) ) {
-			Fonts::LoadFont( DEFAULT_FONT, "default" );
-			Colors::InitColors();
-		}
-	#elif USE_SDL
-		if( !Fonts::FontExists( "default" , 13 ) ) {
-			if(!Fonts::LoadFont( DEFAULT_FONT, "default", 13 )) {
-				cout << "[GUI] default font loading failed\n";
-			}
-			Colors::InitColors();
-		}
-	#endif
+	
 	m_mouse_down = false;
 	m_focus = false;
 	m_keyboard_lock = false;
@@ -41,6 +29,19 @@ GuiEngine::GuiEngine() : ControlManager(this) {
 }
 
 GuiEngine::GuiEngine(int xsize, int ysize) : GuiEngine() {
+	#ifdef USE_SFML
+		if( !Fonts::FontExists( "default" ) ) {
+			Fonts::LoadFont( DEFAULT_FONT, "default" );
+			Colors::InitColors();
+		}
+	#elif USE_SDL
+		if( !Fonts::FontExists( "default" , 13 ) ) {
+			if(!Fonts::LoadFont( DEFAULT_FONT, "default", 13 )) {
+				cout << "[GUI] default font loading failed\n";
+			}
+			Colors::InitColors();
+		}
+	#endif
 	Drawing::Init();
 	SetSize(xsize, ysize);
 }
