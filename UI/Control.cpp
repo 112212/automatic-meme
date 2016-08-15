@@ -248,9 +248,13 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			m_backcolor = Colors::ParseColor(value);
 		_case("hoverbordercolor"):
 			m_hoverbordercolor = Colors::ParseColor(value);
-		_case("font"):
-			m_font = Fonts::GetParsedFont(value);
+		_case("font"): {
+			TTF_Font* f = Fonts::GetParsedFont(value);
+			if(f) {
+				m_font = f;
+			}
 			onFontChange();
+		}
 			break;
 		default:
 			OnSetStyle(style, value);

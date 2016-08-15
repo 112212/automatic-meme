@@ -20,7 +20,7 @@
 #include "UI/common/SDL/Drawing.hpp"
 
 #include <sstream>
-
+ng::GuiEngine gui;
 #include <iostream>
 using namespace std;
 using namespace ng;
@@ -29,6 +29,7 @@ void test(Control* test) {
 }
 
 int main() {
+	
 	
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         throw std::string("Failed to initialize SDL: ") + SDL_GetError();
@@ -93,7 +94,8 @@ int main() {
 	
 	// Drawing::Init();
 	// Drawing::SetResolution( sizeX, sizeY );
-	GuiEngine gui(sizeX, sizeY);
+	
+	gui = GuiEngine(sizeX, sizeY);
 	// gui.SetSize(sizeX, sizeY);
 	gui.LoadXml("gui-test.xml");
 	
