@@ -191,8 +191,8 @@ void ControlManager::ApplyAnchoring() {
 	int wres, hres;
 	if(this_widget) {
 		const Rect &r = this_widget->GetRect();
-		wres = r.x;
-		hres = r.y;
+		wres = r.w;
+		hres = r.h;
 	} else {
 		Drawing::GetResolution(wres, hres);	
 	}
@@ -200,7 +200,7 @@ void ControlManager::ApplyAnchoring() {
 		const Anchor &a = control->GetAnchor();
 		const Rect &r = control->GetRect();
 		const Point &coord = a.coord;
-		control->SetRect( 0, 0, a.sx == 0 && a.sW == 0 ? r.w : wres * a.sW + a.sx, a.sy == 0 && a.sH == 0 ? r.h : hres * a.sH + a.sy );
+		control->SetRect( 0, 0, wres * a.sW + a.sx, hres * a.sH + a.sy );
 		Point p(a.W * wres, 
 				a.H * hres);
 		if(a.isrelative) {
@@ -219,7 +219,7 @@ void ControlManager::ApplyAnchoring() {
 		l.sort([](Control* a, Control* b) -> bool {
 			const Point &p1 = a->GetAnchor().coord;
 			const Point &p2 = b->GetAnchor().coord;
-			return p1.x < p2.x || (p1.x == p2.x && p1.x < p2.x);
+			return p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x);
 		});
 		
 		int lastx = 0, lasty = 0;
@@ -291,6 +291,7 @@ Control* ControlManager::CreateControl(std::string tag) {
 	#include "../controls/Canvas.hpp"
 	#include "../controls/CheckBox.hpp"
 	#include "../controls/WidgetMover.hpp"
+	#include "../controls/Terminal.hpp"
 #endif
 
 namespace ng {
@@ -357,6 +358,7 @@ namespace XmlLoader {
 			TAGTYPE("widgetmover", WidgetMover);
 			TAGTYPE("checkbox", CheckBox);
 			TAGTYPE("gridcontainer", GridContainer);
+			TAGTYPE("terminal", Terminal);
 			default: return tryExtendedTags(tag);
 		}
 		return control;
@@ -414,7 +416,7 @@ namespace XmlLoader {
 						a.W = 0.5;
 					} else if(part == Part::y) {
 						a.h = -0.5;
-						a.W = 0.5;
+						a.H = 0.5;
 					}
 				case 'D':
 				case 'B':

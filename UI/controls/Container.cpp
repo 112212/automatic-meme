@@ -25,7 +25,7 @@ Container::Container() {
 	innerWidget->SetVisible(false);
 	background_color = 0;
 	Widget::AddControl(innerWidget);
-	setInterceptMask(mwheel | mouse_down | mouse_move);
+	setInterceptMask(imask::mwheel | imask::mouse_down | imask::mouse_move);
 }
 
 

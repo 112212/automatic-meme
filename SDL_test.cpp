@@ -56,7 +56,7 @@ int main() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
 	int sizeX = 1280;
-	int sizeY = 768;
+	int sizeY = 900;
 	SDL_Window* win = SDL_CreateWindow("gui sdl test", 100, 100, sizeX, sizeY, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if(!win) {
 		cout << "creating window error\n";
@@ -92,9 +92,9 @@ int main() {
 	cout << "stencil: " << stencil << endl;
 	
 	
-	GuiEngine gui;
+	GuiEngine gui(sizeX,sizeY);
 	
-	gui.LoadXml("gui2.xml");
+	gui.LoadXml("gui-test.xml");
 	
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
 		// cout << "clicked at 1 \n";
@@ -123,7 +123,7 @@ int main() {
 	// });
 	
 	// Drawing::SetResolution( sizeX, sizeY );
-	gui.SetSize(sizeX, sizeY);
+	// gui.SetSize(sizeX, sizeY);
 	// Drawing::Init();
 	
 	/*

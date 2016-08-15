@@ -85,7 +85,7 @@ class GuiEngine : public ControlManager
 		
 	public:
 		GuiEngine();
-	
+		GuiEngine(int xsize, int ysize);
 		#ifdef USE_SFML
 			void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 			void OnKeyDown( sf::Event::KeyEvent &sym );
@@ -102,11 +102,14 @@ class GuiEngine : public ControlManager
 		void UnselectControl() { unselectControl(); }
 		void AddControl( Control* cntrl );
 		void RemoveControl( Control* control );
+		void Clear();
 		
 		void LockWidget(Widget* w);
 		void UnlockWidget();
 		Control* GetControlById(std::string id);
 		void SetSize(int w, int h);
+		
+		void Focus(Control* control);
 		
 		Control* GetSelectedControl() { return selected_control; }
 		Widget* GetSelectedWidget() { return last_selected_widget; }

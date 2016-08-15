@@ -85,6 +85,12 @@ void Control::emitEvent( int EventID ) {
 	}
 }
 
+void Control::Focus() {
+	if(engine) {
+		engine->Focus(this);
+	}
+}
+
 void Control::SubscribeEvent( int event_type, std::function<void(Control*)> callback ) {
 	if(event_type < subscribers.size())
 		subscribers[event_type].push_back(callback);
@@ -190,6 +196,7 @@ void Control::OnMouseUp( int mX, int mY ) {}
 #endif
 void Control::OnLostFocus() {}
 void Control::onPositionChange() {}
+void Control::onFontChange() {}
 
 void Control::OnGetFocus() {}
 void Control::OnLostControl() {}
@@ -214,6 +221,7 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			SetRect(r.x, r.y, r.w, std::stoi(value));
 		_case("id"):
 			SetId(value);
+		/*
 		_case("rect"): {
 				int c[4];
 				int num=0;
@@ -224,7 +232,6 @@ void Control::SetStyle(std::string& style, std::string& value) {
 					std::string::size_type tokenLen = (sepOff == std::string::npos) ? sepOff : sepOff++ - tokenOff;
 					std::string token = value.substr(tokenOff, tokenLen);
 					if (!token.empty()) {
-						// cout << "test: " << token << endl;
 						c[num++] = std::stoi(token);
 					}
 					tokenOff = sepOff;
@@ -232,6 +239,7 @@ void Control::SetStyle(std::string& style, std::string& value) {
 				if(num == 4)
 					SetRect(c[0],c[1],c[2],c[3]);
 			}
+		*/
 		_case("visible"):
 			SetVisible(value=="true"); break;
 		_case("bordercolor"):
@@ -242,6 +250,8 @@ void Control::SetStyle(std::string& style, std::string& value) {
 			m_hoverbordercolor = Colors::ParseColor(value);
 		_case("font"):
 			m_font = Fonts::GetParsedFont(value);
+			onFontChange();
+			break;
 		default:
 			OnSetStyle(style, value);
 	}

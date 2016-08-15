@@ -141,6 +141,7 @@ class Control {
 		
 		// internal virtual
 		virtual void onPositionChange();
+		virtual void onFontChange();
 		virtual bool customBoundary( int x, int y );
 		
 		// called by gui engine, controls can override these functions
@@ -175,6 +176,7 @@ class Control {
 		void SetAnchor( float W, float w, float x, float H, float h, float y );
 		void SetAnchor( Rect r );
 		void SetAnchor( const Anchor& anchor );
+		void Focus();
 #ifdef USE_SDL
 		void SetFont( TTF_Font* fnt ) { if(fnt) m_font = fnt; }
 		void SetFont( std::string name, int size );

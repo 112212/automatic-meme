@@ -9,8 +9,6 @@
 
 #define MAX_BASIC_EVENTS 6
 namespace ng {
-	
-
 GuiEngine::GuiEngine() : ControlManager(this) {
 	#ifdef USE_SFML
 		if( !Fonts::FontExists( "default" ) ) {
@@ -40,8 +38,17 @@ GuiEngine::GuiEngine() : ControlManager(this) {
 	hasIntercepted = false;
 	sel_intercept = 0;
 	sel_intercept_vector.resize(15);
-	
+}
+
+GuiEngine::GuiEngine(int xsize, int ysize) : GuiEngine() {
 	Drawing::Init();
+	SetSize(xsize, ysize);
+}
+
+void GuiEngine::Clear() {
+	for(Control* c : controls) {
+		RemoveControl(c);
+	}
 }
 
 
@@ -141,7 +148,6 @@ Control* GuiEngine::GetControlById(std::string id) {
 		return 0;
 }
 
-
 void GuiEngine::processControlEvent(int event_type) {
 
 	
@@ -177,8 +183,6 @@ void GuiEngine::processControlEvent(int event_type) {
 			break;
 	}
 }
-
-
 	  
 void GuiEngine::AddControl( Control* control ) {
 	if(control->engine) return;
@@ -321,7 +325,6 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 	} else WIDGET_HOOK(mouse_down, OnMouseDown( mX, mY ));
 }
 
-
 void GuiEngine::OnMouseUp( int mX, int mY ) {
 	m_mouse_down = false;
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
@@ -375,14 +378,11 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 	}
 }
 
-
-
 void GuiEngine::OnMWheel( int updown ) {
 	if(selected_control) {
 		INTERCEPT_HOOK(mwheel, OnMWheel( updown ));
 	} else WIDGET_HOOK(mwheel, OnMWheel( updown ));
 }
-
 
 bool GuiEngine::check_control_collision( Control* c, int mX, int mY ) {
 	Rect r = c->m_rect;
@@ -393,6 +393,7 @@ bool GuiEngine::check_control_collision( Control* c, int mX, int mY ) {
 	}
 	return false;
 }
+
 void GuiEngine::check_for_new_collision( int x, int y ) {
 	
 	Control* last_control = selected_control;
@@ -489,6 +490,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 				
 				w->cached_absolute_offset.x = offset.x + it->rect.x;
 				w->cached_absolute_offset.y = offset.y + it->rect.y;
+				
 				offset.x += it->rect.x + w->offset.x;
 				offset.y += it->rect.y + w->offset.y;
 				
@@ -528,6 +530,34 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 			m_focus = true;
 			m_keyboard_lock = false;
 		}
+	}
+}
+
+void GuiEngine::Focus(Control* control) {
+	if(!control->engine || selected_control == control) return;
+	
+	if(selected_control->widget == control->widget) {
+		selected_control = control;
+	} else {
+		Widget* w = control->widget;
+		Widget* wgt = w;
+		last_selected_widget = w;
+		Point ofs{0,0};
+		while(w->widget) {
+			ofs.x += w->offset.x;
+			ofs.y += w->offset.y;
+			w = w->widget;
+		}
+		sel_first_depth_widget = w;
+		w = wgt;
+		Point o = ofs;
+		while(w->widget) {
+			o.x -= w->offset.x;
+			o.y -= w->offset.y;
+			w = w->widget;
+			w->cached_absolute_offset = o;
+		}
+		selected_control = control;
 	}
 }
 

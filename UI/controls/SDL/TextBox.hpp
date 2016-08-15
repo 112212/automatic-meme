@@ -33,6 +33,7 @@ class TextBox : public Control {
 		int m_text_max;
 		int m_lines_max;
 		int m_line_height;
+		
 		static int m_selection_color;
 		static int m_cursor_color;
 		
@@ -49,9 +50,7 @@ class TextBox : public Control {
 		bool m_terminal_mode;
 		int m_terminal_max_messages;
 		int m_ring_head;
-		
-		TTF_Font* m_font;
-		
+				
 		bool m_mousedown;
 
 		void onPositionChange();
@@ -60,9 +59,10 @@ class TextBox : public Control {
 	public:
 	
 		enum event {
-			change,
+			change = 0,
 			enter,
-			terminal_command
+			terminal_command,
+			max_events
 		};
 	
 		TextBox();
@@ -85,15 +85,13 @@ class TextBox : public Control {
 		std::string GetSelectedText();
 		
 		void PutTextAtCursor(std::string text);
+		void PutCursorAt( Point cursor );
 		
 		void SetSelection( Point start, Point end );
 		void SetCursor( SDL_Cursor* curs );
 		void SetMultilineMode( bool tf );
 		void SetCursorBlinkingRate( int rate );
 		
-		void SetTerminalMode( bool tf );
-		void SetTerminalHistoryBuffer(int n_messages);
-		void TerminalAddMessage( std::string msg );
 		void SetReadOnly( bool );
 };
 }

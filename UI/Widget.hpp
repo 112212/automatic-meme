@@ -22,6 +22,7 @@ class Widget : public ControlManager, public Control {
 		Control* selected_control;
 		Point cached_absolute_offset;
 		
+		Point offset;
 		void setRect( int x, int y, int w, int h );
 	protected:
 		enum imask {
@@ -39,7 +40,6 @@ class Widget : public ControlManager, public Control {
 		bool isThisWidgetInSelectedBranch();
 		Control* getSelectedControl() { return selected_control; }
 		const Point& getAbsoluteOffset() { return cached_absolute_offset; };
-		Point offset;
 	public:
 		Widget();
 		~Widget();

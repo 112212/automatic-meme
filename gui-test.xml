@@ -25,7 +25,7 @@
 			<item>ytrytr</item>
 			<item>rwerew</item>
 		</combobox>
-		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
+		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
 Usually a server is a dedicated host that runs the game and is authoritative about world simulation, 
 game rules, and player input processing. A client is a player's computer connected to a game server. 
 The client and server communicate with each other by sending small data packets at a high frequency 
@@ -56,7 +56,7 @@ increasing network latencies. In fast-paced action games, even a delay
 of a few milliseconds can cause a laggy gameplay feeling and make it 
 hard to hit other players or interact with moving objects. Besides 
 bandwidth limitations and network latencies, information can get lost 
-due to network packet loss. "></textbox>
+due to network packet loss. " ></textbox>
 		<label rect="0,0,150,80" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1
 	test2
 test3
@@ -85,5 +85,6 @@ fddgdf"></label>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
+		<terminal rect="0,0,200,200" />
 	</anchor>
 </gui>

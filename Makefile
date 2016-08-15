@@ -25,6 +25,7 @@ build := build
 flags := -g -O2 -Wfatal-errors
 inc := -Ilib
 
+CXX := 
 
 obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(cpp)))
 
@@ -78,7 +79,7 @@ sdl_test_exe := sdl_test
 sdl_test_build: defs := -DUSE_SDL
 sdl_test_build: 
 sdl_test_build: $(sdl_test_obj)
-	g++ $^ -o sdl_test $(sdl_link)
+	$(CXX)g++ $^ -o sdl_test $(sdl_link)
 
 sdl_test: dirs sdl_test_build
 	
@@ -87,7 +88,7 @@ all: dirs
 
 sdl_lib_make: defs := -DUSE_SDL
 sdl_lib_make: $(sdl_test_obj)
-	ar r libgui.a $^
+	$(CXX)ar r libgui.a $^
 
 sdl_lib: dirs sdl_lib_make
 
@@ -109,6 +110,6 @@ dirs:
 	@mkdir -p $(build)/UI/controls/SFML
 	
 $(build)/%.o: %.cpp
-	g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc)
+	$(CXX)g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc)
 
 
