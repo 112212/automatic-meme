@@ -15,6 +15,7 @@ TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_ancho
 	m_terminal_max_messages = 100;
 	m_backcolor = 0;
 	m_readonly = false;
+	m_placeholder.text = "";
 	SetText("");
 }
 
@@ -69,16 +70,20 @@ void TextBox::Render( Point pos, bool selected ) {
 			}
 		}
 		
-		j=0;
-		for( auto i = m_lines.begin()+m_position.y; i != m_lines.end(); i++,j++) {
-			if(5+j*m_line_height+i->h > rect.h) break;
-			Drawing::TexRect( r.x-sz+5, r.y+5+j*m_line_height, i->w, i->h, i->tex);
+		if(!m_locked && m_lines.size() == 1 && m_lines[0].text.size() == 0) {
+			Drawing::TexRect( r.x+5, r.y+5, m_placeholder.w, m_placeholder.h, m_placeholder.tex);
+		} else {
+			j=0;
+			for( auto i = m_lines.begin()+m_position.y; i != m_lines.end(); i++,j++) {
+				if(5+j*m_line_height+i->h > rect.h) break;
+				Drawing::TexRect( r.x-sz+5, r.y+5+j*m_line_height, i->w, i->h, i->tex);
+			}
 		}
 	}
 	
 	glDisable(GL_SCISSOR_TEST);
 	
-	if(selected && !m_readonly && ++m_cursor_blink_counter > m_cursor_blinking_rate && m_cursor.y-m_position.y < m_lines.size()) {
+	if(m_locked && !m_readonly && ++m_cursor_blink_counter > m_cursor_blinking_rate && m_cursor.y-m_position.y < m_lines.size()) {
 		if(m_cursor_blink_counter > 2*m_cursor_blinking_rate)
 			m_cursor_blink_counter = 0;
 			
@@ -131,7 +136,6 @@ void TextBox::SetSelection( Point start, Point end ) {
 
 void TextBox::OnMouseUp( int x, int y ) {
 	m_mousedown = false;
-
 }
 
 void TextBox::OnLostFocus() {
@@ -140,7 +144,7 @@ void TextBox::OnLostFocus() {
 }
 
 void TextBox::OnLostControl() {
-
+	m_locked = false;
 }
 
 
@@ -154,6 +158,9 @@ void TextBox::STYLE_FUNC(value) {
 			m_selection_color = Colors::ParseColor(value);
 		_case("readonly"):
 			SetReadOnly(value == "true");
+		_case("placeholder"):
+			m_placeholder.text = value;
+			updateTexture(m_placeholder);
 	}
 		
 }
@@ -183,6 +190,7 @@ void TextBox::OnMouseDown( int x, int y ) {
 	sendGuiCommand( GUI_KEYBOARD_LOCK );
 	const Rect& rect = GetRect();
 	if(check_collision(x,y)) {
+		m_locked = true;
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
 		int sz = Fonts::getTextSize( m_font, piece );

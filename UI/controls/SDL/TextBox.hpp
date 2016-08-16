@@ -18,6 +18,8 @@ class TextBox : public Control {
 		};
 		std::vector<TextLine> m_lines;
 		
+		TextLine m_placeholder;
+		
 		// position of window
 		Point m_position;
 		// anchor for selection (no selection if x,y = -1,-1)
@@ -30,6 +32,7 @@ class TextBox : public Control {
 		int m_cursor_blinking_rate;
 		int m_readonly;
 		
+		bool m_locked;
 		int m_text_max;
 		int m_lines_max;
 		int m_line_height;

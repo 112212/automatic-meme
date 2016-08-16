@@ -537,6 +537,7 @@ void GuiEngine::Focus(Control* control) {
 	
 	if(selected_control->widget == control->widget) {
 		selected_control = control;
+		control->widget->selected_control = control;
 	} else {
 		Widget* w = control->widget;
 		Widget* wgt = w;
@@ -557,6 +558,7 @@ void GuiEngine::Focus(Control* control) {
 			w->cached_absolute_offset = o;
 		}
 		selected_control = control;
+		wgt->selected_control = selected_control;
 	}
 }
 
@@ -583,7 +585,7 @@ void GuiEngine::unselectWidget() {
 		w = w->widget;
 		last_selected_widget = w;
 		depth--;
-		cout << "depth: " << depth << endl;
+		// cout << "depth: " << depth << endl;
 	}
 }
 void GuiEngine::unselectWidgets() {

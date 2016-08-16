@@ -53,7 +53,7 @@ void Control::SetVisible(bool visible) {
 		this->visible = visible;
 		_updateCache(CacheUpdateFlag::attributes);
 		if(!visible && isThisControlSelected() ) {
-			sendGuiCommand(GUI_UNSELECT);
+			sendGuiCommand(GUI_UNSELECT_WIDGETS);
 		}
 	}
 }
