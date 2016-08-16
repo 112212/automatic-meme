@@ -1,7 +1,7 @@
 #ifndef CCURSORS_H
 #define CCURSORS_H
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 class Cursors {
 private:

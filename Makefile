@@ -56,7 +56,7 @@ sfml_test_build: $(sfml_test_obj)
 	
 sfml_test: dirs sfml_test_build
 
-sdl_test_cpp := $(cpp) SDL_test.cpp \
+sdl_test_cpp := $(cpp) \
 		UI/controls/Button.cpp \
 		UI/controls/ScrollBar.cpp \
 		UI/controls/Container.cpp \
@@ -79,7 +79,7 @@ sdl_test_exe := sdl_test
 
 sdl_test_build: defs := -DUSE_SDL
 sdl_test_build: 
-sdl_test_build: $(sdl_test_obj)
+sdl_test_build: $(sdl_test_obj) SDL_test.o
 	$(CXX)g++ $^ -o sdl_test $(sdl_link) $(CFLAGS)
 
 sdl_test: dirs sdl_test_build
@@ -111,6 +111,6 @@ dirs:
 	@mkdir -p $(build)/UI/controls/SFML
 	
 $(build)/%.o: %.cpp
-	$(CXX)g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc)
+	$(CXX)g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc) $(CFLAGS)
 
 
