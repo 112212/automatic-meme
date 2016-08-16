@@ -199,7 +199,6 @@ void ControlManager::ApplyAnchoring() {
 	for(Control* control : controls) {
 		const Anchor &a = control->GetAnchor();
 		const Rect &r = control->GetRect();
-		const Point &coord = a.coord;
 		control->SetRect( 0, 0, a.sx == 0 && a.sW == 0 ? r.w : wres * a.sW + a.sx,
 								a.sy == 0 && a.sH == 0 ? r.h : hres * a.sH + a.sy );
 		Point p(a.W * wres, 
@@ -207,7 +206,8 @@ void ControlManager::ApplyAnchoring() {
 		if(a.isrelative) {
 			grouping[p].push_back(control);
 		} else {
-			control->SetPosition(p.x + a.w * r.w + a.x, p.y + a.h * r.h + a.y);
+			control->SetPosition(p.x + a.w * r.w + a.x, 
+								 p.y + a.h * r.h + a.y);
 		}
 		
 		if(control->IsWidget()) reinterpret_cast<Widget*>(control)->ApplyAnchoring();
@@ -238,7 +238,7 @@ void ControlManager::ApplyAnchoring() {
 				max_x = min_x;
 				min_y = max_y;
 			}
-			int yc = (a.ay >= 0) ? a.y : (- r.h - a.y);
+			int yc = (a.ay >= 0) ? (a.y + a.h*r.h) : (- r.h - a.y - a.h*r.h);
 			if(a.ax >= 0) {
 				c->SetPosition(max_x + a.x, min_y + yc);
 				max_x += a.x + r.w;
@@ -249,9 +249,9 @@ void ControlManager::ApplyAnchoring() {
 				
 			
 			if(a.ay >= 0) {
-				max_y = std::max<int>(min_y + r.h, max_y);
+				max_y = std::max<int>(min_y + yc + r.h, max_y);
 			} else {
-				max_y = std::min<int>(min_y - r.h, max_y);
+				max_y = std::min<int>(min_y + yc, max_y);
 			}
 			lastx++;
 		}

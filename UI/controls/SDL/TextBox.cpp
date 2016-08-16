@@ -284,7 +284,7 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 }
 
 void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
-	
+	if(!m_locked) return;
 	
 	int val = sym;
 	if(mod & KMOD_CTRL) {
@@ -312,7 +312,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	m_cursor_blink_counter = m_cursor_blinking_rate;
 	switch(val) {
 		case SDLK_BACKSPACE: {
-				if(m_anchor.x != -1) {
+				if(m_anchor.x != -1 && m_anchor.x != m_cursor.x && m_anchor.y != m_cursor.y) {
 					deleteSelection();
 					break;
 				}
@@ -336,6 +336,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				} else {
 					line.text.erase(m_cursor.x-1, 1);
 					updateTexture(line);
+					m_anchor.x = -1;
 					m_cursor.x--;
 					m_cursor_max_x = m_cursor.x;
 					updatePosition();

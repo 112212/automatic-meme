@@ -61,7 +61,6 @@ void Control::SetVisible(bool visible) {
 void Control::setInteractible(bool interactible) {
 	if(this->interactible != interactible) {
 		this->interactible = interactible;
-		
 		_updateCache(CacheUpdateFlag::attributes);
 	}
 }
