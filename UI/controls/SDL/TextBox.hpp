@@ -78,6 +78,7 @@ class TextBox : public Control {
 		virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 		virtual void OnLostControl();
 		//
+		
 				
 		TextBox* Clone();
 		void SetText(std::string text);

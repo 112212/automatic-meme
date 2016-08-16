@@ -464,7 +464,7 @@ namespace XmlLoader {
 	
 	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node, Anchor anchor) {
 		Control* control = nullptr;
-		Point c;
+		Point c{0,0};
 		for(; node; node = node->next_sibling()) {
 			if(!strcmp(node->name(), "anchor")) {
 				Anchor anchor1{{0,0},0};

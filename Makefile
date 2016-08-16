@@ -26,6 +26,7 @@ flags := -g -O2 -Wfatal-errors
 inc := -Ilib
 
 CXX := 
+CFLAGS := 
 
 obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(cpp)))
 
@@ -79,7 +80,7 @@ sdl_test_exe := sdl_test
 sdl_test_build: defs := -DUSE_SDL
 sdl_test_build: 
 sdl_test_build: $(sdl_test_obj)
-	$(CXX)g++ $^ -o sdl_test $(sdl_link)
+	$(CXX)g++ $^ -o sdl_test $(sdl_link) $(CFLAGS)
 
 sdl_test: dirs sdl_test_build
 	

@@ -1,12 +1,12 @@
 <gui>
 	<theme>
-		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
+		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,20" />
 		<listbox id="200" rect="0,0,200,200" backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
 		<textbox backgroundcolor="#050550" />
 		<canvas backgroundcolor="#050550" />
 	</theme>
 	<anchor pos="rL+50,T+100">
-		<button id="2" rect="0,0,100,50" value="nikola" backgroundcolor="#ff202080" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" visible="true"/>
+		<button id="2" rect="0,0,100,50" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,30" value="nikola" backgroundcolor="#ff202080"  visible="true"/>
 		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000" id="w1">
 			<container id="20" rect="0,0,150,150">
 				<button id="5" rect="0,0,200,50" value="1"/>

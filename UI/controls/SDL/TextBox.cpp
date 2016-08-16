@@ -172,6 +172,7 @@ void TextBox::onPositionChange() {
 
 void TextBox::OnGetFocus() {
 	// SDL_SetCursor( CCursors::textCursor );
+	cout << "got focus\n";
 }
 
 void TextBox::OnMouseDown( int x, int y ) {
@@ -258,7 +259,7 @@ void TextBox::updatePosition() {
 void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	if(line.tex == 0xffffffff)
 		new_tex = true;
-	SDL_Surface* surf = TTF_RenderText_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	SDL_Surface* surf = TTF_RenderUTF8_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	// SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     // SDL_BlitSurface(surf, 0, tempSurface, 0);
@@ -593,6 +594,7 @@ void TextBox::SetCursorBlinkingRate( int rate ) {
 void TextBox::SetReadOnly( bool readonly ) {
 	m_readonly = readonly;
 }
+
 
 }
 

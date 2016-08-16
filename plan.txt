@@ -160,20 +160,9 @@ TODO:
 -	resizable widget
 +	setting font by parsing it
 -	implement default font directory for linux and windows and make it as search path for fonts
+-	tabbing for textbox
+-	tooltip
 
-SDL port of controls:
-+ 	Button
-+ 	ComboBox
-+ 	CheckBox
-+ 	Container
-+ 	GridContainer
-+ 	Label
-+ 	ListBox
-+ 	RadioButton
-+ 	ScrollBar
-- 	TabContainer
-+ 	TextBox
-+ 	TrackBar
 
 OpenGL port of controls:
 + 	Button

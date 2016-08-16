@@ -473,7 +473,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 	
 	// --- descending tree ---
 	while(it != it_end) {
-		if(!it->interactible) { it++; continue; }
+		if(!it->interactible || !it->visible) { it++; continue; }
 		bool in = false;
 		if(it->custom_check) {
 			if(it->control->customBoundary( x-o.x, y-o.y )) {

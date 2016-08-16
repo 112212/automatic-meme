@@ -1,12 +1,12 @@
 // #include <SDL2/SDL2_gfxPrimitives.h>
 #include "../common/SDL/Drawing.hpp"
 #include "Button.hpp"
-#include <SDL/SDL_opengl.h>
+#include <SDL2/SDL_opengl.h>
 
 namespace ng {
 Button::Button() {
 	setType( TYPE_BUTTON );
-	initEventVector(1);
+	initEventVector(max_events);
 	#ifdef USE_SFML
 		text.setFont( Fonts::GetFont( "default" ) );
 		text.setCharacterSize( 30 );
@@ -21,10 +21,16 @@ Button::Button() {
 		need_update = false;
 	#endif
 	m_is_mouseDown = false;
+	m_down_color = 0xffff0000;
+	m_up_color = 0xffffffff;
 	m_backcolor = Colors::Dgray;
 }
 
 Button::~Button() {
+}
+
+void Button::onFontChange() {
+	update_text();
 }
 
 
@@ -32,10 +38,10 @@ void Button::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value);
-		_case("font"):
-			TTF_Font* fnt = Fonts::GetParsedFont( value );
-			if(fnt) m_font = fnt;
-			update_text();
+		_case("down_color"):
+			m_down_color = Colors::ParseColor(value);
+		_case("up_color"):
+			m_up_color = Colors::ParseColor(value);
 	}
 }
 
@@ -49,7 +55,7 @@ void Button::STYLE_FUNC(value) {
 	void Button::SetText( const char* _text ) {
 		ctext = _text;
 		text.setPosition( m_rect.x, m_rect.y );
-		this->text.setStri( _text );
+		this->text.setString( _text );
 	}
 	
 	void Button::onPositionChange() {
@@ -92,14 +98,11 @@ void Button::STYLE_FUNC(value) {
 	}
 
 	void Button::update_text() {
-		const Rect& r = GetRect();
-		SDL_Color c;
-		if(m_is_mouseDown)
-			c = {0x0,0xff,0x0,0xff};
-		else
-			c = {0xff,0xff,0xff,0xff};
 		
-		SDL_Surface* surf = TTF_RenderText_Blended( m_font, text.c_str(), c );
+		int color = m_is_mouseDown ? m_down_color : m_up_color;
+		SDL_Color *c = (SDL_Color*)&color;
+		const Rect& r = GetRect();
+		SDL_Surface* surf = TTF_RenderText_Blended( m_font, text.c_str(), *c );
 		if(!surf) return;
 		tex_text = Drawing::GetTextureFromSurface(surf, tex_text);
 		m_text_rect.w = surf->w;
@@ -107,7 +110,6 @@ void Button::STYLE_FUNC(value) {
 		m_text_rect.x = r.x + (r.w - surf->w)/2;
 		m_text_rect.y = r.y + (r.h - surf->h)/2;
 		SDL_FreeSurface(surf);
-		
 	}
 	
 	void Button::SetText( std::string _text ) {
@@ -125,7 +127,7 @@ void Button::STYLE_FUNC(value) {
 		m_is_mouseDown = false;
 		need_update = true;
 		if(check_collision(mX, mY)) {
-			emitEvent( EVENT_BUTTON_CLICK );
+			emitEvent( event::click );
 		}
 	}
 	
