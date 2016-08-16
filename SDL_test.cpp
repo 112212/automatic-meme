@@ -98,7 +98,9 @@ int main() {
 	
 	gui = GuiEngine(sizeX, sizeY);
 	// gui.SetSize(sizeX, sizeY);
-	gui.LoadXml("gui-test.xml");
+	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf");
+	gui.LoadXml("gui2.xml");
+	
 	
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
 		// cout << "clicked at 1 \n";
@@ -158,11 +160,11 @@ int main() {
 	// std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
 	// w1->LoadXml(s);
 	
-	Terminal &t = *((Terminal*)gui.GetControlById("term"));
-	t.SubscribeEvent( Terminal::event::command, [](Control* c) {
-		Terminal* t = (Terminal*)c;
-		cout << "command: " << t->GetText() << endl;
-	});
+	// Terminal &t = *((Terminal*)gui.GetControlById("term"));
+	// t.SubscribeEvent( Terminal::event::command, [](Control* c) {
+		// Terminal* t = (Terminal*)c;
+		// cout << "command: " << t->GetText() << endl;
+	// });
 		
 	gui.ApplyAnchoring();
 	

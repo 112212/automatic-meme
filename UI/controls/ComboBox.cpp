@@ -476,6 +476,7 @@ void ComboBox::openBox() {
 	}
 
 	void ComboBox::AddItem( std::string item ) {
+		if(!m_font) return;
 		SDL_Surface* txt = TTF_RenderText_Blended( m_font, clipText( item, m_max_width ).c_str(), {255,255,255} );
 		if(txt) {
 			m_items.push_back( item );

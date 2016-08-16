@@ -4,8 +4,7 @@
 #include <vector>
 #include <queue>
 
-#include "Control.hpp"
-// #include "Widget.hpp"
+// #include "Control.hpp"
 #include "common/ControlManager.hpp"
 
 #ifdef USE_SFML
@@ -24,7 +23,7 @@
 // #define USE_EVENT_QUEUE
 // --------------------------
 
-#include <utility>
+// #include <utility>
 
 
 namespace ng {
@@ -103,7 +102,7 @@ class GuiEngine : public ControlManager
 			void OnEvent(SDL_Event &event);
 		#endif
 		
-		
+		void SetDefaultFont(std::string font);
 		void UnselectControl() { unselectControl(); }
 		void AddControl( Control* cntrl );
 		void RemoveControl( Control* control );

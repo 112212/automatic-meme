@@ -5,7 +5,7 @@
 	#include "common/SDL/Drawing.hpp"
 #endif
 
-#define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSansMono.ttf"
+#define DEFAULT_FONT "/usr/share/fonts/TTF/DroidSansMono.ttfgfdgd"
 
 #define MAX_BASIC_EVENTS 6
 namespace ng {
@@ -32,16 +32,13 @@ GuiEngine::GuiEngine(int xsize, int ysize) : GuiEngine() {
 	#ifdef USE_SFML
 		if( !Fonts::FontExists( "default" ) ) {
 			Fonts::LoadFont( DEFAULT_FONT, "default" );
-			Colors::InitColors();
 		}
 	#elif USE_SDL
-		if( !Fonts::FontExists( "default" , 13 ) ) {
-			if(!Fonts::LoadFont( DEFAULT_FONT, "default", 13 )) {
-				cout << "[GUI] default font loading failed\n";
-			}
-			Colors::InitColors();
+		if(!Fonts::LoadFont( DEFAULT_FONT, "default", 13 )) {
+			cout << "[GUI] default font loading failed\n";
 		}
 	#endif
+	Colors::InitColors();
 	Drawing::Init();
 	SetSize(xsize, ysize);
 }
@@ -62,6 +59,9 @@ void GuiEngine::Clear() {
 	}
 }
 
+void GuiEngine::SetDefaultFont(std::string font) {
+	Fonts::LoadFont(font, "default", 13);
+}
 
 void GuiEngine::SetSize(int w, int h) {
 	Drawing::SetResolution(w, h);

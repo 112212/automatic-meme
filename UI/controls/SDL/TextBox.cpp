@@ -96,6 +96,7 @@ int TextBox::m_cursor_color = 0xffffffff;
 int TextBox::m_selection_color = 0xff808080;
 
 void TextBox::SetText( std::string text ) {
+	if(!m_font) return;
 	if(m_lines.size() > 0)
 		SetSelection( Point(m_lines.back().text.size(), m_lines.size()-1), {0,0} );
 	m_cursor = Point(0,0);
@@ -172,7 +173,6 @@ void TextBox::onPositionChange() {
 
 void TextBox::OnGetFocus() {
 	// SDL_SetCursor( CCursors::textCursor );
-	cout << "got focus\n";
 }
 
 void TextBox::OnMouseDown( int x, int y ) {

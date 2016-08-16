@@ -98,7 +98,7 @@ void Button::STYLE_FUNC(value) {
 	}
 
 	void Button::update_text() {
-		
+		if(!m_font) return;
 		int color = m_is_mouseDown ? m_down_color : m_up_color;
 		SDL_Color *c = (SDL_Color*)&color;
 		const Rect& r = GetRect();

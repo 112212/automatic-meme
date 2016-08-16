@@ -7,6 +7,7 @@
 #include <string>
 #include <istream>
 namespace ng {
+
 struct cache_entry {
 	controlType type;
 	int z_index;
@@ -21,6 +22,7 @@ struct cache_entry {
 
 class GuiEngine;
 class Widget;
+class Control;
 
 class ControlManager {
 	private:
