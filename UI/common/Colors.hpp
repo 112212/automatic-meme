@@ -14,8 +14,6 @@ namespace Colors {
 		extern Uint32 Yellow;
 		extern Uint32 Blue;
 		
-		// init
-		void InitColors( );
 		Uint32 GetColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 0xff);
 		Uint32 ParseColor(std::string str);
 };

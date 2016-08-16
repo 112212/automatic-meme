@@ -56,10 +56,6 @@ std::map< std::string, std::string > Fonts::fonts_path;
 			return f->second;
 	}
 	
-	/*
-		loads new font, or replaces existing font
-		use GetFont to retrieve font
-	*/
 	TTF_Font* Fonts::LoadFont( std::string full_path_name, std::string short_name, int font_size ) {
 		if(!ttfInited) {
 			ttfInited = true;
@@ -77,20 +73,8 @@ std::map< std::string, std::string > Fonts::fonts_path;
 				return fnt;
 			}
 		} else {
-			RemoveFont(short_name);
-			return LoadFont( full_path_name, short_name, font_size );
+			return f->second;
 		}
-	}
-	
-	void Fonts::RemoveFont( std::string fontname ) {
-		TTF_Font* f = 0;
-		for(auto &p : fonts) {
-			if(p.first.first == fontname) {
-				f = p.second;
-				fonts.erase(p.first);
-			}
-		}
-		// TTF_CloseFont( f );
 	}
 	
 	TTF_Font* Fonts::GetParsedFont( std::string fontString ) {
