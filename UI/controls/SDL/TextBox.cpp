@@ -16,6 +16,7 @@ TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_ancho
 	m_backcolor = 0;
 	m_readonly = false;
 	m_placeholder.text = "";
+	m_locked = false;
 	SetText("");
 }
 
@@ -290,7 +291,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 		bool handled = true;
 		switch(val) {
 			case 'c': // copy
-					SDL_SetClipboardText( GetSelectedText().c_str() );
+				SDL_SetClipboardText( GetSelectedText().c_str() );
 				break;
 			case 'v': // paste
 				PutTextAtCursor( SDL_GetClipboardText() );
@@ -307,9 +308,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	}
 	
 	if(m_readonly) return;
-			
-	// if(val >= 256 && val <= 265) val -= 208;
-	// cout << val << endl;
+	
 	m_cursor_blink_counter = m_cursor_blinking_rate;
 	switch(val) {
 		case SDLK_BACKSPACE: {

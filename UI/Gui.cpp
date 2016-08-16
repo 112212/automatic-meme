@@ -5,7 +5,6 @@
 	#include "common/SDL/Drawing.hpp"
 #endif
 
-#define MAX_BASIC_EVENTS 6
 namespace ng {
 GuiEngine::GuiEngine() : ControlManager(this) {
 	
@@ -179,6 +178,9 @@ void GuiEngine::processControlEvent(int event_type) {
 			}
 		case GUI_UNSELECT_WIDGET:
 			unselectWidget();
+			break;
+		case GUI_UNSELECT_WIDGETS:
+			unselectWidgets();
 			break;
 	}
 }
