@@ -126,6 +126,8 @@ class Control {
 		void initEventVector(int max_events) { subscribers.resize(max_events); }
 		void emitEvent( int EventID );
 		void sendGuiCommand( int eventId );
+		bool isThisControlSelected();
+		
 		inline Widget* getWidget() { return widget; }
 		inline GuiEngine* getEngine() { return engine; }
 		bool check_collision(int x, int y);

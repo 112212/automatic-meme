@@ -44,10 +44,17 @@ void Control::_updateCache(CacheUpdateFlag flag) {
 	}
 }
 
+bool Control::isThisControlSelected() {
+	return engine && engine->selected_control == this;
+}
+
 void Control::SetVisible(bool visible) {
 	if(this->visible != visible) {
 		this->visible = visible;
 		_updateCache(CacheUpdateFlag::attributes);
+		if(!visible && isThisControlSelected() ) {
+			sendGuiCommand(GUI_UNSELECT);
+		}
 	}
 }
 
