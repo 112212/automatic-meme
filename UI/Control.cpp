@@ -52,7 +52,7 @@ void Control::SetVisible(bool visible) {
 	if(this->visible != visible) {
 		this->visible = visible;
 		_updateCache(CacheUpdateFlag::attributes);
-		if(!visible && isThisControlSelected() ) {
+		if(!visible && isWidget && ((Widget*)this)->isThisWidgetInSelectedBranch() ) {
 			sendGuiCommand(GUI_UNSELECT_WIDGETS);
 		}
 	}
@@ -197,8 +197,7 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {}
 	void Control::SetFont( std::string name, int size ) { 
 		TTF_Font* f = Fonts::GetFont(name, size); 
-		if(f) 
-			m_font = f; 
+		if(f) m_font = f; 
 	}
 #endif
 void Control::OnLostFocus() {}
