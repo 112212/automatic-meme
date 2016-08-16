@@ -83,21 +83,14 @@ std::map< std::string, std::string > Fonts::fonts_path;
 	}
 	
 	void Fonts::RemoveFont( std::string fontname ) {
-		bool found = false;
-		int n = 0;
 		TTF_Font* f = 0;
-		std::pair<std::string, int> key;
 		for(auto &p : fonts) {
 			if(p.first.first == fontname) {
-				n++;
 				f = p.second;
-				key = p.first;
+				fonts.erase(p.first);
 			}
 		}
-		if(n == 1) {
-			TTF_CloseFont( f );
-			fonts.erase(key);
-		}
+		TTF_CloseFont( f );
 	}
 	
 	TTF_Font* Fonts::GetParsedFont( std::string fontString ) {
