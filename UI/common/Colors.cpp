@@ -15,8 +15,7 @@ namespace Colors {
 	Uint32 Blue = GetColor( 0x00, 0x00, 0xff );
 	
 	Uint32 ParseColor(std::string str) {
-		long val = std::stol(str.substr(1,8), 0, 16);
-		Uint32 color = val;
+		Uint32 color = std::stoul(str.substr(1,8), 0, 16);
 		if(str.size() < 9)
 			color |= 0xff000000;
 		return color;
