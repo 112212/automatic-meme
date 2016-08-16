@@ -90,7 +90,7 @@ std::map< std::string, std::string > Fonts::fonts_path;
 				fonts.erase(p.first);
 			}
 		}
-		TTF_CloseFont( f );
+		// TTF_CloseFont( f );
 	}
 	
 	TTF_Font* Fonts::GetParsedFont( std::string fontString ) {

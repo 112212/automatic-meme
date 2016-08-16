@@ -100,9 +100,16 @@ void Button::STYLE_FUNC(value) {
 	void Button::update_text() {
 		if(!m_font) return;
 		int color = m_is_mouseDown ? m_down_color : m_up_color;
-		SDL_Color *c = (SDL_Color*)&color;
+		
+		SDL_Color c;
+		c.r = (color >> 16) & 0xff;
+		c.g = (color >> 8) & 0xff;
+		c.b = color & 0xff;
+		c.a = (color >> 24) & 0xff;
+		
 		const Rect& r = GetRect();
-		SDL_Surface* surf = TTF_RenderText_Blended( m_font, text.c_str(), *c );
+		SDL_Surface* surf = TTF_RenderText_Blended( m_font, text.c_str(), c );
+		
 		if(!surf) return;
 		tex_text = Drawing::GetTextureFromSurface(surf, tex_text);
 		m_text_rect.w = surf->w;

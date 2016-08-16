@@ -162,7 +162,10 @@ void TextBox::onFontChange() {
 	if(!m_font) return;
 	m_text_max = Fonts::getMaxTextRep( m_font, 'A', GetRect().w );
 	m_line_height = TTF_FontHeight(m_font);
-	m_lines_max = GetRect().h / m_line_height;
+	if(m_line_height != 0)
+		m_lines_max = GetRect().h / m_line_height;
+	else
+		m_lines_max = 1;
 }
 
 void TextBox::onPositionChange() {
