@@ -136,8 +136,9 @@ class Control {
 		void setInteractible(bool interactible);
 		const Point getOffset();
 		
-		const std::vector<Control*> getWidgetControls();
-		const std::vector<Control*> getEngineControls();
+		const std::vector<Control*>& getParentControls();
+		const std::vector<Control*>& getWidgetControls();
+		const std::vector<Control*>& getEngineControls();
 		
 		// internal virtual
 		virtual void onPositionChange();
@@ -177,6 +178,7 @@ class Control {
 		void SetAnchor( Rect r );
 		void SetAnchor( const Anchor& anchor );
 		void Focus();
+		void Activate();
 #ifdef USE_SDL
 		void SetFont( TTF_Font* fnt ) { if(fnt) m_font = fnt; }
 		void SetFont( std::string name, int size );

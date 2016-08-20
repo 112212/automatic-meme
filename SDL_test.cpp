@@ -99,7 +99,7 @@ int main() {
 	gui = GuiEngine(sizeX, sizeY);
 	// gui.SetSize(sizeX, sizeY);
 	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf");
-	gui.LoadXml("gui2.xml");
+	gui.LoadXml("gui-test.xml");
 	
 	
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){

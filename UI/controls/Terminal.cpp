@@ -54,6 +54,10 @@ Terminal* Terminal::Clone() {
 	return t;
 }
 
+void Terminal::onFontChange() {
+	m_log->SetFont(m_font);
+	m_terminal->SetFont(m_font);
+}
 
 void Terminal::onPositionChange() {
 	int h = TTF_FontHeight(m_font) + 5;

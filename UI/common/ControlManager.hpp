@@ -40,7 +40,7 @@ class ControlManager {
 		void addControlToCache(Control* control);
 		void removeControlFromCache(Control* control);
 	public:
-		inline const std::vector<Control*> GetControls() { return controls; }
+		inline const std::vector<Control*>& GetControls() { return controls; }
 		void ApplyAnchoring();
 		static void RegisterControl(std::string tag, std::function<Control*()> control_constructor);
 		static Control* CreateControl(std::string tag);

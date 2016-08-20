@@ -33,6 +33,8 @@ class TextBox : public Control {
 		int m_readonly;
 		
 		bool m_locked;
+		bool m_password;
+		int m_max_length;
 		int m_text_max;
 		int m_lines_max;
 		int m_line_height;

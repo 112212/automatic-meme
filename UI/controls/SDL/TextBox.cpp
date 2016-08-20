@@ -2,6 +2,7 @@
 #include <SDL2/SDL_opengl.h>
 #include <cctype> // toupper
 #include <list>
+#include <algorithm>
 namespace ng {
 TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_anchor{-1,-1} /*textboxes anchor*/, 
 		m_cursor_max_x(0) {
@@ -17,7 +18,9 @@ TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_ancho
 	m_readonly = false;
 	m_placeholder.text = "";
 	m_locked = false;
+	m_password = false;
 	SetText("");
+	m_max_length = 9999;
 }
 
 TextBox::~TextBox() {
@@ -162,6 +165,10 @@ void TextBox::STYLE_FUNC(value) {
 		_case("placeholder"):
 			m_placeholder.text = value;
 			updateTexture(m_placeholder);
+		_case("password"):
+			m_password = value == "true";
+		_case("max_length"):
+			m_max_length = std::stoi(value);
 	}
 		
 }
@@ -187,10 +194,21 @@ void TextBox::OnGetFocus() {
 	// SDL_SetCursor( CCursors::textCursor );
 }
 
+/*
+int Fonts::getMaxText( TTF_Font* font, const std::string &text, int width ) {
+	
+}
+	
+int TextBox::getTextSize( TTF_Font* font, const std::string &text ) {
+	
+}
+*/
+
 void TextBox::OnMouseDown( int x, int y ) {
 	sendGuiCommand( GUI_KEYBOARD_LOCK );
 	const Rect& rect = GetRect();
 	if(check_collision(x,y)) {
+		m_cursor_blink_counter = m_cursor_blinking_rate;
 		m_locked = true;
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
@@ -215,6 +233,7 @@ void TextBox::OnMouseDown( int x, int y ) {
 
 void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 	if(mouseState) {
+		m_cursor_blink_counter = m_cursor_blinking_rate;
 		const Rect& rect = GetRect();
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
@@ -272,7 +291,10 @@ void TextBox::updatePosition() {
 void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	if(line.tex == 0xffffffff)
 		new_tex = true;
-	SDL_Surface* surf = TTF_RenderUTF8_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	SDL_Surface* surf;
+	
+	surf = TTF_RenderUTF8_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	
 	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	// SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     // SDL_BlitSurface(surf, 0, tempSurface, 0);
@@ -312,7 +334,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	m_cursor_blink_counter = m_cursor_blinking_rate;
 	switch(val) {
 		case SDLK_BACKSPACE: {
-				if(m_anchor.x != -1 && m_anchor.x != m_cursor.x && m_anchor.y != m_cursor.y) {
+				if(m_anchor.x != -1 && (m_anchor.x != m_cursor.x || m_anchor.y != m_cursor.y)) {
 					deleteSelection();
 					break;
 				}
@@ -428,6 +450,19 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			}
 			break;
 		
+		case SDLK_TAB: {
+			std::vector<Control*> controls = getParentControls();
+			std::sort(controls.begin(), controls.end(), [](Control* a, Control* b) -> bool {
+				return a->GetRect().y > b->GetRect().y || (a->GetRect().y == b->GetRect().y && a->GetRect().x <= b->GetRect().x);
+			});
+			for(auto it = controls.begin(); it != controls.end(); it++) {
+				if(*it == this && it+1 != controls.end() && *(it+1)) {
+					(*(it+1))->Focus();
+					break;
+				}
+			}
+		}
+		
 		// keys to ignore (won't be passed to default case)
 		case SDLK_LCTRL:
 		case SDLK_RCTRL:
@@ -450,14 +485,16 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				val = SDLK_PERIOD;
 				
 			if(mod & KMOD_SHIFT) {
+				if(val == '2')
+					val = '@';
 				val = toupper(val);
 			}
 			
 			PutTextAtCursor(std::string(1,(char)val));
 			
 			emitEvent( event::change );
-		}
 			break;
+		}
 	}
 }
 
@@ -529,6 +566,10 @@ void TextBox::PutTextAtCursor(std::string text) {
 	
 	if(!m_multiline)
 		find_and_replace(text, "\n", "");
+		
+	if(m_lines.size() > 0 && m_lines[m_cursor.y].text.size() + text.size() > m_max_length) {
+		text = text.substr(0, m_max_length-m_lines[m_cursor.y].text.size());
+	}
 	
 	std::list<TextLine> lines;
 	size_t pos = 0;

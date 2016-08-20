@@ -14,6 +14,7 @@ class Terminal : public Widget {
 		void onPositionChange();
 		void tbox_enter(Control *c);
 		void execute_command(std::string cmd);
+		void onFontChange();
 	public:
 	
 		Terminal();

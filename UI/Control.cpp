@@ -108,17 +108,28 @@ void Control::sendGuiCommand( int eventId ) {
 	}
 }
 
-const std::vector<Control*> Control::getWidgetControls() {
+std::vector<Control*> empty_vector;
+
+const std::vector<Control*>& Control::getParentControls() {
+	if(widget)
+		return widget->controls;
+	else if(engine)
+		return engine->GetControls();
+	else
+		return empty_vector;
+}
+
+const std::vector<Control*>& Control::getWidgetControls() {
 	if(widget)
 		return widget->controls;
 	else
-		return std::vector<Control*>();
+		return empty_vector;
 }
-const std::vector<Control*> Control::getEngineControls() {
+const std::vector<Control*>& Control::getEngineControls() {
 	if(engine)
 		return engine->GetControls();
 	else
-		return std::vector<Control*>();
+		return empty_vector;
 }
 
 bool Control::check_collision(int x, int y) {

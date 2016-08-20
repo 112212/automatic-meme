@@ -419,6 +419,7 @@ namespace XmlLoader {
 						a.h = -0.5;
 						a.H = 0.5;
 					}
+					break;
 				case 'D':
 				case 'B':
 					a.ay = -1;

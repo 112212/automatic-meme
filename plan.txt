@@ -143,53 +143,39 @@ TODO:
 + 	flexible input redirect to widget
 + 	overlapping check compile time option
 + 	new control widget mover
-+ 	make compile time option to remove event queue and totally replace it with subscribe event
 + 	xml loader
-+ 	OpenGL port of controls
 -	support for unicode in textbox
-+ 	optional multiline textbox with scrollbars (like rich textbox)
--	console style textbox (separate control)
++	terminal control (2 textboxes in a widget)
 -	textbox text wrapping
 - 	colored text
 + 	copy & paste for textbox
 + 	anchoring (group anchor, single element anchor)
--	theme loader (default values)
++	theme loader (default values)
 -	xml defining borders, background color polygon or image and its bounding area (clickable area)
--	label blinking?
+-	label blinking, fading, animations ...
 *	new control registration to xml
 -	resizable widget
 +	setting font by parsing it
 -	implement default font directory for linux and windows and make it as search path for fonts
--	tabbing for textbox
+-	tabbing for textbox and button
 -	tooltip
-
+-	add option to limit number of characters in textbox
+-	textbox scrollbar
+-	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 
 OpenGL port of controls:
-+ 	Button
-+ 	ComboBox
-+ 	CheckBox
-+ 	Container
 - 	GridContainer
-+ 	Label
-+ 	ListBox
-+ 	RadioButton
-+ 	ScrollBar
 - 	TabContainer
-+ 	TextBox
-+ 	TrackBar
 
 TO FIX:
 
 
 
-
-fix subscibing event buggs somehow
-add max chars in textbox (inclusive unicode, č = 1 character)
-add placeholder = default value of the textbox and when its clicked, clear textbox (remove placeholder), if textbox loses focus and is empty (user did not type anything), again show placeholder, its great so we dont have to put empty textboxes and label username next to it, it does not need new attribute placeholder as is in HTML, just make all initial value="" of textbox act like placeholder
 add possibility to change font color (button works by downcolor/upcolor, but textbox doesnt, maybe also implement there downcolor/upcolor instead of just color?)
 add possibility to put textbox type: text or password, like in html, where password is under asterisks
-why button is not pair tag?
+
 when is textbox selected, always start blinking from visible cursor paddle, otherwise sometimes you get feeling as you did not click in the textbox
-add fadeout text + duration, not that important but could be great to show some label for some time, then let it fadeout - SetVisible(false), or probably the control could remove itself on fading out, so we use it for some tooltips
-fix if textbox is selected it needs to select another one, its ok, but if none textbox is selected, you hover mouse in it and it selects it with cursor without clicking, it needs to be clicked to be focused
-fix button downcolor/upcolor ="#FF0000" should be red, but isnt, neither #00FF0000 is, and #1228D1 is some red, while in bordercolor it is blue (correct), its cuz everywhere is ARGB, but here is ABGR format for some reason
+
+add fadeout text + duration, not that important but could be great to show some label for some time, then let it fadeout - SetVisible(false), 
+or probably the control could remove itself on fading out, so we use it for some tooltips
+

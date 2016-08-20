@@ -535,32 +535,36 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 }
 
 void GuiEngine::Focus(Control* control) {
-	if(!control->engine || selected_control == control) return;
+	if(!control || !control->engine || selected_control == control) return;
 	
-	if(selected_control->widget == control->widget) {
-		selected_control = control;
-		control->widget->selected_control = control;
+	if(control->widget) {
+		if(selected_control->widget == control->widget) {
+			selected_control = control;
+			control->widget->selected_control = control;
+		} else {
+			Widget* w = control->widget;
+			Widget* wgt = w;
+			last_selected_widget = w;
+			Point ofs{0,0};
+			while(w->widget) {
+				ofs.x += w->offset.x;
+				ofs.y += w->offset.y;
+				w = w->widget;
+			}
+			sel_first_depth_widget = w;
+			w = wgt;
+			Point o = ofs;
+			while(w->widget) {
+				o.x -= w->offset.x;
+				o.y -= w->offset.y;
+				w = w->widget;
+				w->cached_absolute_offset = o;
+			}
+			selected_control = control;
+			wgt->selected_control = selected_control;
+		}
 	} else {
-		Widget* w = control->widget;
-		Widget* wgt = w;
-		last_selected_widget = w;
-		Point ofs{0,0};
-		while(w->widget) {
-			ofs.x += w->offset.x;
-			ofs.y += w->offset.y;
-			w = w->widget;
-		}
-		sel_first_depth_widget = w;
-		w = wgt;
-		Point o = ofs;
-		while(w->widget) {
-			o.x -= w->offset.x;
-			o.y -= w->offset.y;
-			w = w->widget;
-			w->cached_absolute_offset = o;
-		}
 		selected_control = control;
-		wgt->selected_control = selected_control;
 	}
 }
 
