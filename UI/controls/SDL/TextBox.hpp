@@ -14,7 +14,8 @@ class TextBox : public Control {
 			unsigned int tex;
 			int w,h;
 			std::string text;
-			TextLine() : tex(0xffffffff) {}
+			bool wrap;
+			TextLine() : tex(0xffffffff),wrap(false) {}
 		};
 		std::vector<TextLine> m_lines;
 		

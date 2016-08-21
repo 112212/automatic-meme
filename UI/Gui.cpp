@@ -1,6 +1,6 @@
 #include "Gui.hpp"
 #include "Widget.hpp"
-
+#include <stack>
 #ifdef USE_SDL
 	#include "common/SDL/Drawing.hpp"
 #endif
@@ -17,6 +17,7 @@ GuiEngine::GuiEngine() : ControlManager(this) {
 	
 	depth = 0;
 	selected_control = 0;
+	active_control = 0;
 	sel_first_depth_widget = 0;
 	last_selected_widget = 0;
 	
@@ -269,7 +270,29 @@ void GuiEngine::RemoveControl( Control* control ) {
 	if(hasIntercepted)												\
 		hasIntercepted = false; 									\
 	else 															\
-		selected_control->action;										\
+		selected_control->action;									\
+	}
+	
+#define INTERCEPT_HOOK_KEYBOARD(action_enum,action) {				\
+	std::stack<Widget*> wgts;                                       \
+	Widget* w = active_control->widget;								\
+	while(w) {                                 						\
+		wgts.push(active_control->widget);                          \
+		w = w->widget;                          					\
+	}                                                               \
+	while(!wgts.empty()) {                                          \
+		Widget* w = wgts.top();                                     \
+		if(w->intercept_mask & Widget::imask::action_enum) {        \
+			w->action;                                              \
+			if(hasIntercepted)                                      \
+				break;												\
+		}															\
+		wgts.pop();													\
+	}                                               				\
+	if(hasIntercepted)												\
+		hasIntercepted = false; 									\
+	else 															\
+		active_control->action;										\
 	}
 	
 #define WIDGET_HOOK(action_enum,action) if(last_selected_widget) { 		\
@@ -292,16 +315,16 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 	m_mouse_down = true;
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	
-	#ifndef OVERLAPPING_CHECK
+#ifndef OVERLAPPING_CHECK
 	if( !selected_control ) {
 		check_for_new_collision( mX, mY );
 	}
-	#else
+#else
 	if(!m_focus_lock) {
 		check_for_new_collision( mX, mY );
 	}
-	#endif
-	
+#endif
+	active_control = selected_control;
 	if( selected_control ) {
 		if(m_focus_lock) {
 			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y ));
@@ -324,6 +347,7 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 			}
 		}
 	} else WIDGET_HOOK(mouse_down, OnMouseDown( mX, mY ));
+	active_control = selected_control;
 }
 
 void GuiEngine::OnMouseUp( int mX, int mY ) {
@@ -401,7 +425,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 	Point offset;
 	Point &o = offset;
 	Widget *p = 0;
-	if(m_widget_lock || last_selected_widget) {
+	if(last_selected_widget || m_widget_lock) {
 		offset = sel_widget_offset;
 		if(m_widget_lock)
 			p = sel_first_depth_widget;
@@ -463,7 +487,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 	
 	// --- descending tree ---
 	while(it != it_end) {
-		if(!it->interactible || !it->visible) { it++; continue; }
+		if(!it->interactible) { it++; continue; }
 		bool in = false;
 		if(it->custom_check) {
 			if(it->control->customBoundary( x-o.x, y-o.y )) {
@@ -568,6 +592,13 @@ void GuiEngine::Focus(Control* control) {
 	}
 }
 
+void GuiEngine::Activate(Control* control) {
+	if(control->engine == this && control->interactible) {
+		active_control = control;
+		active_control->OnGetFocus();
+	}
+}
+
 void GuiEngine::recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove) {
 	Widget* w = wgt;
 	for(auto it = w->cache.begin(); it != w->cache.end(); it++) {
@@ -591,7 +622,6 @@ void GuiEngine::unselectWidget() {
 		w = w->widget;
 		last_selected_widget = w;
 		depth--;
-		// cout << "depth: " << depth << endl;
 	}
 }
 void GuiEngine::unselectWidgets() {
@@ -690,26 +720,26 @@ void GuiEngine::OnCleanup() {
 		}
 	}
 	void GuiEngine::OnKeyDown( sf::Event::KeyEvent &sym ) {
-		if(selected_control) {
+		if(active_control) {
 			INTERCEPT_HOOK(key_down, OnKeyDown( sym ));
 		}
 	}
 
 	void GuiEngine::OnKeyUp( sf::Event::KeyEvent &sym ) {
-		if(selected_control) {
+		if(active_control) {
 			INTERCEPT_HOOK(key_up, OnKeyUp( sym ));
 		}
 	}
 #elif USE_SDL
 	void GuiEngine::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod) {
-		if(selected_control) {
-			INTERCEPT_HOOK(key_down, OnKeyDown( sym, mod ));
+		if(active_control) {
+			INTERCEPT_HOOK_KEYBOARD(key_down, OnKeyDown( sym, mod ));
 		}
 	}
 
 	void GuiEngine::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {
-		if(selected_control) {
-			INTERCEPT_HOOK(key_up, OnKeyUp( sym, mod ));
+		if(active_control) {
+			INTERCEPT_HOOK_KEYBOARD(key_down, OnKeyUp( sym, mod ));
 		}
 	}
 	void GuiEngine::Render() {

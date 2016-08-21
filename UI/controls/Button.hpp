@@ -30,6 +30,8 @@ class Button : public Control {
 		void OnLostFocus();
 		void OnGetFocus();
 		void onFontChange();
+		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
+		void OnKeyUp( SDL_Keycode &sym, SDL_Keymod mod );
 		
 		#ifdef USE_SFML
 			void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );

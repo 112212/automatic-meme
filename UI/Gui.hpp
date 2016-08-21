@@ -56,6 +56,7 @@ class GuiEngine : public ControlManager
 			Widget* widget;
 		};
 		std::vector<interceptInfo> sel_intercept_vector;
+		Control* active_control;
 		// --------------------
 		
 		bool m_mouse_down;
@@ -114,6 +115,7 @@ class GuiEngine : public ControlManager
 		void SetSize(int w, int h);
 		
 		void Focus(Control* control);
+		void Activate(Control* control);
 		
 		Control* GetSelectedControl() { return selected_control; }
 		Widget* GetSelectedWidget() { return last_selected_widget; }

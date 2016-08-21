@@ -10,7 +10,7 @@ Terminal::Terminal() {
 	initEventVector(event::max_events);
 	AddControl(m_log);
 	AddControl(m_terminal);
-	setInterceptMask(imask::mouse_up | imask::mouse_down);
+	setInterceptMask(imask::mouse_up);
 	m_terminal->SubscribeEvent( TextBox::event::enter, [this](Control *c) { return tbox_enter(c); });
 }
 
@@ -35,12 +35,12 @@ void Terminal::WriteLog(const std::string& s) {
 }
 
 void Terminal::OnMouseDown( int x, int y ) {
-	m_last_pos = {x,y};
+
 }
+
 void Terminal::OnMouseUp( int x, int y ) {
-	if(x == m_last_pos.x && y == m_last_pos.y) {
-		m_terminal->Focus();
-	}
+	if(m_log->GetSelectedText().size() == 0)
+		m_terminal->Activate();
 }
 
 void Terminal::Render( Point position, bool isSelected ) {

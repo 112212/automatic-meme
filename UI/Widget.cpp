@@ -46,15 +46,15 @@ void Widget::AddControl( Control* control ) {
 	addControlToCache(control);
 }
 
-bool Widget::isThisWidgetSelected() {
+bool Widget::isSelected() {
 	if(engine)
 		return engine->last_selected_widget == this;
 	else
 		return false;
 }
 
-bool Widget::isThisWidgetInSelectedBranch() {
-	return selected_control != 0 or isThisWidgetSelected();
+bool Widget::inSelectedBranch() {
+	return selected_control != 0 or isSelected();
 }
 
 void Widget::LockWidget(bool lock) {
@@ -74,14 +74,14 @@ void Widget::RemoveControl( Control* control ) {
 }
 
 void Widget::setRect( int x, int y, int w, int h ) {
-	if(isThisWidgetInSelectedBranch()) {
+	if(inSelectedBranch()) {
 		engine->sel_widget_offset.x += x-m_rect.x;
 		engine->sel_widget_offset.y += y-m_rect.y;
 	}
 }
 
 void Widget::SetOffset(int x, int y) {
-	if(isThisWidgetInSelectedBranch()) {
+	if(inSelectedBranch()) {
 		engine->sel_widget_offset.x += x-offset.x;
 		engine->sel_widget_offset.y += y-offset.y;
 	}

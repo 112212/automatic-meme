@@ -22,10 +22,10 @@ Container::Container() {
 	max_v = max_h = 0;
 	m_tx = m_ty = 0;
 	innerWidget = new Widget;
-	innerWidget->SetVisible(false);
+	innerWidget->SetRenderable(false);
 	background_color = 0;
 	Widget::AddControl(innerWidget);
-	// setInterceptMask(imask::mwheel | imask::mouse_down | imask::mouse_move);
+	setInterceptMask(imask::mwheel);
 }
 
 
@@ -34,11 +34,8 @@ Container::~Container() {
 }
 
 void Container::OnMWheel( int updown ) {
-	// TODO: scroll vertically default and horizontally if pointed on it
 	if(!getEngine()) return;
-	if(getEngine()->GetSelectedWidget() == (Control*)innerWidget or 
-		isThisWidgetSelected()) {
-			
+	if(getEngine()->GetSelectedWidget() == (Control*)innerWidget or isSelected()) {
 		if(m_scroll_v && !(m_scroll_h && getEngine()->GetSelectedControl() == m_scroll_h)) {
 			m_scroll_v->OnMWheel(updown);
 		}
@@ -50,7 +47,6 @@ void Container::OnMWheel( int updown ) {
 
 void Container::OnMouseDown( int mX, int mY ) {
 	// intercept();
-	
 }
 
 void Container::OnMouseUp( int x, int y ) {
@@ -58,8 +54,6 @@ void Container::OnMouseUp( int x, int y ) {
 }
 
 void Container::OnMouseMove( int x, int y, bool lmb ) {
-	// cout << "hehehehe\n";
-	// sendGuiCommand(GUI_UNSELECT_WIDGET);
 	// intercept();
 }
 
@@ -132,7 +126,7 @@ void Container::onPositionChange() {
 #elif USE_SDL
 
 #ifdef CLIP_METHOD_SCISSOR
-Rect getIntersectingRectangle(Rect &a, Rect &b) {
+Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
 	int Ax = std::max(a.x, b.x);
 	int Ay = std::max(a.y, b.y);
 	int Bx = std::min(a.x+a.w,b.x+b.w);
@@ -161,7 +155,7 @@ void Container::Render( Point pos, bool isSelected ) {
 		w -= thickness + 1;
 	}
 	
-	Drawing::Rect(x, y, r.w, r.h, 0xffffffff);
+	
 	
 #ifdef CLIP_METHOD_SCISSOR
 	Rect clipRect = {x,y,w,r.h};
@@ -252,6 +246,7 @@ void Container::Render( Point pos, bool isSelected ) {
 	
 	
 	RenderWidget(pos, isSelected);
+	Control::Render(pos,isSelected);
 }
 
 void Container::onPositionChange() {
@@ -290,6 +285,7 @@ void Container::AddItem( Control* control ) {
 }
 
 void Container::onOverflow() {
+	
 	const Rect& r = GetRect();
 	if( !m_scroll_v && overflow_v ) {
 		m_scroll_v = new ScrollBar();
@@ -299,7 +295,6 @@ void Container::onOverflow() {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();
 			m_ty = -val * max_v / 100;
-			// innerWidget->SetPosition(innerWidget->GetRect().x, m_ty);
 			innerWidget->SetOffset(innerWidget->GetOffset().x, m_ty);
 		});
 		Anchor a = m_scroll_v->GetAnchor();
@@ -315,7 +310,6 @@ void Container::onOverflow() {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();
 			m_tx = -val * max_h / 100;
-			// innerWidget->SetPosition(m_tx, innerWidget->GetRect().y);
 			innerWidget->SetOffset(m_tx, innerWidget->GetOffset().y);
 		});
 		Anchor a = m_scroll_h->GetAnchor();
@@ -338,10 +332,5 @@ void Container::STYLE_FUNC(value) {
 			background_color = Colors::ParseColor(value);
 	}
 }
-
-// void Container::SetGrid( int x, int y ) {
-	// m_grid_w = x;
-	// m_grid_h = y;
-// }
 
 }

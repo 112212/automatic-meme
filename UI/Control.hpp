@@ -128,7 +128,10 @@ class Control {
 		void initEventVector(int max_events) { subscribers.resize(max_events); }
 		void emitEvent( int EventID );
 		void sendGuiCommand( int eventId );
-		bool isThisControlSelected();
+		bool isSelected();
+		bool isActive();
+		
+		void tabToNextControl();
 		
 		inline Widget* getWidget() { return widget; }
 		inline GuiEngine* getEngine() { return engine; }
@@ -191,6 +194,8 @@ class Control {
 		bool IsWidget() { return isWidget; }
 		void SetStyle(std::string& style, std::string& value);
 		void SetVisible(bool visible);
+		void SetRenderable(bool visible);
+		
 		bool IsVisible() { return visible; }
 		void SetId( std::string id );
 		std::string GetId() { return this->id; }

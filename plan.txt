@@ -153,15 +153,15 @@ TODO:
 +	theme loader (default values)
 -	xml defining borders, background color polygon or image and its bounding area (clickable area)
 -	label blinking, fading, animations ...
-*	new control registration to xml
++	new control registration to xml
 -	resizable widget
 +	setting font by parsing it
 -	implement default font directory for linux and windows and make it as search path for fonts
--	tabbing for textbox and button
++	tabbing for textbox and button
 -	tooltip
--	add option to limit number of characters in textbox
++	add option to limit number of characters in textbox
 -	textbox scrollbar
--	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
++	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 
 OpenGL port of controls:
 - 	GridContainer
@@ -169,12 +169,7 @@ OpenGL port of controls:
 
 TO FIX:
 
-
-
-add possibility to change font color (button works by downcolor/upcolor, but textbox doesnt, maybe also implement there downcolor/upcolor instead of just color?)
 add possibility to put textbox type: text or password, like in html, where password is under asterisks
-
-when is textbox selected, always start blinking from visible cursor paddle, otherwise sometimes you get feeling as you did not click in the textbox
 
 add fadeout text + duration, not that important but could be great to show some label for some time, then let it fadeout - SetVisible(false), 
 or probably the control could remove itself on fading out, so we use it for some tooltips

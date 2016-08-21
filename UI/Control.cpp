@@ -4,6 +4,7 @@
 // za interface eventa sa GUI einom
 #include "Gui.hpp"
 #include "Widget.hpp"
+#include <algorithm>
 
 #ifdef USE_SDL
 	#include "common/SDL/Drawing.hpp"
@@ -44,17 +45,32 @@ void Control::_updateCache(CacheUpdateFlag flag) {
 	}
 }
 
-bool Control::isThisControlSelected() {
+bool Control::isSelected() {
 	return engine && engine->selected_control == this;
+}
+
+bool Control::isActive() {
+	return engine && engine->active_control == this;
 }
 
 void Control::SetVisible(bool visible) {
 	if(this->visible != visible) {
+		this->interactible = visible;
 		this->visible = visible;
 		_updateCache(CacheUpdateFlag::attributes);
-		if(!visible && isWidget && ((Widget*)this)->isThisWidgetInSelectedBranch() ) {
+		if(!visible && isWidget && ((Widget*)this)->inSelectedBranch() ) {
 			sendGuiCommand(GUI_UNSELECT_WIDGETS);
 		}
+	}
+}
+
+void Control::SetRenderable(bool visible) {
+	if(this->visible != visible) {
+		this->visible = visible;
+		_updateCache(CacheUpdateFlag::attributes);
+		// if(!visible && isWidget && ((Widget*)this)->isThisWidgetInSelectedBranch() ) {
+			// sendGuiCommand(GUI_UNSELECT_WIDGETS);
+		// }
 	}
 }
 
@@ -97,6 +113,12 @@ void Control::Focus() {
 	}
 }
 
+void Control::Activate() {
+	if(engine) {
+		engine->Activate(this);
+	}
+}
+
 void Control::SubscribeEvent( int event_type, std::function<void(Control*)> callback ) {
 	if(event_type < subscribers.size())
 		subscribers[event_type].push_back(callback);
@@ -105,6 +127,24 @@ void Control::SubscribeEvent( int event_type, std::function<void(Control*)> call
 void Control::sendGuiCommand( int eventId ) {
 	if(engine) {
 		engine->processControlEvent(eventId);
+	}
+}
+
+void Control::tabToNextControl() {
+	std::vector<Control*> controls = getParentControls();
+	std::sort(controls.begin(), controls.end(), [](Control* a, Control* b) -> bool {
+		return a->GetRect().y < b->GetRect().y || (a->GetRect().y == b->GetRect().y && a->GetRect().x <= b->GetRect().x);
+	});
+	
+	for(auto it = controls.begin(); it != controls.end(); it++) {
+		if(*it == this) {
+			if(it+1 == controls.end()) {
+				(*controls.begin())->Activate();
+			} else {
+				(*(it+1))->Activate();
+			}
+			break;
+		}
 	}
 }
 

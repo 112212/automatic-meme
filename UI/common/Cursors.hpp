@@ -5,8 +5,6 @@
 
 class Cursors {
 private:
-	static const char *cursor[];
-	static const char *zoom[];
 
 	static SDL_Cursor* xpm_to_cursor(const char **xpm, int len);
 	
@@ -19,10 +17,5 @@ public:
 	static void CleanupCursors();
 
 };
-
-
-
-
-
 
 #endif

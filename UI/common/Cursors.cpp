@@ -1,25 +1,25 @@
 #include "Cursors.hpp"
 
-/*
-// CCursors
-SDL_Cursor* CCursors::defaultCursor = 0;
-SDL_Cursor* CCursors::textCursor = 0;
-SDL_Cursor* CCursors::zoomCursor = 0;
 
-void CCursors::InitCursors() {
+// CCursors
+SDL_Cursor* Cursors::defaultCursor = 0;
+SDL_Cursor* Cursors::textCursor = 0;
+SDL_Cursor* Cursors::zoomCursor = 0;
+
+void Cursors::InitCursors() {
 	defaultCursor = SDL_GetCursor();
  
 	textCursor = xpm_to_cursor( cursor, 25 );
 	zoomCursor = xpm_to_cursor( zoom, 25 );
 }
 
-void CCursors::CleanupCursors() {
+void Cursors::CleanupCursors() {
 	SDL_FreeCursor( defaultCursor );
 }
-*/
+
 
 /* XPM */
-const char* Cursors::cursor[] = {
+static const char* Cursors::cursor[] = {
   // width height num_colors chars_per_pixel
   "    32    20        3            1",
   // colors
@@ -51,7 +51,7 @@ const char* Cursors::cursor[] = {
 };
 
 /* XPM */
-const char* Cursors::zoom[] = {
+static const char* Cursors::zoom[] = {
   // width height num_colors chars_per_pixel
   "    32    20        3            1",
   // colors

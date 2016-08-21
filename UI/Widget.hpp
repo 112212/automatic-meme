@@ -36,8 +36,8 @@ class Widget : public ControlManager, public Control {
 		void intercept();
 		void setInterceptMask(unsigned int mask);
 		unsigned int getInterceptMask() { return intercept_mask; }
-		bool isThisWidgetSelected();
-		bool isThisWidgetInSelectedBranch();
+		bool isSelected();
+		bool inSelectedBranch();
 		Control* getSelectedControl() { return selected_control; }
 		const Point& getAbsoluteOffset() { return cached_absolute_offset; };
 	public:

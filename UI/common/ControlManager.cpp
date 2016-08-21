@@ -293,6 +293,7 @@ Control* ControlManager::CreateControl(std::string tag) {
 	#include "../controls/CheckBox.hpp"
 	#include "../controls/WidgetMover.hpp"
 	#include "../controls/Terminal.hpp"
+	#include "../controls/Form.hpp"
 #endif
 
 namespace ng {
@@ -360,6 +361,8 @@ namespace XmlLoader {
 			TAGTYPE("checkbox", CheckBox);
 			TAGTYPE("gridcontainer", GridContainer);
 			TAGTYPE("terminal", Terminal);
+			TAGTYPE("form", Form);
+			
 			default: return tryExtendedTags(tag);
 		}
 		return control;

@@ -2,7 +2,7 @@
 #include <SDL2/SDL_opengl.h>
 #include <cctype> // toupper
 #include <list>
-#include <algorithm>
+
 namespace ng {
 TextBox::TextBox() : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_anchor{-1,-1} /*textboxes anchor*/, 
 		m_cursor_max_x(0) {
@@ -74,7 +74,7 @@ void TextBox::Render( Point pos, bool selected ) {
 			}
 		}
 		
-		if(!m_locked && m_lines.size() == 1 && m_lines[0].text.size() == 0) {
+		if(!isActive() && m_lines.size() == 1 && m_lines[0].text.size() == 0) {
 			Drawing::TexRect( r.x+5, r.y+5, m_placeholder.w, m_placeholder.h, m_placeholder.tex);
 		} else {
 			j=0;
@@ -87,7 +87,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 	glDisable(GL_SCISSOR_TEST);
 	
-	if(m_locked && !m_readonly && ++m_cursor_blink_counter > m_cursor_blinking_rate && m_cursor.y-m_position.y < m_lines.size()) {
+	if(isActive() && !m_readonly && ++m_cursor_blink_counter > m_cursor_blinking_rate && m_cursor.y-m_position.y < m_lines.size()) {
 		if(m_cursor_blink_counter > 2*m_cursor_blinking_rate)
 			m_cursor_blink_counter = 0;
 			
@@ -144,7 +144,7 @@ void TextBox::OnMouseUp( int x, int y ) {
 
 void TextBox::OnLostFocus() {
 	m_mousedown = false;
-	// SDL_SetCursor( CCursors::defaultCursor );
+	// SDL_SetCursor( Cursors::defaultCursor );
 }
 
 void TextBox::OnLostControl() {
@@ -191,24 +191,16 @@ void TextBox::onPositionChange() {
 }
 
 void TextBox::OnGetFocus() {
-	// SDL_SetCursor( CCursors::textCursor );
+	// SDL_SetCursor( Cursors::textCursor );
+	m_cursor_blink_counter = m_cursor_blinking_rate;
 }
 
-/*
-int Fonts::getMaxText( TTF_Font* font, const std::string &text, int width ) {
-	
-}
-	
-int TextBox::getTextSize( TTF_Font* font, const std::string &text ) {
-	
-}
-*/
 
 void TextBox::OnMouseDown( int x, int y ) {
-	sendGuiCommand( GUI_KEYBOARD_LOCK );
+	// sendGuiCommand( GUI_KEYBOARD_LOCK );
 	const Rect& rect = GetRect();
 	if(check_collision(x,y)) {
-		m_cursor_blink_counter = m_cursor_blinking_rate;
+		
 		m_locked = true;
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
@@ -306,7 +298,6 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 }
 
 void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
-	if(!m_locked) return;
 	
 	int val = sym;
 	if(mod & KMOD_CTRL) {
@@ -327,6 +318,11 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				handled = false;
 		}
 		if(handled)return;
+	}
+	
+	if(val == SDLK_TAB) {
+		Control::tabToNextControl();
+		return;
 	}
 	
 	if(m_readonly) return;
@@ -449,19 +445,6 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				PutTextAtCursor("\n");
 			}
 			break;
-		
-		case SDLK_TAB: {
-			std::vector<Control*> controls = getParentControls();
-			std::sort(controls.begin(), controls.end(), [](Control* a, Control* b) -> bool {
-				return a->GetRect().y > b->GetRect().y || (a->GetRect().y == b->GetRect().y && a->GetRect().x <= b->GetRect().x);
-			});
-			for(auto it = controls.begin(); it != controls.end(); it++) {
-				if(*it == this && it+1 != controls.end() && *(it+1)) {
-					(*(it+1))->Focus();
-					break;
-				}
-			}
-		}
 		
 		// keys to ignore (won't be passed to default case)
 		case SDLK_LCTRL:

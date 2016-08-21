@@ -85,14 +85,9 @@ void Button::STYLE_FUNC(value) {
 		int x = r.x + pos.x;
 		int y = r.y + pos.y;
 		
-		if(need_update) {
-			update_text();
-			need_update = false;
-		}
-		
 		Drawing::FillRect(x, y, r.w, r.h, m_backcolor);
 		
-		Control::Render(pos,isSelected);
+		Control::Render(pos,isSelected || isActive());
 		
 		Drawing::TexRect(m_text_rect.x + pos.x, m_text_rect.y + pos.y, m_text_rect.w, m_text_rect.h, tex_text);
 	}
@@ -121,28 +116,44 @@ void Button::STYLE_FUNC(value) {
 	
 	void Button::SetText( std::string _text ) {
 		text = _text;
-		need_update = true;
+		update_text();
 	}
 	
 	void Button::OnMouseDown( int mX, int mY ) {
 		m_is_mouseDown = true;
-		need_update = true;
+		update_text();
 	}
 
 	void Button::OnMouseUp( int mX, int mY ) {
 		
 		m_is_mouseDown = false;
-		need_update = true;
+		update_text();
 		if(check_collision(mX, mY)) {
 			emitEvent( event::click );
 		}
 	}
 	
 	void Button::onPositionChange() {
-		need_update = true;
+		update_text();
 	}
 
 #endif
+
+void Button::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
+	if(sym == SDLK_TAB) {
+		Control::tabToNextControl();
+	} else if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
+		m_is_mouseDown = true;
+		update_text();
+	}
+}
+
+void Button::OnKeyUp( SDL_Keycode &sym, SDL_Keymod mod ) {
+	if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
+		m_is_mouseDown = false;
+		update_text();
+	}
+}
 
 Button* Button::Clone() {
 	Button *btn = new Button;
@@ -150,9 +161,9 @@ Button* Button::Clone() {
 	return btn;
 }
 
-
 void Button::OnGetFocus() {
 }
+
 void Button::OnLostFocus() {
 	m_is_mouseDown = false;
 }

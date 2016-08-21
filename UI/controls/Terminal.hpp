@@ -35,7 +35,6 @@ class Terminal : public Widget {
 		
 	private:
 		std::string m_command;
-		Point m_last_pos;
 };
 }
 #endif

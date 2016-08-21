@@ -17,6 +17,7 @@
 #include "UI/controls/CheckBox.hpp"
 #include "UI/controls/WidgetMover.hpp"
 #include "UI/controls/Terminal.hpp"
+#include "UI/controls/Form.hpp"
 
 #include "UI/common/SDL/Drawing.hpp"
 
@@ -101,7 +102,9 @@ int main() {
 	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf");
 	gui.LoadXml("gui-test.xml");
 	
-	
+	gui.SubscribeEvent("form", Form::event::submit, [](Control* c) {
+		cout << "submit\n";
+	});
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
 		// cout << "clicked at 1 \n";
 	// });
@@ -145,15 +148,15 @@ int main() {
 	cv_minimap->PutPixel(2,2);
 	*/
 	
-	Button* btn = (Button*)ControlManager::CreateControl("button");
-	Anchor a = btn->GetAnchor();
-	a.sx = 300;
-	a.sy = 100;
-	a.isrelative = true;
-	btn->SetAnchor(a);
-	btn->SetText("test create button");
-	btn->SetId("36");
-	gui.AddControl(btn);
+	// Button* btn = (Button*)ControlManager::CreateControl("button");
+	// Anchor a = btn->GetAnchor();
+	// a.sx = 300;
+	// a.sy = 100;
+	// a.isrelative = true;
+	// btn->SetAnchor(a);
+	// btn->SetText("test create button");
+	// btn->SetId("36");
+	// gui.AddControl(btn);
 	
 	// Widget* w1 = (Widget*)gui.GetControlById("w1");
 	
