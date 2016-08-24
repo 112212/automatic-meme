@@ -135,16 +135,12 @@ void Control::tabToNextControl() {
 	std::sort(controls.begin(), controls.end(), [](Control* a, Control* b) -> bool {
 		return a->GetRect().y < b->GetRect().y || (a->GetRect().y == b->GetRect().y && a->GetRect().x <= b->GetRect().x);
 	});
-	
-	for(auto it = controls.begin(); it != controls.end(); it++) {
-		if(*it == this) {
-			if(it+1 == controls.end()) {
-				(*controls.begin())->Activate();
-			} else {
-				(*(it+1))->Activate();
-			}
-			break;
-		}
+	auto f = std::find(controls.begin(), controls.end(), this);
+	auto p = std::find_if(f+1, controls.end(), [](Control* c) { return c->interactible; });
+	if(p == controls.end())
+		p = std::find_if(controls.begin(), f, [](Control* c) { return c->interactible; });
+	if(p != f) {
+		(*p)->Activate();
 	}
 }
 

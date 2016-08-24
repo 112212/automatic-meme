@@ -152,6 +152,7 @@ void Button::OnKeyUp( SDL_Keycode &sym, SDL_Keymod mod ) {
 	if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
 		m_is_mouseDown = false;
 		update_text();
+		emitEvent( event::click );
 	}
 }
 

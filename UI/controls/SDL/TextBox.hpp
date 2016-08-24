@@ -8,8 +8,6 @@ namespace ng {
 
 class TextBox : public Control {
 	private:
-	
-		
 		struct TextLine {
 			unsigned int tex;
 			int w,h;
@@ -46,11 +44,16 @@ class TextBox : public Control {
 		void updatePosition();
 		void onFontChange();
 		void updateTexture(TextLine&,bool = false);
+		std::vector<TextLine> wrap_lines(const std::vector<TextLine>& lines);
+		void compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::iterator it);
 		void sortPoints(Point &p1, Point &p2);
 		void deleteSelection();
+		void OnMWheel( int updown );
 		
 		// config
 		bool m_multiline;
+		bool m_textwrap;
+		bool m_wordwrap;
 		
 		// terminal mode
 		bool m_terminal_mode;
@@ -98,7 +101,8 @@ class TextBox : public Control {
 		void SetCursor( SDL_Cursor* curs );
 		void SetMultilineMode( bool tf );
 		void SetCursorBlinkingRate( int rate );
-		
+		void SetTextWrap(bool wrap);
+		void SetWordWrap(bool word);
 		void SetReadOnly( bool );
 };
 }

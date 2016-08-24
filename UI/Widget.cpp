@@ -2,7 +2,7 @@
 #include "Gui.hpp"
 
 namespace ng {
-Widget::Widget() : Control(), ControlManager(this), 
+Widget::Widget() : ControlManager(this), 
 	selected_control(0), intercept_mask(0) {
 	setType(TYPE_WIDGET);
 	isWidget = true;
@@ -24,11 +24,11 @@ void Widget::set_engine(GuiEngine* engine) {
 	}
 }
 
-
 void Widget::intercept() {
 	if(engine)
 		engine->hasIntercepted = true;
 }
+
 void Widget::setInterceptMask(unsigned int mask) {
 	intercept_mask = mask;
 }
@@ -40,6 +40,9 @@ void Widget::AddControl( Control* control ) {
 		if(control->isWidget) {
 			Widget* w = static_cast<Widget*>(control);
 			w->set_engine(engine);
+			engine->recursiveProcessWidgetControls(w, true);
+		} else {
+			engine->map_id_control[control->id] = control;
 		}
 	}
 	

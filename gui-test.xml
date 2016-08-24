@@ -16,11 +16,18 @@
 			<widgetmover rect="180,0,10,10"/>
 		</container>
 		
-		<form rect="0,0,200,200" id="form">
+		<widget rect="0,0,200,200" id="form">
+			<textbox rect="r0,0,200,30" placeholder="username" />
+			<textbox rect="r0,0,200,30" placeholder="password" />
+			<textbox rect="r0,0,200,30" placeholder="username" />
+			<textbox rect="r0,0,200,30" placeholder="password" />
 			<textbox rect="r0,0,200,30" placeholder="username" />
 			<textbox rect="r0,0,200,30" placeholder="password" />
 			<button rect="r0,10,200,20" value="ok"/>
-		</form>
+			<button rect="r0,10,200,20" value="ok"/>
+			<button rect="r0,10,200,20" value="ok"/>
+			<button rect="r0,10,200,20" value="ok"/>
+		</widget>
 
 		<combobox rect="0,0,-5%+200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" >
 			<item>heheheeh</item>
@@ -91,6 +98,8 @@ fddgdf"></label>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
-		<terminal font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,18" rect="0,0,400,300" id="term" />
+		<widget rect="0,0,200,200">
+			<terminal font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,18" rect="r0,0,400,300" id="term" />
+		</widget>
 	</anchor>
 </gui>

@@ -603,6 +603,11 @@ void GuiEngine::recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove) 
 	Widget* w = wgt;
 	for(auto it = w->cache.begin(); it != w->cache.end(); it++) {
 		if(it->isWidget) {
+			if(add_or_remove) {
+				map_id_control[it->control->id] = it->control;
+			} else {
+				map_id_control.erase(it->control->id);
+			}
 			recursiveProcessWidgetControls((Widget*)it->control, add_or_remove);
 		} else {
 			if(add_or_remove) {

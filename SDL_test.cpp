@@ -168,6 +168,11 @@ int main() {
 		// Terminal* t = (Terminal*)c;
 		// cout << "command: " << t->GetText() << endl;
 	// });
+	
+	TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
+	// tb->SetWordWrap(true);
+	tb->SetTextWrap(true);
+	// tb->SetTextWrap(false);
 		
 	gui.ApplyAnchoring();
 	

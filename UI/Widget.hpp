@@ -7,7 +7,7 @@
 namespace ng {
 class GuiEngine;
 
-class Widget : public ControlManager, public Control {
+class Widget : public Control, public ControlManager  {
 	
 	private:
 		unsigned int intercept_mask;

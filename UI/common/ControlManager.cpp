@@ -485,11 +485,14 @@ namespace XmlLoader {
 				}
 				anchor1.isrelative |= relative;
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
+				continue;
 			} else if(!strcmp(node->name(), "theme")) {
 				loadTheme(node->first_node());
+				continue;
 			} else if(!strcmp(node->name(), "br")) {
 				c.x = 0;
 				c.y++;
+				continue;
 			}
 			
 			control = createControlByXmlTag(node->name());

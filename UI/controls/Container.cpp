@@ -30,7 +30,6 @@ Container::Container() {
 
 
 Container::~Container() {
-	delete innerWidget;
 }
 
 void Container::OnMWheel( int updown ) {
