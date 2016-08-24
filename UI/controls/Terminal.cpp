@@ -57,6 +57,18 @@ Terminal* Terminal::Clone() {
 void Terminal::onFontChange() {
 	m_log->SetFont(m_font);
 	m_terminal->SetFont(m_font);
+	Anchor a = m_log->GetAnchor();
+	int h = TTF_FontHeight(m_font);
+	a.sx = 0;
+	a.sy = GetRect().h - h;
+	a.y = 0;
+	a.x = 0;
+	a.sW = 1;
+	a.sH = 0;
+	m_log->SetAnchor(a);
+	a.H = 1;
+	a.h = -1;
+	m_terminal->SetAnchor(a);
 }
 
 void Terminal::onPositionChange() {

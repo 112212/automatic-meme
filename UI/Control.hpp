@@ -39,6 +39,7 @@ struct Rect : Point {
 	
 };
 
+
 struct Anchor {
 	Point coord;
 	float x,y;
@@ -49,6 +50,7 @@ struct Anchor {
 	int ax,ay;
 	Anchor& operator+=(const Anchor& b);
 	friend std::ostream& operator<< (std::ostream& stream, const Anchor& anchor);
+	static Anchor parseRect(std::string s);
 };
 
 enum controlType {

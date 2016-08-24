@@ -368,91 +368,6 @@ namespace XmlLoader {
 		return control;
 	}
 	
-	Anchor parseRect(std::string s) {
-		Anchor a{{0,0},0};
-		float *n = &a.x;
-		float *nx = n;
-		std::string digit = "0";
-		enum Part {
-			x,y,w,h
-		};
-		a.ax = a.ay = 1;
-		float num;
-		bool ispercent = false;
-		Part part = Part::x;
-		for(const char *c = s.c_str(); ; c++) {
-			if(*c && isdigit(*c) || *c == '.')
-				digit += *c;
-			switch(*c) {
-				case ',':
-					part = (Part)((int)part+1);
-				case '+':
-				case '-':
-				case '\0':
-					if(part == Part::x) n = &a.x;
-					if(part == Part::y) n = &a.y;
-					else if(part == Part::w) n = &a.sx;
-					else if(part == Part::h) n = &a.sy;
-					num = std::stof(digit);
-					digit = (*c == '-' ? "-0" : "0");
-					if(ispercent) num *= .01;
-					*nx += num;
-					ispercent = false;
-					break;
-				case '%':
-					ispercent = true;
-					if(part == Part::x) n = &a.W;
-					else if(part == Part::y) n = &a.H;
-					else if(part == Part::w) n = &a.sW;
-					else if(part == Part::h) n = &a.sH;
-					break;
-				case 'L': break;
-				case 'R':
-					a.ax = -1;
-					a.W = 1;
-					a.w = -1;
-					break;
-				case 'T': break;
-				case 'U': break;
-				case 'M':
-					if(part == Part::x) {
-						a.w = -0.5;
-						a.W = 0.5;
-					} else if(part == Part::y) {
-						a.h = -0.5;
-						a.H = 0.5;
-					}
-					break;
-				case 'D':
-				case 'B':
-					a.ay = -1;
-					a.H = 1;
-					a.h = -1;
-					break;
-				
-				case 'x': n = &a.x; break;
-				case 'y': n = &a.y; break;
-				case 'w': n = &a.w; break;
-				case 'h': n = &a.h; break;
-				case 'W': n = &a.W; break;
-				case 'H': n = &a.H; break;
-				case 'r': a.isrelative = true; break;
-				case 'a': {
-					int adv = digit == "-0" ? -1 : 1;
-					digit = "0";
-					if(part == Part::x) a.ax = adv;
-					if(part == Part::y) a.ay = adv;
-					break;
-				}
-			}
-			nx = n;
-			if(*c == 0)
-				break;
-			
-		}
-		return a;
-	}
-	
 	void loadTheme(xml_node<>* node) {
 		for(; node; node = node->next_sibling()) {
 			Control *control = createControlByXmlTag(node->name());
@@ -476,7 +391,7 @@ namespace XmlLoader {
 				for(auto *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
 					
 					if(!strcmp(attr->name(), "pos")) {
-						anchor1 = parseRect(attr->value());
+						anchor1 = Anchor::parseRect(attr->value());
 					} else if(!strcmp(attr->name(), "relative")) {
 						if(!strcmp(attr->value(),"true")) {
 							relative = true;
@@ -501,16 +416,13 @@ namespace XmlLoader {
 			for(xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
 				std::string style = std::string(attr->name());
 				std::string value = std::string(attr->value());
-				if(style == "rect") {
-					Anchor a = parseRect(value);
-					a += anchor;
-					a.coord = c;
-					control->SetAnchor(a);
-					control->SetRect(a.x, a.y, a.sx, a.sy);
-					continue;
-				}
 				control->SetStyle(style, value);
 			}
+			
+			Anchor a = control->GetAnchor();
+			a.coord = c;
+			a += anchor;
+			control->SetAnchor(a);
 			
 			if(!strcmp(node->name(), "listbox")) processListBoxItems((ListBox*)control, node);
 			if(!strcmp(node->name(), "combobox")) processComboBoxItems((ComboBox*)control, node);

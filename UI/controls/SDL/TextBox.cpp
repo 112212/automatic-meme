@@ -212,7 +212,7 @@ void TextBox::OnMouseDown( int x, int y ) {
 	// sendGuiCommand( GUI_KEYBOARD_LOCK );
 	const Rect& rect = GetRect();
 	if(check_collision(x,y)) {
-		
+		m_cursor_blink_counter = m_cursor_blinking_rate;
 		m_locked = true;
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
