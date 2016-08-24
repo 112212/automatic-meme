@@ -1,6 +1,7 @@
 #include "Gui.hpp"
 #include "Widget.hpp"
 #include <stack>
+#include <cassert>
 #ifdef USE_SDL
 	#include "common/SDL/Drawing.hpp"
 #endif

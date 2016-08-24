@@ -8,14 +8,12 @@
 	#include <SDL2/SDL.h>
 #endif
 
-#include "common/common.hpp"
+#include <functional>
 #include "common/Colors.hpp"
-#include "common/Cursors.hpp"
 #include "common/Fonts.hpp"
 
 #define SELECTION_MARK
 
-#include "common/debug.hpp"
 #include <vector>
 #include <ostream>
 

@@ -366,11 +366,14 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 						m_cursor.y--;
 						m_cursor.x = p;
 						m_cursor_max_x = m_cursor.x;
-						m_lines = wrap_lines(m_lines);
-						compact_lines(m_lines, m_lines.begin()+m_cursor.y);
-						m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
-						if(m_lines.size() > 0)
-						m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
+						
+						if(m_textwrap) {
+							m_lines = wrap_lines(m_lines);
+							compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+							m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
+							if(m_lines.size() > 0)
+							m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
+						}
 						
 						updatePosition();
 					}
@@ -380,11 +383,13 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 					m_anchor.x = -1;
 					m_cursor.x--;
 					m_cursor_max_x = m_cursor.x;
-					compact_lines(m_lines, m_lines.begin()+m_cursor.y);
 					
-					m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
-					if(m_lines.size() > 0)
-					m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
+					if(m_textwrap) {
+						compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+						m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
+						if(m_lines.size() > 0)
+						m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
+					}
 					
 					updatePosition();
 				}
@@ -650,10 +655,12 @@ void TextBox::PutTextAtCursor(std::string text) {
 		}
 	}
 	
-	compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+	if(m_textwrap) {
+		compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+	}
 	
 	m_cursor = next_cursor;
-	cout << "cursor: " << m_cursor.x << ", " << m_cursor.y << endl;
+	// cout << "cursor: " << m_cursor.x << ", " << m_cursor.y << endl;
 	m_ring_head = m_cursor.y;
 	m_cursor_max_x = m_cursor.x;
 	updatePosition();
@@ -726,14 +733,14 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 			while(can_offer > 0 && n->text[can_offer] != ' ')
 				can_offer--;
 		}
-		cout << "new (" << can_offer << "): " << it->text << " (" << it->text.size() << ") : " << n->text << "(" << n->text.size() << ")" << endl;
+		// cout << "new (" << can_offer << "): " << it->text << " (" << it->text.size() << ") : " << n->text << "(" << n->text.size() << ")" << endl;
 		if(can_offer == 0) {
-			cout << "cant offer: " << it->text << " : " << n->text << endl;
+			// cout << "cant offer: " << it->text << " : " << n->text << endl;
 		} else {
 			it->text += n->text.substr(0,can_offer);
 			n->text = n->text.substr(can_offer);
 			n->w = Fonts::getTextSize(m_font, n->text);
-			cout << "new (" << can_offer << "): " << it->text << " : " << n->text << endl;
+			// cout << "new (" << can_offer << "): " << it->text << " : " << n->text << endl;
 			updateTexture(*it);
 			last_it = n;
 		}
@@ -743,7 +750,7 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 	while(it != v.begin() && it->wrap && it->text.size() == 0) {
 		it--;
 	}
-	cout << "final: " << it->text << endl;
+	// cout << "final: " << it->text << endl;
 	if(it != end) {
 		v.erase(it+1,end);
 	}

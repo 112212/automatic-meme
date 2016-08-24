@@ -4,6 +4,10 @@
 #include "common.hpp"
 #include <string>
 
+#ifdef USE_SDL
+#include <SDL2/SDL.h>
+#endif
+
 namespace Colors {
 	
 		extern Uint32 White;
@@ -16,6 +20,7 @@ namespace Colors {
 		
 		Uint32 GetColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 0xff);
 		Uint32 ParseColor(std::string str);
+		SDL_Color toSDL_Color(uint32_t color);
 };
 
 #endif

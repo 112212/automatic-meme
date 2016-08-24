@@ -20,4 +20,13 @@ namespace Colors {
 			color |= 0xff000000;
 		return color;
 	}
+	
+	SDL_Color toSDL_Color(uint32_t color) {
+		SDL_Color c;
+		c.r = (color >> 16) & 0xff;
+		c.g = (color >> 8) & 0xff;
+		c.b = color & 0xff;
+		c.a = (color >> 24) & 0xff;
+		return c;
+	}
 };

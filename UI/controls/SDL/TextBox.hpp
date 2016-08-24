@@ -3,6 +3,7 @@
 
 #include "../../Control.hpp"
 #include "../../common/SDL/Drawing.hpp"
+#include "../../common/Colorstring.hpp"
 #include <vector>
 namespace ng {
 
@@ -12,6 +13,7 @@ class TextBox : public Control {
 			unsigned int tex;
 			int w,h;
 			std::string text;
+			// Colorstring text;
 			bool wrap;
 			TextLine() : tex(0xffffffff),wrap(false) {}
 		};

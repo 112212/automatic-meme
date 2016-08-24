@@ -1,9 +1,11 @@
+#include "common/common.hpp"
 #include "common/ControlManager.hpp"
 #include "Control.hpp"
+#include <iostream>
 
-// za interface eventa sa GUI einom
 #include "Gui.hpp"
 #include "Widget.hpp"
+
 #include <algorithm>
 
 #ifdef USE_SDL
@@ -318,7 +320,7 @@ std::ostream& operator<< (std::ostream& stream, const Anchor& a) {
 		a.H << ", " << a.h << ", " << a.y << " ; " <<
 		a.sW<< "+" << a.sx << ", " << a.sH << "+" << a.sy << " ; (" << 
 		a.coord.x << ", " << a.coord.y << ") adv (" << a.ax << ", " << 
-		a.ay << ")" << " r: " << a.isrelative << endl;
+		a.ay << ")" << " r: " << a.isrelative << std::endl;
 }
 
 

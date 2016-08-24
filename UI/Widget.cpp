@@ -1,5 +1,7 @@
 #include "Widget.hpp"
 #include "Gui.hpp"
+#include <iostream>
+
 
 namespace ng {
 Widget::Widget() : ControlManager(this), 
@@ -62,7 +64,7 @@ bool Widget::inSelectedBranch() {
 
 void Widget::LockWidget(bool lock) {
 	if(!engine) {
-		cout << "\n[GUI] widget cannot be locked if not bound to an engine\n";
+		std::cout << "\n[GUI] widget cannot be locked if not bound to an engine\n";
 		return;
 	}
 	if(lock)
