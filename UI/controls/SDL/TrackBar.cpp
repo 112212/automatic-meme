@@ -16,7 +16,7 @@ TrackBar::TrackBar() {
 	m_value = 0;
 	m_font = Fonts::GetFont( "default", 13 );
 	tex_text = 0;
-	m_bordercolor = 0;
+	m_style.border_color = 0;
 }
 
 TrackBar::~TrackBar() {

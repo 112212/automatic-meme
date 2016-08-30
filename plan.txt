@@ -162,6 +162,7 @@ TODO:
 +	add option to limit number of characters in textbox
 -	textbox scrollbar
 +	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
++	recursive theme (define theme for textboxes inside terminal for example)
 
 OpenGL port of controls:
 - 	GridContainer

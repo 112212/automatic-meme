@@ -335,40 +335,47 @@ namespace XmlLoader {
 	Control* createControlByXmlTag(const char* tag) {
 		#define TAGTYPE(tag, type) \
 			case hash(tag): \
-				if(m_control_templates.find(tag) != m_control_templates.end()) { \
-					control = m_control_templates[tag]->Clone(); \
-				} else { \
-					control = new type(); \
-				} \
-				break; 
-		
-		Control* control;
-		switch(hash(tag)) {
-			TAGTYPE("control", Control);
-			TAGTYPE("widget", Widget);
-			// TAGTYPE("dialog", Dialog);
-			TAGTYPE("button", Button);
-			TAGTYPE("textbox", TextBox);
-			TAGTYPE("canvas", Canvas);
-			TAGTYPE("listbox", ListBox);
-			TAGTYPE("radiobutton", RadioButton);
-			TAGTYPE("container", Container);
-			TAGTYPE("combobox", ComboBox);
-			TAGTYPE("label", Label);
-			TAGTYPE("trackbar", TrackBar);
-			TAGTYPE("scrollbar", ScrollBar);
-			TAGTYPE("widgetmover", WidgetMover);
-			TAGTYPE("checkbox", CheckBox);
-			TAGTYPE("gridcontainer", GridContainer);
-			TAGTYPE("terminal", Terminal);
-			TAGTYPE("form", Form);
+				control = new type(); \
+				break;
 			
-			default: return tryExtendedTags(tag);
+		Control* control;
+		if(m_control_templates.find(tag) != m_control_templates.end()) {
+			control = m_control_templates[tag]->Clone();
+			// cout << "control: " << tag << " found\n";
+		} else {
+			
+			const char* c = strrchr(tag, '/');
+			if(!c) c = tag;
+			else c++;
+			
+			switch(hash(c)) {
+				TAGTYPE("control", Control);
+				TAGTYPE("widget", Widget);
+				// TAGTYPE("dialog", Dialog);
+				TAGTYPE("button", Button);
+				TAGTYPE("textbox", TextBox);
+				TAGTYPE("canvas", Canvas);
+				TAGTYPE("listbox", ListBox);
+				TAGTYPE("radiobutton", RadioButton);
+				TAGTYPE("container", Container);
+				TAGTYPE("combobox", ComboBox);
+				TAGTYPE("label", Label);
+				TAGTYPE("trackbar", TrackBar);
+				TAGTYPE("scrollbar", ScrollBar);
+				TAGTYPE("widgetmover", WidgetMover);
+				TAGTYPE("checkbox", CheckBox);
+				TAGTYPE("gridcontainer", GridContainer);
+				TAGTYPE("terminal", Terminal);
+				TAGTYPE("form", Form);
+				
+				default: return tryExtendedTags(tag);
+			}
 		}
 		return control;
 	}
 	
-	void loadTheme(xml_node<>* node) {
+	void loadTheme(std::string parent, xml_node<>* node) {
+		// cout << "loading theme: " << parent << endl;
 		for(; node; node = node->next_sibling()) {
 			Control *control = createControlByXmlTag(node->name());
 			if(!control) continue;
@@ -377,7 +384,11 @@ namespace XmlLoader {
 				std::string value = std::string(attr->value());
 				control->SetStyle(style, value);
 			}
-			m_control_templates[node->name()] = control;
+			if(control->IsWidget()) {
+				loadTheme(parent + node->name() + "/", node->first_node());
+			}
+			// cout << "theme: " << parent + node->name() << endl;
+			m_control_templates[parent + node->name()] = control;
 		}
 	}
 	
@@ -402,7 +413,7 @@ namespace XmlLoader {
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
 				continue;
 			} else if(!strcmp(node->name(), "theme")) {
-				loadTheme(node->first_node());
+				loadTheme("", node->first_node());
 				continue;
 			} else if(!strcmp(node->name(), "br")) {
 				c.x = 0;

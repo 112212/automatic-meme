@@ -2,10 +2,14 @@
 	<theme>
 		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,20" down_color="#00ff00" />
 		<listbox id="200" rect="0,0,200,200" backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
-		<textbox backgroundcolor="#050550" />
 		<canvas backgroundcolor="#050550" />
+		<textbox backgroundcolor="#050550" />
+		<terminal>
+			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
+		</terminal>
 	</theme>
 	<anchor pos="rL+50,T+100">
+		
 		<button id="2" rect="0,0,100,50" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,30" value="test" backgroundcolor="#ff202080"/>
 		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000" id="w1">
 			<container id="20" rect="0,0,150,150">
@@ -98,8 +102,8 @@ fddgdf"></label>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
-		<widget rect="0,0,200,200">
-			<terminal font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,18" rect="r0,0,400,300" id="term" />
+		<widget rect="0,0,400,300">
+			<terminal font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" rect="0,0,400,300" id="term" />
 		</widget>
 	</anchor>
 </gui>

@@ -28,7 +28,7 @@ ComboBox::ComboBox() {
 	tex_sel = 0;
 	m_last_scroll = 0;
 	m_is_textbox_mode = false;
-	m_backcolor = 0x00000000;
+	m_style.background_color = 0x00000000;
 	m_selection_color = 0xff3E398E;
 	
 	#ifdef USE_SFML
@@ -515,7 +515,7 @@ void ComboBox::openBox() {
 					break;
 				h += it->h;
 			}
-			Drawing::FillRect( rect.x + pos.x, rect.y + pos.y + rect.h, rect.w, rect.h + h, m_backcolor);
+			Drawing::FillRect( rect.x + pos.x, rect.y + pos.y + rect.h, rect.w, rect.h + h, m_style.background_color);
 			h=i=0;
 			for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 				if(i >= m_max_dropdown_items)
@@ -622,6 +622,12 @@ void ComboBox::openBox() {
 		
 	}
 #endif
+
+Control* ComboBox::Clone() {
+	ComboBox* cb = new ComboBox;
+	copyStyle(cb);
+	return cb;
+}
 
 void ComboBox::STYLE_FUNC(value) {
 	STYLE_SWITCH {

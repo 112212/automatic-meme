@@ -119,6 +119,7 @@ class GuiEngine : public ControlManager
 		
 		Control* GetSelectedControl() { return selected_control; }
 		Widget* GetSelectedWidget() { return last_selected_widget; }
+		Control* GetActiveControl() { return active_control; }
 		
 		#ifdef USE_EVENT_QUEUE
 			bool HasEvents( );

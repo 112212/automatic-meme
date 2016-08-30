@@ -5,6 +5,7 @@
 #ifdef USE_SDL
 	#include "common/SDL/Drawing.hpp"
 #endif
+#include <iostream>
 
 namespace ng {
 GuiEngine::GuiEngine() : ControlManager(this) {
@@ -354,8 +355,9 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 void GuiEngine::OnMouseUp( int mX, int mY ) {
 	m_mouse_down = false;
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
-	if( selected_control )
+	if( selected_control ) {
 		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y ));
+	} else WIDGET_HOOK(mouse_up, OnMouseUp( mX, mY ));
 }
 
 void GuiEngine::OnMouseMove( int mX, int mY ) {
@@ -539,8 +541,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 		last_selected_widget = last_widget;
 		sel_widget_offset = offset;
 	}
-	
-	
+		
 	sel_intercept_vector[depth].widget = 0;
 	
 	// global intercept flag

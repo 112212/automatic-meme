@@ -17,13 +17,12 @@ Button::Button() {
 		rect1.setOutlineThickness( 1 );
 	#elif USE_SDL
 		tex_text = 0;
-		m_font = Fonts::GetFont( "default", 25 );
 		need_update = false;
 	#endif
 	m_is_mouseDown = false;
 	m_down_color = 0xffff0000;
 	m_up_color = 0xffffffff;
-	m_backcolor = Colors::Dgray;
+	m_style.background_color = Colors::Dgray;
 }
 
 Button::~Button() {
@@ -85,7 +84,7 @@ void Button::STYLE_FUNC(value) {
 		int x = r.x + pos.x;
 		int y = r.y + pos.y;
 		
-		Drawing::FillRect(x, y, r.w, r.h, m_backcolor);
+		Drawing::FillRect(x, y, r.w, r.h, m_style.background_color);
 		
 		Control::Render(pos,isSelected || isActive());
 		
@@ -93,7 +92,7 @@ void Button::STYLE_FUNC(value) {
 	}
 
 	void Button::update_text() {
-		if(!m_font) return;
+		if(!m_style.font) return;
 		int color = m_is_mouseDown ? m_down_color : m_up_color;
 		
 		SDL_Color c;
@@ -103,7 +102,7 @@ void Button::STYLE_FUNC(value) {
 		c.a = (color >> 24) & 0xff;
 		
 		const Rect& r = GetRect();
-		SDL_Surface* surf = TTF_RenderText_Blended( m_font, text.c_str(), c );
+		SDL_Surface* surf = TTF_RenderText_Blended( m_style.font, text.c_str(), c );
 		
 		if(!surf) return;
 		tex_text = Drawing::GetTextureFromSurface(surf, tex_text);
@@ -158,7 +157,7 @@ void Button::OnKeyUp( SDL_Keycode &sym, SDL_Keymod mod ) {
 
 Button* Button::Clone() {
 	Button *btn = new Button;
-	*btn = *this;
+	copyStyle(btn);
 	return btn;
 }
 

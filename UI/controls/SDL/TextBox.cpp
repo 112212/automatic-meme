@@ -8,11 +8,11 @@ TextBox::TextBox() : m_mousedown(false), m_position{0,0},
 m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
 	setType( TYPE_TEXTBOX );
 	initEventVector(event::max_events);
-	m_font = Fonts::GetFont( "default", 13 );
+	m_style.font = Fonts::GetFont( "default", 13 );
 	m_cursor_blink_counter = 0;
 	m_cursor_blinking_rate = 300;
 	m_terminal_max_messages = 100;
-	m_backcolor = 0;
+	m_style.background_color = 0;
 	m_max_length = 9999;
 	m_multiline = false;
 	m_terminal_mode = false;
@@ -34,7 +34,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	const Rect& rect = this->GetRect();
 	Point r = rect.Offset(pos);
 	
-	Drawing::FillRect(r.x, r.y, rect.w, rect.h, m_backcolor );
+	Drawing::FillRect(r.x, r.y, rect.w, rect.h, m_style.background_color );
 	
 	int w,h;
 	Drawing::GetResolution(w,h);
@@ -47,7 +47,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	if(m_lines.size() > 0) {
 		// selection
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
-		int sz = Fonts::getTextSize( m_font, piece );
+		int sz = Fonts::getTextSize( m_style.font, piece );
 		if(m_anchor.x != -1) {
 			j=0;
 			Point p1,p2;
@@ -60,16 +60,16 @@ void TextBox::Render( Point pos, bool selected ) {
 				if(yy == p1.y && p1.y == p2.y) {
 					std::string pd = m_lines[yy].text.substr(p1.x, p2.x-p1.x);
 					std::string pd1 = m_lines[yy].text.substr(0, p1.x);
-					int selw = Fonts::getTextSize( m_font, pd );
-					int selw1 = Fonts::getTextSize( m_font, pd1 );
+					int selw = Fonts::getTextSize( m_style.font, pd );
+					int selw1 = Fonts::getTextSize( m_style.font, pd1 );
 					Drawing::FillRect( r.x-sz+5+selw1, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else if(yy == p1.y) {
 					std::string pd = m_lines[yy].text.substr(p1.x);
-					int selw = Fonts::getTextSize( m_font, pd );
+					int selw = Fonts::getTextSize( m_style.font, pd );
 					Drawing::FillRect( r.x-sz+5+i->w-selw, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else if(yy == p2.y) {
 					std::string pd = m_lines[yy].text.substr(0,p2.x);
-					int selw = Fonts::getTextSize( m_font, pd );
+					int selw = Fonts::getTextSize( m_style.font, pd );
 					Drawing::FillRect( r.x-sz+5, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else {
 					Drawing::FillRect( r.x-sz+5, r.y+5+j*m_line_height, i->w, i->h, m_selection_color);
@@ -100,7 +100,7 @@ void TextBox::Render( Point pos, bool selected ) {
 			
 		if(m_cursor.x >= m_position.x && m_cursor.x <= m_lines[m_cursor.y].text.size()) {
 			std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x);
-			Drawing::Rect(Fonts::getTextSize( m_font, piece )+r.x+5, 
+			Drawing::Rect(Fonts::getTextSize( m_style.font, piece )+r.x+5, 
 				(m_cursor.y-m_position.y)*m_line_height+r.y+5, 1, m_line_height, 0xffffffff);
 		}
 	}
@@ -112,7 +112,7 @@ int TextBox::m_cursor_color = 0xffffffff;
 int TextBox::m_selection_color = 0xff808080;
 
 void TextBox::SetText( std::string text ) {
-	if(!m_font) return;
+	if(!m_style.font) return;
 	if(m_lines.size() > 0)
 		SetSelection( Point(m_lines.back().text.size(), m_lines.size()-1), {0,0} );
 	m_cursor = Point(0,0);
@@ -186,9 +186,9 @@ void TextBox::STYLE_FUNC(value) {
 }
 
 void TextBox::onFontChange() {
-	if(!m_font) return;
-	m_text_max = Fonts::getMaxTextRep( m_font, 'A', GetRect().w );
-	m_line_height = TTF_FontHeight(m_font);
+	if(!m_style.font) return;
+	m_text_max = Fonts::getMaxTextRep( m_style.font, 'A', GetRect().w );
+	m_line_height = TTF_FontHeight(m_style.font);
 	if(m_line_height != 0)
 		m_lines_max = GetRect().h / m_line_height;
 	else
@@ -216,14 +216,14 @@ void TextBox::OnMouseDown( int x, int y ) {
 		m_locked = true;
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
-		int sz = Fonts::getTextSize( m_font, piece );
+		int sz = Fonts::getTextSize( m_style.font, piece );
 		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
 		if(pt.y < 0) pt.y = 0;
 		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
 		
 		pt.x = (x-rect.x-10) + sz;
-		if(pt.x > 0) pt.x = Fonts::getMaxText( m_font, m_lines[pt.y].text, pt.x );
+		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text, pt.x );
 		
 		if(pt.x < 0) pt.x = 0;
 		else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
@@ -241,14 +241,14 @@ void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 		const Rect& rect = GetRect();
 		Point pt;
 		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
-		int sz = Fonts::getTextSize( m_font, piece );
+		int sz = Fonts::getTextSize( m_style.font, piece );
 		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
 		if(pt.y < 0) pt.y = 0;
 		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
 		
 		pt.x = (x-rect.x-10) + sz;
-		if(pt.x > 0) pt.x = Fonts::getMaxText( m_font, m_lines[pt.y].text, pt.x );
+		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text, pt.x );
 		
 		if(pt.x < 0) pt.x = 0;
 		else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
@@ -273,9 +273,9 @@ void TextBox::updatePosition() {
 	TextLine &line = m_lines[m_cursor.y];
 	const Rect& rect = GetRect();
 	if(m_position.x > line.text.size()) {
-		m_text_max = Fonts::getMaxTextBw(m_font, line.text, rect.w-20);
+		m_text_max = Fonts::getMaxTextBw(m_style.font, line.text, rect.w-20);
 	} else {
-		m_text_max = Fonts::getMaxText(m_font, line.text.substr(m_position.x), rect.w-20);
+		m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x), rect.w-20);
 	}
 	
 	if(m_cursor.x > m_position.x + m_text_max ) {
@@ -300,11 +300,11 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	SDL_Surface* surf;
 	
 	// if(line.wrap)
-		// surf = TTF_RenderUTF8_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {100,100,100} );
+		// surf = TTF_RenderUTF8_Blended( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {100,100,100} );
 	// else
-		surf = TTF_RenderUTF8_Blended( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+		surf = TTF_RenderUTF8_Blended( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	
-	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	// SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     // SDL_BlitSurface(surf, 0, tempSurface, 0);
 	line.tex = Drawing::GetTextureFromSurface(surf, new_tex ? 0 : line.tex);
@@ -694,7 +694,7 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 		std::string sub;
 		do {
 			sub = line.substr(last_pos);
-			max_text = Fonts::getMaxText(m_font, sub, GetRect().w-15);
+			max_text = Fonts::getMaxText(m_style.font, sub, GetRect().w-15);
 			
 			if(m_wordwrap && max_text != sub.size()) {
 				int s = max_text;
@@ -728,7 +728,7 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 	auto n = it+1;
 	auto last_it = it;
 	for(; n != v.end() && n->wrap; it++,n++) {
-		int can_offer = Fonts::getMaxText(m_font, n->text, GetRect().w - it->w - 15);
+		int can_offer = Fonts::getMaxText(m_style.font, n->text, GetRect().w - it->w - 15);
 		if(m_wordwrap && can_offer < n->text.size()) {
 			while(can_offer > 0 && n->text[can_offer] != ' ')
 				can_offer--;
@@ -739,7 +739,7 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 		} else {
 			it->text += n->text.substr(0,can_offer);
 			n->text = n->text.substr(can_offer);
-			n->w = Fonts::getTextSize(m_font, n->text);
+			n->w = Fonts::getTextSize(m_style.font, n->text);
 			// cout << "new (" << can_offer << "): " << it->text << " : " << n->text << endl;
 			updateTexture(*it);
 			last_it = n;
@@ -779,7 +779,7 @@ void TextBox::SetTextWrap(bool wrap) {
 			
 			do {
 				std::string sub = line.text.substr(last_pos);
-				max_text = Fonts::getMaxText(m_font, sub, GetRect().w-15);
+				max_text = Fonts::getMaxText(m_style.font, sub, GetRect().w-15);
 				if(m_wordwrap && max_text != sub.size()) {
 					int s = max_text;
 					for(; s >= 0; s--) {

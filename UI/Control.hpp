@@ -112,14 +112,16 @@ class Control {
 		};
 		// compiler screams ambiguous for this, so had to add _
 		void _updateCache(CacheUpdateFlag flag);
-		// void updateCache() {}
 	protected:
-		int minor_type;
+		char minor_type;
 		int z_index;
 		
-		int m_bordercolor;
-		int m_backcolor;
-		int m_hoverbordercolor;
+		struct {			
+			int border_color;
+			int hoverborder_color;
+			int background_color;
+			TTF_Font* font;
+		} m_style;
 		
 		static bool custom_check;
 		
@@ -132,6 +134,7 @@ class Control {
 		bool isActive();
 		
 		void tabToNextControl();
+		void copyStyle(Control* copy_to);
 		
 		inline Widget* getWidget() { return widget; }
 		inline GuiEngine* getEngine() { return engine; }
@@ -154,7 +157,6 @@ class Control {
 			virtual void OnKeyDown( sf::Event::KeyEvent &sym );
 			virtual void OnKeyUp( sf::Event::KeyEvent &sym );
 		#elif USE_SDL
-			TTF_Font* m_font;
 			virtual void Render( Point position, bool isSelected );
 			virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
@@ -183,9 +185,9 @@ class Control {
 		void Focus();
 		void Activate();
 #ifdef USE_SDL
-		void SetFont( TTF_Font* fnt ) { if(fnt) m_font = fnt; }
+		void SetFont( TTF_Font* fnt ) { if(fnt) m_style.font = fnt; }
 		void SetFont( std::string name, int size );
-		TTF_Font* GetFont() { return m_font; }
+		TTF_Font* GetFont() { return m_style.font; }
 #endif
 		const Anchor& GetAnchor();
 		

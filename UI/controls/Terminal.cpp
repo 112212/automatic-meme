@@ -2,9 +2,9 @@
 namespace ng {
 
 Terminal::Terminal() {
-	m_font = Fonts::GetFont( "default", 13 );
-	m_log = (TextBox*)CreateControl("textbox");
-	m_terminal = (TextBox*)CreateControl("textbox");
+	m_style.font = Fonts::GetFont( "default", 13 );
+	m_log = (TextBox*)CreateControl("terminal/textbox");
+	m_terminal = (TextBox*)CreateControl("terminal/textbox");
 	m_log->SetMultilineMode(true);
 	m_log->SetReadOnly(true);
 	initEventVector(event::max_events);
@@ -50,15 +50,18 @@ void Terminal::Render( Point position, bool isSelected ) {
 
 Terminal* Terminal::Clone() {
 	Terminal *t = new Terminal;
-	*t = *this;
+	copyStyle(t);
 	return t;
 }
 
-void Terminal::onFontChange() {
-	m_log->SetFont(m_font);
-	m_terminal->SetFont(m_font);
+void Terminal::onFontChange() {}
+
+void Terminal::onPositionChange() {
+	int h = TTF_FontHeight(m_style.font) + 5;
+	m_log->SetRect(0,0,GetRect().w, GetRect().h-h);
+	m_terminal->SetRect(0,GetRect().h-h,GetRect().w,h);
+	
 	Anchor a = m_log->GetAnchor();
-	int h = TTF_FontHeight(m_font);
 	a.sx = 0;
 	a.sy = GetRect().h - h;
 	a.y = 0;
@@ -66,15 +69,9 @@ void Terminal::onFontChange() {
 	a.sW = 1;
 	a.sH = 0;
 	m_log->SetAnchor(a);
-	a.H = 1;
-	a.h = -1;
+	a.y = a.sy;
+	a.sy = h;
 	m_terminal->SetAnchor(a);
-}
-
-void Terminal::onPositionChange() {
-	int h = TTF_FontHeight(m_font) + 5;
-	m_log->SetRect(0,0,GetRect().w, GetRect().h-h);
-	m_terminal->SetRect(0,GetRect().h-h,GetRect().w,h);
 }
 
 }

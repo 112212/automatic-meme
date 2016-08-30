@@ -14,8 +14,12 @@
 
 namespace ng {
 Control::Control() : id("0"), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
-interactible(true), visible(true), anchor({{0,0},0}), m_bordercolor(0xff333376), m_hoverbordercolor(0xff1228D1), m_backcolor(0), m_font(0) {
+interactible(true), visible(true), anchor({{0,0},0}) {
 	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
+	m_style.border_color = 0xff333376;
+	m_style.hoverborder_color = 0xff1228D1;
+	m_style.background_color = 0;
+	m_style.font = Fonts::GetFont( "default", 25 );;
 }
 
 Control::~Control() {
@@ -236,7 +240,7 @@ void Control::OnMouseUp( int mX, int mY ) {}
 #elif USE_SDL
 	void Control::Render( Point pos, bool selected ) {
 		#ifdef SELECTION_MARK
-			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, selected ? m_hoverbordercolor : m_bordercolor );
+			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, selected ? m_style.hoverborder_color : m_style.border_color );
 		#else
 			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, m_bordercolor );
 		#endif
@@ -245,7 +249,7 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {}
 	void Control::SetFont( std::string name, int size ) { 
 		TTF_Font* f = Fonts::GetFont(name, size); 
-		if(f) m_font = f; 
+		if(f) m_style.font = f; 
 	}
 #endif
 void Control::OnLostFocus() {}
@@ -258,7 +262,13 @@ void Control::OnMWheel( int updown ) {}
 bool Control::customBoundary( int x, int y ) {}
 
 Control* Control::Clone() {
-	return new Control;
+	Control* c = new Control;
+	copyStyle(c);
+	return c;
+}
+
+void Control::copyStyle(Control* copy_to) {
+	copy_to->m_style = this->m_style;
 }
 
 
@@ -368,15 +378,15 @@ void Control::SetStyle(std::string& style, std::string& value) {
 		_case("visible"):
 			SetVisible(value=="true");
 		_case("bordercolor"):
-			m_bordercolor = Colors::ParseColor(value);
+			m_style.border_color = Colors::ParseColor(value);
 		_case("background_color"):
-			m_backcolor = Colors::ParseColor(value);
+			m_style.background_color = Colors::ParseColor(value);
 		_case("hoverbordercolor"):
-			m_hoverbordercolor = Colors::ParseColor(value);
+			m_style.hoverborder_color = Colors::ParseColor(value);
 		_case("font"): {
 			TTF_Font* f = Fonts::GetParsedFont(value);
 			if(f) {
-				m_font = f;
+				m_style.font = f;
 			}
 			onFontChange();
 		}

@@ -13,7 +13,7 @@ Canvas::Canvas() {
 	align_to_grid = false;
 	display_grid = false;
 	maketex=true;
-	m_backcolor = 0;
+	m_style.background_color = 0;
 	grid_color = 0xff808080;
 }
 
@@ -26,7 +26,7 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
 	
-	Drawing::FillRect(x, y, rect.w, rect.h, m_backcolor );
+	Drawing::FillRect(x, y, rect.w, rect.h, m_style.background_color );
 	
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
@@ -80,7 +80,7 @@ void Canvas::STYLE_FUNC(value) {
 }
 
 void Canvas::SetBackgroundColor(int color) {
-	m_backcolor = color;
+	m_style.background_color = color;
 }
 
 void Canvas::SetPixelSize(int size) {

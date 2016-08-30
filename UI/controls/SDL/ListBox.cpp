@@ -26,7 +26,7 @@ void ListBox::Render( Point pos, bool isSelected ) {
 	int y = rect.y + pos.y;
 	
 	
-	Drawing::FillRect(  x, y, rect.w, rect.h, m_backcolor );
+	Drawing::FillRect(  x, y, rect.w, rect.h, m_style.background_color );
 	
 	// draw items
 	int h=0,i=0;

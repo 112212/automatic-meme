@@ -321,7 +321,7 @@ void Container::onOverflow() {
 
 Container* Container::Clone() {
 	Container* c = new Container;
-	*c = *this;
+	copyStyle(c);
 	return c;
 }
 

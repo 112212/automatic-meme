@@ -116,7 +116,7 @@ class ComboBox : public Control {
 			void OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod );
 		#endif
 		
-
+		Control* Clone();
 		void OnSetStyle(std::string& style, std::string& value);
 		void Clear() { m_items.clear(); }
 		void AddItem( const char* item );
