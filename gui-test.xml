@@ -4,9 +4,14 @@
 		<listbox id="200" rect="0,0,200,200" backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
 		<canvas backgroundcolor="#050550" />
 		<textbox backgroundcolor="#050550" />
+<!--
 		<terminal>
 			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
 		</terminal>
+-->
+	</theme>
+	<theme prefix="terminal/">
+		<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" />
 	</theme>
 	<anchor pos="rL+50,T+100">
 		

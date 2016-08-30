@@ -413,7 +413,11 @@ namespace XmlLoader {
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
 				continue;
 			} else if(!strcmp(node->name(), "theme")) {
-				loadTheme("", node->first_node());
+				if(node->first_attribute() && !strcmp(node->first_attribute()->name(), "prefix") ) {
+					loadTheme(node->first_attribute()->value(), node->first_node());
+				} else {
+					loadTheme("", node->first_node());
+				}
 				continue;
 			} else if(!strcmp(node->name(), "br")) {
 				c.x = 0;
