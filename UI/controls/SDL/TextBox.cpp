@@ -21,6 +21,7 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
 	m_password = false;
 	m_textwrap = false;
 	m_wordwrap = false;
+	m_color_input = false;
 	m_placeholder.text = "";
 	SetText("");
 }
@@ -38,6 +39,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 	int w,h;
 	Drawing::GetResolution(w,h);
+	
 	// TODO: tweak scissor a little
 	glScissor(r.x, h-(r.y+rect.h), rect.w, rect.h);
 	glEnable(GL_SCISSOR_TEST);
@@ -46,7 +48,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 	if(m_lines.size() > 0) {
 		// selection
-		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
+		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x, m_password);
 		int sz = Fonts::getTextSize( m_style.font, piece );
 		if(m_anchor.x != -1) {
 			j=0;
@@ -58,17 +60,17 @@ void TextBox::Render( Point pos, bool selected ) {
 				if(yy < p1.y || yy > p2.y) continue;
 				
 				if(yy == p1.y && p1.y == p2.y) {
-					std::string pd = m_lines[yy].text.substr(p1.x, p2.x-p1.x);
-					std::string pd1 = m_lines[yy].text.substr(0, p1.x);
+					std::string pd = m_lines[yy].text.substr(p1.x, p2.x-p1.x, m_password);
+					std::string pd1 = m_lines[yy].text.substr(0, p1.x, m_password);
 					int selw = Fonts::getTextSize( m_style.font, pd );
 					int selw1 = Fonts::getTextSize( m_style.font, pd1 );
 					Drawing::FillRect( r.x-sz+5+selw1, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else if(yy == p1.y) {
-					std::string pd = m_lines[yy].text.substr(p1.x);
+					std::string pd = m_lines[yy].text.substr(p1.x, m_password);
 					int selw = Fonts::getTextSize( m_style.font, pd );
 					Drawing::FillRect( r.x-sz+5+i->w-selw, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else if(yy == p2.y) {
-					std::string pd = m_lines[yy].text.substr(0,p2.x);
+					std::string pd = m_lines[yy].text.substr(0,p2.x, m_password);
 					int selw = Fonts::getTextSize( m_style.font, pd );
 					Drawing::FillRect( r.x-sz+5, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else {
@@ -99,7 +101,7 @@ void TextBox::Render( Point pos, bool selected ) {
 			m_cursor_blink_counter = 0;
 			
 		if(m_cursor.x >= m_position.x && m_cursor.x <= m_lines[m_cursor.y].text.size()) {
-			std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x);
+			std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x, m_password);
 			Drawing::Rect(Fonts::getTextSize( m_style.font, piece )+r.x+5, 
 				(m_cursor.y-m_position.y)*m_line_height+r.y+5, 1, m_line_height, 0xffffffff);
 		}
@@ -215,7 +217,7 @@ void TextBox::OnMouseDown( int x, int y ) {
 		m_cursor_blink_counter = m_cursor_blinking_rate;
 		m_locked = true;
 		Point pt;
-		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
+		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x, m_password);
 		int sz = Fonts::getTextSize( m_style.font, piece );
 		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
@@ -223,7 +225,7 @@ void TextBox::OnMouseDown( int x, int y ) {
 		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
 		
 		pt.x = (x-rect.x-10) + sz;
-		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text, pt.x );
+		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text.substr(0,std::string::npos, m_password), pt.x );
 		
 		if(pt.x < 0) pt.x = 0;
 		else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
@@ -240,7 +242,7 @@ void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 		m_cursor_blink_counter = m_cursor_blinking_rate;
 		const Rect& rect = GetRect();
 		Point pt;
-		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x);
+		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x, m_password);
 		int sz = Fonts::getTextSize( m_style.font, piece );
 		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
@@ -248,7 +250,7 @@ void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
 		
 		pt.x = (x-rect.x-10) + sz;
-		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text, pt.x );
+		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text.substr(0,std::string::npos, m_password), pt.x );
 		
 		if(pt.x < 0) pt.x = 0;
 		else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
@@ -273,9 +275,9 @@ void TextBox::updatePosition() {
 	TextLine &line = m_lines[m_cursor.y];
 	const Rect& rect = GetRect();
 	if(m_position.x > line.text.size()) {
-		m_text_max = Fonts::getMaxTextBw(m_style.font, line.text, rect.w-20);
+		m_text_max = Fonts::getMaxTextBw(m_style.font, line.text.substr(0,std::string::npos, m_password), rect.w-20);
 	} else {
-		m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x), rect.w-20);
+		m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x, std::string::npos, m_password), rect.w-20);
 	}
 	
 	if(m_cursor.x > m_position.x + m_text_max ) {
@@ -297,12 +299,11 @@ void TextBox::updatePosition() {
 void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	if(line.tex == 0xffffffff)
 		new_tex = true;
+	
 	SDL_Surface* surf;
 	
-	// if(line.wrap)
-		// surf = TTF_RenderUTF8_Blended( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {100,100,100} );
-	// else
-		surf = TTF_RenderUTF8_Blended( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	// surf = TTF_RenderUTF8_Blended( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
+	surf = line.text.get_surface(m_style.font, line.last_color, m_password);
 	
 	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	// SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
@@ -312,6 +313,59 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	line.h = surf->h;
 	SDL_FreeSurface(surf);
 	// SDL_FreeSurface(tempSurface);
+}
+
+void TextBox::backspace() {
+	if(m_anchor.x != -1 && (m_anchor.x != m_cursor.x || m_anchor.y != m_cursor.y)) {
+		deleteSelection();
+		return;
+	}
+	TextLine &line = m_lines[m_cursor.y];
+	if(m_cursor.x == 0) {
+		// remove line
+		if(m_cursor.y > 0) {
+			TextLine &line = m_lines[m_cursor.y];
+			int p = m_lines[m_cursor.y-1].text.size();
+			if(m_lines[m_cursor.y].text.substr(m_cursor.x).size() > 0) {
+				m_lines[m_cursor.y-1].text += m_lines[m_cursor.y].text.csubstr(m_cursor.x);
+				updateTexture(m_lines[m_cursor.y-1]);
+			}
+			Drawing::DeleteTexture(m_lines[m_cursor.y].tex);
+			m_lines.erase(m_lines.begin()+m_cursor.y);
+			m_cursor.y--;
+			m_cursor.x = p;
+			m_cursor_max_x = m_cursor.x;
+			
+			if(m_textwrap) {
+				m_lines = wrap_lines(m_lines);
+				compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+				
+				spreadColor(m_lines.begin(),true);
+				
+				m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
+				if(m_lines.size() > 0)
+				m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
+			}
+			
+			updatePosition();
+		}
+	} else {
+		line.text.erase(m_cursor.x-1, 1);
+		updateTexture(line);
+		m_anchor.x = -1;
+		m_cursor.x--;
+		m_cursor_max_x = m_cursor.x;
+		
+		if(m_textwrap) {
+			compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+			m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
+			if(m_lines.size() > 0)
+			m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
+		}
+		
+		updatePosition();
+		spreadColor(m_lines.begin() + m_cursor.y);
+	}
 }
 
 void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
@@ -347,53 +401,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	m_cursor_blink_counter = m_cursor_blinking_rate;
 	switch(val) {
 		case SDLK_BACKSPACE: {
-				if(m_anchor.x != -1 && (m_anchor.x != m_cursor.x || m_anchor.y != m_cursor.y)) {
-					deleteSelection();
-					break;
-				}
-				TextLine &line = m_lines[m_cursor.y];
-				if(m_cursor.x == 0) {
-					// remove line
-					if(m_cursor.y > 0) {
-						TextLine &line = m_lines[m_cursor.y];
-						int p = m_lines[m_cursor.y-1].text.size();
-						if(m_lines[m_cursor.y].text.substr(m_cursor.x).size() > 0) {
-							m_lines[m_cursor.y-1].text += m_lines[m_cursor.y].text.substr(m_cursor.x);
-							updateTexture(m_lines[m_cursor.y-1]);
-						}
-						Drawing::DeleteTexture(m_lines[m_cursor.y].tex);
-						m_lines.erase(m_lines.begin()+m_cursor.y);
-						m_cursor.y--;
-						m_cursor.x = p;
-						m_cursor_max_x = m_cursor.x;
-						
-						if(m_textwrap) {
-							m_lines = wrap_lines(m_lines);
-							compact_lines(m_lines, m_lines.begin()+m_cursor.y);
-							m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
-							if(m_lines.size() > 0)
-							m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
-						}
-						
-						updatePosition();
-					}
-				} else {
-					line.text.erase(m_cursor.x-1, 1);
-					updateTexture(line);
-					m_anchor.x = -1;
-					m_cursor.x--;
-					m_cursor_max_x = m_cursor.x;
-					
-					if(m_textwrap) {
-						compact_lines(m_lines, m_lines.begin()+m_cursor.y);
-						m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
-						if(m_lines.size() > 0)
-						m_cursor.x = std::min<int>(std::max<int>(0, m_cursor.x), m_lines[m_cursor.y].text.size());
-					}
-					
-					updatePosition();
-				}
-				
+				backspace();
 			}
 			break;
 		case SDLK_LEFT:
@@ -407,6 +415,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_cursor_max_x = m_cursor.x;
 				updatePosition();
 			}
+			m_color_input = false;
 			break;
 		case SDLK_RIGHT:
 			if((mod & KMOD_SHIFT) == 0) {
@@ -420,6 +429,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_cursor_max_x = m_cursor.x;
 				updatePosition();
 			}
+			m_color_input = false;
 			break;
 		case SDLK_UP:
 			if((mod & KMOD_SHIFT) == 0) {
@@ -432,6 +442,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_cursor.x = std::min<int>(m_lines[m_cursor.y].text.size(), m_cursor_max_x);
 				updatePosition();
 			}
+			m_color_input = false;
 			break;
 		case SDLK_DOWN:
 			if((mod & KMOD_SHIFT) == 0) {
@@ -444,6 +455,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_cursor.x = std::min<int>(m_lines[m_cursor.y].text.size(), m_cursor_max_x);
 				updatePosition();
 			}
+			m_color_input = false;
 			break;
 		case SDLK_END:
 			if((mod & KMOD_SHIFT) == 0) {
@@ -458,6 +470,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			m_cursor.x = m_lines[m_cursor.y].text.size();
 			m_cursor_max_x = m_cursor.x;
 			updatePosition();
+			m_color_input = false;
 			break;
 		case SDLK_HOME:
 			if((mod & KMOD_LSHIFT) == 0) {
@@ -472,6 +485,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			m_cursor.x = 0;
 			m_cursor_max_x = m_cursor.x;
 			updatePosition();
+			m_color_input = false;
 			break;
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER: {
@@ -500,14 +514,29 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 		
 			if(val == SDLK_KP_PERIOD) 
 				val = SDLK_PERIOD;
-				
+			
+			
 			if(mod & KMOD_SHIFT) {
 				if(val == '2')
 					val = '@';
-				val = toupper(val);
+				else if(val == '6') {
+					val = '^';
+				}
+				else
+					val = toupper(val);
 			}
 			
-			PutTextAtCursor(std::string(1,(char)val));
+			if(m_color_input) {
+				backspace();
+				PutTextAtCursor(std::string("^")+((char)val));
+				m_color_input = false;
+			} else {
+				PutTextAtCursor(std::string(1,(char)val));
+			}
+			
+			if(!m_color_input && val == '^') {
+				m_color_input = true;
+			}
 			
 			emitEvent( event::change );
 			break;
@@ -520,9 +549,9 @@ std::string TextBox::GetText( ) {
 	auto it_last = m_lines.end()-1;
 	for(auto it = m_lines.begin(); it != m_lines.end(); it++) {
 		if(it != it_last)
-			str += it->text + "\n";
+			str += it->text.str() + "\n";
 		else
-			str += it->text;
+			str += it->text.str();
 	}
 	return str;
 }
@@ -536,7 +565,7 @@ std::string TextBox::GetSelectedText() {
 	std::string str = m_lines[p1.y].text.substr(p1.x, p2.y == p1.y ? (p2.x - p1.x) : std::string::npos);
 	if(p1.y != p2.y) {
 		for(auto it = m_lines.begin()+p1.y+1; it != m_lines.begin()+p2.y; it++) {
-			str += "\n" + it->text;
+			str += "\n" + it->text.str();
 		}
 		str += "\n" + m_lines[p2.y].text.substr(0,p2.x);
 	}
@@ -553,8 +582,7 @@ void TextBox::deleteSelection() {
 		m_lines[p1.y].text.erase(p1.x, p2.x-p1.x);
 		updateTexture(m_lines[p1.y]);
 	} else {
-		m_lines[p1.y].text = m_lines[p1.y].text.substr(0,p1.x) + 
-			m_lines[p2.y].text.substr(p2.x);
+		m_lines[p1.y].text = (m_lines[p1.y].text.substr(0,p1.x) + m_lines[p2.y].text.substr(p2.x));
 		updateTexture(m_lines[p1.y]);
 		auto it1 = m_lines.begin()+p1.y+1;
 		auto it2 = m_lines.begin()+p2.y+1;
@@ -576,7 +604,6 @@ static void find_and_replace(std::string& source, std::string const& find, std::
 }
 
 void TextBox::PutTextAtCursor(std::string text) {
-	
 	if(m_anchor.x != -1) {
 		deleteSelection();
 	}
@@ -605,12 +632,13 @@ void TextBox::PutTextAtCursor(std::string text) {
 		lines.push_back(line);
 	}
 	
-	std::string left = "";
-	std::string right = "";
+	Colorstring left = "";
+	Colorstring right = "";
 	
 	if(m_lines.size() > 0) {
-		left = m_lines[m_cursor.y].text.substr(0,m_cursor.x);
-		right = m_lines[m_cursor.y].text.substr(m_cursor.x);
+		
+		left = m_lines[m_cursor.y].text.csubstr(0,m_cursor.x);
+		right = m_lines[m_cursor.y].text.csubstr(m_cursor.x);
 		
 		lines.front().text = left + lines.front().text;
 		lines.front().wrap = m_lines[m_cursor.y].wrap;
@@ -618,18 +646,23 @@ void TextBox::PutTextAtCursor(std::string text) {
 
 		if(m_textwrap) {
 			lines = wrap_lines(lines);
+			int lc = m_lines[m_cursor.y].last_color;
 			m_lines[m_cursor.y] = lines.front();
-			updateTexture(m_lines[m_cursor.y]);
+			m_lines[m_cursor.y].last_color = lc;
 		} else {
 			m_lines[m_cursor.y].text = lines.front().text;
-			updateTexture(m_lines[m_cursor.y]);
+			
 		}
 	} else {
-		lines = wrap_lines(lines);
+		if(m_textwrap) lines = wrap_lines(lines);
 		m_lines.push_back(lines.back());
-		updateTexture(m_lines[0],true);
+		m_cursor.y = 0;
 	}
 	
+	int last_color = m_lines[m_cursor.y].text.GetLastColor();
+	if(last_color == -1)
+		last_color = m_lines[m_cursor.y].last_color;
+	updateTexture(m_lines[m_cursor.y]);
 	Point next_cursor;
 	next_cursor.y = m_cursor.y + lines.size() - 1;
 	
@@ -637,7 +670,11 @@ void TextBox::PutTextAtCursor(std::string text) {
 	auto it2 = m_lines.begin()+m_cursor.y;
 	for(auto it = lines.begin()+1; it != lines.end(); it++) {
 		it2 = m_lines.insert(it2+1, *it);
-		updateTexture(*it2, true);
+		it2->last_color = last_color;
+		int nc = it2->text.GetLastColor();
+		if(nc != -1)
+			last_color = nc;
+		updateTexture(*it2);
 	}
 	
 	if(lines.size() == 1) {
@@ -656,15 +693,16 @@ void TextBox::PutTextAtCursor(std::string text) {
 	}
 	
 	if(m_textwrap) {
-		compact_lines(m_lines, m_lines.begin()+m_cursor.y);
+		compact_lines(m_lines, m_lines.begin()+m_cursor.y+1);
 	}
 	
+	spreadColor(m_lines.begin()+m_cursor.y);
+	
 	m_cursor = next_cursor;
-	// cout << "cursor: " << m_cursor.x << ", " << m_cursor.y << endl;
 	m_ring_head = m_cursor.y;
 	m_cursor_max_x = m_cursor.x;
-	updatePosition();
 	
+	updatePosition();
 }
 
 void TextBox::OnMWheel( int updown ) {
@@ -684,10 +722,9 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 	*/
 	int tex = 0;
 	int l = 0;
-	
 	while(l < lines.size()) {
 		TextLine nl = lines[l++];
-		std::string line = nl.text;
+		Colorstring line = nl.text;
 		
 		int max_text;
 		int last_pos = 0;
@@ -705,15 +742,13 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 				max_text = s;
 			}
 			
-			nl.text = line.substr(last_pos, max_text);
+			nl.text = line.csubstr(last_pos, max_text);
 			
 			if(last_pos != 0) {
 				nl.wrap = true;
 				nl.tex = 0xffffffff;
 			}
 			
-			// cout << "pushing: " << nl.text << endl;
-			updateTexture(nl);
 			new_lines.push_back(nl);
 			
 			last_pos += max_text;
@@ -728,19 +763,15 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 	auto n = it+1;
 	auto last_it = it;
 	for(; n != v.end() && n->wrap; it++,n++) {
-		int can_offer = Fonts::getMaxText(m_style.font, n->text, GetRect().w - it->w - 15);
+		int can_offer = Fonts::getMaxText(m_style.font, n->text.str(), GetRect().w - it->w - 15);
 		if(m_wordwrap && can_offer < n->text.size()) {
 			while(can_offer > 0 && n->text[can_offer] != ' ')
 				can_offer--;
 		}
-		// cout << "new (" << can_offer << "): " << it->text << " (" << it->text.size() << ") : " << n->text << "(" << n->text.size() << ")" << endl;
-		if(can_offer == 0) {
-			// cout << "cant offer: " << it->text << " : " << n->text << endl;
-		} else {
+		if(can_offer != 0) {
 			it->text += n->text.substr(0,can_offer);
 			n->text = n->text.substr(can_offer);
-			n->w = Fonts::getTextSize(m_style.font, n->text);
-			// cout << "new (" << can_offer << "): " << it->text << " : " << n->text << endl;
+			n->w = Fonts::getTextSize(m_style.font, n->text.str());
 			updateTexture(*it);
 			last_it = n;
 		}
@@ -750,7 +781,6 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 	while(it != v.begin() && it->wrap && it->text.size() == 0) {
 		it--;
 	}
-	// cout << "final: " << it->text << endl;
 	if(it != end) {
 		v.erase(it+1,end);
 	}
@@ -763,6 +793,21 @@ void TextBox::SetWordWrap(bool word) {
 	if(m_textwrap) {
 		SetTextWrap(false);
 		SetTextWrap(true);
+	}
+}
+
+void TextBox::spreadColor(std::vector<TextLine>::iterator it, bool fully) {
+	int last_color = it->text.GetLastColor();
+	if(last_color == -1)
+		last_color = it->last_color;
+	it++;
+	for(; it != m_lines.end(); it++) {
+		if(!fully && it->last_color == last_color) break;
+		it->last_color = last_color;
+		int nc = it->text.GetLastColor();
+		if(nc != -1)
+			last_color = nc;
+		updateTexture(*it);
 	}
 }
 
@@ -790,9 +835,8 @@ void TextBox::SetTextWrap(bool wrap) {
 				}
 				TextLine nl;
 				nl.tex = tex < m_lines.size() ? m_lines[tex++].tex : 0xffffffff;
-				nl.text = line.text.substr(last_pos, max_text);
+				nl.text = line.text.csubstr(last_pos, max_text);
 				nl.wrap = last_pos != 0;
-				updateTexture(nl);
 				new_lines.push_back(nl);
 				last_pos += max_text;
 			} while(last_pos < line.text.size());
@@ -804,7 +848,6 @@ void TextBox::SetTextWrap(bool wrap) {
 		for(auto &line : m_lines) {
 			if(!line.wrap) {
 				if(!nl.wrap) {
-					updateTexture(nl);
 					new_lines.push_back(nl);
 				}
 				nl.tex = tex < m_lines.size() ? m_lines[tex++].tex : 0xffffffff;
@@ -815,7 +858,6 @@ void TextBox::SetTextWrap(bool wrap) {
 			}
 		}
 		if(!nl.wrap) {
-			updateTexture(nl);
 			new_lines.push_back(nl);
 		}
 		
@@ -830,6 +872,7 @@ void TextBox::SetTextWrap(bool wrap) {
 	m_cursor.x = std::min<int>( m_cursor.x, m_lines[m_cursor.y].text.size() );
 	m_textwrap = wrap;
 	updatePosition();
+	spreadColor(m_lines.begin(),true);
 }
 
 TextBox* TextBox::Clone() {

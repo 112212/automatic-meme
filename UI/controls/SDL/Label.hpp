@@ -34,7 +34,6 @@ class Label : public Control {
 		
 		std::vector<TextLine> text_lines;
 		
-		TTF_Font* m_font;
 		void STYLE_FUNC(value);
 		
 		void Render( Point pos, bool isSelected );

@@ -98,7 +98,7 @@ Requirements:
 	; so if collision happens, first check whether control can be placed next to
 	; control which was collided with, if not then rescale all
 
-	- anchoring
+	+ anchoring
 	; combinations {L,R,M,a%+b','}{T,B,M,c%+d}
 	; SetRect will unapply anchoring (marking isAnchored = false)
 	; new per control functions
@@ -127,10 +127,8 @@ TODO:
 + 	lock1 textbox (keyboard lock)
 + 	control to gui events
 + 	global control events for specific gui instance
-+ 	fix controls to work on this api
 + 	introduce z-index and make rendering strictly ordered
 + 	make selected control render last along with its recursively parent widgets
-+ 	remove m_selected_control
 + 	widget lock / widget unlock
 + 	SDL port of rendering
 + 	SDL port of controls
@@ -146,8 +144,8 @@ TODO:
 + 	xml loader
 -	support for unicode in textbox
 +	terminal control (2 textboxes in a widget)
--	textbox text wrapping
-- 	colored text
++	textbox text wrapping
++ 	colored text
 + 	copy & paste for textbox
 + 	anchoring (group anchor, single element anchor)
 +	theme loader (default values)
@@ -163,15 +161,16 @@ TODO:
 -	textbox scrollbar
 +	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 +	recursive theme (define theme for textboxes inside terminal for example)
+-	textbox password masking (asteriks)
 
 OpenGL port of controls:
 - 	GridContainer
 - 	TabContainer
 
 TO FIX:
+-	textwrapping doesn't compact when backspacing
 
-add possibility to put textbox type: text or password, like in html, where password is under asterisks
-
+Comments:
 add fadeout text + duration, not that important but could be great to show some label for some time, then let it fadeout - SetVisible(false), 
 or probably the control could remove itself on fading out, so we use it for some tooltips
 

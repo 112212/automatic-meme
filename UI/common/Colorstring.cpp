@@ -27,47 +27,38 @@ const uint i_colormap[] = {
 };
 
 const char *c_colormap = "wrbgycp";
-	
-Colorstring& Colorstring::insert (size_t pos, const std::string& str) {
-	Colorstring s(str.c_str());
-	auto it_ins = std::find_if(m_attr.begin(), m_attr.end(), [pos](const Attribute& a) {
-		return a.pos >= pos;
-	});
-	for(auto it = it_ins; it != m_attr.end(); it++) {
-		if(it->pos >= pos) {
-			it->pos += s.size();
-		}
-	}
-	for(auto &a : s.m_attr) a.pos += pos;
-	m_attr.insert(it_ins, s.m_attr.begin(), s.m_attr.end());
-	m_str.insert(pos, s.m_str);
+
+Colorstring::Colorstring() {}
+
+Colorstring::Colorstring(const std::string& a) {
+	process_string(a.c_str());
 }
 
+Colorstring& Colorstring::insert (size_t pos, const std::string& str) {
+	*this = csubstr(0,pos) + Colorstring(str) + csubstr(pos);
+}
 
 std::string Colorstring::GetRawString() {
-		std::string s;
-		s.resize( m_attr.size()*2 + m_str.size() );
-		int c = 0;
-		int i = 0;
-		for(auto& a : m_attr) {
-			for(; i < a.pos; i++) {
-				s[c++] = m_str[i];
-			}
-			s[c] = '^'; 
-			s[c+1] = c_colormap[a.color];
-			c+=2;
-		}
-		for(; i < m_str.size(); i++) {
+	std::string s;
+	s.resize( m_attr.size()*2 + m_str.size() );
+	int c = 0;
+	int i = 0;
+	for(auto& a : m_attr) {
+		for(; i < a.pos; i++) {
 			s[c++] = m_str[i];
 		}
-		return s;
+		s[c] = '^'; 
+		s[c+1] = c_colormap[a.color];
+		c+=2;
 	}
-	
+	for(; i < m_str.size(); i++) {
+		s[c++] = m_str[i];
+	}
+	return s;
+}
 
 void Colorstring::process_string(const char* str) {
-	const char* s = str;
-	int len;
-	for(len=0; *s; s++,len++);
+	int len = strlen(str);
 	m_str.resize(len);
 	int c=0;
 	for(int i=0; i < len; i++) {
@@ -86,6 +77,8 @@ void Colorstring::process_string(const char* str) {
 					case 'y': a.color = Attribute::Color::yellow; break;
 					case 'c': a.color = Attribute::Color::cyan; break;
 					case 'p': a.color = Attribute::Color::purple; break;
+					default: 
+						a.color = Attribute::Color::white;
 				}
 				
 				if(m_attr.size() > 0 && m_attr.back().pos == c)
@@ -100,74 +93,176 @@ void Colorstring::process_string(const char* str) {
 	m_str.resize(c);
 }
 
-Colorstring& Colorstring::erase (size_t pos, size_t len) {
-	std::vector<Attribute>::iterator begin = m_attr.begin();
-	std::vector<Attribute>::iterator end = m_attr.end();
-	for(auto it = begin; it != m_attr.end(); it++) {
-		if(it->pos >= pos && it->pos < pos+len) {
-			begin = it;
-			break;
+void Colorstring::erase (size_t pos, size_t len) {
+	if(pos + len > m_str.size()) return;
+	auto begin = m_attr.begin();
+	auto end = m_attr.end();
+	
+	// delete middle part
+	begin = std::find_if(begin, end, [&](const Attribute& a) { return a.pos >= pos && a.pos < pos+len; });
+	if(begin != m_attr.end()) {
+		end = std::find_if_not(begin, end, [&](const Attribute& a) { return a.pos >= pos && a.pos < pos+len; });
+		if(end != begin ) {
+			auto it = m_attr.erase(begin,end);
 		}
 	}
-	for(auto it = end; it != begin; it--) {
-		if((it->pos >= pos && it->pos < pos+len)) {
-			end = it;
-			break;
-		}
-	}
-	auto it = m_attr.erase(begin,end+1);
-	if(len != std::string::npos) {
-		for(; it != m_attr.end(); it++) {
+	
+	
+	if(len != std::string::npos && pos+len < m_str.size()) {
+		begin = std::find_if(m_attr.begin(), m_attr.end(), [&](const Attribute& a) { return a.pos >= pos+len; });
+		for(auto it = begin; it != m_attr.end(); it++) {
 			it->pos -= len;
 		}
 	}
+	
 	m_str.erase(pos,len);
 }
+
 
 
 std::ostream& operator<<(std::ostream& o, const Colorstring& s) {
 	int last_pos = 0;
 	for(auto &i : s.m_attr) {
+		if(last_pos >= s.m_str.size()) break;
 		o << s.m_str.substr(last_pos,i.pos-last_pos);
 		o << colormap[i.color];
 		last_pos = i.pos;
 	}
-	o << s.m_str.substr(last_pos) << colormap[0];
+	if(last_pos < s.m_str.size())
+	o << s.m_str.substr(last_pos);
+	o << colormap[0];
 	return o;
 }
 
-GLuint Colorstring::get_texture(TTF_Font* font) {
-	/*
-	int last_pos = 0;
-	for(auto &i : s.m_attr) {
-		o << s.m_str.substr(last_pos,i.pos-last_pos);
-		o << s.colormap[i.color];
-		last_pos = i.pos;
+Colorstring& Colorstring::operator+=(const Colorstring &b) {
+	
+	auto begin = b.m_attr.begin();
+	if(begin != b.m_attr.end()) {
+		int i = m_attr.size();
+		int p = m_str.size();
+		
+		if(i > 0 && m_attr.back().pos == p && begin->pos == 0) {
+			begin++;
+		}
+		
+		m_attr.insert(m_attr.end(), begin, b.m_attr.end());
+		for(; i < m_attr.size(); i++)
+			m_attr[i].pos += p;
 	}
-	o << s.m_str.substr(last_pos) << s.colormap[0];
-	return o;
-	*/
+	m_str += b.m_str;
+	
+	return *this;
+}
+
+const char* Colorstring::c_str() {
+	return m_str.c_str();
+}
+
+const std::string& Colorstring::str() {
+	return m_str;
+}
+
+Colorstring operator+(const Colorstring& a, const Colorstring& b) {
+	Colorstring s(a);
+	s += b;
+	return s;
+}
+
+
+
+Colorstring& Colorstring::operator=(const Colorstring& b) {
+	m_attr = b.m_attr;
+	m_str = b.m_str;
+	return *this;
+}
+
+std::string Colorstring::substr (size_t pos, size_t len, bool passw) const {
+	if(passw) {
+		std::string s;
+		if(len == std::string::npos)
+			s.resize(m_str.size() - pos);
+		else
+			s.resize( std::min<size_t>( len, m_str.size()-pos ) );
+		for(auto& i : s) i='*';
+		return s;
+	} else {
+		return m_str.substr(pos, len);
+	}
+}
+
+Colorstring Colorstring::csubstr (size_t pos, size_t len) const {
+	Colorstring s;
+	if(pos >= m_str.size() && !(m_str.empty() && !m_attr.empty())) return s;
+	if(len == std::string::npos) len = m_str.size();
+	
+	auto begin = m_attr.begin();
+	auto end = m_attr.end();
+	begin = std::find_if(begin, end, [&](const Attribute& a) { return a.pos >= pos && a.pos < pos+len; });
+	end = std::find_if_not(begin, end, [&](const Attribute& a) { return a.pos >= pos && a.pos < pos+len; });
+	
+	s.m_attr.insert(s.m_attr.begin(), begin, end);
+	
+	if(pos+len == m_str.size() && m_attr.size() > 0 && m_attr.back().pos == m_str.size()) {
+		s.m_attr.push_back(m_attr.back());
+	}
+	
+	if(pos > 0)
+	for(auto& t : s.m_attr) {
+		t.pos -= pos;
+	}
+	
+	s.m_str = m_str.substr(pos, len);
+	return s;
+}
+
+SDL_Surface* Colorstring::get_surface(TTF_Font* font, int color, bool passw) {
+	Attribute::Color last_color = (Attribute::Color)color;
+	SDL_Surface* surf;
+	if(passw) {
+		std::string s;
+		s.resize( m_str.size() );
+		for(auto& i : s) i='*';
+		return TTF_RenderUTF8_Blended( font, s.empty() ? " " : s.c_str(), Colors::toSDL_Color(i_colormap[0]) );
+	}
+	if(m_str.empty() || m_attr.empty())
+		return TTF_RenderUTF8_Blended( font, m_str.empty() ? " " : m_str.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
+		
 	int w = ng::Fonts::getTextSize(font, m_str);
 	int h = TTF_FontHeight(font);
-	SDL_Surface* surf = SDL_CreateRGBSurface(0, w, h, 8, 0xff0000, 0x00ff00, 0x0000ff, 0xff000000);
+	
+	surf = SDL_CreateRGBSurface(0, w, h, 32, 0xff0000, 0x00ff00, 0x0000ff, 0xff000000);
+	
 	int last_pos = 0;
 	SDL_Rect dst;
 	dst.y = dst.x = 0;
 	dst.h = h;
+	
 	for(auto& i : m_attr) {
-		std::string s = m_str.substr(last_pos,i.pos-last_pos);
+		if(last_pos >= m_str.size()) break;
+		std::string s = m_str.substr(last_pos, i.pos-last_pos);
 		if(s.size() > 0) {
-			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.c_str(), Colors::toSDL_Color(i_colormap[i.color]) );
+			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
 			SDL_BlitSurface(mini_surf, nullptr, surf, &dst);
 			dst.x += mini_surf->w;
-			/*
-			int SDL_BlitSurface(SDL_Surface*    src,
-				const SDL_Rect* srcrect,
-				SDL_Surface*    dst,
-				SDL_Rect*       dstrect)
-			*/
-
+			SDL_FreeSurface(mini_surf);
+		}
+		last_color = i.color;
+		last_pos = i.pos;
+	}
+	if(last_pos < m_str.size()) {
+		std::string s = m_str.substr(last_pos);
+		if(s.size() > 0) {
+			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
+			SDL_BlitSurface(mini_surf, nullptr, surf, &dst);
+			dst.x += mini_surf->w;
+			SDL_FreeSurface(mini_surf);
 		}
 	}
 	
+	return surf;
 }
+
+int Colorstring::GetLastColor() {
+	return m_attr.empty() ? -1 : m_attr.back().color;
+}
+

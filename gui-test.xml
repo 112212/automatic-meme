@@ -27,8 +27,8 @@
 		
 		<widget rect="0,0,200,200" id="form">
 			<textbox rect="r0,0,200,30" placeholder="username" />
-			<textbox rect="r0,0,200,30" placeholder="password" />
-			<textbox rect="r0,0,200,30" placeholder="username" />
+			<textbox rect="r0,0,200,30" placeholder="password" max_length="10" />
+			<textbox rect="r0,0,200,30" placeholder="username" password="true"/>
 			<textbox rect="r0,0,200,30" placeholder="password" />
 			<textbox rect="r0,0,200,30" placeholder="username" />
 			<textbox rect="r0,0,200,30" placeholder="password" />
@@ -48,8 +48,8 @@
 			<item>rwerew</item>
 		</combobox>
 		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
-Usually a server is a dedicated host that runs the game and is authoritative about world simulation, 
-game rules, and player input processing. A client is a player's computer connected to a game server. 
+Usual^rly a server is a dedicated host that runs the game and is authoritative about world simulation, 
+game rules, and playe^gr input processing. A client is a player's computer connected to a game server. 
 The client and server communicate with each other by sending small data packets at a high frequency 
 
 (usually 20 to 30 packets per second). A client receives the current world state from the server and g
@@ -81,8 +81,8 @@ bandwidth limitations and network latencies, information can get lost
 due to network packet loss. " ></textbox>
 		<label rect="0,0,150,80" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1
 	test2
-test3
-hehehe
+test3^g
+hehehehe
 fddgdf"></label>
 		<widget rect="0,0,100,200">
 			<radiobutton rect="0,20,100,30" value="haha"></radiobutton>

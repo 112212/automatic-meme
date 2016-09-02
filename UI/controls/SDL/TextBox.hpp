@@ -12,10 +12,11 @@ class TextBox : public Control {
 		struct TextLine {
 			unsigned int tex;
 			int w,h;
-			std::string text;
-			// Colorstring text;
+			// std::string text;
+			Colorstring text;
 			bool wrap;
-			TextLine() : tex(0xffffffff),wrap(false) {}
+			int last_color;
+			TextLine() : tex(0xffffffff),wrap(false),last_color(0) {}
 		};
 		std::vector<TextLine> m_lines;
 		
@@ -33,6 +34,7 @@ class TextBox : public Control {
 		int m_cursor_blinking_rate;
 		int m_readonly;
 		
+		bool m_color_input;
 		bool m_locked;
 		bool m_password;
 		int m_max_length;
@@ -45,6 +47,8 @@ class TextBox : public Control {
 		
 		void updatePosition();
 		void onFontChange();
+		void backspace();
+		void spreadColor(std::vector<TextLine>::iterator it, bool fully = false);
 		void updateTexture(TextLine&,bool = false);
 		std::vector<TextLine> wrap_lines(const std::vector<TextLine>& lines);
 		void compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::iterator it);
