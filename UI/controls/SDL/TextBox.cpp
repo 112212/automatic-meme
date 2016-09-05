@@ -275,7 +275,7 @@ void TextBox::updatePosition() {
 	TextLine &line = m_lines[m_cursor.y];
 	const Rect& rect = GetRect();
 	
-	if(m_textwrap) {
+	if(m_textwrap && m_multiline) {
 		m_position.x = 0;
 	} else {
 		
@@ -652,7 +652,7 @@ void TextBox::PutTextAtCursor(std::string text) {
 		lines.front().wrap = m_lines[m_cursor.y].wrap;
 		lines.back().text += right;
 
-		if(m_textwrap) {
+		if(m_textwrap && m_multiline) {
 			lines = wrap_lines(lines);
 			int lc = m_lines[m_cursor.y].last_color;
 			m_lines[m_cursor.y] = lines.front();
@@ -662,7 +662,7 @@ void TextBox::PutTextAtCursor(std::string text) {
 			
 		}
 	} else {
-		if(m_textwrap) lines = wrap_lines(lines);
+		if(m_textwrap && m_multiline) lines = wrap_lines(lines);
 		m_lines.push_back(lines.back());
 		m_cursor.y = 0;
 	}
@@ -700,7 +700,7 @@ void TextBox::PutTextAtCursor(std::string text) {
 		}
 	}
 	
-	if(m_textwrap) {
+	if(m_textwrap && m_multiline) {
 		compact_lines(m_lines, m_lines.begin()+m_cursor.y+1);
 	}
 	
@@ -769,6 +769,7 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 }
 
 void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::iterator start) {
+	if(!m_multiline) return;
 	while(start->wrap && v.begin() != start) start--;
 	auto it=start;
 	auto n = it+1;
@@ -802,7 +803,7 @@ void TextBox::SetWordWrap(bool word) {
 	if(m_wordwrap == word) return;
 	
 	m_wordwrap = word;
-	if(m_textwrap) {
+	if(m_textwrap && m_lines.size() > 0) {
 		SetTextWrap(false);
 		SetTextWrap(true);
 	}
