@@ -274,18 +274,26 @@ void TextBox::sortPoints(Point &p1, Point &p2) {
 void TextBox::updatePosition() {
 	TextLine &line = m_lines[m_cursor.y];
 	const Rect& rect = GetRect();
-	if(m_position.x > line.text.size()) {
-		m_text_max = Fonts::getMaxTextBw(m_style.font, line.text.substr(0,std::string::npos, m_password), rect.w-20);
+	
+	if(m_textwrap) {
+		m_position.x = 0;
 	} else {
-		m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x, std::string::npos, m_password), rect.w-20);
+		
+		if(m_position.x > line.text.size()) {
+			m_text_max = Fonts::getMaxTextBw(m_style.font, line.text.substr(0,std::string::npos, m_password), rect.w-20);
+		} else {
+			m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x, std::string::npos, m_password), rect.w-20);
+		}
+		
+		if(m_cursor.x > m_position.x + m_text_max ) {
+			m_position.x = m_cursor.x - m_text_max + 1;
+		}
+		else if(m_cursor.x < m_position.x) {
+			m_position.x = m_cursor.x;
+		}
 	}
 	
-	if(m_cursor.x > m_position.x + m_text_max ) {
-		m_position.x = m_cursor.x - m_text_max + 1;
-	}
-	else if(m_cursor.x < m_position.x) {
-		m_position.x = m_cursor.x;
-	}
+	
 	
 	if(m_cursor.y < m_position.y) {
 		m_position.y = m_cursor.y;
@@ -338,9 +346,9 @@ void TextBox::backspace() {
 			
 			if(m_textwrap) {
 				m_lines = wrap_lines(m_lines);
+				spreadColor(m_lines.begin(),true);
 				compact_lines(m_lines, m_lines.begin()+m_cursor.y);
 				
-				spreadColor(m_lines.begin(),true);
 				
 				m_cursor.y = std::min<int>(std::max<int>(0, m_cursor.y), m_lines.size()-1);
 				if(m_lines.size() > 0)
@@ -709,6 +717,7 @@ void TextBox::OnMWheel( int updown ) {
 	m_position.y = std::min<int>(std::max<int>(0, m_position.y-updown), m_lines.size()-GetRect().h/m_line_height);
 }
 
+// ----------- Wrapping ------------------------------------------------
 std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& lines) {
 	std::vector<TextLine> new_lines;
 	new_lines.reserve(m_lines.size()*3/2);
@@ -739,7 +748,8 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 					if(sub[s] == ' ')
 						break;
 				}
-				max_text = s;
+				if(s > 0)
+					max_text = s;
 			}
 			
 			nl.text = line.csubstr(last_pos, max_text);
@@ -759,18 +769,19 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 }
 
 void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::iterator start) {
+	while(start->wrap && v.begin() != start) start--;
 	auto it=start;
 	auto n = it+1;
 	auto last_it = it;
 	for(; n != v.end() && n->wrap; it++,n++) {
-		int can_offer = Fonts::getMaxText(m_style.font, n->text.str(), GetRect().w - it->w - 15);
+		int can_offer = Fonts::getMaxText(m_style.font, n->text.str(), GetRect().w - it->w - 16);
 		if(m_wordwrap && can_offer < n->text.size()) {
 			while(can_offer > 0 && n->text[can_offer] != ' ')
 				can_offer--;
 		}
 		if(can_offer != 0) {
-			it->text += n->text.substr(0,can_offer);
-			n->text = n->text.substr(can_offer);
+			it->text += n->text.csubstr(0,can_offer);
+			n->text = n->text.csubstr(can_offer);
 			n->w = Fonts::getTextSize(m_style.font, n->text.str());
 			updateTexture(*it);
 			last_it = n;
@@ -785,6 +796,7 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 		v.erase(it+1,end);
 	}
 }
+// ---------------------------------------------------------------------
 
 void TextBox::SetWordWrap(bool word) {
 	if(m_wordwrap == word) return;

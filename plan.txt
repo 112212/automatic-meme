@@ -142,7 +142,6 @@ TODO:
 + 	overlapping check compile time option
 + 	new control widget mover
 + 	xml loader
--	support for unicode in textbox
 +	terminal control (2 textboxes in a widget)
 +	textbox text wrapping
 + 	colored text
@@ -158,17 +157,19 @@ TODO:
 +	tabbing for textbox and button
 -	tooltip
 +	add option to limit number of characters in textbox
--	textbox scrollbar
 +	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 +	recursive theme (define theme for textboxes inside terminal for example)
--	textbox password masking (asteriks)
++	textbox password masking (asteriks)
+-	effects widget (supporting effects like fadeout or blinking or whatever ...)
+-	textbox scrollbar
+-	support for unicode in textbox
 
 OpenGL port of controls:
 - 	GridContainer
 - 	TabContainer
 
 TO FIX:
--	textwrapping doesn't compact when backspacing
+
 
 Comments:
 add fadeout text + duration, not that important but could be great to show some label for some time, then let it fadeout - SetVisible(false), 

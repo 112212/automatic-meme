@@ -54,6 +54,20 @@ Terminal* Terminal::Clone() {
 	return t;
 }
 
+void Terminal::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("wordwrap"): {
+			bool val = value == "true";
+			m_log->SetTextWrap(val);
+			m_log->SetWordWrap(val);
+		}
+		_case("textwrap"): {
+			bool val = value == "true";
+			m_log->SetTextWrap(val);
+		}
+	}
+}
+
 void Terminal::onFontChange() {}
 
 void Terminal::onPositionChange() {

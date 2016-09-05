@@ -15,6 +15,7 @@ class Terminal : public Widget {
 		void tbox_enter(Control *c);
 		void execute_command(std::string cmd);
 		void onFontChange();
+		void STYLE_FUNC(value);
 	public:
 	
 		Terminal();

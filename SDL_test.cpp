@@ -170,8 +170,8 @@ int main() {
 	// });
 	
 	TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
-	// tb->SetWordWrap(true);
-	// tb->SetTextWrap(true);
+	tb->SetWordWrap(true);
+	tb->SetTextWrap(true);
 	// tb->SetTextWrap(false);
 		
 	gui.ApplyAnchoring();
