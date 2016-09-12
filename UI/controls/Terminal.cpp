@@ -13,6 +13,7 @@ Terminal::Terminal() {
 	AddControl(m_terminal);
 	setInterceptMask(imask::mouse_up | imask::key_down);
 	m_terminal->SubscribeEvent( TextBox::event::enter, [this](Control *c) { return tbox_enter(c); });
+	m_log_immediate = true;
 }
 
 Terminal::~Terminal() {}
@@ -24,8 +25,11 @@ void Terminal::tbox_enter(Control* c) {
 	m_history.push_back(m_command);
 	m_history_counter = m_history.size();
 	t->SetText("");
+	m_log_msg = "> " + m_command;
+	m_log_immediate = false;
 	emitEvent(event::command);
-	WriteLog("> "+m_command);
+	m_log_immediate = true;
+	WriteLog(m_log_msg);
 }
 
 const std::string& Terminal::GetText() {
@@ -33,8 +37,16 @@ const std::string& Terminal::GetText() {
 }
 
 void Terminal::WriteLog(const std::string& s) {
-	m_log->PutCursorAt(Point(9999,9999));
-	m_log->PutTextAtCursor(s+"\n");
+	if(m_log_immediate) {
+		m_log->PutCursorAt(Point(9999,9999));
+		m_log->PutTextAtCursor(s+"\n");
+	} else {
+		m_log_msg = s;
+	}
+}
+
+void Terminal::AppendLog(const std::string& s) {
+	m_log_msg += s;
 }
 
 void Terminal::OnMouseDown( int x, int y ) {
@@ -69,8 +81,7 @@ void Terminal::STYLE_FUNC(value) {
 			m_log->SetTextWrap(val);
 		}
 		_case("max_length"): {
-			std::string s = "max_length";
-			m_terminal->SetStyle(s, value);
+			m_terminal->SetStyle(style, value);
 		}
 	}
 }

@@ -13,12 +13,15 @@ class Terminal : public Widget {
 		int m_history_counter;
 		std::vector<std::string> m_history;
 		std::string m_command;
+		std::string m_log_msg;
+		bool m_log_immediate;
 		void onPositionChange();
 		void tbox_enter(Control *c);
 		void execute_command(std::string cmd);
 		void onFontChange();
 		void STYLE_FUNC(value);
 		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
+		
 	public:
 	
 		Terminal();
@@ -33,6 +36,7 @@ class Terminal : public Widget {
 		Terminal* Clone();
 		const std::string& GetText();
 		void WriteLog(const std::string& s);
+		void AppendLog(const std::string& s);
 		
 		
 		void OnMouseDown( int x, int y );

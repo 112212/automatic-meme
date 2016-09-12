@@ -163,11 +163,14 @@ int main() {
 	// std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
 	// w1->LoadXml(s);
 	
-	// Terminal &t = *((Terminal*)gui.GetControlById("term"));
-	// t.SubscribeEvent( Terminal::event::command, [](Control* c) {
-		// Terminal* t = (Terminal*)c;
+	Terminal &t = *((Terminal*)gui.GetControlById("term"));
+	t.SubscribeEvent( Terminal::event::command, [](Control* c) {
+		Terminal* t = (Terminal*)c;
 		// cout << "command: " << t->GetText() << endl;
-	// });
+		t->WriteLog("hehhe");
+	});
+	
+	t.WriteLog("hahahaha");
 	
 	TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
 	tb->SetWordWrap(true);
