@@ -108,7 +108,7 @@ fddgdf"></label>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
 		<widget rect="0,0,400,300">
-			<terminal font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" rect="0,0,400,300" id="term" textwrap="true" />
+			<terminal font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" rect="0,0,400,300" id="term" textwrap="true"/>
 		</widget>
 	</anchor>
 </gui>

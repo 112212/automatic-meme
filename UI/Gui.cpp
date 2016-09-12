@@ -263,8 +263,7 @@ void GuiEngine::RemoveControl( Control* control ) {
 		for(int i=0; !hasIntercepted; i++) {                        \
 			interceptInfo &v = sel_intercept_vector[i];             \
 			if(!v.widget) break;                                    \
-			if((v.intercept_mask                                    \
-				& Widget::imask::action_enum) != 0) {          		\
+			if( (v.intercept_mask & Widget::imask::action_enum) != 0) {  \
 				v.widget->action;                                   \
 			}                                                       \
 		}                                                           \
@@ -279,7 +278,7 @@ void GuiEngine::RemoveControl( Control* control ) {
 	std::stack<Widget*> wgts;                                       \
 	Widget* w = active_control->widget;								\
 	while(w) {                                 						\
-		wgts.push(active_control->widget);                          \
+		wgts.push(w);                          						\
 		w = w->widget;                          					\
 	}                                                               \
 	while(!wgts.empty()) {                                          \
@@ -746,7 +745,7 @@ void GuiEngine::OnCleanup() {
 
 	void GuiEngine::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {
 		if(active_control) {
-			INTERCEPT_HOOK_KEYBOARD(key_down, OnKeyUp( sym, mod ));
+			INTERCEPT_HOOK_KEYBOARD(key_up, OnKeyUp( sym, mod ));
 		}
 	}
 	void GuiEngine::Render() {

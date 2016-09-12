@@ -76,7 +76,6 @@ class TextBox : public Control {
 		enum event {
 			change = 0,
 			enter,
-			terminal_command,
 			max_events
 		};
 	
@@ -93,7 +92,6 @@ class TextBox : public Control {
 		virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 		virtual void OnLostControl();
 		//
-		
 				
 		TextBox* Clone();
 		void SetText(std::string text);

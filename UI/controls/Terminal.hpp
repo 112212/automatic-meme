@@ -10,12 +10,15 @@ class Terminal : public Widget {
 	private:
 		TextBox *m_log;
 		TextBox *m_terminal;
-		
+		int m_history_counter;
+		std::vector<std::string> m_history;
+		std::string m_command;
 		void onPositionChange();
 		void tbox_enter(Control *c);
 		void execute_command(std::string cmd);
 		void onFontChange();
 		void STYLE_FUNC(value);
+		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 	public:
 	
 		Terminal();
@@ -31,11 +34,9 @@ class Terminal : public Widget {
 		const std::string& GetText();
 		void WriteLog(const std::string& s);
 		
+		
 		void OnMouseDown( int x, int y );
 		void OnMouseUp( int x, int y );
-		
-	private:
-		std::string m_command;
 };
 }
 #endif

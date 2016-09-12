@@ -149,7 +149,6 @@ TODO:
 + 	anchoring (group anchor, single element anchor)
 +	theme loader (default values)
 -	xml defining borders, background color polygon or image and its bounding area (clickable area)
--	label blinking, fading, animations ...
 +	new control registration to xml
 -	resizable widget
 +	setting font by parsing it
@@ -163,6 +162,7 @@ TODO:
 -	effects widget (supporting effects like fadeout or blinking or whatever ...)
 -	textbox scrollbar
 -	support for unicode in textbox
++	terminal: arrow up brings text from history
 
 OpenGL port of controls:
 - 	GridContainer

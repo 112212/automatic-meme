@@ -8,9 +8,10 @@ Terminal::Terminal() {
 	m_log->SetMultilineMode(true);
 	m_log->SetReadOnly(true);
 	initEventVector(event::max_events);
+	m_history_counter = 0;
 	AddControl(m_log);
 	AddControl(m_terminal);
-	setInterceptMask(imask::mouse_up);
+	setInterceptMask(imask::mouse_up | imask::key_down);
 	m_terminal->SubscribeEvent( TextBox::event::enter, [this](Control *c) { return tbox_enter(c); });
 }
 
@@ -18,8 +19,10 @@ Terminal::~Terminal() {}
 
 void Terminal::tbox_enter(Control* c) {
 	TextBox* t = static_cast<TextBox*>(c);
-	if(t->GetText().size() <= 1) return;
+	if(t->GetText().size() <= 0) return;
 	m_command = t->GetText();
+	m_history.push_back(m_command);
+	m_history_counter = m_history.size();
 	t->SetText("");
 	emitEvent(event::command);
 	WriteLog("> "+m_command);
@@ -64,6 +67,36 @@ void Terminal::STYLE_FUNC(value) {
 		_case("textwrap"): {
 			bool val = value == "true";
 			m_log->SetTextWrap(val);
+		}
+		_case("max_length"): {
+			std::string s = "max_length";
+			m_terminal->SetStyle(s, value);
+		}
+	}
+}
+
+void Terminal::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
+	if(sym == SDLK_UP) {
+		if(m_history_counter == 0) 
+			return;
+		if(m_history_counter == m_history.size()) {
+			m_command = m_terminal->GetText();
+		}
+		
+		m_terminal->SetText(m_history[--m_history_counter]);
+		m_terminal->PutCursorAt(Point(0,9999));
+		
+	} else if(sym == SDLK_DOWN) {
+		if(m_history_counter >= m_history.size())
+			return;
+		
+		if(m_history_counter == m_history.size()-1) {
+			m_terminal->SetText(m_command);
+			m_history_counter = m_history.size();
+			m_terminal->PutCursorAt(Point(0,9999));
+		} else {
+			m_terminal->SetText(m_history[++m_history_counter]);
+			m_terminal->PutCursorAt(Point(0,9999));
 		}
 	}
 }
