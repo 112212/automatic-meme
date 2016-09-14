@@ -23,6 +23,7 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
 	m_wordwrap = false;
 	m_color_input = false;
 	m_placeholder.text = "";
+	m_colors = true;
 	SetText("");
 }
 
@@ -182,6 +183,8 @@ void TextBox::STYLE_FUNC(value) {
 			SetTextWrap(value=="true");
 		_case("wordwrap"):
 			SetWordWrap(value=="true");
+		_case("colors"):
+			m_colors = value == "true";
 			
 	}
 		
@@ -505,9 +508,12 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 		// keys to ignore (won't be passed to default case)
 		case SDLK_LCTRL:
 		case SDLK_RCTRL:
-		case SDLK_ESCAPE:
 		case SDLK_LSHIFT:
 		case SDLK_RSHIFT:
+			break;
+			
+		case SDLK_ESCAPE:
+			Unselect();
 			break;
 			
 		default: {
@@ -523,27 +529,20 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			if(val == SDLK_KP_PERIOD) 
 				val = SDLK_PERIOD;
 			
-			
-			if(mod & KMOD_SHIFT) {
-				if(val == '2')
-					val = '@';
-				else if(val == '6') {
-					val = '^';
-				}
-				else
-					val = toupper(val);
-			}
+			val = SDLCodeToChar(val, mod & KMOD_SHIFT);
 			
 			if(m_color_input) {
-				backspace();
-				PutTextAtCursor(std::string("^")+((char)val));
+				if(val != '^') {
+					backspace();
+					PutTextAtCursor(std::string("^")+((char)val));
+				}
 				m_color_input = false;
 			} else {
 				PutTextAtCursor(std::string(1,(char)val));
-			}
-			
-			if(!m_color_input && val == '^') {
-				m_color_input = true;
+				
+				if(m_colors && val == '^') {
+					m_color_input = true;
+				}
 			}
 			
 			emitEvent( event::change );
@@ -564,6 +563,18 @@ std::string TextBox::GetText( ) {
 	return str;
 }
 
+std::string TextBox::GetRawText( ) {
+	std::string str;
+	auto it_last = m_lines.end()-1;
+	for(auto it = m_lines.begin(); it != m_lines.end(); it++) {
+		if(it != it_last)
+			str += it->text.GetRawString() + "\n";
+		else
+			str += it->text.GetRawString();
+	}
+	return str;
+}
+
 
 std::string TextBox::GetSelectedText() {
 	Point p1,p2;
@@ -574,6 +585,21 @@ std::string TextBox::GetSelectedText() {
 	if(p1.y != p2.y) {
 		for(auto it = m_lines.begin()+p1.y+1; it != m_lines.begin()+p2.y; it++) {
 			str += "\n" + it->text.str();
+		}
+		str += "\n" + m_lines[p2.y].text.substr(0,p2.x);
+	}
+	return str;
+}
+
+std::string TextBox::GetRawSelectedText() {
+	Point p1,p2;
+	sortPoints(p1,p2);
+	
+	if(p1.x == -1 or p2.x == -1) return std::string("");
+	std::string str = m_lines[p1.y].text.substr(p1.x, p2.y == p1.y ? (p2.x - p1.x) : std::string::npos);
+	if(p1.y != p2.y) {
+		for(auto it = m_lines.begin()+p1.y+1; it != m_lines.begin()+p2.y; it++) {
+			str += "\n" + it->text.GetRawString();
 		}
 		str += "\n" + m_lines[p2.y].text.substr(0,p2.x);
 	}
@@ -618,6 +644,8 @@ void TextBox::PutTextAtCursor(std::string text) {
 	
 	if(!m_multiline)
 		find_and_replace(text, "\n", "");
+	if(!m_colors)
+		find_and_replace(text, "^", "^^");
 		
 	if(m_lines.size() > 0 && m_lines[m_cursor.y].text.size() + text.size() > m_max_length) {
 		text = text.substr(0, m_max_length-m_lines[m_cursor.y].text.size());

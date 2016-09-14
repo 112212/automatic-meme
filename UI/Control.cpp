@@ -261,6 +261,11 @@ void Control::OnLostControl() {}
 void Control::OnMWheel( int updown ) {}
 bool Control::customBoundary( int x, int y ) {}
 
+void Control::Unselect() {
+	if(engine && (engine->GetActiveControl() == this || engine->GetSelectedControl() == this))
+		engine->UnselectControl();
+}
+
 Control* Control::Clone() {
 	Control* c = new Control;
 	copyStyle(c);
@@ -357,7 +362,7 @@ Anchor Anchor::parseRect(std::string s) {
 	return a;
 }
 
-void Control::SetStyle(std::string& style, std::string& value) {
+void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
 	STYLE_SWITCH {
 		_case("x"):

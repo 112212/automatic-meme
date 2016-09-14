@@ -31,16 +31,16 @@ void printChars(char* str, int start, int end) {
 
 inline unsigned int binary_search_log10( unsigned int num ) {
 	// fast log10
-	if(num >= 100000u) { // 4 nule (9,8,7,6,5)
-		if(num >= 10000000u) { // 7 nula (7,8,9)
-			if(num >= 1000000000u) // 9 nula
+	if(num >= 100000u) { // 4 zeros (9,8,7,6,5)
+		if(num >= 10000000u) { // 7 zeros (7,8,9)
+			if(num >= 1000000000u) // 9 zeros
 				return 9;
-			else if( num >= 100000000u ) // 10 nula
+			else if( num >= 100000000u ) // 10 zeros
 				return 8;
 			else 
 				return 7;
 		} else { // 6,5
-			if(num >= 1000000u) { // 6 nula
+			if(num >= 1000000u) { // 6 zeros
 				return 6;
 			} else {
 				return 5;
@@ -70,19 +70,16 @@ int old_bcd_to_binary( const char* str, int start, int end ) {
 	int retval = 0;
 	int mask = 0;
 	int i;
-	// iz stria u binarni bcd
 	for(i=0; i < len; i++) {
 		buf |= (str[start+i]-0x30) << ((len-i-1)<<2);
 	}
 	
 	len*=4;
-	// iz bcd u integer
 	for(i=0; i < len; i++) {
 		if(buf & 1)
 			retval |= 1 << i;
 			
 		mask = buf & 0x01111110;
-		// da li negde treba dodati 10?
 		if(mask) {
 			buf ^= mask;
 			mask >>= 4;
@@ -97,7 +94,7 @@ int old_bcd_to_binary( const char* str, int start, int end ) {
 void old_basic_binary_to_bcd( int binary, char* str, int start, int end ) {
 	// [stri] <<
 	int minus = 0;
-	int nule = 1;
+	int zeros = 1;
 	int i;
 	unsigned num, n, q, r;
 	
@@ -108,9 +105,9 @@ void old_basic_binary_to_bcd( int binary, char* str, int start, int end ) {
 		num = (unsigned)binary;
 	}
 	
-	nule = binary_search_log10( num );
+	zeros = binary_search_log10( num );
 	
-	start = start + nule + minus;
+	start = start + zeros + minus;
 	
 	if( end - start  < 0 )
 		start = end;
@@ -174,6 +171,29 @@ unsigned int hex_to_binary( const char* str, int start, int length ) {
 	return retval;
 }
 
+#ifdef USE_SDL
+const char sdl_code_conversion_table[] = 
+"................................" // 32 dots
+" !\"#$%&\'()*+,-./0123456789:;<=>?@" // 33 chars
+".........................." // 26 dots
+"[\\]^_`abcdefghijklmnopqrstuvwxyz"
+;
+const char sdl_code_conversion_table_shift[] = 
+"................................" // 32 dots
+" !\"#$%&\"()*+<_>?)!@#$%^&*(::<=>?@" // 33 chars
+".........................." // 26 dots
+"{|}^_~ABCDEFGHIJKLMNOPQRSTUVWXYZ" // 32 chars
+;
+char SDLCodeToChar( int code, bool shift ) {
+	if(code <= 122)
+		return (shift ? sdl_code_conversion_table_shift[code] : sdl_code_conversion_table[code]);
+	else
+		return ' ';
+}
+
+#endif
+
+#ifdef USE_SFML
 const char sf_code_conversion_table[] =
 "abcdefghijklmnopqrstuvwxyz0123456789..........[];,.'/\\`=- l\b\t......+-*/....0123456789................";
 const char sf_code_conversion_table_shift[] =
@@ -181,4 +201,5 @@ const char sf_code_conversion_table_shift[] =
 char SFMLCodeToChar( unsigned char sf_code, bool shift ) {
 	return (shift ? sf_code_conversion_table_shift[sf_code] : sf_code_conversion_table[sf_code]);
 }
+#endif
 }

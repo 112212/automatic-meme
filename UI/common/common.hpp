@@ -25,5 +25,9 @@ constexpr unsigned int hash(const char *s, int off = 0) {
 	char SFMLCodeToChar( unsigned char sf_code, bool shift );
 #endif
 
+#ifdef USE_SDL
+	char SDLCodeToChar( int code, bool shift );
+#endif
+
 }	
 #endif

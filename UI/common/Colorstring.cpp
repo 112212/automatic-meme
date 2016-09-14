@@ -78,7 +78,8 @@ void Colorstring::process_string(const char* str) {
 					case 'c': a.color = Attribute::Color::cyan; break;
 					case 'p': a.color = Attribute::Color::purple; break;
 					default: 
-						a.color = Attribute::Color::white;
+						m_str[c++] = '^';
+						continue;
 				}
 				
 				if(m_attr.size() > 0 && m_attr.back().pos == c)

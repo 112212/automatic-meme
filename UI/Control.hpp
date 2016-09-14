@@ -194,9 +194,10 @@ class Control {
 		controlType GetType() { return type; }
 		
 		bool IsWidget() { return isWidget; }
-		void SetStyle(std::string& style, std::string& value);
+		void SetStyle(std::string style, std::string value);
 		void SetVisible(bool visible);
 		void SetRenderable(bool visible);
+		void Unselect();
 		
 		bool IsVisible() { return visible; }
 		void SetId( std::string id );

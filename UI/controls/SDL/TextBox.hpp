@@ -33,6 +33,7 @@ class TextBox : public Control {
 		int m_cursor_blink_counter;
 		int m_cursor_blinking_rate;
 		int m_readonly;
+		bool m_colors;
 		
 		bool m_color_input;
 		bool m_locked;
@@ -96,7 +97,9 @@ class TextBox : public Control {
 		TextBox* Clone();
 		void SetText(std::string text);
 		std::string GetText();
+		std::string GetRawText();
 		std::string GetSelectedText();
+		std::string GetRawSelectedText();
 		
 		void PutTextAtCursor(std::string text);
 		void PutCursorAt( Point cursor );

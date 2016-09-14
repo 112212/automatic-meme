@@ -235,6 +235,7 @@ void TrackBar::onPositionChange() {
 void TrackBar::setValue( int value ) {
 	m_value = std::min( std::max(value, m_slider_min), m_slider_max );
 	updateSlider();
+	onChange();
 }
 
 void TrackBar::updateSlider() {

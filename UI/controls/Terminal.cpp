@@ -7,6 +7,7 @@ Terminal::Terminal() {
 	m_terminal = (TextBox*)CreateControl("terminal/textbox");
 	m_log->SetMultilineMode(true);
 	m_log->SetReadOnly(true);
+	m_log->SetStyle("colors", "false");
 	initEventVector(event::max_events);
 	m_history_counter = 0;
 	AddControl(m_log);
@@ -21,7 +22,7 @@ Terminal::~Terminal() {}
 void Terminal::tbox_enter(Control* c) {
 	TextBox* t = static_cast<TextBox*>(c);
 	if(t->GetText().size() <= 0) return;
-	m_command = t->GetText();
+	m_command = t->GetRawText();
 	m_history.push_back(m_command);
 	m_history_counter = m_history.size();
 	t->SetText("");
@@ -70,18 +71,23 @@ Terminal* Terminal::Clone() {
 }
 
 void Terminal::STYLE_FUNC(value) {
-	STYLE_SWITCH {
-		_case("wordwrap"): {
-			bool val = value == "true";
-			m_log->SetTextWrap(val);
-			m_log->SetWordWrap(val);
-		}
-		_case("textwrap"): {
-			bool val = value == "true";
-			m_log->SetTextWrap(val);
-		}
-		_case("max_length"): {
-			m_terminal->SetStyle(style, value);
+	if(style.substr(0,3) == "log") {
+		// log_* applies styles to log window
+		m_log->SetStyle(style.substr(4), value);
+	} else {
+		STYLE_SWITCH {
+			_case("wordwrap"): {
+				bool val = value == "true";
+				m_log->SetTextWrap(val);
+				m_log->SetWordWrap(val);
+			}
+			_case("textwrap"): {
+				bool val = value == "true";
+				m_log->SetTextWrap(val);
+			}
+			
+			default:
+				m_terminal->SetStyle(style, value);
 		}
 	}
 }
