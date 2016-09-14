@@ -61,19 +61,29 @@ std::map< std::string, std::string > Fonts::fonts_path;
 			ttfInited = true;
 			TTF_Init();
 		}
-		auto key = make_pair(short_name, font_size);
-		auto f = fonts.find( key );
-		if( f == fonts.end() ) {
-			TTF_Font* fnt;
-			if( !(fnt = TTF_OpenFont( full_path_name.c_str(), font_size )) )
-				return 0;
-			else {
-				fonts[ key ] = fnt;
-				fonts_path[ short_name ] = full_path_name;
-				return fnt;
+		
+		TTF_Font* fnt = 0;
+		if(full_path_name == short_name) {
+			fnt = GetFont(short_name, font_size);
+		}
+		
+		if(!fnt) {
+			auto key = make_pair(short_name, font_size);
+			auto f = fonts.find( key );
+			if( f == fonts.end() ) {
+				TTF_Font* fnt;
+				if( !(fnt = TTF_OpenFont( full_path_name.c_str(), font_size )) )
+					return 0;
+				else {
+					fonts[ key ] = fnt;
+					fonts_path[ short_name ] = full_path_name;
+					return fnt;
+				}
+			} else {
+				return f->second;
 			}
 		} else {
-			return f->second;
+			return fnt;
 		}
 	}
 	
