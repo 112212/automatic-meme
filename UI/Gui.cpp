@@ -594,10 +594,12 @@ void GuiEngine::Focus(Control* control) {
 }
 
 void GuiEngine::Activate(Control* control) {
-	if(control->engine == this && control->interactible) {
+	if(control && control->engine == this && control->interactible) {
 		active_control = control;
 		active_control->OnGetFocus();
 	}
+	if(!control)
+		active_control = control;
 }
 
 void GuiEngine::recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove) {
@@ -653,6 +655,7 @@ void GuiEngine::unselectControl() {
 		selected_control->widget->selected_control = 0;
 	}
 	selected_control = 0;
+	active_control = 0;
 }
 
 #ifdef USE_EVENT_QUEUE
