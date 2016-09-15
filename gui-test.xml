@@ -14,7 +14,7 @@
 	</theme>
 -->
 	<anchor pos="rR,B">
-		<trackbar rect="0,0,100,30" id="1" range="0,100" value="15" />
+		<trackbar rect="0,0,100,30" id="1" range="0,100" value="15" /><br/>
 		<textbox rect="0,0,100,30" id="terminal" value="" />
 	</anchor>
 	
