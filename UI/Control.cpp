@@ -63,6 +63,9 @@ void Control::SetVisible(bool visible) {
 	if(this->visible != visible) {
 		this->interactible = visible;
 		this->visible = visible;
+		if(!visible && engine && engine->active_control == this) {
+			engine->active_control = 0;
+		}
 		_updateCache(CacheUpdateFlag::attributes);
 		if(!visible && isWidget && ((Widget*)this)->inSelectedBranch() ) {
 			sendGuiCommand(GUI_UNSELECT_WIDGETS);
@@ -336,7 +339,7 @@ Anchor Anchor::parseRect(std::string s) {
 			case 'B':
 				a.ay = -1;
 				a.H = 1;
-				// a.h = 1;
+				a.h = 1;
 				break;
 			
 			case 'x': n = &a.x; break;
