@@ -339,7 +339,7 @@ Anchor Anchor::parseRect(std::string s) {
 			case 'B':
 				a.ay = -1;
 				a.H = 1;
-				a.h = 0;
+				a.h = -1;
 				break;
 			
 			case 'x': n = &a.x; break;
