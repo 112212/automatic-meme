@@ -185,6 +185,8 @@ void TextBox::STYLE_FUNC(value) {
 			SetWordWrap(value=="true");
 		_case("colors"):
 			m_colors = value == "true";
+		_case("cursor_blinking_rate"):
+			m_cursor_blinking_rate = std::stoi(value);
 			
 	}
 		

@@ -62,11 +62,6 @@ class TextBox : public Control {
 		bool m_textwrap;
 		bool m_wordwrap;
 		
-		// terminal mode
-		bool m_terminal_mode;
-		int m_terminal_max_messages;
-		int m_ring_head;
-				
 		bool m_mousedown;
 
 		void onPositionChange();
