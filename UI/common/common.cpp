@@ -197,7 +197,7 @@ char SDLCodeToChar( int code, bool shift ) {
 const char sf_code_conversion_table[] =
 "abcdefghijklmnopqrstuvwxyz0123456789..........[];,.'/\\`=- l\b\t......+-*/....0123456789................";
 const char sf_code_conversion_table_shift[] =
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ)!@#$%^&*(..........{}:<>\"?|~=_ l\b\t......+-*/....0123456789................";
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ)!@#$%^&*(..........{}:<>\"?|~+_ l\b\t......+-*/....0123456789................";
 char SFMLCodeToChar( unsigned char sf_code, bool shift ) {
 	return (shift ? sf_code_conversion_table_shift[sf_code] : sf_code_conversion_table[sf_code]);
 }

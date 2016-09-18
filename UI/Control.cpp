@@ -368,19 +368,13 @@ Anchor Anchor::parseRect(std::string s) {
 void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
 	STYLE_SWITCH {
-		_case("x"):
-			SetRect(std::stoi(value), r.y, r.w, r.h);
-		_case("y"):
-			SetRect(r.x, std::stoi(value), r.w, r.h);
-		_case("w"):
-			SetRect(r.x, r.y, std::stoi(value), r.h);
-		_case("h"):
-			SetRect(r.x, r.y, r.w, std::stoi(value));
 		_case("rect"): {
 			Anchor a = Anchor::parseRect(value);
 			SetAnchor(a);
 			SetRect(a.x, a.y, a.sx, a.sy);
 		}
+		_case("zindex"):
+			SetZIndex(std::stoi(value));
 		_case("id"):
 			SetId(value);
 		_case("visible"):

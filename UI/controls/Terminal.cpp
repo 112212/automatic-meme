@@ -36,6 +36,9 @@ void Terminal::tbox_enter(Control* c) {
 const std::string& Terminal::GetText() {
 	return m_command;
 }
+void Terminal::ClearLog() {
+	m_log->SetText("");
+}
 
 void Terminal::WriteLog(const std::string& s) {
 	if(m_log_immediate) {
