@@ -16,7 +16,7 @@ const char* colormap[10] = {
 	"\x1b[35m", // purple
 };
 
-const uint i_colormap[] = {
+const unsigned int i_colormap[] = {
 	0xffffffff,
 	0xffff0000,
 	0xff0000ff,
