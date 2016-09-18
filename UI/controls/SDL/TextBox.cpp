@@ -11,11 +11,9 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_cursor_blink_counter = 0;
 	m_cursor_blinking_rate = 300;
-	m_terminal_max_messages = 100;
 	m_style.background_color = 0;
 	m_max_length = 9999;
 	m_multiline = false;
-	m_terminal_mode = false;
 	m_readonly = false;
 	m_locked = false;
 	m_password = false;
@@ -737,7 +735,6 @@ void TextBox::PutTextAtCursor(std::string text) {
 	spreadColor(m_lines.begin()+m_cursor.y);
 	
 	m_cursor = next_cursor;
-	m_ring_head = m_cursor.y;
 	m_cursor_max_x = m_cursor.x;
 	
 	updatePosition();
