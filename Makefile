@@ -88,9 +88,11 @@ sdl_test: dirs sdl_test_build
 all: dirs
 	@echo choose target 'sfml_test' or 'sdl_test'
 
+libout := libgui.a
+
 sdl_lib_make: defs := -DUSE_SDL
 sdl_lib_make: $(sdl_test_obj)
-	$(CXX)ar r libgui.a $^
+	$(CXX)ar r $(libout) $^
 
 sdl_lib: dirs sdl_lib_make
 
