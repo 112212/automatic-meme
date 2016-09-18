@@ -655,7 +655,6 @@ void GuiEngine::unselectControl() {
 		selected_control->widget->selected_control = 0;
 	}
 	selected_control = 0;
-	active_control = 0;
 }
 
 #ifdef USE_EVENT_QUEUE
