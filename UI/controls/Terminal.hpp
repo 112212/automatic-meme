@@ -37,7 +37,7 @@ class Terminal : public Widget {
 		const std::string& GetLastCommand();
 		
 		const std::string GetText();
-		const std::string SetText(const std::string& str);
+		void SetText(const std::string& str);
 		void ClearLog();
 		void WriteLog(const std::string& s);
 		void AppendLog(const std::string& s);

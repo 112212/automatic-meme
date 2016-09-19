@@ -168,7 +168,10 @@ int main() {
 		Terminal* t = (Terminal*)c;
 		// cout << "command: " << t->GetText() << endl;
 		t->AppendLog("\nhehhe");
+		t->SetText("ROFL");
 	});
+	
+	
 	
 	t.WriteLog("hahahaha");
 	

@@ -41,8 +41,9 @@ const std::string Terminal::GetText() {
 	return m_terminal->GetText();
 }
 
-const std::string Terminal::SetText(const std::string& str) {
+void Terminal::SetText(const std::string& str) {
 	m_terminal->SetText(str);
+	m_terminal->PutCursorAt(Point(9999,0));
 }
 
 void Terminal::ClearLog() {
