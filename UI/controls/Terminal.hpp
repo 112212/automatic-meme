@@ -34,7 +34,8 @@ class Terminal : public Widget {
 		
 		void Render( Point position, bool isSelected );
 		Terminal* Clone();
-		const std::string& GetText();
+		const std::string& GetLastCommand();
+		const std::string GetText();
 		void ClearLog();
 		void WriteLog(const std::string& s);
 		void AppendLog(const std::string& s);

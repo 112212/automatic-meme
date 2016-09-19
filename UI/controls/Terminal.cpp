@@ -25,17 +25,22 @@ void Terminal::tbox_enter(Control* c) {
 	m_command = t->GetRawText();
 	m_history.push_back(m_command);
 	m_history_counter = m_history.size();
-	t->SetText("");
 	m_log_msg = "> " + m_command;
+	t->SetText("");
 	m_log_immediate = false;
 	emitEvent(event::command);
 	m_log_immediate = true;
 	WriteLog(m_log_msg);
 }
 
-const std::string& Terminal::GetText() {
+const std::string& Terminal::GetLastCommand() {
 	return m_command;
 }
+
+const std::string Terminal::GetText() {
+	return m_terminal->GetText();
+}
+
 void Terminal::ClearLog() {
 	m_log->SetText("");
 }
