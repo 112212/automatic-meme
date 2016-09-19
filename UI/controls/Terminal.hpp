@@ -35,11 +35,12 @@ class Terminal : public Widget {
 		void Render( Point position, bool isSelected );
 		Terminal* Clone();
 		const std::string& GetLastCommand();
+		
 		const std::string GetText();
+		const std::string SetText(const std::string& str);
 		void ClearLog();
 		void WriteLog(const std::string& s);
 		void AppendLog(const std::string& s);
-		
 		
 		void OnMouseDown( int x, int y );
 		void OnMouseUp( int x, int y );

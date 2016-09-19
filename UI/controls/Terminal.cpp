@@ -41,6 +41,10 @@ const std::string Terminal::GetText() {
 	return m_terminal->GetText();
 }
 
+const std::string Terminal::SetText(const std::string& str) {
+	m_terminal->SetText(str);
+}
+
 void Terminal::ClearLog() {
 	m_log->SetText("");
 }
