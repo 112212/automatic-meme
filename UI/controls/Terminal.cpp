@@ -25,12 +25,12 @@ void Terminal::tbox_enter(Control* c) {
 	m_command = t->GetRawText();
 	m_history.push_back(m_command);
 	m_history_counter = m_history.size();
-	m_log_msg = "> " + m_command;
+	// m_log_msg = "> " + m_command;
 	t->SetText("");
-	m_log_immediate = false;
+	// m_log_immediate = false;
 	emitEvent(event::command);
-	m_log_immediate = true;
-	WriteLog(m_log_msg);
+	// m_log_immediate = true;
+	// WriteLog(m_log_msg);
 }
 
 const std::string& Terminal::GetLastCommand() {
@@ -60,7 +60,9 @@ void Terminal::WriteLog(const std::string& s) {
 }
 
 void Terminal::AppendLog(const std::string& s) {
-	m_log_msg += s;
+	// m_log_msg += s;
+	m_log->PutCursorAt(Point(9999,9999));
+	m_log->PutTextAtCursor(s+"\n");
 }
 
 void Terminal::OnMouseDown( int x, int y ) {
@@ -70,6 +72,10 @@ void Terminal::OnMouseDown( int x, int y ) {
 void Terminal::OnMouseUp( int x, int y ) {
 	if(m_log->GetSelectedText().size() == 0)
 		m_terminal->Activate();
+}
+
+void Terminal::Focus() {
+	m_terminal->Activate();
 }
 
 void Terminal::Render( Point position, bool isSelected ) {

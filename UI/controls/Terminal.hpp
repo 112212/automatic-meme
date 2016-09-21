@@ -41,6 +41,7 @@ class Terminal : public Widget {
 		void ClearLog();
 		void WriteLog(const std::string& s);
 		void AppendLog(const std::string& s);
+		void Focus();
 		
 		void OnMouseDown( int x, int y );
 		void OnMouseUp( int x, int y );

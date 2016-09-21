@@ -167,10 +167,10 @@ int main() {
 	t.SubscribeEvent( Terminal::event::command, [](Control* c) {
 		Terminal* t = (Terminal*)c;
 		// cout << "command: " << t->GetText() << endl;
-		t->AppendLog("\nhehhe");
+		t->AppendLog("> " + t->GetLastCommand());
 		t->SetText("ROFL");
 	});
-	
+	t.Focus();
 	
 	
 	t.WriteLog("hahahaha");
