@@ -180,7 +180,7 @@ const char sdl_code_conversion_table[] =
 ;
 const char sdl_code_conversion_table_shift[] = 
 "................................" // 32 dots
-" !\"#$%&\"()*+<_>?)!@#$%^&*(::<=>?@" // 33 chars
+" !\"#$%&\"()*+<_>?)!@#$%^&*(::<+>?@" // 33 chars
 ".........................." // 26 dots
 "{|}^_~ABCDEFGHIJKLMNOPQRSTUVWXYZ" // 32 chars
 ;

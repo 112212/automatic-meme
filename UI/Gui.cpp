@@ -563,8 +563,9 @@ void GuiEngine::Focus(Control* control) {
 	if(!control || !control->engine || selected_control == control) return;
 	
 	if(control->widget) {
-		if(selected_control->widget == control->widget) {
+		if(selected_control && selected_control->widget == control->widget) {
 			selected_control = control;
+			active_control = control;
 			control->widget->selected_control = control;
 		} else {
 			Widget* w = control->widget;
@@ -586,9 +587,11 @@ void GuiEngine::Focus(Control* control) {
 				w->cached_absolute_offset = o;
 			}
 			selected_control = control;
+			active_control = control;
 			wgt->selected_control = selected_control;
 		}
 	} else {
+		active_control = control;
 		selected_control = control;
 	}
 }
@@ -599,7 +602,7 @@ void GuiEngine::Activate(Control* control) {
 		active_control->OnGetFocus();
 	}
 	if(!control)
-		active_control = control;
+		active_control = 0;
 }
 
 void GuiEngine::recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove) {

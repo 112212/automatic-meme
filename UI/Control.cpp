@@ -119,12 +119,22 @@ void Control::emitEvent( int EventID ) {
 void Control::Focus() {
 	if(engine) {
 		engine->Focus(this);
+	} else {
+		std::cout << "no focus fail\n";
 	}
 }
 
 void Control::Activate() {
 	if(engine) {
 		engine->Activate(this);
+	}
+}
+
+bool Control::IsSelected() {
+	if(IsWidget()) {
+		return ((Widget*)this)->inSelectedBranch();
+	} else {
+		return engine && engine->GetSelectedControl() == this;
 	}
 }
 
@@ -265,8 +275,10 @@ void Control::OnMWheel( int updown ) {}
 bool Control::customBoundary( int x, int y ) {}
 
 void Control::Unselect() {
-	if(engine && (engine->GetActiveControl() == this || engine->GetSelectedControl() == this))
+	if(engine && (engine->GetSelectedControl() == this)) {
 		engine->UnselectControl();
+		engine->unselectWidget();
+	}
 }
 
 Control* Control::Clone() {

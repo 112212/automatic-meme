@@ -198,6 +198,7 @@ class Control {
 		void SetVisible(bool visible);
 		void SetRenderable(bool visible);
 		void Unselect();
+		bool IsSelected();
 		
 		bool IsVisible() { return visible; }
 		void SetId( std::string id );

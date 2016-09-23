@@ -21,7 +21,7 @@ Terminal::~Terminal() {}
 
 void Terminal::tbox_enter(Control* c) {
 	TextBox* t = static_cast<TextBox*>(c);
-	if(t->GetText().size() <= 0) return;
+	// if(t->GetText().size() <= 0) return;
 	m_command = t->GetRawText();
 	m_history.push_back(m_command);
 	m_history_counter = m_history.size();
@@ -75,6 +75,7 @@ void Terminal::OnMouseUp( int x, int y ) {
 }
 
 void Terminal::Focus() {
+	m_terminal->Focus();
 	m_terminal->Activate();
 }
 
