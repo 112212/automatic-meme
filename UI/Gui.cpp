@@ -647,6 +647,7 @@ void GuiEngine::unselectWidgets() {
 		last_selected_widget = 0;
 		depth = 0;
 	}
+	active_control = 0;
 }
 
 void GuiEngine::unselectControl() {
