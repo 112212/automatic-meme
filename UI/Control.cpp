@@ -19,7 +19,8 @@ interactible(true), visible(true), anchor({{0,0},0}) {
 	m_style.border_color = 0xff333376;
 	m_style.hoverborder_color = 0xff1228D1;
 	m_style.background_color = 0;
-	m_style.font = Fonts::GetFont( "default", 25 );;
+	m_style.font = Fonts::GetFont( "default", 25 );
+	m_image_tex = 0xffffffff;
 }
 
 Control::~Control() {
@@ -252,6 +253,9 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyUp( sf::Event::KeyEvent &sym ) {}
 #elif USE_SDL
 	void Control::Render( Point pos, bool selected ) {
+		if(m_image_tex > 0) {
+			Drawing::TexRect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, m_image_tex);
+		}
 		#ifdef SELECTION_MARK
 			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, selected ? m_style.hoverborder_color : m_style.border_color );
 		#else
@@ -377,6 +381,15 @@ Anchor Anchor::parseRect(std::string s) {
 	return a;
 }
 
+#include <SDL2/SDL_image.h>
+void Control::SetImage(std::string image) {
+	SDL_Surface* surf = IMG_Load(image.c_str());
+	if(surf) {
+		m_image_tex = Drawing::GetTextureFromSurface2(surf,m_image_tex);
+		SDL_FreeSurface(surf);
+	}
+}
+
 void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
 	STYLE_SWITCH {
@@ -389,6 +402,8 @@ void Control::SetStyle(std::string style, std::string value) {
 			SetZIndex(std::stoi(value));
 		_case("id"):
 			SetId(value);
+		_case("interactible"):
+			setInteractible(value == "true");
 		_case("visible"):
 			SetVisible(value=="true");
 		_case("bordercolor"):

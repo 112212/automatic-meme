@@ -17,6 +17,7 @@ namespace Drawing {
 	void VLine(int x1, int y1, int y2, unsigned int color);
 
 	unsigned int GetTextureFromSurface(SDL_Surface* surface, unsigned int textureID);
+	unsigned int GetTextureFromSurface2(SDL_Surface* surface, unsigned int textureID);
 	void DeleteTexture(unsigned int textureID);
 	void TexRect(int x, int y, int w, int h, unsigned int texture);
 

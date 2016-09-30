@@ -439,6 +439,30 @@ namespace Drawing {
 		glBindTexture(GL_TEXTURE_2D, 0);
 		return textureID;
 	}
+	
+	GLuint GetTextureFromSurface2(SDL_Surface* surface, GLuint textureID) {
+		if(!surface) {
+			throw std::string("Error nullptr surface!");
+		}
+
+		if(!glIsTexture(textureID)) {
+			GLuint newTextureID;
+			glGenTextures(1, &newTextureID);
+
+			textureID = newTextureID;
+
+			// std::cout << "generating new texture" << std::endl;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		return textureID;
+	}
 
 	void DeleteTexture(GLuint textureID) {
 		if(glIsTexture(textureID)) {

@@ -115,6 +115,7 @@ class Control {
 	protected:
 		char minor_type;
 		int z_index;
+		int m_image_tex;
 		
 		struct {			
 			int border_color;
@@ -132,6 +133,7 @@ class Control {
 		void sendGuiCommand( int eventId );
 		bool isSelected();
 		bool isActive();
+		
 		
 		void tabToNextControl();
 		void copyStyle(Control* copy_to);
@@ -199,6 +201,8 @@ class Control {
 		void SetRenderable(bool visible);
 		void Unselect();
 		bool IsSelected();
+		
+		void SetImage(std::string image);
 		
 		bool IsVisible() { return visible; }
 		void SetId( std::string id );

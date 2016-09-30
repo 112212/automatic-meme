@@ -33,6 +33,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 	const Rect& rect = this->GetRect();
 	Point r = rect.Offset(pos);
+	Control::Render(pos, selected);
 	
 	Drawing::FillRect(r.x, r.y, rect.w, rect.h, m_style.background_color );
 	
@@ -106,7 +107,7 @@ void TextBox::Render( Point pos, bool selected ) {
 		}
 	}
 	
-	Control::Render(pos, selected);
+	
 }
 
 int TextBox::m_cursor_color = 0xffffffff;
