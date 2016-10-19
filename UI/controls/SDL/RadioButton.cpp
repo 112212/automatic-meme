@@ -91,7 +91,7 @@ void RadioButton::OnMouseUp( int mX, int mY ) {
 	}
 	if(check_collision(mX, mY)) {
 		if( !m_isSelected ) {
-			emitEvent( EVENT_RADIOBUTTON_CHANGE );
+			emitEvent( change );
 			handleRadioButtonChange();
 			m_isSelected = true;
 		}

@@ -61,6 +61,10 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	Control::Render(pos, isSelected);	
 }
 
+void Canvas::RefreshTexture() {
+	maketex = true;
+}
+
 void Canvas::STYLE_FUNC(value) {
 	STYLE_SWITCH {
 		_case("grid"):

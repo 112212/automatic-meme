@@ -3,9 +3,7 @@
 
 #include "../../Control.hpp"
 namespace ng {
-enum {
-	EVENT_RADIOBUTTON_CHANGE
-};
+
 
 #define RADIO_BUTTON_RADIUS 14
 
@@ -29,6 +27,11 @@ class RadioButton : public Control {
 		void OnLostFocus();
 		void STYLE_FUNC(value);
 	public:
+	
+		enum event {
+			change
+		};
+	
 		RadioButton();
 		~RadioButton();
 		
@@ -38,7 +41,7 @@ class RadioButton : public Control {
 		void SetText( std::string text );
 		void SetGroup( int group ) { m_group = group; }
 		void Unselect() { m_isSelected = false; }
-		void Select() { m_isSelected = true; handleRadioButtonChange(); emitEvent( EVENT_RADIOBUTTON_CHANGE ); }
+		void Select() { m_isSelected = true; handleRadioButtonChange(); emitEvent( change ); }
 		int GetGroup() { return m_group; }
 };
 }

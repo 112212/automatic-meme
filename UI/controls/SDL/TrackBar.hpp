@@ -3,9 +3,7 @@
 
 #include "../../Control.hpp"
 namespace ng {
-enum {
-	EVENT_TRACKBAR_CHANGE
-};
+
 
 typedef Point Range;
 
@@ -37,6 +35,11 @@ class TrackBar : public Control {
 		void STYLE_FUNC(value);
 		
 	public:
+	
+		enum event {
+			change
+		};
+	
 		TrackBar();
 		~TrackBar();
 		
