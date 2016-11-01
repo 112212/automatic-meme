@@ -198,7 +198,7 @@ void TrackBar::onChange() {
 		updateTextLocation();
 	}
 	
-	emitEvent( EVENT_TRACKBAR_CHANGE );
+	emitEvent( change );
 }
 
 void TrackBar::updateTextLocation() {

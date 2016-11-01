@@ -3,9 +3,7 @@
 
 #include "../../Control.hpp"
 namespace ng {
-enum {
-	EVENT_CHECKBOX_CHANGE
-};
+
 
 #define CHECKBOX_SIZE 15
 #define CHECKBOX_OKVIR 5
@@ -25,6 +23,10 @@ class CheckBox : public Control {
 		void STYLE_FUNC(value);
 		
 	public:
+		enum event {
+			change
+		};
+
 		CheckBox();
 		~CheckBox();
 		
@@ -34,13 +36,13 @@ class CheckBox : public Control {
 		void OnMouseUp( int mX, int mY );
 		void OnLostFocus();
 		
-		bool IsSelected() { return m_isChecked; }
+		bool IsSelected();
 		void SetText( const char* text );
-		void Uncheck() { m_isChecked = false; }
-		void Check() { m_isChecked = true; emitEvent( EVENT_CHECKBOX_CHANGE ); }
-		void SetValue( bool check ) { m_isChecked = check; }
+		void Uncheck();
+		void Check();
+		void SetValue( bool check );
 		
-		bool IsChecked(){ return m_isChecked; }
+		bool IsChecked() { return m_isChecked; }
 };
 }
 #endif

@@ -11,6 +11,7 @@
 #include <functional>
 #include "common/Colors.hpp"
 #include "common/Fonts.hpp"
+#include "common/common.hpp"
 
 #define SELECTION_MARK
 

@@ -19,7 +19,7 @@ interactible(true), visible(true), anchor({{0,0},0}) {
 	m_style.border_color = 0xff333376;
 	m_style.hoverborder_color = 0xff1228D1;
 	m_style.background_color = 0;
-	m_style.font = Fonts::GetFont( "default", 25 );
+	m_style.font = Fonts::GetFont( "default", 13 );
 	m_image_tex = 0xffffffff;
 }
 

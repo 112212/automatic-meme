@@ -29,7 +29,6 @@ GuiEngine::GuiEngine() : ControlManager(this) {
 }
 
 GuiEngine::GuiEngine(int xsize, int ysize) : GuiEngine() {
-	Drawing::Init();
 	SetSize(xsize, ysize);
 }
 
@@ -49,11 +48,12 @@ void GuiEngine::Clear() {
 	}
 }
 
-void GuiEngine::SetDefaultFont(std::string font) {
-	Fonts::LoadFont(font, "default", 13);
+void GuiEngine::SetDefaultFont(std::string font, int size) {
+	Fonts::LoadFont(font, "default", size);
 }
 
 void GuiEngine::SetSize(int w, int h) {
+	Drawing::Init();
 	Drawing::SetResolution(w, h);
 	ApplyAnchoring();
 }
@@ -679,10 +679,6 @@ void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<vo
 	if(it != map_id_control.end()) {
 		it->second->SubscribeEvent(event_type, callback);
 	}
-}
-
-
-void GuiEngine::OnCleanup() {
 }
 
 // ------------------------------------------------------------------------------

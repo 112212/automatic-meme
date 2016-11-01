@@ -12,15 +12,13 @@ CheckBox::CheckBox() {
 
 
 CheckBox::~CheckBox() {
-	if(m_text)
-		delete[] m_text;
+	if(m_text) delete[] m_text;
 }
 
 void CheckBox::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y + 5;
-	
 	
 	Drawing::Rect(x+CHECKBOX_SHIFT, y, CHECKBOX_SIZE, CHECKBOX_SIZE, Colors::White );
 	
@@ -78,11 +76,12 @@ void CheckBox::OnMouseUp( int mX, int mY ) {
 	}
 	if(check_collision(mX, mY)) {
 		m_isChecked = !m_isChecked;
-		emitEvent( EVENT_CHECKBOX_CHANGE );
+		emitEvent( change );
 	}
 }
 
 void CheckBox::OnLostFocus() {
+	
 }
 
 
@@ -93,8 +92,24 @@ CheckBox* CheckBox::Clone() {
 }
 
 void CheckBox::onPositionChange() {
-	if(m_text)
-		updateText(); // update poziciju teksta :)
+	if(m_text) updateText(); // update poziciju teksta :)
+}
+
+void CheckBox::Check() {
+	m_isChecked = true;
+	emitEvent( change );
+}
+
+void CheckBox::Uncheck() {
+	m_isChecked = false;
+}
+
+void CheckBox::SetValue( bool check ) {
+	 { m_isChecked = check; }
+}
+
+bool CheckBox::IsSelected() {
+	return m_isChecked;
 }
 
 void CheckBox::STYLE_FUNC(value) {

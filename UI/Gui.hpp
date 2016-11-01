@@ -20,7 +20,7 @@
 // ---- GUI configuration ---
 #define SELECTED_CONTROL_ON_TOP
 #define OVERLAPPING_CHECK
-// #define USE_EVENT_QUEUE
+#define USE_EVENT_QUEUE
 // --------------------------
 
 // #include <utility>
@@ -103,7 +103,7 @@ class GuiEngine : public ControlManager
 			void OnEvent(SDL_Event &event);
 		#endif
 		
-		void SetDefaultFont(std::string font);
+		void SetDefaultFont(std::string font, int size=13);
 		void UnselectControl() { unselectControl(); }
 		void AddControl( Control* cntrl );
 		void RemoveControl( Control* control );
@@ -132,9 +132,6 @@ class GuiEngine : public ControlManager
 		void OnMouseUp( int mX, int mY );
 		void OnMouseMove( int mX, int mY );
 		void OnMWheel( int updown );
-		
-		// cleanup
-		void OnCleanup();
 };
 
 }
