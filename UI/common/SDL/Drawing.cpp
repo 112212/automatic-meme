@@ -10,6 +10,9 @@
 namespace ng {
 namespace Drawing {
 
+	
+	
+	
 	// shaders
 	static unsigned int readShader(std::string shaderStr, unsigned int shaderType)
 	{
@@ -119,20 +122,28 @@ namespace Drawing {
 	out vec4 color;\n\
 	\n\
 	uniform sampler2D textureUniform;\n\
+	uniform float max_alpha;\n\
 	\n\
 	void main() {\n\
-		color = texture(textureUniform, inTexCoord);\n\
+		vec4 c = texture(textureUniform, inTexCoord);\n\
+		c.a = min(max_alpha, c.a);\n\
+		color = c;\n\
 	}\n\
 	";
 
 
-	GLuint vao = 0,
+	static GLuint vao = 0,
 		vbo_position = 0,
 		vbo_color = 0,
 		ebo = 0;
 
-	GLuint shader = 0;
-	GLuint shader2 = 0;
+	static GLuint shader = 0;
+	static GLuint shader2 = 0;
+	
+	static float max_alpha = 1.0f;
+	void SetMaxAlpha(float _max_alpha) {
+		max_alpha = _max_alpha;
+	}
 
 	void Init() {
 		static bool inited = false;
@@ -186,7 +197,8 @@ namespace Drawing {
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
 		float cb = (float)((color) & 0xff) / 255.0f;
 		float ca = (float)(color >> 24) / 255.0f;
-
+		ca = std::min<float>(max_alpha, ca);
+		
 		GLfloat colors[] = {
 			 cr, cg, cb, ca,
 			 cr, cg, cb, ca,
@@ -230,7 +242,8 @@ namespace Drawing {
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
 		float cb = (float)((color) & 0xff) / 255.0f;
 		float ca = (float)(color >> 24) / 255.0f;
-
+		ca = std::min<float>(max_alpha, ca);
+		
 		GLfloat colors[] = {
 			 cr, cg, cb, ca,
 			 cr, cg, cb, ca,
@@ -282,7 +295,8 @@ namespace Drawing {
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
 		float cb = (float)((color) & 0xff) / 255.0f;
 		float ca = (float)(color >> 24) / 255.0f;
-
+		ca = std::min<float>(max_alpha, ca);
+		
 		std::vector<glm::vec4> colors;
 		std::vector<glm::vec2> positions;
 
@@ -331,7 +345,8 @@ namespace Drawing {
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
 		float cb = (float)((color) & 0xff) / 255.0f;
 		float ca = (float)(color >> 24) / 255.0f;
-
+		ca = std::min<float>(max_alpha, ca);
+		
 		std::vector<glm::vec4> colors;
 		std::vector<glm::vec2> positions;
 
@@ -361,7 +376,8 @@ namespace Drawing {
 		glUseProgram(0);
 	}
 
-	void TexRect(int x, int y, int w, int h, GLuint texture) {
+	//void TexRect(int x, int y, int w, int h, GLuint texture) {
+	void TexRect(int x, int y, int w, int h, GLuint texture, bool repeat, int texWidth, int texHeight) {
 		glUseProgram(shader2);
 		glBindVertexArray(vao);
 
@@ -378,11 +394,10 @@ namespace Drawing {
 		};
 
 		GLfloat texCoords[] = {
-			1.0f, 1.0f,
-			1.0f, 0.0f,
+			repeat ? (float)w/texWidth : 1.0f, repeat ? (float)h/texHeight : 1.0f,
+			repeat ? (float)w/texWidth : 1.0f, 0.0f,
 			0.0f, 0.0f,
-			0.0f, 1.0f,
-
+			0.0f, repeat ? (float)h/texHeight : 1.0f,
 		};
 
 		GLuint indices[] = {
@@ -406,7 +421,7 @@ namespace Drawing {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniform1i(glGetUniformLocation(shader2, "textureUniform"), 0);
-		
+		glUniform1f(glGetUniformLocation(shader2, "max_alpha"), max_alpha);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -483,7 +498,8 @@ namespace Drawing {
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
 		float cb = (float)((color) & 0xff) / 255.0f;
 		float ca = (float)(color >> 24) / 255.0f;
-
+		ca = std::min<float>(max_alpha, ca);
+		
 		GLfloat positions[] = {
 			x1, -y1,
 			x2, -y2,

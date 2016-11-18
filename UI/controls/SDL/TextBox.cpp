@@ -55,7 +55,7 @@ void TextBox::Render( Point pos, bool selected ) {
 			Point p1,p2;
 			sortPoints(p1,p2);
 			int yy=m_position.y;
-			for( auto i = m_lines.begin()+m_position.y; i != m_lines.end(); i++,j++,yy++) {
+			for( auto i = m_lines.begin()+yy; i != m_lines.end(); i++,j++,yy++) {
 				if(5+j*m_line_height+i->h > rect.h) break;
 				if(yy < p1.y || yy > p2.y) continue;
 				
@@ -66,11 +66,11 @@ void TextBox::Render( Point pos, bool selected ) {
 					int selw1 = Fonts::getTextSize( m_style.font, pd1 );
 					Drawing::FillRect( r.x-sz+5+selw1, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else if(yy == p1.y) {
-					std::string pd = m_lines[yy].text.substr(p1.x, m_password);
+					std::string pd = m_lines[yy].text.substr(p1.x, std::string::npos, m_password);
 					int selw = Fonts::getTextSize( m_style.font, pd );
 					Drawing::FillRect( r.x-sz+5+i->w-selw, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else if(yy == p2.y) {
-					std::string pd = m_lines[yy].text.substr(0,p2.x, m_password);
+					std::string pd = m_lines[yy].text.substr(0, p2.x, m_password);
 					int selw = Fonts::getTextSize( m_style.font, pd );
 					Drawing::FillRect( r.x-sz+5, r.y+5+j*m_line_height, selw, i->h, m_selection_color);
 				} else {

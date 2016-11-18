@@ -27,6 +27,7 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	int y = rect.y + pos.y;
 	
 	Drawing::FillRect(x, y, rect.w, rect.h, m_style.background_color );
+	Control::Render(pos, isSelected);
 	
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
@@ -58,7 +59,7 @@ void Canvas::Render( Point pos, bool isSelected ) {
 		Drawing::TexRect( x, y, m_drawing->w, m_drawing->h, tex_drawing );
 	}
 	
-	Control::Render(pos, isSelected);	
+	
 }
 
 void Canvas::RefreshTexture() {

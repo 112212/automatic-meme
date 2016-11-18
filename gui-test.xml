@@ -105,6 +105,7 @@ fddgdf"></label>
 			<item>777</item>
 		</listbox>
 		
+<!--
 		<trackbar rect="0,0,200,30" id="549" range="1,300" value="150"></trackbar>
 		<trackbar rect="0,0,30,100" id="546" orientation="vertical" slidersize="15" show_number="true"></trackbar>
 		<scrollbar rect="0,0,300,50" id="20" orientation="vertical"></scrollbar>
@@ -112,9 +113,12 @@ fddgdf"></label>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
+-->
 		
 		<anchor pos="L,B">
-			<terminal rect="0,0,400,300" font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" id="term" wordwrap="false" textwrap="true" colors="false" log_colors="true" />
+			<terminal rect="0,0,400,300" font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" id="term" 
+				wordwrap="false" textwrap="true" colors="false" log_colors="true" bordercolor="#00000000"
+				fadeout_speed="200" fadeout_delay="1000" />
 		</anchor>
 <!--
 		<widget rect="0,0,400,300">

@@ -766,12 +766,15 @@ void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<vo
 				#else
 					c->Render(pos, c == selected_control);
 				#endif
+				
+				Drawing::SetMaxAlpha(1.0f);
 			}
 		}
 		
 		#ifdef SELECTED_CONTROL_ON_TOP
 		if(has_selected_control) {
 			selected_control->Render(pos,true);
+			Drawing::SetMaxAlpha(1.0f);
 		}
 		#endif
 	}

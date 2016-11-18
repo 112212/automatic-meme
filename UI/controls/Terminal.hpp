@@ -14,6 +14,15 @@ class Terminal : public Widget {
 		std::vector<std::string> m_history;
 		std::string m_command;
 		std::string m_log_msg;
+		int m_tick;
+		int m_fadeout_tick;
+		int m_fadeout_speed;
+		enum {
+			visible,
+			invisible,
+			fading,
+			appearing
+		} m_state;
 		bool m_log_immediate;
 		void onPositionChange();
 		void tbox_enter(Control *c);

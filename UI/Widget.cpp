@@ -1,7 +1,7 @@
 #include "Widget.hpp"
 #include "Gui.hpp"
 #include <iostream>
-
+#include "common/SDL/Drawing.hpp"
 
 namespace ng {
 Widget::Widget() : ControlManager(this), 
@@ -128,7 +128,7 @@ void Widget::Render( Point position, bool isSelected ) {
 void Widget::RenderWidget( Point position, bool isSelected ) {
 	
 	position = position.Offset(m_rect).Offset(offset);
-	
+	Control::Render(position, isSelected);
 	for(auto &ca : cache) {
 		if(ca.visible) {
 			auto &c = ca.control;
@@ -139,12 +139,14 @@ void Widget::RenderWidget( Point position, bool isSelected ) {
 			#else
 				c->Render( position, c == selected_control);
 			#endif
+			Drawing::SetMaxAlpha(1.0f);
 		}
 	}
 	
 	#ifdef SELECTED_CONTROL_ON_TOP
 	if(selected_control && selected_control->visible) {
 		selected_control->Render(position,true);
+		Drawing::SetMaxAlpha(1.0f);
 	}
 	#endif
 }

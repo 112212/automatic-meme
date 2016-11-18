@@ -21,6 +21,7 @@ interactible(true), visible(true), anchor({{0,0},0}) {
 	m_style.background_color = 0;
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_image_tex = 0xffffffff;
+	m_alpha = 1.0f;
 }
 
 Control::~Control() {
@@ -78,9 +79,6 @@ void Control::SetRenderable(bool visible) {
 	if(this->visible != visible) {
 		this->visible = visible;
 		_updateCache(CacheUpdateFlag::attributes);
-		// if(!visible && isWidget && ((Widget*)this)->isThisWidgetInSelectedBranch() ) {
-			// sendGuiCommand(GUI_UNSELECT_WIDGETS);
-		// }
 	}
 }
 
@@ -253,11 +251,16 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::OnKeyUp( sf::Event::KeyEvent &sym ) {}
 #elif USE_SDL
 	void Control::Render( Point pos, bool selected ) {
+		if(m_alpha != 1.0f) {
+			Drawing::SetMaxAlpha(m_alpha);
+		}
 		if(m_image_tex > 0) {
-			Drawing::TexRect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, m_image_tex);
+			Drawing::TexRect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, 
+				m_image_tex, m_image_repeat, m_image_size.w, m_image_size.h);
 		}
 		#ifdef SELECTION_MARK
-			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, selected ? m_style.hoverborder_color : m_style.border_color );
+			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, 
+				selected ? m_style.hoverborder_color : m_style.border_color );
 		#else
 			Drawing::Rect(m_rect.x+pos.x, m_rect.y+pos.y, m_rect.w, m_rect.h, m_bordercolor );
 		#endif
@@ -293,6 +296,10 @@ Control* Control::Clone() {
 
 void Control::copyStyle(Control* copy_to) {
 	copy_to->m_style = this->m_style;
+}
+
+void Control::SetAlpha(float alpha) {
+	m_alpha = alpha;
 }
 
 
@@ -382,12 +389,17 @@ Anchor Anchor::parseRect(std::string s) {
 }
 
 #include <SDL2/SDL_image.h>
-void Control::SetImage(std::string image) {
+void Control::SetImage(std::string image, bool repeat) {
 	SDL_Surface* surf = IMG_Load(image.c_str());
+	m_image_size.w = surf->w;
+	m_image_size.h = surf->h;
 	if(surf) {
 		m_image_tex = Drawing::GetTextureFromSurface2(surf,m_image_tex);
 		SDL_FreeSurface(surf);
 	}
+	
+	m_image_repeat = repeat;
+	
 }
 
 void Control::SetStyle(std::string style, std::string value) {
@@ -418,6 +430,15 @@ void Control::SetStyle(std::string style, std::string value) {
 				m_style.font = f;
 			}
 			onFontChange();
+		}
+		_case("image"): {
+			size_t pos = value.find(',');
+			if(pos != std::string::npos && value.substr(pos+1) == "repeat") {
+				SetImage(value.substr(0, pos), true);
+			} else {
+				SetImage(value, false);
+			}
+			
 		}
 			break;
 		default:

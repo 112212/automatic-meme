@@ -40,6 +40,10 @@ struct Rect : Point {
 	
 };
 
+struct Size {
+	int w,h;
+};
+
 
 struct Anchor {
 	Point coord;
@@ -116,7 +120,13 @@ class Control {
 	protected:
 		char minor_type;
 		int z_index;
+		
+		// image
 		int m_image_tex;
+		bool m_image_repeat;
+		Size m_image_size;
+		
+		float m_alpha;
 		
 		struct {			
 			int border_color;
@@ -202,8 +212,9 @@ class Control {
 		void SetRenderable(bool visible);
 		void Unselect();
 		bool IsSelected();
+		void SetAlpha(float alpha);
 		
-		void SetImage(std::string image);
+		void SetImage(std::string image, bool repeat = false);
 		
 		bool IsVisible() { return visible; }
 		void SetId( std::string id );

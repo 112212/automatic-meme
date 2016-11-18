@@ -15,6 +15,9 @@ Terminal::Terminal() {
 	setInterceptMask(imask::mouse_up | imask::key_down);
 	m_terminal->SubscribeEvent( TextBox::event::enter, [this](Control *c) { return tbox_enter(c); });
 	m_log_immediate = true;
+	m_state = invisible;
+	m_tick = 0;
+	m_log->SetAlpha(0.0f);
 }
 
 Terminal::~Terminal() {}
@@ -57,12 +60,18 @@ void Terminal::WriteLog(const std::string& s) {
 	} else {
 		m_log_msg = s;
 	}
+	if(m_state == invisible)
+		m_state = appearing;
+	m_tick = 0;
 }
 
 void Terminal::AppendLog(const std::string& s) {
 	// m_log_msg += s;
 	m_log->PutCursorAt(Point(9999,9999));
 	m_log->PutTextAtCursor(s+"\n");
+	if(m_state == invisible)
+		m_state = appearing;
+	m_tick = 0;
 }
 
 void Terminal::OnMouseDown( int x, int y ) {
@@ -72,15 +81,50 @@ void Terminal::OnMouseDown( int x, int y ) {
 void Terminal::OnMouseUp( int x, int y ) {
 	if(m_log->GetSelectedText().size() == 0)
 		m_terminal->Activate();
+	if(m_state == invisible)
+		m_state = appearing;
 }
 
 void Terminal::Focus() {
 	m_terminal->Focus();
 	m_terminal->Activate();
+	if(m_state == invisible) {
+		m_state = appearing;
+	}
 }
 
 void Terminal::Render( Point position, bool isSelected ) {
+	// cout << m_state << endl;
+	if(m_state == visible) {
+		if(IsSelected()) {
+			m_tick = 0;
+		} else if(m_fadeout_tick > 0) {
+			if(++m_tick > m_fadeout_tick) {
+				m_tick = 0;
+				m_state = fading;
+			}
+		}
+	} else if(m_state == fading) {
+		m_log->SetAlpha(1.0f - (float)m_tick / m_fadeout_speed);
+		if(++m_tick > m_fadeout_speed) {
+			m_state = invisible;
+			m_tick = 0;
+		}
+	} else if(m_state == appearing) {
+		// cout << "appear\n";
+		m_log->SetAlpha((float)m_tick / m_fadeout_speed);
+		if(++m_tick > m_fadeout_speed) {
+			m_state = visible;
+			m_tick = 0;
+		}
+	} else if(m_state == invisible && IsSelected()) {
+		m_state = appearing;
+		m_tick = 0;
+	}
+	
+	
 	Control::Render(position, isSelected);
+	
 	RenderWidget(position,isSelected);
 }
 
@@ -105,7 +149,11 @@ void Terminal::STYLE_FUNC(value) {
 				bool val = value == "true";
 				m_log->SetTextWrap(val);
 			}
-			
+			_case("fadeout_speed"):
+				m_fadeout_speed = std::stoi(value);
+			_case("fadeout_delay"):
+				m_fadeout_tick = std::stoi(value);
+			break;
 			default:
 				m_terminal->SetStyle(style, value);
 		}
@@ -113,6 +161,10 @@ void Terminal::STYLE_FUNC(value) {
 }
 
 void Terminal::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
+	if(m_state == invisible) {
+		m_state = appearing;
+	}
+	m_tick = 0;
 	if(sym == SDLK_UP) {
 		if(m_history_counter == 0) 
 			return;
