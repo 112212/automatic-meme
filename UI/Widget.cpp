@@ -94,6 +94,12 @@ void Widget::SetOffset(int x, int y) {
 	offset.y = y;
 }
 
+Control* Widget::Clone() {
+	Widget *w = new Widget;
+	copyStyle(w);
+	return w;
+}
+
 #ifdef USE_SFML
 void Widget::Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected) {
 	RenderWidget(ren,state,isSelected);
@@ -127,8 +133,8 @@ void Widget::Render( Point position, bool isSelected ) {
 }
 void Widget::RenderWidget( Point position, bool isSelected ) {
 	
-	position = position.Offset(m_rect).Offset(offset);
 	Control::Render(position, isSelected);
+	position = position.Offset(m_rect).Offset(offset);
 	for(auto &ca : cache) {
 		if(ca.visible) {
 			auto &c = ca.control;

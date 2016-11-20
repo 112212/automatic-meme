@@ -34,6 +34,7 @@ Label::~Label() {
 
 
 void Label::Render( Point pos, bool isSelected ) {
+	Control::Render(pos, isSelected);
 	const Rect& rect = GetRect();
 	int j=0;
 	int line_height = TTF_FontHeight(m_style.font)-5;
