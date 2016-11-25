@@ -3,6 +3,8 @@
 #include "Control.hpp"
 #include <iostream>
 
+#include <SDL2/SDL_image.h>
+
 #include "Gui.hpp"
 #include "Widget.hpp"
 
@@ -388,7 +390,7 @@ Anchor Anchor::parseRect(std::string s) {
 	return a;
 }
 
-#include <SDL2/SDL_image.h>
+
 void Control::SetImage(std::string image, bool repeat) {
 	SDL_Surface* surf = IMG_Load(image.c_str());
 	m_image_size.w = surf->w;

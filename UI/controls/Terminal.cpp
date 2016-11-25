@@ -60,18 +60,22 @@ void Terminal::WriteLog(const std::string& s) {
 	} else {
 		m_log_msg = s;
 	}
-	if(m_state == invisible)
+	appear();
+}
+
+void Terminal::appear() {
+	if(m_state == invisible) {
 		m_state = appearing;
-	m_tick = 0;
+		m_tick = 0;
+	} else if(m_state == fading) {
+		m_state = appearing;
+	}
 }
 
 void Terminal::AppendLog(const std::string& s) {
-	// m_log_msg += s;
 	m_log->PutCursorAt(Point(9999,9999));
 	m_log->PutTextAtCursor(s+"\n");
-	if(m_state == invisible)
-		m_state = appearing;
-	m_tick = 0;
+	appear();
 }
 
 void Terminal::OnMouseDown( int x, int y ) {
@@ -81,16 +85,13 @@ void Terminal::OnMouseDown( int x, int y ) {
 void Terminal::OnMouseUp( int x, int y ) {
 	if(m_log->GetSelectedText().size() == 0)
 		m_terminal->Activate();
-	if(m_state == invisible)
-		m_state = appearing;
+	appear();
 }
 
 void Terminal::Focus() {
 	m_terminal->Focus();
 	m_terminal->Activate();
-	if(m_state == invisible) {
-		m_state = appearing;
-	}
+	appear();
 }
 
 void Terminal::Render( Point position, bool isSelected ) {
@@ -111,20 +112,17 @@ void Terminal::Render( Point position, bool isSelected ) {
 			m_tick = 0;
 		}
 	} else if(m_state == appearing) {
-		// cout << "appear\n";
 		m_log->SetAlpha((float)m_tick / m_fadeout_speed);
 		if(++m_tick > m_fadeout_speed) {
 			m_state = visible;
 			m_tick = 0;
 		}
 	} else if(m_state == invisible && IsSelected()) {
-		m_state = appearing;
-		m_tick = 0;
+		appear();
 	}
 	
 	
 	Control::Render(position, isSelected);
-	
 	RenderWidget(position,isSelected);
 }
 
@@ -161,10 +159,7 @@ void Terminal::STYLE_FUNC(value) {
 }
 
 void Terminal::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
-	if(m_state == invisible) {
-		m_state = appearing;
-	}
-	m_tick = 0;
+	appear();
 	if(sym == SDLK_UP) {
 		if(m_history_counter == 0) 
 			return;

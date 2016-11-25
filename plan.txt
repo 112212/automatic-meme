@@ -40,7 +40,7 @@ Requirements:
 	+ global control events for specific gui instance
 	; every control has gui engine pointer, control base class has function for sending events
 
-	- themes
+	+ themes
 	; only default values setting in xml + registering new controls to gui
 
 	+ make selected branch be rendered last to be on Top Most
@@ -133,7 +133,7 @@ TODO:
 + 	SDL port of rendering
 + 	SDL port of controls
 + 	control vision (show,hide)
-* 	non-interactible controls
++ 	non-interactible controls
 + 	get control by id, get control by name
 + 	user input redirect to widget
 + 	control selection and deselection optimization in widget
@@ -163,6 +163,7 @@ TODO:
 -	textbox scrollbar
 -	support for unicode in textbox
 +	terminal: arrow up brings text from history
+-	textbox and terminal CTRL and arrows
 
 OpenGL port of controls:
 - 	GridContainer
