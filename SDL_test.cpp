@@ -188,9 +188,9 @@ int main() {
 	bool running = true;
 	while(running) {
 		SDL_Event e;
-		while(1) {
-			lb->SetText("ROFL");
-		}
+		// while(1) {
+			// lb->SetText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+		// }
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_KEYDOWN) {
 				if(e.key.keysym.sym == 'q' || 

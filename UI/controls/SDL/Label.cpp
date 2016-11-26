@@ -65,29 +65,35 @@ void Label::SetText( std::string text ) {
 	for(std::string::size_type pos = 0; pos < m_text.size();) {
 		
 		std::string s = m_text.substr(pos);
+		// if(s.size() == 1) {
+			// cout <<s 
+		// }
 		int max_text = Fonts::getMaxText(m_style.font, s, max_text_width);
 		// cout << "(" << pos << ") doing: " << s << endl;
 		int p = s.find('\n');
 		if(p != s.npos)
 			max_text = p;
+		
 		Colorstring cstr;
 		if(max_text < s.size())
 			cstr = s.substr(0,max_text).c_str();
 		else
 			cstr = s.c_str();
+		
 		SDL_Surface* surf = cstr.get_surface(m_style.font, last_color);
 		int ncol = cstr.GetLastColor();
 		if(ncol > 0)
 			last_color = ncol;
 		if(j < text_lines.size()) {
-			text_lines[j++] = { Drawing::GetTextureFromSurface(surf, text_lines[j].tex), surf->w, surf->h };
+			text_lines[j] = { Drawing::GetTextureFromSurface(surf, text_lines[j].tex), surf->w, surf->h };
+			j++;
 		} else {
 			text_lines.push_back( { Drawing::GetTextureFromSurface(surf, 0), surf->w, surf->h } );
 			j++;
 		}
 		SDL_FreeSurface(surf);
 		
-		// cout << pos << " : " << m_text.size() << " : " << max_text << ", " << s.size() << "\n";
+		// cout << j << " ... " << pos << " : " << m_text.size() << " : " << max_text << ", " << s.size() << "\n";
 		if(max_text < s.size() && max_text != 0)
 			pos += max_text;
 		else {

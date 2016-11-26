@@ -70,6 +70,8 @@ void Terminal::appear() {
 		m_tick = 0;
 	} else if(m_state == fading) {
 		m_state = appearing;
+	} else if(m_state == visible) {
+		m_tick = 0;
 	}
 }
 

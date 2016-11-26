@@ -4,7 +4,7 @@
 #include <list>
 
 namespace ng {
-
+#define NO_TEXTURE 0xffffffff
 TextBox::TextBox() : m_mousedown(false), m_position{0,0}, 
 m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
  {
@@ -116,7 +116,7 @@ void TextBox::Render( Point pos, bool selected ) {
 		if(m_cursor.x >= m_position.x && m_cursor.x <= m_lines[m_cursor.y].text.size()) {
 			std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x, m_password);
 			Drawing::Rect(Fonts::getTextSize( m_style.font, piece )+r.x+5, 
-				(m_cursor.y-m_position.y)*m_line_height+r.y+5, 1, m_line_height, 0xffffffff);
+				(m_cursor.y-m_position.y)*m_line_height+r.y+5, 1, m_line_height, NO_TEXTURE);
 		}
 	}
 	
@@ -125,7 +125,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 }
 
-int TextBox::m_cursor_color = 0xffffffff;
+int TextBox::m_cursor_color = NO_TEXTURE;
 int TextBox::m_selection_color = 0xff808080;
 
 void TextBox::SetText( std::string text ) {
@@ -323,7 +323,7 @@ void TextBox::updatePosition() {
 
 
 void TextBox::updateTexture(TextLine& line, bool new_tex) {
-	if(line.tex == 0xffffffff)
+	if(line.tex == NO_TEXTURE)
 		new_tex = true;
 	
 	SDL_Surface* surf;
@@ -706,7 +706,7 @@ void TextBox::PutTextAtCursor(std::string text) {
 		if(m_textwrap && m_multiline) {
 			lines = wrap_lines(lines);
 			int lc = m_lines[m_cursor.y].last_color;
-			m_lines[m_cursor.y] = lines.front();
+			m_lines[m_cursor.y].text = lines.front().text;
 			m_lines[m_cursor.y].last_color = lc;
 		} else {
 			m_lines[m_cursor.y].text = lines.front().text;
@@ -806,7 +806,7 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 			
 			if(last_pos != 0) {
 				nl.wrap = true;
-				nl.tex = 0xffffffff;
+				nl.tex = NO_TEXTURE;
 			}
 			
 			new_lines.push_back(nl);
@@ -897,7 +897,7 @@ void TextBox::SetTextWrap(bool wrap) {
 					max_text = s;
 				}
 				TextLine nl;
-				nl.tex = tex < m_lines.size() ? m_lines[tex++].tex : 0xffffffff;
+				nl.tex = tex < m_lines.size() ? m_lines[tex++].tex : NO_TEXTURE;
 				nl.text = line.text.csubstr(last_pos, max_text);
 				nl.wrap = last_pos != 0;
 				new_lines.push_back(nl);
@@ -913,7 +913,7 @@ void TextBox::SetTextWrap(bool wrap) {
 				if(!nl.wrap) {
 					new_lines.push_back(nl);
 				}
-				nl.tex = tex < m_lines.size() ? m_lines[tex++].tex : 0xffffffff;
+				nl.tex = tex < m_lines.size() ? m_lines[tex++].tex : NO_TEXTURE;
 				nl.text = line.text;
 				nl.wrap = false;
 			} else {

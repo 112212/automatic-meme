@@ -442,15 +442,11 @@ namespace Drawing {
 
 			textureID = newTextureID;
 
-			// std::cout << "generating new texture" << std::endl;
+			// std::cout << "generating new texture " << textureID << std::endl;
 		} else {
-			// glBindTexture(GL_TEXTURE_2D, 0);
-			GLuint newTextureID = textureID;
-			glDeleteTextures(1, &textureID);
-			textureID = newTextureID;
-			glGenTextures(1, &textureID);
+			// std::cout << "reusing " << textureID << std::endl;
 		}
-
+		
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
