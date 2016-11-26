@@ -443,6 +443,12 @@ namespace Drawing {
 			textureID = newTextureID;
 
 			// std::cout << "generating new texture" << std::endl;
+		} else {
+			// glBindTexture(GL_TEXTURE_2D, 0);
+			GLuint newTextureID = textureID;
+			glDeleteTextures(1, &textureID);
+			textureID = newTextureID;
+			glGenTextures(1, &textureID);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -467,6 +473,8 @@ namespace Drawing {
 			textureID = newTextureID;
 
 			// std::cout << "generating new texture" << std::endl;
+		} else {
+			glDeleteTextures(1, &textureID);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, textureID);

@@ -1,4 +1,5 @@
 #include "Terminal.hpp"
+#include "../Gui.hpp"
 namespace ng {
 
 Terminal::Terminal() {
@@ -185,10 +186,14 @@ void Terminal::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	}
 }
 
-void Terminal::onFontChange() {}
+void Terminal::onFontChange() {
+	onPositionChange();
+	if(getEngine())
+		getEngine()->ApplyAnchoring();
+}
 
 void Terminal::onPositionChange() {
-	int h = TTF_FontHeight(m_style.font) + 5;
+	int h = TTF_FontHeight(m_style.font) + 7;
 	m_log->SetRect(0,0,GetRect().w, GetRect().h-h);
 	m_terminal->SetRect(0,GetRect().h-h,GetRect().w,h);
 	

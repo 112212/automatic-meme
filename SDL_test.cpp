@@ -172,6 +172,7 @@ int main() {
 	});
 	t.Focus();
 	
+	Label* lb = (Label*)gui.GetControlById("label");
 	
 	t.WriteLog("hahahaha");
 	
@@ -187,6 +188,9 @@ int main() {
 	bool running = true;
 	while(running) {
 		SDL_Event e;
+		while(1) {
+			lb->SetText("ROFL");
+		}
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_KEYDOWN) {
 				if(e.key.keysym.sym == 'q' || 

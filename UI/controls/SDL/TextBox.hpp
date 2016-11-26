@@ -4,6 +4,8 @@
 #include "../../Control.hpp"
 #include "../../common/SDL/Drawing.hpp"
 #include "../../common/Colorstring.hpp"
+#include "../ScrollBar.hpp"
+
 #include <vector>
 namespace ng {
 
@@ -26,6 +28,8 @@ class TextBox : public Control {
 		Point m_position;
 		// anchor for selection (no selection if x,y = -1,-1)
 		Point m_anchor;
+		
+		ScrollBar *m_scrollbar;
 		
 		Point m_cursor;
 		int m_line_max;

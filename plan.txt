@@ -160,19 +160,41 @@ TODO:
 +	recursive theme (define theme for textboxes inside terminal for example)
 +	textbox password masking (asteriks)
 -	effects widget (supporting effects like fadeout or blinking or whatever ...)
--	textbox scrollbar
+-	textbox scrollbar *********
 -	support for unicode in textbox
 +	terminal: arrow up brings text from history
--	textbox and terminal CTRL and arrows
++	textbox and terminal CTRL + left(right) arrow for jumping over words
 
 OpenGL port of controls:
 - 	GridContainer
 - 	TabContainer
 
 TO FIX:
+	Anchoring
 
+---------------------------
+New Features in new version
+---------------------------
+; polygonal dimensions
+	SetPolygon() instead of SetRect ...
+	sizeVertical()
+	sizeHorizontal()
+	sizeLine()
+	getAABB()
+	
+; effects
+	LoopEffect("effect name", {"effect params"})
+	StopEffect()
+	PlayEffect("effect name", {"effect params"}, std::function call_after_effect_finished)
+	; shader postprocessing effect	
+	; animated image
 
-Comments:
-add fadeout text + duration, not that important but could be great to show some label for some time, then let it fadeout - SetVisible(false), 
-or probably the control could remove itself on fading out, so we use it for some tooltips
+; textbox scrollbar
 
+; draggable
+
+; widget resizer
+
+; tooltips
+
+---------------------------

@@ -23,7 +23,7 @@ defs :=
 
 build := build
 
-flags := -g -O2 -Wfatal-errors
+flags := -g -Wfatal-errors
 inc := -Ilib
 
 CXX := 

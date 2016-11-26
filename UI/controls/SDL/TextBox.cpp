@@ -4,8 +4,10 @@
 #include <list>
 
 namespace ng {
+
 TextBox::TextBox() : m_mousedown(false), m_position{0,0}, 
-m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
+m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
+ {
 	setType( TYPE_TEXTBOX );
 	initEventVector(event::max_events);
 	m_style.font = Fonts::GetFont( "default", 13 );
@@ -22,12 +24,23 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
 	m_color_input = false;
 	m_placeholder.text = "";
 	m_colors = true;
+	m_scrollbar=new ScrollBar();
+	m_scrollbar->SetRect( 0, 0, 30, GetRect().h );
 	SetText("");
 }
 
 TextBox::~TextBox() {
 	
 }
+
+/*
+// scrollbar to implement
+void OnMouseMove( int mX, int mY, bool mouseState );
+	void OnMouseDown( int mX, int mY );
+	void OnMouseUp( int mX, int mY );
+	void OnLostFocus();
+	void OnMWheel( int updown );
+*/
 
 void TextBox::Render( Point pos, bool selected ) {
 	
@@ -107,6 +120,8 @@ void TextBox::Render( Point pos, bool selected ) {
 		}
 	}
 	
+	// TODO: position
+	m_scrollbar->Render(pos, selected);
 	
 }
 
@@ -209,7 +224,6 @@ void TextBox::onPositionChange() {
 }
 
 void TextBox::OnGetFocus() {
-	// SDL_SetCursor( Cursors::textCursor );
 	m_cursor_blink_counter = m_cursor_blinking_rate;
 }
 
@@ -313,18 +327,12 @@ void TextBox::updateTexture(TextLine& line, bool new_tex) {
 		new_tex = true;
 	
 	SDL_Surface* surf;
-	
-	// surf = TTF_RenderUTF8_Blended( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
 	surf = line.text.get_surface(m_style.font, line.last_color, m_password);
 	
-	// SDL_Surface* surf = TTF_RenderUTF8_Solid( m_style.font, line.text.size() > 0 ? line.text.c_str() : " ", {255,255,255} );
-	// SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-    // SDL_BlitSurface(surf, 0, tempSurface, 0);
 	line.tex = Drawing::GetTextureFromSurface(surf, new_tex ? 0 : line.tex);
 	line.w = surf->w;
 	line.h = surf->h;
 	SDL_FreeSurface(surf);
-	// SDL_FreeSurface(tempSurface);
 }
 
 void TextBox::backspace() {
@@ -380,6 +388,8 @@ void TextBox::backspace() {
 	}
 }
 
+
+
 void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	
 	int val = sym;
@@ -423,7 +433,12 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_anchor = m_cursor;
 			}
 			if(m_cursor.x > 0) {
-				m_cursor.x --;
+				if(mod & KMOD_LCTRL) {
+					auto &line = m_lines[m_cursor.y].text;
+					while(--m_cursor.x > 0 && !( !isspace(line[m_cursor.x]) && isspace(line[m_cursor.x-1])) );
+				} else {
+					m_cursor.x --;
+				}
 				m_cursor_max_x = m_cursor.x;
 				updatePosition();
 			}
@@ -437,7 +452,14 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			}
 			
 			if(m_cursor.x < m_lines[m_cursor.y].text.size()) {
-				m_cursor.x ++;
+				if(mod & KMOD_LCTRL) {
+					auto &line = m_lines[m_cursor.y].text;
+					while(++m_cursor.x < line.size() && !(m_cursor.x-1 >= 0 && 
+						!isspace(line[m_cursor.x-1]) && isspace(line[m_cursor.x])));
+				} else {
+					m_cursor.x ++;
+				}
+				
 				m_cursor_max_x = m_cursor.x;
 				updatePosition();
 			}
@@ -450,7 +472,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_anchor = m_cursor;
 			}
 			if(m_cursor.y > 0) {
-				m_cursor.y--;
+				m_cursor.y --;
 				m_cursor.x = std::min<int>(m_lines[m_cursor.y].text.size(), m_cursor_max_x);
 				updatePosition();
 			}
@@ -463,7 +485,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_anchor = m_cursor;
 			}
 			if(m_cursor.y < m_lines.size()-1) {
-				m_cursor.y++;
+				m_cursor.y ++;
 				m_cursor.x = std::min<int>(m_lines[m_cursor.y].text.size(), m_cursor_max_x);
 				updatePosition();
 			}
