@@ -25,7 +25,7 @@ void ListBox::Render( Point pos, bool isSelected ) {
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
 	
-	
+	Control::Render(pos,isSelected);
 	Drawing::FillRect(  x, y, rect.w, rect.h, m_style.background_color );
 	
 	// draw items
@@ -43,7 +43,7 @@ void ListBox::Render( Point pos, bool isSelected ) {
 		m_scrollbar->Render( pos, false );
 	}
 	
-	Control::Render(pos,isSelected);
+	
 }
 
 void ListBox::AddItem( std::string item ) {

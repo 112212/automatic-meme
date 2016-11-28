@@ -164,6 +164,8 @@ TODO:
 -	support for unicode in textbox
 +	terminal: arrow up brings text from history
 +	textbox and terminal CTRL + left(right) arrow for jumping over words
+-	label rotate
+-	label textalign (left, right, center)
 
 OpenGL port of controls:
 - 	GridContainer
@@ -175,26 +177,51 @@ TO FIX:
 ---------------------------
 New Features in new version
 ---------------------------
+
+; config
+<config>
+	<option name="tooltip_delay" value="10" />
+	<option name="use_stencil" value="true" />
+</config>
+
 ; polygonal dimensions
 	SetPolygon() instead of SetRect ...
+	xml: polygon="" instead of rect=""
 	sizeVertical()
 	sizeHorizontal()
 	sizeLine()
 	getAABB()
+	isConvex()
 	
 ; effects
 	LoopEffect("effect name", {"effect params"})
 	StopEffect()
+	; playing effect or animation
 	PlayEffect("effect name", {"effect params"}, std::function call_after_effect_finished)
 	; shader postprocessing effect	
 	; animated image
+	effect="effect1 {speed=10,offset=10},
+			effect2, effect3, ..."
 
+;;; first ------------
 ; textbox scrollbar
 
 ; draggable
+	control may allow dragging and use OnDrag function
 
 ; widget resizer
+	widget resizer control to put anywhere in widget
 
 ; tooltips
+	tooltip="whatever text"
+
+; rotate on all controls
+
+; grid container
+
+; tab container
+
+; all events are now global (not namespaced)
+ng::event::* and not ng::TextBox::event::*
 
 ---------------------------

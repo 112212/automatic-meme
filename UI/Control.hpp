@@ -119,13 +119,14 @@ class Control {
 		void _updateCache(CacheUpdateFlag flag);
 	protected:
 		char minor_type;
+		bool m_image_repeat;
+		bool m_draggable;
+		
 		int z_index;
 		
 		// image
 		int m_image_tex;
-		bool m_image_repeat;
 		Size m_image_size;
-		
 		float m_alpha;
 		
 		struct {			

@@ -21,7 +21,7 @@
 	<anchor pos="rL+50,T+100">
 		
 		<button id="2" rect="0,0,100,50" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,30" value="test" backgroundcolor="#ff202080"/>
-		<container id="100" rect="0,0,200,200" backgroundcolor="#ff200000" id="w1">
+		<container id="100" rect="0,0,200,200" backgroundcolor="#ff000000" id="w1">
 			<container id="20" rect="0,0,150,150">
 				<button id="5" rect="0,0,200,50" value="1"/>
 				<button id="55" rect="0,20,200,50" value="3"></button>

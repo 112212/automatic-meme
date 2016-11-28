@@ -40,8 +40,6 @@ class ListBox : public Control {
 		int m_max_items;
 		int m_last_scroll;
 		
-		// koliko moze da se prosiri
-		
 		int m_selected_index;
 		
 		int m_scroll_pos;

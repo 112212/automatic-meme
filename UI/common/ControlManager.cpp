@@ -270,8 +270,11 @@ void ControlManager::RegisterControl(std::string tag, std::function<Control*()> 
 	XmlLoader::RegisterControl(tag, control_constructor);
 }
 
-Control* ControlManager::CreateControl(std::string tag) {
-	return XmlLoader::createControlByXmlTag(tag.c_str());
+Control* ControlManager::CreateControl(std::string tag, std::string id) {
+	Control* ctrl = XmlLoader::createControlByXmlTag(tag.c_str());
+	if(ctrl)
+		ctrl->SetId(id);
+	return ctrl;
 }
 
 } // namespace ng

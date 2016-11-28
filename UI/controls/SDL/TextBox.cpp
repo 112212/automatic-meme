@@ -25,7 +25,10 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
 	m_placeholder.text = "";
 	m_colors = true;
 	m_scrollbar=new ScrollBar();
-	m_scrollbar->SetRect( 0, 0, 30, GetRect().h );
+	// m_scrollbar->SetRect( 0, 0, 30, GetRect().h );
+	
+	m_scrollbar->SetVertical(true);
+	
 	SetText("");
 }
 
@@ -47,8 +50,6 @@ void TextBox::Render( Point pos, bool selected ) {
 	const Rect& rect = this->GetRect();
 	Point r = rect.Offset(pos);
 	Control::Render(pos, selected);
-	
-	Drawing::FillRect(r.x, r.y, rect.w, rect.h, m_style.background_color );
 	
 	int w,h;
 	Drawing::GetResolution(w,h);
@@ -122,7 +123,6 @@ void TextBox::Render( Point pos, bool selected ) {
 	
 	// TODO: position
 	m_scrollbar->Render(pos, selected);
-	
 }
 
 int TextBox::m_cursor_color = NO_TEXTURE;
@@ -218,6 +218,9 @@ void TextBox::onFontChange() {
 
 void TextBox::onPositionChange() {
 	onFontChange();
+	const Rect& r = this->GetRect();
+	int w = 30;
+	m_scrollbar->SetRect(r.w - w, 0, w, r.h);
 	for(TextLine& t : m_lines) {
 		updateTexture(t);
 	}

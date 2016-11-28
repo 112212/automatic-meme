@@ -43,7 +43,7 @@ class ControlManager {
 		inline const std::vector<Control*>& GetControls() { return controls; }
 		void ApplyAnchoring();
 		static void RegisterControl(std::string tag, std::function<Control*()> control_constructor);
-		static Control* CreateControl(std::string tag);
+		static Control* CreateControl(std::string tag, std::string id="");
 		void LoadXml(std::string xml_filename);
 		void LoadXml(std::istream& stream);
 		

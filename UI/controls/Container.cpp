@@ -138,6 +138,8 @@ Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
 #endif
 
 void Container::Render( Point pos, bool isSelected ) {
+	// Control::Render(pos,isSelected);
+	RenderWidget(pos, isSelected);	
 	const Rect& r = GetRect();
 	int x = r.x + pos.x;
 	int y = r.y + pos.y;
@@ -153,8 +155,6 @@ void Container::Render( Point pos, bool isSelected ) {
 	if(overflow_v) {
 		w -= thickness + 1;
 	}
-	
-	
 	
 #ifdef CLIP_METHOD_SCISSOR
 	Rect clipRect = {x,y,w,r.h};
@@ -213,7 +213,8 @@ void Container::Render( Point pos, bool isSelected ) {
 	glStencilMask(0);
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 #endif
-	Drawing::FillRect(x, y, w, h, background_color);
+	// Drawing::FillRect(x, y, w, h, background_color);
+	// Control::Render(pos,isSelected);
 	innerWidget->Render(Point(x,y),isSelected);
 	
 	
@@ -243,9 +244,6 @@ void Container::Render( Point pos, bool isSelected ) {
 	}
 #endif
 	
-	
-	RenderWidget(pos, isSelected);
-	Control::Render(pos,isSelected);
 }
 
 void Container::onPositionChange() {
