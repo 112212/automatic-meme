@@ -395,7 +395,6 @@ void GuiEngine::ShowTooltip(Control* control) {
 	Point p = cursor.GetCursor();
 	Point g = control->GetOffset();
 	if(!control->check_collision(p.x-g.x, p.y-g.y)) return;
-	// TODO: show tooltip, hide it on lost focus event or something
 	if(!m_tooltip) {
 		m_tooltip = (Label*)CreateControl("tooltip", "tooltip");
 	}
@@ -418,7 +417,7 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 	HideTooltip();
 	if(selected_control) {
 		if( m_mouse_down || m_focus_lock ) {
-			if(m_mouse_down && active_control->IsDraggable()) {
+			if(m_mouse_down && selected_control->IsDraggable()) {
 				Point pt = selected_control->GetGlobalPosition();
 				drag_offset = Point(mX - pt.x - drag_start_diff.x, mY - pt.y - drag_start_diff.y);
 			}

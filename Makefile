@@ -1,5 +1,7 @@
 
-
+all: dirs
+	@echo choose target 'sdl_test' or 'sfml_test' which doesn\'t work yet
+	
 build := build
 
 cpp = \
@@ -97,8 +99,7 @@ sdl_lib: dirs sdl_lib_make
 
 ###########################
 
-all: dirs
-	@echo choose target 'sfml_test' or 'sdl_test'
+
 	
 clean:
 	@echo project cleaned

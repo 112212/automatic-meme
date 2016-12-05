@@ -90,11 +90,11 @@ test3^g
 hehehehe
 fddgdf" onHoverImage=""></label>
 		<widget rect="0,0,100,200">
-			<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
-			<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>
-			<radiobutton rect="0,120,100,30" value="cool"></radiobutton>
-			<widgetmover rect="0,0,100,20" zindex="50"></widgetmover>
-			<widgetresizer rect="0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
+			<radiobutton rect="0,50,100,30" value="haha"></radiobutton>
+			<radiobutton rect="0,90,100,30" value="hehe"></radiobutton>
+			<radiobutton rect="0,140,100,30" value="cool"></radiobutton>
+			<widgetmover rect="r0,0,100,20" zindex="50"></widgetmover>
+			<widgetresizer rect="r0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
 		</widget>
 		
 		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4">

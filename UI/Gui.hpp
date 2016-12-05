@@ -1,5 +1,5 @@
-#ifndef _H_GUI_
-#define _H_GUI_
+#ifndef _GUI_HPP_
+#define _GUI_HPP_
 
 #include <vector>
 #include <queue>
@@ -23,9 +23,14 @@
 #include "controls/Label.hpp"
 
 // ---- GUI configuration ---
-#define SELECTED_CONTROL_ON_TOP
-#define OVERLAPPING_CHECK
-#define USE_EVENT_QUEUE
+#ifndef NO_SELECTED_CONTROL_ON_TOP
+	#define SELECTED_CONTROL_ON_TOP
+#endif
+
+#ifndef NO_OVERLAPPING_CHECK
+	#define OVERLAPPING_CHECK
+#endif
+// #define USE_EVENT_QUEUE
 // --------------------------
 
 
