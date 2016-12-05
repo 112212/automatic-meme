@@ -1,5 +1,5 @@
 #ifdef USE_SDL
-#include "../common/SDL/Drawing.hpp"
+#include "../../common/SDL/Drawing.hpp"
 #endif
 #include "ScrollBar.hpp"
 
@@ -9,8 +9,7 @@
 namespace ng {
 
 ScrollBar::ScrollBar() {
-	setType( TYPE_SCROLLBAR );
-	initEventVector(1);
+	setType( "scrollbar" );
 	m_slider_pix = 0;
 	m_slider_size = 5;
 	m_is_vertical = false;
@@ -22,47 +21,16 @@ ScrollBar::ScrollBar() {
 	m_mwheel_const = 4;
 	m_slider_click_offset = 0;
 	// m_bordercolor = 0xffffffff;
-		
-	#ifdef USE_SFML
-		m_outline.setFillColor( sf::Color::Transparent );
-		m_outline.setOutlineColor( sf::Color::White );
-		m_outline.setOutlineThickness( 1 );
-	#elif USE_SDL
-	#endif
 }
 
 ScrollBar::~ScrollBar() {
 }
-
-#ifdef USE_SFML
-	void ScrollBar::Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected ) {
-		ren.draw(m_slider, state);
-		ren.draw(m_outline, state);
-	}
-	void ScrollBar::updateSlider() {
-		if( m_is_vertical ) {
-			m_slider.setSize( sf::Vector2f( m_rect.w, m_slider_size ) );
-			m_slider.setPosition( m_rect.x, m_rect.y + m_slider_pix );
-		} else {
-			m_slider.setSize( sf::Vector2f( m_slider_size, m_rect.h ) );
-			m_slider.setPosition( m_rect.x + m_slider_pix, m_rect.y );
-		}
-	}
-	void ScrollBar::onPositionChange() {
-		m_outline.setPosition( m_rect.x, m_rect.y );
-		m_outline.setSize( sf::Vector2f( m_rect.w, m_rect.h ) );
-		updateSlider();
-	}
-	
-#elif USE_SDL
 
 void ScrollBar::Render( Point pos, bool isSelected ) {
 	const Rect& r = GetRect();
 	Drawing::FillRect(m_slider.x+pos.x, m_slider.y+pos.y, m_slider.w, m_slider.h, Colors::White);
 	Control::Render(pos, isSelected);
 }
-
-#endif
 
 void ScrollBar::STYLE_FUNC(value) {
 	STYLE_SWITCH {
@@ -95,8 +63,6 @@ void ScrollBar::STYLE_FUNC(value) {
 	}
 }
 
-
-
 void ScrollBar::updateSlider() {
 	const Rect& r = GetRect();
 	if( m_is_vertical ) {
@@ -115,8 +81,8 @@ void ScrollBar::OnMouseUp( int mX, int mY ) {
 }
 
 ScrollBar* ScrollBar::Clone() {
-	ScrollBar* s = new ScrollBar;
-	*s = *this;
+	ScrollBar* s = new ScrollBar();
+	copyStyle(s);
 	return s;
 }
 
@@ -194,11 +160,10 @@ void ScrollBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 }
 
 float ScrollBar::GetPercentageValue() {
-	return (m_slider_pix*100.0f) / (float)((m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size);
+	return (m_slider_pix) / (float)((m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size);
 }
 
 int ScrollBar::getValue() {
-	// f( m_slider_pix )
 	return (m_slider_pix*(m_max_value-m_min_value)) / ((m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size) + m_min_value;
 }
 
@@ -213,7 +178,7 @@ void ScrollBar::OnLostFocus() {
 void ScrollBar::onChange() {
 	m_value = getValue();
 	updateSlider();
-	emitEvent( EVENT_SCROLLBAR_CHANGE );
+	emitEvent( event::change );
 }
 
 Rect ScrollBar::getSliderRect() {
@@ -237,7 +202,7 @@ void ScrollBar::OnMWheel( int updown ) {
 	m_value = std::max<int>(m_min_value, std::min<int>(m_max_value, m_value - updown * m_mwheel_const));
 	m_slider_pix = ((m_value-m_min_value) * ( (m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size) ) / (m_max_value-m_min_value);
 	updateSlider();
-	emitEvent( EVENT_SCROLLBAR_CHANGE );
+	emitEvent( event::change );
 }
 
 void ScrollBar::setValue( int value ) {

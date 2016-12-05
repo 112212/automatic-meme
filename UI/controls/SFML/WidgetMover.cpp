@@ -3,8 +3,8 @@
 
 namespace ng {
 WidgetMover::WidgetMover() {
-	setType(TYPE_CONTROL);
 }
+
 void WidgetMover::OnMouseMove( int mX, int mY, bool mouseState ) {
 	if(mouseState) {
 		const Rect &r = getWidget()->GetRect();

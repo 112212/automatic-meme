@@ -2,22 +2,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "UI/Gui.hpp"
-#include "UI/Control.hpp"
-#include "UI/controls/Button.hpp"
-#include "UI/controls/ScrollBar.hpp"
-#include "UI/controls/Container.hpp"
-#include "UI/controls/ComboBox.hpp"
-#include "UI/controls/GridContainer.hpp"
-#include "UI/controls/TextBox.hpp"
-#include "UI/controls/RadioButton.hpp"
-#include "UI/controls/ListBox.hpp"
-#include "UI/controls/Label.hpp"
-#include "UI/controls/TrackBar.hpp"
-#include "UI/controls/Canvas.hpp"
-#include "UI/controls/CheckBox.hpp"
-#include "UI/controls/WidgetMover.hpp"
-#include "UI/controls/Terminal.hpp"
-#include "UI/controls/Form.hpp"
+
+#include "UI/common/Cursor.hpp"
+#include "UI/AllControls.hpp"
 
 #include "UI/common/SDL/Drawing.hpp"
 
@@ -82,7 +69,7 @@ int main() {
 	
 	glewExperimental = GL_TRUE; 
     glewInit();
-	
+	// Cursor::InitCursors();
     
 	// SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
 	// if(!ren) {
@@ -101,8 +88,9 @@ int main() {
 	// gui.SetSize(sizeX, sizeY);
 	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf");
 	gui.LoadXml("gui-test.xml");
+	gui.SetTooltipDelay(0.5);
 	
-	gui.SubscribeEvent("form", Form::event::submit, [](Control* c) {
+	gui.OnEvent("form", event::submit, [](Control* c) {
 		cout << "submit\n";
 	});
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
@@ -164,7 +152,7 @@ int main() {
 	// w1->LoadXml(s);
 	
 	Terminal &t = *((Terminal*)gui.GetControlById("term"));
-	t.SubscribeEvent( Terminal::event::command, [](Control* c) {
+	t.SubscribeEvent( event::enter, [](Control* c) {
 		Terminal* t = (Terminal*)c;
 		// cout << "command: " << t->GetText() << endl;
 		t->AppendLog("> " + t->GetLastCommand());
@@ -174,11 +162,17 @@ int main() {
 	
 	Label* lb = (Label*)gui.GetControlById("label");
 	
+	gui.OnEvent("combo", event::drag, [&](Control* c) {
+		Widget* wgt = gui.GetSelectedWidget();
+		cout << "Combo dragged onto: " << wgt->GetType() << " (" << wgt->GetId() << ")\n";
+	});
+	
 	t.WriteLog("hahahaha");
 	
 	TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
-	tb->SetWordWrap(true);
-	tb->SetTextWrap(true);
+	// tb->SetWordWrap(true);
+	// tb->SetTextWrap(true);
+	
 	// tb->SetTextWrap(false);
 		
 	gui.ApplyAnchoring();
@@ -188,16 +182,14 @@ int main() {
 	bool running = true;
 	while(running) {
 		SDL_Event e;
-		// while(1) {
-			// lb->SetText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-		// }
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_KEYDOWN) {
 				if(e.key.keysym.sym == 'q' || 
 					e.key.keysym.sym == SDLK_ESCAPE) {
 					running = false;
 				}
-			}
+			} else if(e.type == SDL_QUIT)
+				running = false;
 			gui.OnEvent(e);
 		}
 		Drawing::GetResolution(sizeX, sizeY);

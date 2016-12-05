@@ -9,6 +9,7 @@
 
 namespace ng {
 Container::Container() {
+	setType( "dialog" );
 	m_is_mouseDown = false;
 	#ifdef USE_SFML
 		m_rectShape.setFillColor( sf::Color::Black );
@@ -21,7 +22,7 @@ Container::Container() {
 	m_scroll_h = m_scroll_v = 0;
 	max_v = max_h = 0;
 	m_tx = m_ty = 0;
-	innerWidget = new Widget;
+	innerWidget = new Widget();
 	innerWidget->SetRenderable(false);
 	background_color = 0;
 	Widget::AddControl(innerWidget);

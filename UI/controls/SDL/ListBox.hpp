@@ -5,13 +5,6 @@
 #include "../ScrollBar.hpp"
 #include "TextBox.hpp"
 namespace ng {
-enum {
-	EVENT_LISTBOX_CLICK,
-	EVENT_LISTBOX_LOCK,
-	EVENT_LISTBOX_UNLOCK,
-	EVENT_LISTBOX_CHANGE
-};
-
 
 class ListBox : public Control {
 	private:

@@ -6,7 +6,7 @@
 namespace ng {
 Widget::Widget() : ControlManager(this), 
 	selected_control(0), intercept_mask(0) {
-	setType(TYPE_WIDGET);
+	setType( "widget" );
 	isWidget = true;
 	offset = {0,0};
 }

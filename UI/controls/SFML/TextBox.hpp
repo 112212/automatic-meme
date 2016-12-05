@@ -2,64 +2,109 @@
 #define NG_TEXTBOX_HPP
 
 #include "../../Control.hpp"
+#include "../../common/SDL/Drawing.hpp"
+#include "../../common/Colorstring.hpp"
+#include "../ScrollBar.hpp"
 
-enum {
-	EVENT_TEXTBOX_CHANGE,
-	EVENT_TEXTBOX_ENTER,
-};
+#include <vector>
+namespace ng {
 
 class TextBox : public Control {
 	private:
-	
-		sf::Text m_text;
-		sf::RectangleShape m_cursor;
-		sf::RectangleShape m_rectShape;
-		sf::RectangleShape m_selection;
-		sf::Font m_font;
+		struct TextLine {
+			unsigned int tex;
+			int w,h;
+			// std::string text;
+			Colorstring text;
+			bool wrap;
+			int last_color;
+			TextLine() : tex(0xffffffff),wrap(false),last_color(0) {}
+		};
+		std::vector<TextLine> m_lines;
 		
-		Point m_text_loc;
-		Point m_text_selection;
-		bool m_is_mouseDown;
-		int m_last_sel;
-		int m_cursor_sel;
-		int m_cursor_pt;
-		int m_first_index;
-		int m_maxtext;
-		unsigned int characterSize;
+		TextLine m_placeholder;
 		
-		std::string m_str;
+		// position of window
+		Point m_position;
+		// anchor for selection (no selection if x,y = -1,-1)
+		Point m_anchor;
+		
+		ScrollBar *m_scrollbar;
+		
+		Point m_cursor;
+		int m_line_max;
+		int m_cursor_max_x;
+		int m_cursor_blink_counter;
+		int m_cursor_blinking_rate;
+		int m_readonly;
+		bool m_colors;
+		
+		bool m_color_input;
+		bool m_locked;
+		bool m_password;
+		int m_max_length;
+		int m_text_max;
+		int m_lines_max;
+		int m_line_height;
+		int m_line_max_width;
+		
+		static int m_selection_color;
+		static int m_cursor_color;
+		
+		void updatePosition();
+		void onFontChange();
+		void backspace();
+		void spreadColor(std::vector<TextLine>::iterator it, bool fully = false);
+		void updateTexture(TextLine&,bool = false);
+		std::vector<TextLine> wrap_lines(const std::vector<TextLine>& lines);
+		void compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::iterator it);
+		void sortPoints(Point &p1, Point &p2);
+		void deleteSelection();
+		void OnMWheel( int updown );
+		
+		// config
+		bool m_multiline;
+		bool m_textwrap;
+		bool m_wordwrap;
+		
+		bool m_mousedown;
+
 		void onPositionChange();
+		void STYLE_FUNC(value);
 		
-		static int m_font_index;
-		void updateSelection();
-		void fixSelection();
-		int getSelectionPoint( int mX );
-		int getCharPos( int num );
-		int getCharDistance( int startChar, int endChar );
-		void updateCursor();
-		int getMaxText( );
-		int getMaxTextBw( int indx );
-		void updateMaxText();
-		void setFirstIndex( int index );
 	public:
+	
 		TextBox();
 		~TextBox();
-		void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
-		void OnMouseMove( int mX, int mY, bool mouseState );
-		void OnLostFocus();
-		void OnGetFocus();
-		void OnKeyDown( sf::Event::KeyEvent &sym );
-		void OnLostControl();
-
-		void SetText( const char* text );
-		void SetText( std::string text );
-		const char* GetText( );
-		const char* GetSelectedText();
 		
-		void SetSelection( int start, int end );
+		//
+		virtual void Render( Point position, bool isSelected );
+		virtual void OnMouseDown( int mX, int mY );
+		virtual void OnMouseUp( int mX, int mY );
+		virtual void OnMouseMove( int mX, int mY, bool mouseState );
+		virtual void OnLostFocus();
+		virtual void OnGetFocus();
+		virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
+		virtual void OnLostControl();
+		//
+				
+		TextBox* Clone();
+		void SetText(std::string text);
+		std::string GetText();
+		std::string GetRawText();
+		std::string GetSelectedText();
+		std::string GetRawSelectedText();
+		
+		void PutTextAtCursor(std::string text);
+		void PutCursorAt( Point cursor );
+		
+		void SetSelection( Point start, Point end );
 		void SetCursor( SDL_Cursor* curs );
+		void SetMultilineMode( bool tf );
+		void SetCursorBlinkingRate( int rate );
+		void SetTextWrap(bool wrap);
+		void SetWordWrap(bool word);
+		void SetReadOnly( bool );
 };
-
+}
 #endif

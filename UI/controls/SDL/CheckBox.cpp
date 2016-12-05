@@ -2,7 +2,7 @@
 #include "../../common/SDL/Drawing.hpp"
 namespace ng {
 CheckBox::CheckBox() {
-	setType( TYPE_CHECKBOX );
+	setType( "checkbox" );
 	m_surf_text = 0;
 	m_text = 0;
 	tex_text = 0;
@@ -27,18 +27,16 @@ void CheckBox::Render( Point pos, bool isSelected ) {
 	}
 	
 	if(m_isChecked) {
-		int x1 = x+CHECKBOX_OKVIR+CHECKBOX_SHIFT;
-		int y1 = y+CHECKBOX_OKVIR;
-		int x2 = x+CHECKBOX_SIZE-CHECKBOX_OKVIR+CHECKBOX_SHIFT;
-		int y2 = y+CHECKBOX_SIZE-CHECKBOX_OKVIR;
+		int x1 = x+CHECKBOX_FRAME+CHECKBOX_SHIFT;
+		int y1 = y+CHECKBOX_FRAME;
+		int x2 = x+CHECKBOX_SIZE-CHECKBOX_FRAME+CHECKBOX_SHIFT;
+		int y2 = y+CHECKBOX_SIZE-CHECKBOX_FRAME;
 		
 		Drawing::Line(x1, y1, x2, y2, Colors::Yellow );
 		Drawing::Line(x1, y2, x2, y1, Colors::Yellow );
-		
 	}
 	
 	Control::Render(pos,isSelected);
-	
 }
 
 
@@ -76,7 +74,7 @@ void CheckBox::OnMouseUp( int mX, int mY ) {
 	}
 	if(check_collision(mX, mY)) {
 		m_isChecked = !m_isChecked;
-		emitEvent( change );
+		emitEvent( event::change );
 	}
 }
 

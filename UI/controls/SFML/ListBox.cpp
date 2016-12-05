@@ -1,11 +1,10 @@
 #include "ListBox.hpp"
-
+namespace ng {
 ListBox::ListBox() {
-	setType( TYPE_LISTBOX );
+	setType( "listbox" );
 	
 	m_font_height = 13;
-	characterSize = 13;
-	m_font = Fonts::GetFont( "default" );
+	m_font = Fonts::GetFont( "default", m_font_height );
 	
 	m_scrollbar = 0;
 	m_selected_index = -1;
@@ -13,11 +12,7 @@ ListBox::ListBox() {
 	m_scrollbar_focus = false;
 	
 	m_last_scroll = 0;
-	
-	m_rectShape.setFillColor( sf::Color::Transparent );
-	m_rectShape.setOutlineColor( sf::Color::White );
-	m_rectShape.setOutlineThickness( 1 );
-	m_highlight.setFillColor( sf::Color::Blue );
+	m_selection_color = 0xff0414CA;
 }
 
 ListBox::~ListBox() {
@@ -25,59 +20,46 @@ ListBox::~ListBox() {
 		delete m_scrollbar;
 }
 
-const int lineMargin = 2;
-
-void ListBox::Render( sf::RenderTarget& ren, sf::RenderStates states, bool isSelected ) {
+void ListBox::Render( Point pos, bool isSelected ) {
+	const Rect& rect = GetRect();
+	int x = rect.x + pos.x;
+	int y = rect.y + pos.y;
 	
-	ren.draw( m_rectShape, states );
+	Control::Render(pos,isSelected);
 	
 	// draw items
 	int h=0,i=0;
 	int offs = getListOffset();
-	for(auto it = m_texts.begin()+offs; it != m_texts.end(); it++,i++) {
+	for(auto it = text_lines.cbegin()+offs; it != text_lines.cend(); it++,i++) {
 		if(i >= m_max_items)
 			break;
-		if(m_selected_index == i+offs) {
-			
-			//Draw_FillRect( ren, m_rect.x, m_rect.y + h, m_rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), (*it)->h, CColors::c_blue );
-			m_highlight.setPosition( m_rect.x, m_rect.y + h + lineMargin );
-			m_highlight.setSize( sf::Vector2f( m_rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), m_font_height ) );
-			ren.draw( m_highlight, states );
-		} else {
-			// Draw_FillRect( ren, m_rect.x, m_rect.y + h, m_rect.w, (*it)->h, 0 );
-		}
-		
-		//CSurface::OnDraw(ren, *it, m_rect.x+2, m_rect.y + h);
-		it->setPosition( m_rect.x, m_rect.y + h );
-		ren.draw( *it, states );
-		h += it->getLocalBounds().height + lineMargin;	
+		if(m_selected_index == i+offs)
+			Drawing::FillRect(  x, y + h, rect.w - (m_drawscrollbar ? m_scrollrect.w : 0), it->h, m_selection_color );
+		Drawing::TexRect( x+2, y+h, it->w, it->h, it->tex );
+		h += it->h;
 	}
-
 	if(m_drawscrollbar) {
-		m_scrollbar->Render( ren, states, false );
+		m_scrollbar->Render( pos, false );
 	}
-
+	
+	
 }
 
 void ListBox::AddItem( std::string item ) {
-	m_items.push_back( item );
-	sf::Text txt;
-	txt.setFont( m_font );
-	txt.setCharacterSize( characterSize );
-	txt.setStri( item );
-	m_texts.push_back( txt );
 	
-	if(m_selected_index == -1) {
-		m_selected_index = 0;
-		//~ updateSelection();
+	SDL_Surface* txt = TTF_RenderText_Blended( m_font, clipText( item, GetRect().w ).c_str(), {255,255,255} );
+	
+	if(txt) {
+		m_items.push_back( item );
+		text_lines.push_back( {Drawing::GetTextureFromSurface(txt, 0), txt->w, txt->h} );
+		SDL_FreeSurface(txt);
+		if(m_selected_index == -1) {
+			m_selected_index = 0;
+		}
 	}
 	
 	updateBox();
 }
-void ListBox::AddItem( const char* item ) {
-	AddItem( std::string( item ) );
-}
-
 
 void ListBox::OnMouseDown( int mX, int mY ) {
 	m_is_mouseDown = true;
@@ -85,9 +67,7 @@ void ListBox::OnMouseDown( int mX, int mY ) {
 		if( isOnScrollbar( mX, mY ) ) {
 			m_scrollbar->OnMouseDown( mX, mY );
 			m_scrollbar_focus = true;
-			if(m_scrollbar->GetDifference()) {
-				m_last_scroll = m_scrollbar->GetValue();
-			}
+			m_last_scroll = m_scrollbar->GetValue();
 			return;
 		} else {
 			if(m_scrollbar_focus) {
@@ -97,11 +77,10 @@ void ListBox::OnMouseDown( int mX, int mY ) {
 		}
 	}
 	
-	// treba pronaci na cemu drzimo mis u postaviti "selekciju"
-	int tmp = (mY - m_rect.y)/m_font_height + getListOffset();
+	int tmp = (mY - GetRect().y)/m_font_height + getListOffset();
 	if(tmp != m_selected_index) {
 		m_selected_index = tmp;
-		emitEvent( EVENT_LISTBOX_CHANGE );
+		emitEvent( event::change );
 	}
 }
 
@@ -115,9 +94,7 @@ void ListBox::OnMouseMove( int mX, int mY, bool mouseState ) {
 		if( isOnScrollbar( mX, mY ) ) {
 			m_scrollbar->OnMouseMove( mX, mY, mouseState );
 			m_scrollbar_focus = true;
-			if(m_scrollbar->GetDifference()) {
-				m_last_scroll = m_scrollbar->GetValue();
-			}
+			m_last_scroll = m_scrollbar->GetValue();
 			return;
 		} else {
 			if(m_scrollbar_focus) {
@@ -128,7 +105,7 @@ void ListBox::OnMouseMove( int mX, int mY, bool mouseState ) {
 	}
 }
 
-bool ListBox::isOnScrollbar( int mX, int mY ) {
+bool ListBox::isOnScrollbar( int &mX, int &mY ) {
 	if( mX > m_scrollrect.x && mX < m_scrollrect.x+m_scrollrect.w ) {
 		if( mY > m_scrollrect.y && mY < m_scrollrect.y + m_scrollrect.h ) {
 			return true;
@@ -136,7 +113,6 @@ bool ListBox::isOnScrollbar( int mX, int mY ) {
 	}
 	return false;
 }
-
 
 void ListBox::OnLostFocus() {
 	m_is_mouseDown = false;
@@ -146,11 +122,7 @@ void ListBox::OnLostFocus() {
 	}
 }
 
-
 void ListBox::onPositionChange() {
-	m_rectShape.setPosition( m_rect.x, m_rect.y );
-	m_rectShape.setSize( sf::Vector2f( m_rect.w, m_rect.h ) );
-	
 	updateItemsSize();
 }
 
@@ -158,108 +130,76 @@ void ListBox::onPositionChange() {
 void ListBox::OnLostControl() {
 }
 
-const int textMargin = 17;
 int ListBox::getMaxText( std::string txt, int w ) {
+	TTF_Font* fnt = m_font;
+	
+	int dummy, advance;
 	int len = txt.length();
 	int sum=0;
 	for(int i=0; i < len; i++) {
-		const sf::Glyph &g = m_font.getGlyph( txt[i], characterSize, false );
-		if( sum > w-textMargin ) {
+		TTF_GlyphMetrics( fnt, txt[i], &dummy, &dummy, &dummy, &dummy, &advance);
+		if( sum > w-15 ) {
 			return i+1;
 		}
-		sum += g.advance;
+		sum += advance;
 	}
 	return len;
 }
 
-
 void ListBox::OnGetFocus() {
 }
 
-/*
 int ListBox::getAverageHeight() {
 	int h=0,i=0;
-	for(auto it = m_vec_surf_text.begin(); it != m_vec_surf_text.end(); it++,i++) {
-		if(h >= m_rect.h)
+	for(auto it = text_lines.begin(); it != text_lines.end(); it++,i++) {
+		if(h >= GetRect().h)
 			break;
-		h += (*it)->h;
+		h += it->h;
 	}
 	return h / i;
 }
-*/
-
-int ListBox::getAverageHeight() {
-	// this would give averate, but i don't think its necessary
-	/*
-	int h=0,i=1;
-	for(auto it = m_texts.begin(); it != m_texts.end(); it++,i++) {
-		if(i >= m_max_dropdown_items)
-			break;
-		//~ h += it->getLineSpaci( characterSize );;	
-		h += it->getLocalBounds().height;	
-	}
-	return h / i;
-	*/
-	// lets return just first height
-	return m_texts.begin()->getLocalBounds().height + lineMargin;
-}
-
-
 
 void ListBox::updateBox() {
+	const Rect& rect = GetRect();
 	m_font_height = getAverageHeight();
-	m_max_items = m_rect.h / m_font_height;
+	m_max_items = rect.h / m_font_height;
 	if(m_items.size() > m_max_items) {
-		// treba implementirati scrollbar :)
 		if(!m_scrollbar) {
 			m_scrollbar = new ScrollBar;
 			m_scrollbar->SetVertical( true );
 		}
 		int scrollbar_width = 10;
-		m_scrollrect = getRect( m_rect.x + m_rect.w - scrollbar_width, m_rect.y, scrollbar_width, m_rect.h );
-		m_scrollbar->SetRect( m_scrollrect );
+		m_scrollrect = { rect.x + rect.w - scrollbar_width, rect.y, scrollbar_width, rect.h };
+		m_scrollbar->SetRect( m_scrollrect.x, m_scrollrect.y, m_scrollrect.w, m_scrollrect.h );
 		
 		m_scrollbar->SetSliderSize( std::max<int>(10, std::min<int>( ( (m_max_items*100)/m_items.size()), m_scrollrect.h - 10) ) );
-		m_scrollbar->SetMaxRange( m_items.size() - m_max_items );
+		m_scrollbar->SetRange( 0, m_items.size() - m_max_items );
 		m_scrollbar->SetMouseWheelConstant( std::max<int>( m_max_items/3, 1 ) );
 		m_drawscrollbar = true;
 	}
 }
 
-void ListBox::OnMWheel( int &updown ) {
+void ListBox::OnMWheel( int updown ) {
 	if(m_drawscrollbar) {
 		m_scrollbar->OnMWheel( updown );
-		if(m_scrollbar->GetDifference()) {
-			m_last_scroll = m_scrollbar->GetValue();
-		}
+		m_last_scroll = m_scrollbar->GetValue();
 	}
 }
 
 int ListBox::getListOffset() {
 	if(m_drawscrollbar) {
-		//int sz = m_vec_surf_text.size();
-		return m_last_scroll;//min<int>( ((sz-m_max_items)*m_last_scroll) / 100, sz - m_max_items );
+		return m_last_scroll;//std::min<int>( ((sz-m_max_items)*m_last_scroll) / 100, sz - m_max_items );
 	} else return 0;
 }
 
-
 void ListBox::updateItemsSize() {
-	/*
 	std::string tmp;
 	for(int i=0; i < m_items.size(); i++) {
-		tmp = clipText( m_items[i], m_rect.w );
+		tmp = clipText( m_items[i], GetRect().w );
 		if( tmp != m_items[i] ) {
-			
-			//~ SDL_FreeSurface( m_vec_surf_text[i] );
-			//~ m_vec_surf_text[i] = TTF_RenderText_Solid( CFonts::GetFont( m_font_index ), tmp.c_str(), CColors::s_white );
-		}
-	}
-	*/
-	std::string tmp;
-	for(int i=0; i < m_items.size(); i++) {
-		tmp = clipText( m_items[i], m_rect.w );
-		if( tmp != m_items[i] ) {
-			m_texts[i].setStri( tmp.c_str() );
+			SDL_Surface* surf = TTF_RenderText_Blended( m_font, tmp.c_str(), {255,255,255} );
+			text_lines[i] = { Drawing::GetTextureFromSurface(surf, text_lines[i].tex), surf->w, surf->h };
+			SDL_FreeSurface( surf );
 		}
 	}
 }
@@ -286,5 +226,21 @@ std::string ListBox::GetText() {
 void ListBox::SetSelectedIndex( int index ) {
 	m_selected_index = index;
 }
+
+void ListBox::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetSelectedIndex(std::stoi(value));
+	}
+}
+
+ListBox* ListBox::Clone() {
+	ListBox* lb = new ListBox();
+	copyStyle(lb);
+	return lb;
+}
+
+}
+
 
 

@@ -1,5 +1,5 @@
-#ifdef USE_SDL
-	#include "SDL/CheckBox.hpp"
-#elif USE_SFML
-	#include "SDL/CheckBox.hpp"
-#endif
+		#ifdef USE_SDL
+		 #include "SDL/CheckBox.hpp"
+		#elif USE_SFML
+		 #include "SFML/CheckBox.hpp"
+		#endif

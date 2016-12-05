@@ -12,8 +12,8 @@ cpp = \
 	UI/common/common.cpp \
 	UI/common/Colors.cpp \
 	UI/common/Fonts.cpp \
-	UI/common/Colorstring.cpp
-
+	UI/common/Colorstring.cpp \
+	UI/common/Cursor.cpp
 
 exe := 
 link := 
@@ -31,20 +31,32 @@ CFLAGS :=
 
 obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(cpp)))
 
+controls_path := UI/controls
+
+# all controls which contains non-header (.cpp) code
+control_names := Button 	    \
+				RadioButton 	\
+				ComboBox 		\
+				CheckBox		\
+				Label           \
+				ScrollBar       \
+				TextBox         \
+				ListBox         \
+				TrackBar        \
+				GridContainer   \
+				Container       \
+				Dialog			\
+				Terminal		\
+				Canvas			\
+				WidgetMover		\
+				WidgetResizer	\
+				
+# 				TabContainer     \
+
+############ SFML ##############
 sfml_test_cpp := $(cpp) SFML_test.cpp \
 		UI/common/SFML/Drawing.cpp \
-		UI/controls/Button.cpp \
-		UI/controls/RadioButton.cpp \
-		UI/controls/ComboBox.cpp \
-		UI/controls/Label.cpp \
-		UI/controls/ScrollBar.cpp \
-		UI/controls/SFML/TextBox.cpp \
-		UI/controls/SFML/ListBox.cpp \
-		UI/controls/TrackBar.cpp \
-		UI/controls/GridContainer.cpp \
-		UI/controls/Container.cpp \
-		UI/controls/TabContainer.cpp \
-		UI/controls/Dialog.cpp
+		$(addsuffix .cpp, $(addprefix $(controls_path)/SFML/, $(control_names)))
 		
 sfml_test_obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(sfml_test_cpp)))
 sfml_link := -lsfml-window -lsfml-graphics -lsfml-system -lGL
@@ -57,21 +69,10 @@ sfml_test_build: $(sfml_test_obj)
 	
 sfml_test: dirs sfml_test_build
 
+
+############ SDL ###############
 sdl_test_cpp := $(cpp) \
-		UI/controls/Button.cpp \
-		UI/controls/ScrollBar.cpp \
-		UI/controls/Container.cpp \
-		UI/controls/ComboBox.cpp \
-		UI/controls/GridContainer.cpp \
-		UI/controls/SDL/TextBox.cpp \
-		UI/controls/SDL/RadioButton.cpp \
-		UI/controls/SDL/ListBox.cpp \
-		UI/controls/SDL/Label.cpp \
-		UI/controls/SDL/TrackBar.cpp \
-		UI/controls/SDL/Canvas.cpp \
-		UI/controls/SDL/CheckBox.cpp \
-		UI/controls/WidgetMover.cpp \
-		UI/controls/Terminal.cpp \
+		$(addsuffix .cpp, $(addprefix $(controls_path)/SDL/, $(control_names))) \
 		UI/common/SDL/Drawing.cpp \
 		
 sdl_test_obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(sdl_test_cpp)))
@@ -85,8 +86,6 @@ sdl_test_build: $(sdl_test_obj) build/SDL_test.o
 
 sdl_test: dirs sdl_test_build
 	
-all: dirs
-	@echo choose target 'sfml_test' or 'sdl_test'
 
 libout := libgui.a
 
@@ -96,6 +95,11 @@ sdl_lib_make: $(sdl_test_obj)
 
 sdl_lib: dirs sdl_lib_make
 
+###########################
+
+all: dirs
+	@echo choose target 'sfml_test' or 'sdl_test'
+	
 clean:
 	@echo project cleaned
 	@rm -f libgui.a

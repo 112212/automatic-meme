@@ -5,7 +5,7 @@
 
 namespace ng {
 Button::Button() {
-	setType( TYPE_BUTTON );
+	setType( "button" );
 	initEventVector(max_events);
 	#ifdef USE_SFML
 		text.setFont( Fonts::GetFont( "default" ) );

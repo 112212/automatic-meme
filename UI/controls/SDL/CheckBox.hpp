@@ -6,7 +6,7 @@ namespace ng {
 
 
 #define CHECKBOX_SIZE 15
-#define CHECKBOX_OKVIR 5
+#define CHECKBOX_FRAME 5
 #define CHECKBOX_SHIFT 10
 
 class CheckBox : public Control {
@@ -23,9 +23,6 @@ class CheckBox : public Control {
 		void STYLE_FUNC(value);
 		
 	public:
-		enum event {
-			change
-		};
 
 		CheckBox();
 		~CheckBox();

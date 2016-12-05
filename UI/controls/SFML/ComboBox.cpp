@@ -5,8 +5,7 @@
 
 namespace ng {
 ComboBox::ComboBox() {
-	setType( TYPE_COMBOBOX );
-	initEventVector(2);
+	setType( "combobox" );
 	
 	m_font_height = 13;
 	characterSize = 13;
@@ -84,7 +83,7 @@ void ComboBox::OnMouseDown( int mX, int mY ) {
 				if(absolute_selection != m_selected_index) {
 					m_selected_index = absolute_selection;
 					updateSelection();
-					emitEvent( EVENT_COMBOBOX_CHANGE );
+					emitEvent( event::change );
 				}
 				
 				m_is_opened = false;
@@ -137,17 +136,11 @@ void ComboBox::OnMouseMove( int mX, int mY, bool mouseState ) {
 	const Rect& r = GetRect();
 	if(m_is_opened) {
 		if(m_drawscrollbar) {
-			if( isOnScrollbar( mX, mY ) ) {
+			if( m_scrollbar_focus ) {
 				m_scrollbar->OnMouseMove( mX, mY, mouseState );
-				m_scrollbar_focus = true;
 				m_last_scroll = m_scrollbar->GetValue();
 				// just moved scrollbar, no need to do anything else
 				return;
-			} else {
-				if(m_scrollbar_focus) {
-					m_scrollbar->OnLostFocus();
-					m_scrollbar_focus = false;
-				}
 			}
 		}
 		if(mX > r.x && mX < r.x + m_max_width) {
@@ -426,7 +419,7 @@ void ComboBox::updateItemsSize() {
 	for(int i=0; i < m_items.size(); i++) {
 		tmp = clipText( m_items[i], m_max_width );
 		if( tmp != m_items[i] ) {
-			m_texts[i].setStri( tmp.c_str() );
+			m_texts[i].setString( tmp.c_str() );
 		}
 	}
 }
@@ -437,7 +430,7 @@ void ComboBox::updateSelection() {
 	if(m_is_textbox_mode) {
 		m_textbox->SetText( m_items[ m_selected_index ] );
 	} else {
-		m_sel_text.setStri( clipText( m_items[ m_selected_index ], m_rect.w-KVADRAT_SIZE ).c_str() );
+		m_sel_text.setString( clipText( m_items[ m_selected_index ], m_rect.w-KVADRAT_SIZE ).c_str() );
 	}
 	
 }

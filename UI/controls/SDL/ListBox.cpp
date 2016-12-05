@@ -1,7 +1,7 @@
 #include "ListBox.hpp"
 namespace ng {
 ListBox::ListBox() {
-	setType( TYPE_LISTBOX );
+	setType( "listbox" );
 	
 	m_font_height = 13;
 	m_font = Fonts::GetFont( "default", m_font_height );
@@ -26,7 +26,6 @@ void ListBox::Render( Point pos, bool isSelected ) {
 	int y = rect.y + pos.y;
 	
 	Control::Render(pos,isSelected);
-	Drawing::FillRect(  x, y, rect.w, rect.h, m_style.background_color );
 	
 	// draw items
 	int h=0,i=0;
@@ -81,7 +80,7 @@ void ListBox::OnMouseDown( int mX, int mY ) {
 	int tmp = (mY - GetRect().y)/m_font_height + getListOffset();
 	if(tmp != m_selected_index) {
 		m_selected_index = tmp;
-		emitEvent( EVENT_LISTBOX_CHANGE );
+		emitEvent( event::change );
 	}
 }
 
@@ -236,8 +235,8 @@ void ListBox::STYLE_FUNC(value) {
 }
 
 ListBox* ListBox::Clone() {
-	ListBox* lb = new ListBox;
-	*lb = *this;
+	ListBox* lb = new ListBox();
+	copyStyle(lb);
 	return lb;
 }
 

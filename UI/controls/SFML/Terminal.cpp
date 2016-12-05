@@ -3,18 +3,18 @@
 namespace ng {
 
 Terminal::Terminal() {
+	setType( "terminal" );
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_log = (TextBox*)CreateControl("terminal/textbox");
 	m_terminal = (TextBox*)CreateControl("terminal/textbox");
 	m_log->SetMultilineMode(true);
 	m_log->SetReadOnly(true);
 	m_log->SetStyle("colors", "false");
-	initEventVector(event::max_events);
 	m_history_counter = 0;
 	AddControl(m_log);
 	AddControl(m_terminal);
 	setInterceptMask(imask::mouse_up | imask::key_down);
-	m_terminal->SubscribeEvent( TextBox::event::enter, [this](Control *c) { return tbox_enter(c); });
+	m_terminal->SubscribeEvent( event::enter, [this](Control *c) { return tbox_enter(c); });
 	m_log_immediate = true;
 	m_state = invisible;
 	m_tick = 0;
@@ -32,7 +32,7 @@ void Terminal::tbox_enter(Control* c) {
 	// m_log_msg = "> " + m_command;
 	t->SetText("");
 	// m_log_immediate = false;
-	emitEvent(event::command);
+	emitEvent(event::enter);
 	// m_log_immediate = true;
 	// WriteLog(m_log_msg);
 }

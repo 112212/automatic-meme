@@ -17,13 +17,16 @@
 	#include <SDL2/SDL_opengl.h>
 #endif
 
+#include "common/Cursor.hpp"
+
+// only for tooltip
+#include "controls/Label.hpp"
+
 // ---- GUI configuration ---
 #define SELECTED_CONTROL_ON_TOP
 #define OVERLAPPING_CHECK
 #define USE_EVENT_QUEUE
 // --------------------------
-
-// #include <utility>
 
 
 namespace ng {
@@ -44,7 +47,6 @@ class GuiEngine : public ControlManager
 		std::map<std::string, Control*> map_id_control;
 		
 		// -- selection info --
-		
 		Control* selected_control;
 		Widget* sel_first_depth_widget; // first widget, or widget lock
 		Point sel_widget_offset; // for widget lock
@@ -57,15 +59,33 @@ class GuiEngine : public ControlManager
 		};
 		std::vector<interceptInfo> sel_intercept_vector;
 		Control* active_control;
+		// ------------------
+		
+		Cursor cursor;
+		
+		// -- dragging info --
+		Point drag_start_diff;
+		Point drag_offset;
+		bool dragging;
 		// --------------------
 		
-		bool m_mouse_down;
+		// -- tooltip --
+		Label* m_tooltip;
+		bool m_tooltip_shown;
+		double m_tooltip_delay;
+		double m_last_cursor_update_time;
+		// -------------
 		
+		bool m_mouse_down;
 		bool m_keyboard_lock;
 		bool m_widget_lock;
 		bool m_focus;
 		bool m_focus_lock;
 		bool m_lock_once;
+		
+		double m_time;
+		double m_delta_time;
+		
 		
 		void check_for_new_collision( int mX, int mY );
 		int depth;
@@ -75,6 +95,8 @@ class GuiEngine : public ControlManager
 			std::queue<Event> m_events;
 		#endif
 		
+		double getTime() { return m_time; }
+		double getDeltaTime() { return m_delta_time; }
 		void processControlEvent(int event_type);
 		void unselectControl();
 		void unselectWidgets();
@@ -94,7 +116,7 @@ class GuiEngine : public ControlManager
 		#ifdef USE_SFML
 			void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 			void OnKeyDown( sf::Event::KeyEvent &sym );
-			void OnKeyUp(  sf::Event::KeyEvent &sym );
+			void OnKeyUp( sf::Event::KeyEvent &sym );
 			void OnEvent(sf::Event &event);
 		#elif USE_SDL
 			void Render();
@@ -103,7 +125,6 @@ class GuiEngine : public ControlManager
 			void OnEvent(SDL_Event &event);
 		#endif
 		
-		void SetDefaultFont(std::string font, int size=13);
 		void UnselectControl() { unselectControl(); }
 		void AddControl( Control* cntrl );
 		void RemoveControl( Control* control );
@@ -111,21 +132,30 @@ class GuiEngine : public ControlManager
 		
 		void LockWidget(Widget* w);
 		void UnlockWidget();
-		Control* GetControlById(std::string id);
+		
+		
+		void SetDefaultFont(std::string font, int size=13);
 		void SetSize(int w, int h);
+		void SetTooltipDelay(double seconds);
+		void SetRelativeMode(bool relative_mode);
 		
 		void Focus(Control* control);
 		void Activate(Control* control);
+		void ShowTooltip(Control* control);
+		void HideTooltip();
 		
 		Control* GetSelectedControl() { return selected_control; }
 		Widget* GetSelectedWidget() { return last_selected_widget; }
 		Control* GetActiveControl() { return active_control; }
+		Control* GetControlById(std::string id);
 		
 		#ifdef USE_EVENT_QUEUE
 			bool HasEvents( );
 			Event PopEvent();
 		#endif
-		void SubscribeEvent( std::string id, int event_type, std::function<void(Control*)> callback );
+		
+		void SubscribeEvent( std::string id, event event_type, std::function<void(Control*)> callback );
+		void OnEvent( std::string id, event event_type, std::function<void(Control*)> callback );
 		
 		// events
 		void OnMouseDown( int mX, int mY );

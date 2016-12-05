@@ -1,14 +1,5 @@
-#ifndef NG_DIALOG
-#define NG_DIALOG
-
-#include "../Widget.hpp"
-namespace ng {
-class Dialog : public Widget {
-	
-	private:
-		void Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected);
-	public:
-		Dialog();
-};
-}
-#endif
+		#ifdef USE_SDL
+		 #include "SDL/Dialog.hpp"
+		#elif USE_SFML
+		 #include "SFML/Dialog.hpp"
+		#endif

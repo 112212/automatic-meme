@@ -1,19 +1,5 @@
-#ifndef WGT_MOVER
-#define WGT_MOVER
-#include "../Control.hpp"
-#include "../Widget.hpp"
-namespace ng {
-class WidgetMover : public Control {
-	private:
-		Rect last_pos;
-
-	public:
-		WidgetMover();
-		
-		void OnMouseMove( int mX, int mY, bool mouseState );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
-		void Render( Point pos, bool isSelected );
-};
-}
-#endif
+		#ifdef USE_SDL
+		 #include "SDL/WidgetMover.hpp"
+		#elif USE_SFML
+		 #include "SFML/WidgetMover.hpp"
+		#endif

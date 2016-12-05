@@ -30,6 +30,7 @@ class TextBox : public Control {
 		Point m_anchor;
 		
 		ScrollBar *m_scrollbar;
+		bool m_scrollbar_selected;
 		
 		Point m_cursor;
 		int m_line_max;
@@ -46,6 +47,7 @@ class TextBox : public Control {
 		int m_text_max;
 		int m_lines_max;
 		int m_line_height;
+		int m_line_max_width;
 		
 		static int m_selection_color;
 		static int m_cursor_color;
@@ -72,12 +74,6 @@ class TextBox : public Control {
 		void STYLE_FUNC(value);
 		
 	public:
-	
-		enum event {
-			change = 0,
-			enter,
-			max_events
-		};
 	
 		TextBox();
 		~TextBox();

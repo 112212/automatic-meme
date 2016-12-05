@@ -9,7 +9,8 @@
 namespace ng {
 
 struct cache_entry {
-	controlType type;
+	// controlType type;
+	const char* type;
 	int z_index;
 	bool visible;
 	bool interactible;

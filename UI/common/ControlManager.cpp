@@ -1,6 +1,7 @@
 #include "ControlManager.hpp"
 #include "../Widget.hpp"
 #include "SDL/Drawing.hpp"
+#include "../Gui.hpp"
 
 #include <map>
 #include <algorithm>
@@ -281,23 +282,7 @@ Control* ControlManager::CreateControl(std::string tag, std::string id) {
 
 
 #include <RapidXML/rapidxml.hpp>
-#if USE_SDL
-	#include "../controls/Button.hpp"
-	#include "../controls/ScrollBar.hpp"
-	#include "../controls/Container.hpp"
-	#include "../controls/ComboBox.hpp"
-	#include "../controls/GridContainer.hpp"
-	#include "../controls/TextBox.hpp"
-	#include "../controls/RadioButton.hpp"
-	#include "../controls/ListBox.hpp"
-	#include "../controls/Label.hpp"
-	#include "../controls/TrackBar.hpp"
-	#include "../controls/Canvas.hpp"
-	#include "../controls/CheckBox.hpp"
-	#include "../controls/WidgetMover.hpp"
-	#include "../controls/Terminal.hpp"
-	#include "../controls/Form.hpp"
-#endif
+#include "../AllControls.hpp"
 
 namespace ng {
 namespace XmlLoader {
@@ -365,11 +350,16 @@ namespace XmlLoader {
 				TAGTYPE("label", Label);
 				TAGTYPE("trackbar", TrackBar);
 				TAGTYPE("scrollbar", ScrollBar);
-				TAGTYPE("widgetmover", WidgetMover);
 				TAGTYPE("checkbox", CheckBox);
 				TAGTYPE("gridcontainer", GridContainer);
 				TAGTYPE("terminal", Terminal);
 				TAGTYPE("form", Form);
+				
+				
+				TAGTYPE("tooltip", Label);
+				// special types for widget
+				TAGTYPE("widgetmover", WidgetMover);
+				TAGTYPE("widgetresizer", WidgetResizer);
 				
 				default: return tryExtendedTags(tag);
 			}
@@ -442,6 +432,7 @@ namespace XmlLoader {
 			a += anchor;
 			control->SetAnchor(a);
 			
+			// TODO: generalize making controls with items
 			if(!strcmp(node->name(), "listbox")) processListBoxItems((ListBox*)control, node);
 			if(!strcmp(node->name(), "combobox")) processComboBoxItems((ComboBox*)control, node);
 			

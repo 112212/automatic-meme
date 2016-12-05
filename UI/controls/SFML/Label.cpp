@@ -19,74 +19,118 @@
 // 
 // 
 #include "Label.hpp"
-
+#include "../../common/debug.hpp"
+#include "../../common/SDL/Drawing.hpp"
+#include "../../common/Colorstring.hpp"
 namespace ng {
-
 Label::Label() {
-	setType( TYPE_LABEL );
+	setType( "label" );
 	setInteractible(false);
-	fnt = Fonts::GetFont( "default" );
+	text_lines.clear();
+	m_alignment = Alignment::left;
 }
 
 Label::~Label() {
 }
 
-
-void Label::Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected ) {
-	for( auto &i : m_texts ) {
-		ren.draw( i,state );
-	}
-}
-
-void Label::SetText( const char* text ) {
-
-	m_text = text;
-	m_texts.clear();
-
-	// do the line wrappi
-	line_height = fnt.getLineSpaci( characterSize );
-	int sum = 0, save, last_ind = 0, line = 0;
-	int len = m_text.size();
-	sf::Text txt;
-	for(int i = 0; i < len; i++) {
-		const sf::Glyph& g = fnt.getGlyph( text[i], characterSize, false );
-		if(m_text[i] == '\n' or sum > m_rect.w - 25) {
-			txt.setStri( m_text.substr( last_ind, i - last_ind ) );
-			txt.setFont( fnt );
-			txt.setCharacterSize( characterSize );
-			txt.setPosition( m_rect.x, m_rect.y + line*line_height );
-			m_texts.push_back( txt );
-			last_ind = i;
-			line++;
-			sum = 0;
+void Label::Render( Point pos, bool isSelected ) {
+	Control::Render(pos, isSelected);
+	const Rect& rect = GetRect();
+	int j=0;
+	int line_height = TTF_FontHeight(m_style.font)-5;
+	for( auto i = text_lines.begin(); i != text_lines.end(); i++,j++) {
+		if(5+j*line_height+i->h > rect.h) break;
+		if(m_alignment == Alignment::left) {
+			Drawing::TexRect( rect.x, rect.y+5+j*line_height, i->w, i->h, i->tex);
+		} else if(m_alignment == Alignment::right) {
+			Drawing::TexRect( rect.x + rect.w - i->w, rect.y+5+j*line_height, i->w, i->h, i->tex);
+		} else if(m_alignment == Alignment::center) {
+			Drawing::TexRect( rect.x + (rect.w - i->w)/2, rect.y+5+j*line_height, i->w, i->h, i->tex);
 		}
-		sum += g.advance;
-	}
-	txt.setString( m_text.substr( last_ind, m_texts.size() - last_ind ) );
-	txt.setFont( fnt );
-	txt.setCharacterSize( characterSize );
-	txt.setPosition( m_rect.x, m_rect.y + line*line_height );
-	m_texts.push_back( txt );
-}
-
-void Label::onPositionChange() {
-	for( int i = 0; i < m_texts.size(); i++ ) {
-		sf::Text &t = m_texts[i];
-		t.setPosition( m_rect.x, m_rect.y + line_height*i);
 	}
 }
 
-void Label::SetFont( const char* text, int size ) {
-	fnt = Fonts::GetFont( text );
-	characterSize = size;
-	for(auto &i : m_texts) {
-		i.setCharacterSize( characterSize );
+static void find_and_replace(std::string& source, std::string const& find, std::string const& replace) {
+    for(std::string::size_type i = 0; (i = source.find(find, i)) != std::string::npos; i += replace.length()) {
+        source.replace(i, find.length(), replace);
+    }
+}
+
+void Label::SetText( std::string text ) {
+	m_text = text;
+	
+	// replace tabs with 4 spaces
+	find_and_replace(m_text, "\t", "    ");
+	
+	int j = 0;
+	
+	int max_text_width = GetRect().w-25;
+	int last_color = 0;
+	for(std::string::size_type pos = 0; pos < m_text.size();) {
+		
+		std::string s = m_text.substr(pos);
+		// if(s.size() == 1) {
+			// cout <<s 
+		// }
+		int max_text = Fonts::getMaxText(m_style.font, s, max_text_width);
+		// cout << "(" << pos << ") doing: " << s << endl;
+		int p = s.find('\n');
+		if(p != s.npos)
+			max_text = p;
+		
+		Colorstring cstr;
+		if(max_text < s.size())
+			cstr = s.substr(0,max_text).c_str();
+		else
+			cstr = s.c_str();
+		
+		SDL_Surface* surf = cstr.get_surface(m_style.font, last_color);
+		int ncol = cstr.GetLastColor();
+		if(ncol > 0)
+			last_color = ncol;
+		if(j < text_lines.size()) {
+			text_lines[j] = { Drawing::GetTextureFromSurface(surf, text_lines[j].tex), surf->w, surf->h };
+			j++;
+		} else {
+			text_lines.push_back( { Drawing::GetTextureFromSurface(surf, 0), surf->w, surf->h } );
+			j++;
+		}
+		SDL_FreeSurface(surf);
+		
+		// cout << j << " ... " << pos << " : " << m_text.size() << " : " << max_text << ", " << s.size() << "\n";
+		if(max_text < s.size() && max_text != 0)
+			pos += max_text;
+		else {
+			pos = m_text.find('\n', pos);
+			if(pos == m_text.npos) 
+				break;
+			pos++;
+		}
 	}
 }
 
-void Label::OnSetStyle(std::string& style, std::string& value) {
-	if(style == "text")
-		SetText(value.c_str());
+void Label::SetAlignment( Alignment alignment ) {
+	m_alignment = alignment;
 }
 
+Control* Label::Clone() {
+	Label* l = new Label;
+	*l = *this;
+	return l;
+}
+
+void Label::STYLE_FUNC(value) {
+	STYLE_SWITCH {
+		_case("value"):
+			SetText(value.c_str());
+		_case("align"):
+			if(value == "left")
+				SetAlignment( Alignment::left );
+			else if(value == "right")
+				SetAlignment( Alignment::right );
+			else if(value == "center")
+				SetAlignment( Alignment::center );
+			break;
+	}
+}
 }

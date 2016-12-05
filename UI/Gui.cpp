@@ -6,16 +6,21 @@
 	#include "common/SDL/Drawing.hpp"
 #endif
 #include <iostream>
+#include <ratio>
+#include <chrono>
 
 namespace ng {
 GuiEngine::GuiEngine() : ControlManager(this) {
-	
 	m_mouse_down = false;
 	m_focus = false;
 	m_keyboard_lock = false;
 	m_focus_lock = false;
 	m_widget_lock = false;
 	m_lock_once = false;
+	m_time = 0;
+	dragging = false;
+	
+	drag_offset = {0,0};
 	
 	depth = 0;
 	selected_control = 0;
@@ -26,7 +31,13 @@ GuiEngine::GuiEngine() : ControlManager(this) {
 	hasIntercepted = false;
 	sel_intercept = 0;
 	sel_intercept_vector.resize(15);
+	
+	m_tooltip_shown = false;
+	m_tooltip_delay = 2;
+	m_tooltip = 0;
 }
+
+static std::chrono::high_resolution_clock::time_point time_point = std::chrono::high_resolution_clock::now();
 
 GuiEngine::GuiEngine(int xsize, int ysize) : GuiEngine() {
 	SetSize(xsize, ysize);
@@ -150,8 +161,6 @@ Control* GuiEngine::GetControlById(std::string id) {
 }
 
 void GuiEngine::processControlEvent(int event_type) {
-
-	
 	switch(event_type) {
 		case GUI_KEYBOARD_LOCK:
 			m_keyboard_lock = true;
@@ -349,20 +358,71 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 		}
 	} else WIDGET_HOOK(mouse_down, OnMouseDown( mX, mY ));
 	active_control = selected_control;
+	if(selected_control && selected_control->IsDraggable()) {
+		dragging = true;
+		Point gpos = selected_control->GetGlobalPosition();
+		drag_start_diff = Point(mX - gpos.x, mY - gpos.y);
+		drag_offset = {mX - gpos.x - drag_start_diff.x, mY - gpos.y - drag_start_diff.y};
+	}
+}
+
+void GuiEngine::SetTooltipDelay(double seconds) {
+	m_tooltip_delay = seconds;
 }
 
 void GuiEngine::OnMouseUp( int mX, int mY ) {
 	m_mouse_down = false;
+	if(dragging) {
+		Control* dragging_control = selected_control;
+		UnselectControl();
+		check_for_new_collision(mX, mY);
+		if(last_selected_widget) {
+			dragging_control->emitEvent( event::drag );
+		}
+		dragging = false;
+		return;
+	}
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	if( selected_control ) {
 		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y ));
 	} else WIDGET_HOOK(mouse_up, OnMouseUp( mX, mY ));
 }
 
+void GuiEngine::ShowTooltip(Control* control) {
+	m_last_cursor_update_time = m_time;
+	if(!control) return;
+	if(control->GetTooltip().empty()) return;
+	Point p = cursor.GetCursor();
+	Point g = control->GetOffset();
+	if(!control->check_collision(p.x-g.x, p.y-g.y)) return;
+	// TODO: show tooltip, hide it on lost focus event or something
+	if(!m_tooltip) {
+		m_tooltip = (Label*)CreateControl("tooltip", "tooltip");
+	}
+	// TODO: fix this rect
+	int distance = 25;
+	m_tooltip->SetRect(p.x+distance, p.y+distance, 200, 100);
+	m_tooltip->SetText( selected_control->GetTooltip() );
+	m_tooltip->SetAlignment( Alignment::center );
+	m_tooltip_shown = true;
+}
+
+void GuiEngine::HideTooltip() {
+	if(m_tooltip_shown) {
+		m_tooltip_shown = false;
+	}
+}
+
 void GuiEngine::OnMouseMove( int mX, int mY ) {
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
+	HideTooltip();
 	if(selected_control) {
 		if( m_mouse_down || m_focus_lock ) {
+			if(m_mouse_down && active_control->IsDraggable()) {
+				Point pt = selected_control->GetGlobalPosition();
+				drag_offset = Point(mX - pt.x - drag_start_diff.x, mY - pt.y - drag_start_diff.y);
+			}
+				
 			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
 			return;
 		}
@@ -673,8 +733,17 @@ void GuiEngine::unselectControl() {
 	}
 #endif
 
+void GuiEngine::SetRelativeMode(bool relative_mode) {
+	cursor.SetRelativeMode(relative_mode);
+}
 
-void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<void(Control*)> callback ) {
+void GuiEngine::SubscribeEvent( std::string id, event event_type, std::function<void(Control*)> callback ) {
+	auto it = map_id_control.find(id);
+	if(it != map_id_control.end()) {
+		it->second->SubscribeEvent(event_type, callback);
+	}
+}
+void GuiEngine::OnEvent( std::string id, event event_type, std::function<void(Control*)> callback ) {
 	auto it = map_id_control.find(id);
 	if(it != map_id_control.end()) {
 		it->second->SubscribeEvent(event_type, callback);
@@ -751,37 +820,78 @@ void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<vo
 		}
 	}
 	void GuiEngine::Render() {
+		
+		// measure time
+		auto now = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> d = now - time_point;
+		double last_time = m_time;
+		m_time = d.count();
+		m_delta_time = m_time - last_time;
+		
+		
+		if(!m_tooltip_shown && selected_control && 
+			m_time - m_last_cursor_update_time > m_tooltip_delay)
+		{
+			ShowTooltip(selected_control);
+		}
+		
+		bool dragging_widget_workaround = false;
+		if(dragging && selected_control->widget) {
+			dragging_widget_workaround = true;
+			selected_control->visible = false;
+			selected_control->update_cache(Control::CacheUpdateFlag::attributes);
+		}
+		
 		bool has_selected_control = false;
-		Rect pos(0,0,0,0);
+		Point pos(0,0);
 		for(auto &ca : cache) {
 			if(ca.visible) {
 				Control* const &c = ca.control;
 				
-				#ifdef SELECTED_CONTROL_ON_TOP
 				if(c != selected_control) {
 					c->Render(pos, false );
 				} else {
-					has_selected_control = true;
+					#ifdef SELECTED_CONTROL_ON_TOP
+						has_selected_control = true;
+					#else
+						if(!dragging)
+							c->Render(pos, true);
+					#endif
 				}
-				#else
-					c->Render(pos, c == selected_control);
-				#endif
 				
 				Drawing::SetMaxAlpha(1.0f);
 			}
 		}
 		
-		#ifdef SELECTED_CONTROL_ON_TOP
-		if(has_selected_control) {
-			selected_control->Render(pos,true);
-			Drawing::SetMaxAlpha(1.0f);
+		if(dragging_widget_workaround) {
+			selected_control->visible = true;
+			selected_control->update_cache(Control::CacheUpdateFlag::attributes);
 		}
-		#endif
+		
+		if(dragging) {
+			selected_control->Render(pos.Offset(drag_offset), true);
+			Drawing::SetMaxAlpha(1.0f);
+		} else {
+			if(has_selected_control) {
+				selected_control->Render(pos,true);
+				Drawing::SetMaxAlpha(1.0f);
+			}
+		}
+		
+		if(m_tooltip_shown) {
+			((Control*)m_tooltip)->Render( Point(0,0), true );
+		}
+		
 	}
 	void GuiEngine::OnEvent(SDL_Event &event) {
+		Point p = cursor.GetCursor();
 		switch(event.type) {
-			case SDL_MOUSEMOTION:
-				OnMouseMove( event.motion.x, event.motion.y );
+			case SDL_MOUSEMOTION: {
+				cursor.MoveCursor(event.motion.x, event.motion.y);
+				p = cursor.GetCursor();
+				OnMouseMove( p.x, p.y );
+				m_last_cursor_update_time = m_time;
+			}
 				break;
 			case SDL_KEYDOWN:
 				OnKeyDown( event.key.keysym.sym, (SDL_Keymod)event.key.keysym.mod );
@@ -790,10 +900,10 @@ void GuiEngine::SubscribeEvent( std::string id, int event_type, std::function<vo
 				OnKeyUp( event.key.keysym.sym, (SDL_Keymod)event.key.keysym.mod );
 				break;
 			case SDL_MOUSEBUTTONUP:
-				OnMouseUp( event.button.x, event.button.y );
+				OnMouseUp( p.x, p.y );
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				OnMouseDown( event.button.x, event.button.y );
+				OnMouseDown( p.x, p.y );
 				break;
 			case SDL_MOUSEWHEEL:
 				OnMWheel( event.wheel.y );

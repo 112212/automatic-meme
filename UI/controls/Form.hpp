@@ -5,13 +5,10 @@ namespace ng {
 class Form : public Widget {
 	public:
 		Form() {
-			initEventVector(1);
+			setType( "form" );
 			setInterceptMask(imask::key_down);
 		}
-		enum event {
-			submit
-		};
-	
+
 	private:
 		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {

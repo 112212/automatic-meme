@@ -9,9 +9,6 @@
 
 namespace ng {
 namespace Drawing {
-
-	
-	
 	
 	// shaders
 	static unsigned int readShader(std::string shaderStr, unsigned int shaderType)
@@ -143,6 +140,11 @@ namespace Drawing {
 	static float max_alpha = 1.0f;
 	void SetMaxAlpha(float _max_alpha) {
 		max_alpha = _max_alpha;
+	}
+	
+	static float rotation = 0.0f;
+	void SetRotation(float _rotation) {
+		rotation = _rotation;
 	}
 
 	void Init() {
@@ -534,6 +536,6 @@ namespace Drawing {
 		Line(x1, y1, x1, y2, color);
 	}
 
-
+	
 }
 }

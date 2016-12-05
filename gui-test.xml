@@ -30,7 +30,7 @@
 			<widgetmover rect="180,0,10,10"/>
 		</container>
 		
-		<widget rect="0,0,200,200" id="form">
+		<form rect="0,0,200,200" id="form">
 			<textbox rect="r0,0,200,30" placeholder="username" />
 			<textbox rect="r0,0,200,30" placeholder="password" max_length="10" />
 			<textbox rect="r0,0,200,30" placeholder="username" password="true"/>
@@ -41,9 +41,9 @@
 			<button rect="r0,10,200,20" value="ok"/>
 			<button rect="r0,10,200,20" value="ok"/>
 			<button rect="r0,10,200,20" value="ok"/>
-		</widget>
+		</form>
 
-		<combobox rect="0,0,-5%+200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" >
+		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,-5%+200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" draggable="f" >
 			<item>heheheeh</item>
 			<item>hghfghf</item>
 			<item>jhgjghjhg</item>
@@ -52,7 +52,7 @@
 			<item>ytrytr</item>
 			<item>rwerew</item>
 		</combobox>
-		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" id="mojtbox" multiline="true" terminal_mode="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
+		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" id="mojtbox" multiline="true" textwrap="false" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
 Usual^rly a server is a dedicated host that runs the game and is authoritative about world simulation, 
 game rules, and playe^gr input processing. A client is a player's computer connected to a game server. 
 The client and server communicate with each other by sending small data packets at a high frequency 
@@ -84,16 +84,17 @@ of a few milliseconds can cause a laggy gameplay feeling and make it
 hard to hit other players or interact with moving objects. Besides 
 bandwidth limitations and network latencies, information can get lost 
 due to network packet loss. " ></textbox>
-		<label id="label" rect="0,0,150,80" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1
-	test2
+		<label id="label" align="center" rect="0,0,150,80" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1 hhfghgf hfghghgfhhhcangfdgfgfdhhgfhgf
+	test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf
 test3^g
 hehehehe
-fddgdf"></label>
+fddgdf" onHoverImage=""></label>
 		<widget rect="0,0,100,200">
 			<radiobutton rect="0,20,100,30" value="haha"></radiobutton>
 			<radiobutton rect="0,70,100,30" value="hehe"></radiobutton>
 			<radiobutton rect="0,120,100,30" value="cool"></radiobutton>
 			<widgetmover rect="0,0,100,20" zindex="50"></widgetmover>
+			<widgetresizer rect="0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
 		</widget>
 		
 		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4">

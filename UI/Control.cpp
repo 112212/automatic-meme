@@ -15,27 +15,41 @@
 #endif
 
 namespace ng {
-Control::Control() : id("0"), engine(0), widget(0), z_index(0), type(TYPE_CONTROL), isWidget(false),
-interactible(true), visible(true), anchor({{0,0},0}) {
-	m_rect.x = m_rect.y = m_rect.w = m_rect.h = 0;
+Control::Control() : id("0"), engine(0), widget(0), 
+z_index(0), type("control"), isWidget(false),
+interactible(true), visible(true), anchor({{0,0},0}) 
+{
+	m_rect.x = m_rect.y = 0;
+	m_rect.w = m_rect.h = 50;
 	m_style.border_color = 0xff333376;
 	m_style.hoverborder_color = 0xff1228D1;
 	m_style.background_color = 0;
 	m_style.font = Fonts::GetFont( "default", 13 );
-	m_image_tex = 0xffffffff;
-	m_alpha = 1.0f;
+	m_style.image_tex = 0xffffffff;
+	m_style.alpha = 1.0f;
+	m_style.draggable = false;
 }
 
 Control::~Control() {
 }
 
 // int Control::m_hoverbordercolor = 0xff1D1DBB;
-
-const Point Control::getOffset() {
+const Point Control::GetOffset() {
 	if(engine)
 		return engine->sel_widget_offset;
 	else
 		return {0,0};
+}
+
+const Point Control::GetGlobalPosition() {
+	Point ofs = GetOffset();
+	ofs.x += m_rect.x;
+	ofs.y += m_rect.y;
+	return ofs;
+}
+
+void Control::SetDraggable( bool draggable ) {
+	m_style.draggable = draggable;
 }
 
 void Control::SetZIndex( int zindex ) {
@@ -47,7 +61,7 @@ void Control::SetZIndex( int zindex ) {
 	}
 }
 
-void Control::_updateCache(CacheUpdateFlag flag) {
+void Control::update_cache(CacheUpdateFlag flag) {
 	if(widget) {
 		widget->updateCache(this,flag);
 	} else if(engine) {
@@ -70,7 +84,7 @@ void Control::SetVisible(bool visible) {
 		if(!visible && engine && engine->active_control == this) {
 			engine->active_control = 0;
 		}
-		_updateCache(CacheUpdateFlag::attributes);
+		update_cache(CacheUpdateFlag::attributes);
 		if(!visible && isWidget && ((Widget*)this)->inSelectedBranch() ) {
 			sendGuiCommand(GUI_UNSELECT_WIDGETS);
 		}
@@ -80,14 +94,14 @@ void Control::SetVisible(bool visible) {
 void Control::SetRenderable(bool visible) {
 	if(this->visible != visible) {
 		this->visible = visible;
-		_updateCache(CacheUpdateFlag::attributes);
+		update_cache(CacheUpdateFlag::attributes);
 	}
 }
 
 void Control::setInteractible(bool interactible) {
 	if(this->interactible != interactible) {
 		this->interactible = interactible;
-		_updateCache(CacheUpdateFlag::attributes);
+		update_cache(CacheUpdateFlag::attributes);
 	}
 }
 
@@ -96,23 +110,23 @@ void Control::SetId(std::string id) {
 }
 
 
-void Control::setType( controlType type ) {
+// void Control::setType( controlType type ) {
+void Control::setType( const char* type ) {
 	this->type = type;
-	_updateCache(CacheUpdateFlag::all);
+	update_cache(CacheUpdateFlag::all);
 }
 
 // emit global event
-void Control::emitEvent( int EventID ) {
+void Control::emitEvent( int event_id ) {
 	#ifdef USE_EVENT_QUEUE
 	if(engine) {
-		engine->m_events.push( { id, EventID, this } );
+		engine->m_events.push( { id, event_id, this } );
 	}
 	#endif
 	
-	if(EventID < subscribers.size()) {
-		auto &lst = subscribers[EventID];
-		for(auto i = lst.begin(); i != lst.end(); i++) {
-			(*i)(this);
+	for( auto sub : subscribers ) {
+		if(sub.first == event_id) {
+			sub.second(this);
 		}
 	}
 }
@@ -139,9 +153,12 @@ bool Control::IsSelected() {
 	}
 }
 
-void Control::SubscribeEvent( int event_type, std::function<void(Control*)> callback ) {
-	if(event_type < subscribers.size())
-		subscribers[event_type].push_back(callback);
+void Control::SubscribeEvent( event event_type, std::function<void(Control*)> callback ) {
+	subscribers.emplace_back((event)event_type, callback);
+}
+// alias
+void Control::OnEvent( event event_type, std::function<void(Control*)> callback ) {
+	subscribers.emplace_back((event)event_type, callback);
 }
 
 void Control::sendGuiCommand( int eventId ) {
@@ -194,9 +211,7 @@ bool Control::check_collision(int x, int y) {
 }
 
 void Control::SetRect( int x, int y, int w, int h ) {
-	int old_x = m_rect.x;
-	int old_y = m_rect.y;
-	
+
 	if(isWidget)
 		((Widget*)this)->setRect(x,y,w,h);
 	
@@ -217,6 +232,10 @@ void Control::SetRect( int x, int y, int w, int h ) {
 }
 
 bool Control::custom_check = false;
+
+void Control::SetTooltip(std::string tooltip) {
+	this->m_style.tooltip = tooltip;
+}
 
 void Control::SetRect( Rect r ) { 
 	SetRect(r.x, r.y, r.w, r.h);
@@ -256,12 +275,12 @@ void Control::OnMouseUp( int mX, int mY ) {}
 		pos.x += m_rect.x;
 		pos.y += m_rect.y;
 		Drawing::FillRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
-		if(m_alpha != 1.0f) {
-			Drawing::SetMaxAlpha(m_alpha);
+		if(m_style.alpha != 1.0f) {
+			Drawing::SetMaxAlpha(m_style.alpha);
 		}
-		if(m_image_tex > 0) {
+		if(m_style.image_tex > 0) {
 			Drawing::TexRect(pos.x, pos.y, m_rect.w, m_rect.h, 
-				m_image_tex, m_image_repeat, m_image_size.w, m_image_size.h);
+				m_style.image_tex, m_style.image_repeat, m_style.image_size.w, m_style.image_size.h);
 		}
 		#ifdef SELECTION_MARK
 			Drawing::Rect(pos.x, pos.y, m_rect.w, m_rect.h, 
@@ -304,7 +323,7 @@ void Control::copyStyle(Control* copy_to) {
 }
 
 void Control::SetAlpha(float alpha) {
-	m_alpha = alpha;
+	m_style.alpha = alpha;
 }
 
 
@@ -398,14 +417,14 @@ Anchor Anchor::parseRect(std::string s) {
 
 void Control::SetImage(std::string image, bool repeat) {
 	SDL_Surface* surf = IMG_Load(image.c_str());
-	m_image_size.w = surf->w;
-	m_image_size.h = surf->h;
+	m_style.image_size.w = surf->w;
+	m_style.image_size.h = surf->h;
 	if(surf) {
-		m_image_tex = Drawing::GetTextureFromSurface2(surf,m_image_tex);
+		m_style.image_tex = Drawing::GetTextureFromSurface2(surf, m_style.image_tex);
 		SDL_FreeSurface(surf);
 	}
 	
-	m_image_repeat = repeat;
+	m_style.image_repeat = repeat;
 	
 }
 
@@ -431,6 +450,7 @@ void Control::SetStyle(std::string style, std::string value) {
 			m_style.background_color = Colors::ParseColor(value);
 		_case("hoverbordercolor"):
 			m_style.hoverborder_color = Colors::ParseColor(value);
+		_case("border"):
 		_case("font"): {
 			TTF_Font* f = Fonts::GetParsedFont(value);
 			if(f) {
@@ -438,6 +458,8 @@ void Control::SetStyle(std::string style, std::string value) {
 			}
 			onFontChange();
 		}
+		_case("tooltip"):
+			m_style.tooltip = value;
 		_case("image"): {
 			size_t pos = value.find(',');
 			if(pos != std::string::npos && value.substr(pos+1) == "repeat") {
@@ -445,7 +467,9 @@ void Control::SetStyle(std::string style, std::string value) {
 			} else {
 				SetImage(value, false);
 			}
-			
+		}
+		_case("draggable"): {
+			m_style.draggable = value == "true";
 		}
 			break;
 		default:

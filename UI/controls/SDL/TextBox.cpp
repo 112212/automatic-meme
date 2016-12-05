@@ -2,14 +2,14 @@
 #include <SDL2/SDL_opengl.h>
 #include <cctype> // toupper
 #include <list>
+#include "../../common/Cursor.hpp"
 
 namespace ng {
 #define NO_TEXTURE 0xffffffff
 TextBox::TextBox() : m_mousedown(false), m_position{0,0}, 
 m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
  {
-	setType( TYPE_TEXTBOX );
-	initEventVector(event::max_events);
+	setType( "textbox" );
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_cursor_blink_counter = 0;
 	m_cursor_blinking_rate = 300;
@@ -24,11 +24,11 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
 	m_color_input = false;
 	m_placeholder.text = "";
 	m_colors = true;
-	m_scrollbar=new ScrollBar();
-	// m_scrollbar->SetRect( 0, 0, 30, GetRect().h );
+	
+	m_scrollbar = new ScrollBar();
+	m_scrollbar->SetVisible(false);
 	
 	m_scrollbar->SetVertical(true);
-	
 	SetText("");
 }
 
@@ -55,7 +55,7 @@ void TextBox::Render( Point pos, bool selected ) {
 	Drawing::GetResolution(w,h);
 	
 	// TODO: tweak scissor a little
-	glScissor(r.x, h-(r.y+rect.h), rect.w, rect.h);
+	glScissor(r.x, h-(r.y+rect.h), m_line_max_width, rect.h);
 	glEnable(GL_SCISSOR_TEST);
 	
 	int j;
@@ -117,12 +117,12 @@ void TextBox::Render( Point pos, bool selected ) {
 		if(m_cursor.x >= m_position.x && m_cursor.x <= m_lines[m_cursor.y].text.size()) {
 			std::string piece = m_lines[m_cursor.y].text.substr(m_position.x, m_cursor.x-m_position.x, m_password);
 			Drawing::Rect(Fonts::getTextSize( m_style.font, piece )+r.x+5, 
-				(m_cursor.y-m_position.y)*m_line_height+r.y+5, 1, m_line_height, NO_TEXTURE);
+				(m_cursor.y-m_position.y)*m_line_height+r.y+5, 1, m_line_height, 0xffffffff);
 		}
 	}
 	
-	// TODO: position
-	m_scrollbar->Render(pos, selected);
+	if(m_scrollbar->IsVisible())
+		m_scrollbar->Render(r, selected);
 }
 
 int TextBox::m_cursor_color = NO_TEXTURE;
@@ -164,11 +164,15 @@ void TextBox::SetSelection( Point start, Point end ) {
 
 void TextBox::OnMouseUp( int x, int y ) {
 	m_mousedown = false;
+	m_scrollbar->OnMouseUp(x,y);
+	m_scrollbar_selected = false;
+	// SDL_SetCursor( Cursor::zoomCursor );
 }
 
 void TextBox::OnLostFocus() {
 	m_mousedown = false;
-	// SDL_SetCursor( Cursors::defaultCursor );
+	
+	m_scrollbar->OnLostFocus();
 }
 
 void TextBox::OnLostControl() {
@@ -208,7 +212,7 @@ void TextBox::STYLE_FUNC(value) {
 
 void TextBox::onFontChange() {
 	if(!m_style.font) return;
-	m_text_max = Fonts::getMaxTextRep( m_style.font, 'A', GetRect().w );
+	m_text_max = Fonts::getMaxTextRep( m_style.font, 'A', m_line_max_width );
 	m_line_height = TTF_FontHeight(m_style.font);
 	if(m_line_height != 0)
 		m_lines_max = GetRect().h / m_line_height;
@@ -219,8 +223,12 @@ void TextBox::onFontChange() {
 void TextBox::onPositionChange() {
 	onFontChange();
 	const Rect& r = this->GetRect();
-	int w = 30;
+	int w = 20;
+	
 	m_scrollbar->SetRect(r.w - w, 0, w, r.h);
+		
+	Rect rekt = m_scrollbar->GetRect();
+	m_line_max_width = r.w - w;
 	for(TextLine& t : m_lines) {
 		updateTexture(t);
 	}
@@ -232,9 +240,12 @@ void TextBox::OnGetFocus() {
 
 
 void TextBox::OnMouseDown( int x, int y ) {
-	// sendGuiCommand( GUI_KEYBOARD_LOCK );
 	const Rect& rect = GetRect();
-	if(check_collision(x,y)) {
+	
+	if(m_scrollbar->check_collision(x-rect.x, y-rect.y)) {
+		m_scrollbar->OnMouseDown(x - rect.x, y - rect.y);
+		m_scrollbar_selected = true;
+	} else {
 		m_cursor_blink_counter = m_cursor_blinking_rate;
 		m_locked = true;
 		Point pt;
@@ -259,26 +270,33 @@ void TextBox::OnMouseDown( int x, int y ) {
 }
 
 void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
+	const Rect& rect = GetRect();
 	if(mouseState) {
-		m_cursor_blink_counter = m_cursor_blinking_rate;
-		const Rect& rect = GetRect();
-		Point pt;
-		std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x, m_password);
-		int sz = Fonts::getTextSize( m_style.font, piece );
-		pt.y = (y-rect.y-10) / m_line_height + m_position.y;
 		
-		if(pt.y < 0) pt.y = 0;
-		else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
-		
-		pt.x = (x-rect.x-10) + sz;
-		if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text.substr(0,std::string::npos, m_password), pt.x );
-		
-		if(pt.x < 0) pt.x = 0;
-		else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
-		
-		m_cursor = pt;
-		m_cursor_max_x = m_cursor.x;
-		updatePosition();
+		if(m_scrollbar_selected) {
+			m_scrollbar->OnMouseMove(x - rect.x, y - rect.y, mouseState);
+			m_position.y = std::max(0, (int)(m_scrollbar->GetPercentageValue() * (m_lines.size() - m_lines_max) ));
+		} else {
+			m_cursor_blink_counter = m_cursor_blinking_rate;
+			
+			Point pt;
+			std::string piece = m_lines[m_cursor.y].text.substr(0, m_position.x, m_password);
+			int sz = Fonts::getTextSize( m_style.font, piece );
+			pt.y = (y-rect.y-10) / m_line_height + m_position.y;
+			
+			if(pt.y < 0) pt.y = 0;
+			else if(pt.y > m_lines.size()-1) pt.y = m_lines.size()-1;
+			
+			pt.x = (x-rect.x-10) + sz;
+			if(pt.x > 0) pt.x = Fonts::getMaxText( m_style.font, m_lines[pt.y].text.substr(0,std::string::npos, m_password), pt.x );
+			
+			if(pt.x < 0) pt.x = 0;
+			else if(pt.x > m_lines[pt.y].text.size()) pt.x = m_lines[pt.y].text.size();
+			
+			m_cursor = pt;
+			m_cursor_max_x = m_cursor.x;
+			updatePosition();
+		}
 	}
 }
 
@@ -301,9 +319,9 @@ void TextBox::updatePosition() {
 	} else {
 		
 		if(m_position.x > line.text.size()) {
-			m_text_max = Fonts::getMaxTextBw(m_style.font, line.text.substr(0,std::string::npos, m_password), rect.w-20);
+			m_text_max = Fonts::getMaxTextBw(m_style.font, line.text.substr(0,std::string::npos, m_password), m_line_max_width-20);
 		} else {
-			m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x, std::string::npos, m_password), rect.w-20);
+			m_text_max = Fonts::getMaxText(m_style.font, line.text.substr(m_position.x, std::string::npos, m_password), m_line_max_width-20);
 		}
 		
 		if(m_cursor.x > m_position.x + m_text_max ) {
@@ -313,9 +331,7 @@ void TextBox::updatePosition() {
 			m_position.x = m_cursor.x;
 		}
 	}
-	
-	
-	
+
 	if(m_cursor.y < m_position.y) {
 		m_position.y = m_cursor.y;
 	} else if(m_cursor.y >= m_position.y + m_lines_max) {
@@ -426,6 +442,12 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 	m_cursor_blink_counter = m_cursor_blinking_rate;
 	switch(val) {
 		case SDLK_BACKSPACE: {
+				if(mod & KMOD_CTRL && m_anchor.x == -1) {
+					// set selection to one word before cursor
+					auto &line = m_lines[m_cursor.y].text;
+					m_anchor = m_cursor;
+					while(--m_anchor.x > 0 && !( !isspace(line[m_anchor.x]) && isspace(line[m_anchor.x-1])) );
+				}
 				backspace();
 			}
 			break;
@@ -436,7 +458,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				m_anchor = m_cursor;
 			}
 			if(m_cursor.x > 0) {
-				if(mod & KMOD_LCTRL) {
+				if(mod & KMOD_CTRL) {
 					auto &line = m_lines[m_cursor.y].text;
 					while(--m_cursor.x > 0 && !( !isspace(line[m_cursor.x]) && isspace(line[m_cursor.x-1])) );
 				} else {
@@ -455,7 +477,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			}
 			
 			if(m_cursor.x < m_lines[m_cursor.y].text.size()) {
-				if(mod & KMOD_LCTRL) {
+				if(mod & KMOD_CTRL) {
 					auto &line = m_lines[m_cursor.y].text;
 					while(++m_cursor.x < line.size() && !(m_cursor.x-1 >= 0 && 
 						!isspace(line[m_cursor.x-1]) && isspace(line[m_cursor.x])));
@@ -764,6 +786,12 @@ void TextBox::PutTextAtCursor(std::string text) {
 	m_cursor_max_x = m_cursor.x;
 	
 	updatePosition();
+	
+	if(m_lines_max+1 < m_lines.size()) {
+		m_scrollbar->SetVisible(true);
+	} else {
+		m_scrollbar->SetVisible(false);
+	}
 }
 
 void TextBox::OnMWheel( int updown ) {
@@ -793,7 +821,7 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 		std::string sub;
 		do {
 			sub = line.substr(last_pos);
-			max_text = Fonts::getMaxText(m_style.font, sub, GetRect().w-15);
+			max_text = Fonts::getMaxText(m_style.font, sub, m_line_max_width-15);
 			
 			if(m_wordwrap && max_text != sub.size()) {
 				int s = max_text;
@@ -828,7 +856,7 @@ void TextBox::compact_lines(std::vector<TextLine>& v, std::vector<TextLine>::ite
 	auto n = it+1;
 	auto last_it = it;
 	for(; n != v.end() && n->wrap; it++,n++) {
-		int can_offer = Fonts::getMaxText(m_style.font, n->text.str(), GetRect().w - it->w - 16);
+		int can_offer = Fonts::getMaxText(m_style.font, n->text.str(), m_line_max_width - it->w - 16);
 		if(m_wordwrap && can_offer < n->text.size()) {
 			while(can_offer > 0 && n->text[can_offer] != ' ')
 				can_offer--;
@@ -890,7 +918,7 @@ void TextBox::SetTextWrap(bool wrap) {
 			
 			do {
 				std::string sub = line.text.substr(last_pos);
-				max_text = Fonts::getMaxText(m_style.font, sub, GetRect().w-15);
+				max_text = Fonts::getMaxText(m_style.font, sub, m_line_max_width-15);
 				if(m_wordwrap && max_text != sub.size()) {
 					int s = max_text;
 					for(; s >= 0; s--) {
@@ -942,10 +970,8 @@ void TextBox::SetTextWrap(bool wrap) {
 }
 
 TextBox* TextBox::Clone() {
-	TextBox* t = new TextBox;
-	*t = *this;
-	t->m_lines.clear();
-	t->SetText("");
+	TextBox* t = new TextBox();
+	copyStyle(t);
 	return t;
 }
 

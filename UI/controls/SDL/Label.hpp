@@ -23,9 +23,15 @@
 
 #include "../../Control.hpp"
 namespace ng {
+enum Alignment {
+	left,
+	right,
+	center
+};
 class Label : public Control {
 	private:
 		std::string m_text;
+		Alignment m_alignment;
 		
 		struct TextLine{
 			Uint32 tex;
@@ -33,9 +39,7 @@ class Label : public Control {
 		};
 		
 		std::vector<TextLine> text_lines;
-		
 		void STYLE_FUNC(value);
-		
 		void Render( Point pos, bool isSelected );
 	public:
 		Label();
@@ -43,6 +47,7 @@ class Label : public Control {
 
 		Control* Clone();
 		void SetText( std::string text );
+		void SetAlignment( Alignment alignment );
 };
 }
 #endif

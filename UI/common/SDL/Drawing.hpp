@@ -16,6 +16,7 @@ namespace Drawing {
 	void Line(int xA, int yA, int xB, int yB, unsigned int color);
 	void VLine(int x1, int y1, int y2, unsigned int color);
 	void SetMaxAlpha(float _max_alpha);
+	void SetRotation(float rotation);
 
 	unsigned int GetTextureFromSurface(SDL_Surface* surface, unsigned int textureID);
 	unsigned int GetTextureFromSurface2(SDL_Surface* surface, unsigned int textureID);

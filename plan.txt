@@ -148,9 +148,8 @@ TODO:
 + 	copy & paste for textbox
 + 	anchoring (group anchor, single element anchor)
 +	theme loader (default values)
--	xml defining borders, background color polygon or image and its bounding area (clickable area)
+-	xml defining borders, defining selection by background alpha
 +	new control registration to xml
--	resizable widget
 +	setting font by parsing it
 -	implement default font directory for linux and windows and make it as search path for fonts
 +	tabbing for textbox and button
@@ -159,34 +158,46 @@ TODO:
 +	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 +	recursive theme (define theme for textboxes inside terminal for example)
 +	textbox password masking (asteriks)
--	effects widget (supporting effects like fadeout or blinking or whatever ...)
--	textbox scrollbar *********
 -	support for unicode in textbox
 +	terminal: arrow up brings text from history
 +	textbox and terminal CTRL + left(right) arrow for jumping over words
--	label rotate
--	label textalign (left, right, center)
++	label textalign (left, right, center)
++	clone check for every function to exist
++	added OnEvent alias to SubscribeEvent function
++	separate SDL and SFML controls
+-	drag n drop file to gui (SDL_DropEvent)
 
 OpenGL port of controls:
 - 	GridContainer
 - 	TabContainer
 
 TO FIX:
-	Anchoring
+	- Anchoring
+
+; controls to check for Clone and setType and events
++ Button.cpp
++ Canvas.cpp
++ CheckBox.cpp
++ ComboBox.cpp
++ Container.cpp
+- Dialog.cpp
+- GridContainer.cpp
++ Label.cpp
++ ListBox.cpp
++ RadioButton.cpp
++ ScrollBar.cpp
+- TabContainer.cpp
++ Terminal.cpp
++ TextBox.cpp
++ TrackBar.cpp
++ WidgetMover.cpp
 
 ---------------------------
 New Features in new version
 ---------------------------
 
-; config
-<config>
-	<option name="tooltip_delay" value="10" />
-	<option name="use_stencil" value="true" />
-</config>
-
 ; polygonal dimensions
 	SetPolygon() instead of SetRect ...
-	xml: polygon="" instead of rect=""
 	sizeVertical()
 	sizeHorizontal()
 	sizeLine()
@@ -199,29 +210,38 @@ New Features in new version
 	; playing effect or animation
 	PlayEffect("effect name", {"effect params"}, std::function call_after_effect_finished)
 	; shader postprocessing effect	
-	; animated image
-	effect="effect1 {speed=10,offset=10},
-			effect2, effect3, ..."
+	; animated image (.gif or so)
+	effect="effect1 {speed=10,offset=10};
+			effect2; effect3, ..."
+
+; - basic event scripting
+			
+; - sound effects
+
+; - grid container
+
+; - tab container
+
+; - changing styles on event
 
 ;;; first ------------
-; textbox scrollbar
+; + textbox scrollbar
 
-; draggable
+; + draggable
 	control may allow dragging and use OnDrag function
 
-; widget resizer
+; + widget resizer
 	widget resizer control to put anywhere in widget
 
-; tooltips
+; * tooltips
 	tooltip="whatever text"
+	tooltip control which can be modified
 
-; rotate on all controls
+; - rotate on all controls
 
-; grid container
+; + all events are now global (except some custom events which may be added to some controls)
+	ng::event::* and not ng::TextBox::event::*
 
-; tab container
-
-; all events are now global (not namespaced)
-ng::event::* and not ng::TextBox::event::*
+; * cursor
 
 ---------------------------

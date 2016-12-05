@@ -18,31 +18,36 @@
 // MA 02110-1301, USA.
 // 
 // 
-#ifndef NG_LABEL_HPP
-#define NG_LABEL_HPP
-#ifdef USE_SDL
-	#include "SDL/Label.hpp"
-#elif USE_SFML
-#include "../Control.hpp"
+#ifndef SDL_NG_LABEL_HPP
+#define SDL_NG_LABEL_HPP
+
+#include "../../Control.hpp"
 namespace ng {
+enum Alignment {
+	left,
+	right,
+	center
+};
 class Label : public Control {
 	private:
-		std::vector<sf::Text> m_texts;
 		std::string m_text;
-		int line_height;
-		unsigned int characterSize;
-		sf::Font fnt;
-		void onPositionChange();
+		Alignment m_alignment;
 		
+		struct TextLine{
+			Uint32 tex;
+			int w,h;
+		};
+		
+		std::vector<TextLine> text_lines;
+		void STYLE_FUNC(value);
+		void Render( Point pos, bool isSelected );
 	public:
 		Label();
 		~Label();
-		
-		void Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected );
-		
-		void SetText( const char* text );
-		void SetFont( const char* text, int size );
+
+		Control* Clone();
+		void SetText( std::string text );
+		void SetAlignment( Alignment alignment );
 };
 }
-#endif
 #endif
