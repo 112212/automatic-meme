@@ -242,7 +242,7 @@ SDL_Surface* Colorstring::get_surface(TTF_Font* font, int color, bool passw) {
 		if(last_pos >= m_str.size()) break;
 		std::string s = m_str.substr(last_pos, i.pos-last_pos);
 		if(s.size() > 0) {
-			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
+			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.empty() ? " " : s.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
 			SDL_BlitSurface(mini_surf, nullptr, surf, &dst);
 			dst.x += mini_surf->w;
 			SDL_FreeSurface(mini_surf);
@@ -253,7 +253,7 @@ SDL_Surface* Colorstring::get_surface(TTF_Font* font, int color, bool passw) {
 	if(last_pos < m_str.size()) {
 		std::string s = m_str.substr(last_pos);
 		if(s.size() > 0) {
-			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
+			SDL_Surface* mini_surf = TTF_RenderUTF8_Blended( font, s.empty() ? " " : s.c_str(), Colors::toSDL_Color(i_colormap[last_color]) );
 			SDL_BlitSurface(mini_surf, nullptr, surf, &dst);
 			dst.x += mini_surf->w;
 			SDL_FreeSurface(mini_surf);

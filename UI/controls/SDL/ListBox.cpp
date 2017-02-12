@@ -61,11 +61,11 @@ void ListBox::AddItem( std::string item ) {
 	updateBox();
 }
 
-void ListBox::OnMouseDown( int mX, int mY ) {
+void ListBox::OnMouseDown( int mX, int mY, MouseButton which_button ) {
 	m_is_mouseDown = true;
 	if(m_drawscrollbar) {
 		if( isOnScrollbar( mX, mY ) ) {
-			m_scrollbar->OnMouseDown( mX, mY );
+			m_scrollbar->OnMouseDown( mX, mY, which_button );
 			m_scrollbar_focus = true;
 			m_last_scroll = m_scrollbar->GetValue();
 			return;
@@ -80,11 +80,11 @@ void ListBox::OnMouseDown( int mX, int mY ) {
 	int tmp = (mY - GetRect().y)/m_font_height + getListOffset();
 	if(tmp != m_selected_index) {
 		m_selected_index = tmp;
-		emitEvent( event::change );
+		emitEvent( "change" );
 	}
 }
 
-void ListBox::OnMouseUp( int mX, int mY ) {
+void ListBox::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 	m_is_mouseDown = false;
 }
 
@@ -227,7 +227,7 @@ void ListBox::SetSelectedIndex( int index ) {
 	m_selected_index = index;
 }
 
-void ListBox::STYLE_FUNC(value) {
+void ListBox::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetSelectedIndex(std::stoi(value));

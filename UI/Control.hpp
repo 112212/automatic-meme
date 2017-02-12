@@ -23,27 +23,40 @@
 namespace ng {
 
 
+//
+#define STYLE_FUNC(value) OnSetStyle(std::string& style, std::string& value)
+#define STYLE_SWITCH switch(hash(style.c_str()))
+#define _case(a) break; case hash(a)
+//
+
 struct Anchor {
 	Point coord;
 	float x,y;
 	float W,w,H,h;
-	float sW,sH;
-	float sx,sy;
-	bool isrelative;
-	int ax,ay;
+	
+	// TODO: remove
+	// float sW,sH;
+	// float sx,sy;
+	
+	bool absolute_coordinates;
+	
+	// only for widgets
+	enum SizeFunction {
+		none,
+		keep,
+		fit,
+		expand
+	};
+	SizeFunction w_func;
+	SizeFunction h_func;
+	float w_min[2];
+	float w_max[2];
+	float h_min[2];
+	float h_max[2];
+	
 	Anchor& operator+=(const Anchor& b);
 	friend std::ostream& operator<< (std::ostream& stream, const Anchor& anchor);
 	static Anchor parseRect(std::string s);
-};
-
-enum event {
-	click,
-	hover,
-	enter,
-	change,
-	submit,
-	drag,
-	max_default_events
 };
 
 // used from within controls
@@ -65,6 +78,30 @@ struct Event;
 
 class GuiEngine;
 
+enum MouseButton {
+	BUTTON_LEFT,
+	BUTTON_MIDDLE,
+	BUTTON_RIGHT,
+	BUTTON_X1,
+	BUTTON_X2
+};
+
+typedef const std::vector<std::string> Argv;
+struct Event {
+	Event(std::string& event_id, std::string function_name) {
+		this->event_id = event_id;
+		this->function_name = function_name;
+	}
+	std::string event_id;
+	std::vector<std::string> args;
+	
+	Control* control;
+	std::string function_name;
+};
+
+
+
+typedef std::function<void(Control*, Argv&)> EventCallback;
 class Control {
 	private:
 		bool isWidget;
@@ -77,7 +114,9 @@ class Control {
 		bool visible;
 		bool interactible;
 		std::string id;
-		std::vector< std::pair<event, std::function<void(Control*)> > > subscribers;
+		
+		// vector of pair (event_type, function)
+		std::vector< Event > subscribers;
 		Anchor anchor;
 		Rect m_rect;
 		
@@ -92,7 +131,7 @@ class Control {
 	protected:
 		int z_index;
 		
-		struct ControlStyle {			
+		struct ControlStyle {
 			int border_color;
 			int hoverborder_color;
 			int background_color;
@@ -113,7 +152,7 @@ class Control {
 		
 		// functions used by controls
 		void setType(const char* type);
-		void emitEvent( int EventID );
+		void emitEvent( std::string event_id, Argv& args = {} );
 		void sendGuiCommand( int eventId );
 		bool isSelected();
 		bool isActive();
@@ -125,7 +164,6 @@ class Control {
 		inline GuiEngine* getEngine() { return engine; }
 		
 		void setInteractible(bool interactible);
-		
 		
 		const std::vector<Control*>& getParentControls();
 		const std::vector<Control*>& getWidgetControls();
@@ -147,9 +185,10 @@ class Control {
 			virtual void OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod );
 		#endif
 		
+		
 		virtual void OnMouseMove( int mX, int mY, bool mouseState );
-		virtual void OnMouseDown( int mX, int mY );
-		virtual void OnMouseUp( int mX, int mY );
+		virtual void OnMouseDown( int mX, int mY, MouseButton which_button );
+		virtual void OnMouseUp( int mX, int mY, MouseButton which_button );
 		virtual void OnLostFocus();
 		virtual void OnGetFocus();
 		virtual void OnLostControl();
@@ -204,8 +243,7 @@ class Control {
 		bool IsSelected();
 		bool IsDraggable() { return m_style.draggable; }
 		
-		void SubscribeEvent( event event_type, std::function<void(Control*)> callback );
-		void OnEvent( event event_type, std::function<void(Control*)> callback );
+		void OnEvent( std::string event_type, EventCallback callback );
 };
 }
 #endif

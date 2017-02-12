@@ -32,7 +32,7 @@ class TrackBar : public Control {
 		bool canChange();
 		TTF_Font* m_font;
 		Uint32 tex_text;
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 		
 	public:
 	
@@ -42,7 +42,7 @@ class TrackBar : public Control {
 		TrackBar* Clone();
 		void Render( Point pos, bool isSelected );
 		void OnMouseMove( int mX, int mY, bool mouseState );
-		void OnMouseDown( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton button );
 		void OnLostFocus();
 		void OnLostControl();
 		

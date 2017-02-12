@@ -12,7 +12,7 @@ class Form : public Widget {
 	private:
 		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
-				emitEvent(event::submit);
+				emitEvent("submit");
 				intercept();
 			}
 		}

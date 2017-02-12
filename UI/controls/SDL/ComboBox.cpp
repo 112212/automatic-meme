@@ -42,12 +42,12 @@ ComboBox::~ComboBox() {
 
 
 
-void ComboBox::OnMouseDown( int mX, int mY ) {
+void ComboBox::OnMouseDown( int mX, int mY, MouseButton which_button ) {
 	const Rect& r = GetRect();
 	if(m_is_opened) {
 		if(m_drawscrollbar) {
 			if( isOnScrollbar( mX, mY ) ) {
-				m_scrollbar->OnMouseDown( mX, mY );
+				m_scrollbar->OnMouseDown( mX, mY, which_button );
 				m_virtual_selected_index = -1;
 				m_scrollbar_focus = true;
 				m_last_scroll = m_scrollbar->GetValue();
@@ -67,7 +67,7 @@ void ComboBox::OnMouseDown( int mX, int mY ) {
 				if(absolute_selection != m_selected_index) {
 					m_selected_index = absolute_selection;
 					updateSelection();
-					emitEvent( event::change );
+					emitEvent( "change" );
 				}
 				
 				m_is_opened = false;
@@ -90,7 +90,7 @@ void ComboBox::OnMouseDown( int mX, int mY ) {
 				if( mY > r.y && mY < r.y + r.h ) {
 					sendGuiCommand( GUI_KEYBOARD_LOCK );
 					m_textbox_focus = true;
-					m_textbox->OnMouseDown( mX, mY );
+					m_textbox->OnMouseDown( mX, mY, which_button );
 				}
 			}
 		}
@@ -109,10 +109,10 @@ void ComboBox::OnMouseDown( int mX, int mY ) {
 	m_is_mouseDown = true;
 }
 
-void ComboBox::OnMouseUp( int x, int y ) {
+void ComboBox::OnMouseUp( int x, int y, MouseButton which_button ) {
 	m_is_mouseDown = false;
 	if(m_is_textbox_mode) {
-		m_textbox->OnMouseUp( x, y );
+		m_textbox->OnMouseUp( x, y, which_button );
 	}
 }
 
@@ -445,7 +445,7 @@ Control* ComboBox::Clone() {
 	return cb;
 }
 
-void ComboBox::STYLE_FUNC(value) {
+void ComboBox::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetSelectedIndex(std::stoi(value));

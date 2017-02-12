@@ -17,9 +17,9 @@ class Button : public Control {
 		
 		void onPositionChange();
 		void update_text();
-		void STYLE_FUNC(value);
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnSetStyle(std::string& style, std::string& value);
+		void OnMouseDown( int mX, int mY, MouseButton which_button );
+		void OnMouseUp( int mX, int mY, MouseButton which_button );
 		void OnLostFocus();
 		void OnGetFocus();
 		void onFontChange();

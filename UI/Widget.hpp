@@ -21,7 +21,7 @@ class Widget : public Control, public ControlManager  {
 		#endif
 		Control* selected_control;
 		Point cached_absolute_offset;
-		
+		Size min, max;
 		Point offset;
 		void setRect( int x, int y, int w, int h );
 	protected:
@@ -46,8 +46,8 @@ class Widget : public Control, public ControlManager  {
 		
 		Control* Clone();
 		void OnMouseMove( int mX, int mY, bool mouseState ){}
-		void OnMouseDown( int mX, int mY ){}
-		void OnMouseUp( int mX, int mY ){}
+		void OnMouseDown( int mX, int mY, MouseButton button ){}
+		void OnMouseUp( int mX, int mY, MouseButton button ){}
 		void OnLostFocus(){}
 		void OnGetFocus(){}
 		void OnLostControl(){}

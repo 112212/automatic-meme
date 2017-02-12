@@ -116,7 +116,7 @@ Control* Label::Clone() {
 	return l;
 }
 
-void Label::STYLE_FUNC(value) {
+void Label::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value.c_str());
@@ -129,5 +129,9 @@ void Label::STYLE_FUNC(value) {
 				SetAlignment( Alignment::center );
 			break;
 	}
+}
+
+void Label::SetRotation(int angle) {
+	m_angle = angle;
 }
 }

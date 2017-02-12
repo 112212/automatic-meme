@@ -8,6 +8,8 @@
 #include <list>
 #include <fstream>
 
+#include <iostream>
+
 namespace ng {
 	
 namespace XmlLoader {
@@ -188,83 +190,176 @@ void ControlManager::removeControlFromCache(Control* control) {
 }
 
 void ControlManager::ApplyAnchoring() {
-	std::map<Point,std::list<Control*>> grouping;
+	if(controls.empty()) return;
+	bool w_auto = false, h_auto = false;
 	int wres, hres;
+	bool any_auto = false;
+	int wmax = 0;
 	if(this_widget) {
+		std::cout << "widget " << this_widget->GetId() << " >>\n";
 		const Rect &r = this_widget->GetRect();
-		wres = r.w;
-		hres = r.h;
-	} else {
-		Drawing::GetResolution(wres, hres);	
-	}
-	for(Control* control : controls) {
-		const Anchor &a = control->GetAnchor();
-		const Rect &r = control->GetRect();
-		control->SetRect( 0, 0, a.sx == 0 && a.sW == 0 ? r.w : wres * a.sW + a.sx,
-								a.sy == 0 && a.sH == 0 ? r.h : hres * a.sH + a.sy );
-		Point p(a.W * wres, 
-				a.H * hres);
-		if(a.isrelative) {
-			grouping[p].push_back(control);
-		} else {
-			control->SetPosition(p.x + a.w * r.w + a.x, 
-								 p.y + a.h * r.h + a.y);
+		const Anchor &a = this_widget->GetAnchor();
+		
+		// resolve wres
+		if(a.w_func != Anchor::SizeFunction::none) {
+			w_auto = true;
+		}
+		wres = std::min<int>(std::max<int>(this_widget->min.w, r.w), this_widget->max.w);
+		
+		wmax = this_widget->max.w;
+		
+		this_widget->m_rect.w = wres;
+		
+		// resolve hres
+		if(a.h_func != Anchor::SizeFunction::none) {
+			h_auto = true;
 		}
 		
-		if(control->IsWidget()) reinterpret_cast<Widget*>(control)->ApplyAnchoring();
+		hres = std::min<int>(std::max<int>(this_widget->min.h, r.h), this_widget->max.h);
+		
+		this_widget->m_rect.h = hres;
+		
+		any_auto = w_auto || h_auto;
+	} else {
+		std::cout << "root >>\n";
+		Drawing::GetResolution(wres, hres);
+		wmax = wres;
 	}
 	
-	for(auto &kv : grouping) {
-		const Point &pt = kv.first;
-		std::list<Control*> &l = kv.second;
+	// sort controls by coords
+	std::sort(controls.begin(), controls.end(), [](Control* ca, Control* cb) {
+		const Point &p1 = ca->GetAnchor().coord;
+		const Point &p2 = cb->GetAnchor().coord;
+		return p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x);
+	});
+	
+	int lasty = 0;
+	int min_x = 0, min_y = 0;
+	int max_x = min_x, max_y = min_y;
+	
+	// corner points for auto
+	Point c2=Point(0,0);
+	for(Control* c : controls) {
 		
-		l.sort([](Control* a, Control* b) -> bool {
-			const Point &p1 = a->GetAnchor().coord;
-			const Point &p2 = b->GetAnchor().coord;
-			return p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x);
-		});
+		const Anchor &a = c->GetAnchor();
+		const Rect &r = c->GetRect();
+		const Point &p = a.coord;
 		
-		int lastx = 0, lasty = 0;
-		int min_x = pt.x, min_y = pt.y;
-		int max_x = min_x, max_y = min_y;
-		for(Control* c : l) {
-			const Anchor& a = c->GetAnchor();
-			const Rect &r = c->GetRect();
-			const Point &p = a.coord;
-			if(p.y != lasty || (
-			(a.ax >= 0 && max_x + a.x + r.w > wres) ||
-			(a.ax < 0 && max_x - a.x - r.w < 0))) {
-				lasty = p.y;
-				lastx = 0;
-				max_x = min_x;
-				min_y = max_y;
-			}
-			int yc = (a.ay >= 0) ? (a.y + a.h*r.h) : (- r.h - a.y - a.h*r.h);
-			if(a.ax >= 0) {
-				c->SetPosition(max_x + a.x, min_y + yc);
-				max_x += a.x + r.w;
-			} else {
-				c->SetPosition(max_x - a.x - r.w, min_y + yc);
-				max_x -= a.x + r.w;
-			}
-				
+		int w,h;
+		// calculate min, max of this control if its widget
+		if(c->IsWidget()) {
+			Widget* widget = reinterpret_cast<Widget*>(c);
 			
-			if(a.ay >= 0) {
-				max_y = std::max<int>(min_y + yc + r.h, max_y);
-			} else {
-				max_y = std::min<int>(min_y + yc, max_y);
+			widget->min.w = a.w_min[0] + a.w_min[1] * wres;
+			widget->max.w = a.w_max[0] + a.w_max[1] * wres;
+			
+			widget->min.h = a.h_min[0] + a.h_min[1] * hres;
+			widget->max.h = a.h_max[0] + a.h_max[1] * hres;
+		}
+		
+		if(c->IsWidget()) {
+			Widget* widget = reinterpret_cast<Widget*>(c);
+			widget->ApplyAnchoring();
+		} else {
+			
+			w = (a.w_min[0] == 0 && a.w_min[1] == 0) ? r.w : (wres * a.w_min[1]) + a.w_min[0];
+			h = (a.h_min[0] == 0 && a.h_min[1] == 0) ? r.h : (hres * a.h_min[1]) + a.h_min[0];
+			c->SetRect( 0, 0, w, h );
+			
+		}
+
+		// control forced on next line or overflow
+		if( !a.absolute_coordinates && (p.y != lasty || (max_x + a.x + r.w > wmax)) ) {
+			lasty = p.y;
+			std::cout << c->GetId() << " NEW ROW\n";
+			
+			// starts at x beginning (min_x)
+			max_x = min_x;
+			
+			// at new row
+			min_y = max_y;
+		}
+		
+		// std::cout << c->GetId() << ": " << r.x << ", " << r.y << ", " << r.w << ", " << r.h << "\n";
+		
+		// x + w * width + W * parent_width
+		int xc = a.x + (a.w * r.w) + (a.W * wres);
+		
+		// y + h * height + H * parent_height
+		int yc = a.y + (a.h * r.h) + (a.H * hres);
+		
+		if(a.absolute_coordinates) {
+			// TODO: defer if anchor and needed
+			c->SetPosition(xc, yc);
+			std::cout << "ABSOLUTE\n";
+		} else {
+			c->SetPosition(max_x + xc, min_y + yc);
+			
+			max_x += xc + r.w;
+			max_y = std::max<int>(min_y + yc + r.h, max_y);
+		}
+		
+		if(any_auto) {
+			// auto max
+			if(w_auto) {
+				c2.x = std::max<int>(c2.x, r.x + r.w);
 			}
-			lastx++;
+			
+			if(h_auto) {
+				c2.y = std::max<int>(c2.y, r.y + r.h);
+			}
 		}
 	}
+	
+	// if widget with auto sizes, must calculate it
+	if(this_widget && any_auto) {
+		const Rect &r = this_widget->GetRect();
+		const Anchor &a = this_widget->GetAnchor();
+		
+		int w = r.w;
+		int h = r.h;
+		int x = r.x;
+		int y = r.y;
+		
+		if(w_auto) {
+			if(a.w_func == Anchor::SizeFunction::fit) {
+				w = c2.x;				
+			} else if(a.w_func == Anchor::SizeFunction::expand) {
+				w = std::max<int>(w, c2.x);
+			}
+			x += a.w*w;
+			std::cout << "AUTO x " << x << ", " << w << "\n";
+		}
+		
+		if(h_auto) {
+			if(a.h_func == Anchor::SizeFunction::fit) {
+				h = c2.y;				
+			} else if(a.h_func == Anchor::SizeFunction::expand) {
+				h = std::max<int>(h, c2.y);
+			}
+			y += a.h*h;
+			std::cout << "AUTO y " << y << ", " << h << "\n";
+		}
+		
+		// TODO: clip w, h with min, max
+		this_widget->SetRect(x, y, w, h);
+	}
+	
+	// TODO: process deferred stuff
+	
+	std::cout << "<< leaving " << (this_widget ? this_widget->GetId() : "root") << "\n";
+	
 }
+
 
 void ControlManager::LoadXml(std::string xml_filename) {
 	XmlLoader::LoadXml(this_engine, this_widget, xml_filename);
+	ApplyAnchoring();
 }
 
 void ControlManager::LoadXml(std::istream& stream) {
 	XmlLoader::LoadXml(this_engine, this_widget, stream);
+	ApplyAnchoring();
 }
 
 void ControlManager::RegisterControl(std::string tag, std::function<Control*()> control_constructor) {
@@ -385,10 +480,12 @@ namespace XmlLoader {
 		}
 	}
 	
+	// TODO: remove anchor tag
 	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node, Anchor anchor) {
 		Control* control = nullptr;
 		Point c{0,0};
 		for(; node; node = node->next_sibling()) {
+			/*
 			if(!strcmp(node->name(), "anchor")) {
 				Anchor anchor1{{0,0},0};
 				bool relative = false;
@@ -405,7 +502,8 @@ namespace XmlLoader {
 				anchor1.isrelative |= relative;
 				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
 				continue;
-			} else if(!strcmp(node->name(), "theme")) {
+			} else */
+			if(!strcmp(node->name(), "theme")) {
 				if(node->first_attribute() && !strcmp(node->first_attribute()->name(), "prefix") ) {
 					loadTheme(node->first_attribute()->value(), node->first_node());
 				} else {
@@ -469,6 +567,7 @@ namespace XmlLoader {
 			return;
 		}
 		loadXmlRecursive(engine, widget, doc.first_node("gui")->first_node(), {{0,0},0});
+		
 		
 		delete[] data;
 	}

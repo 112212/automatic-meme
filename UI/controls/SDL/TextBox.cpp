@@ -162,9 +162,9 @@ void TextBox::SetSelection( Point start, Point end ) {
 }
 
 
-void TextBox::OnMouseUp( int x, int y ) {
+void TextBox::OnMouseUp( int x, int y, MouseButton button ) {
 	m_mousedown = false;
-	m_scrollbar->OnMouseUp(x,y);
+	m_scrollbar->OnMouseUp(x,y,button);
 	m_scrollbar_selected = false;
 	// SDL_SetCursor( Cursor::zoomCursor );
 }
@@ -180,7 +180,7 @@ void TextBox::OnLostControl() {
 }
 
 
-void TextBox::STYLE_FUNC(value) {
+void TextBox::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value);
@@ -239,11 +239,11 @@ void TextBox::OnGetFocus() {
 }
 
 
-void TextBox::OnMouseDown( int x, int y ) {
+void TextBox::OnMouseDown( int x, int y, MouseButton button ) {
 	const Rect& rect = GetRect();
 	
 	if(m_scrollbar->check_collision(x-rect.x, y-rect.y)) {
-		m_scrollbar->OnMouseDown(x - rect.x, y - rect.y);
+		m_scrollbar->OnMouseDown(x - rect.x, y - rect.y, button);
 		m_scrollbar_selected = true;
 	} else {
 		m_cursor_blink_counter = m_cursor_blinking_rate;
@@ -338,8 +338,6 @@ void TextBox::updatePosition() {
 		m_position.y = m_cursor.y - m_lines_max + 1;
 	}
 }
-
-
 
 void TextBox::updateTexture(TextLine& line, bool new_tex) {
 	if(line.tex == NO_TEXTURE)
@@ -548,7 +546,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			break;
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER: {
-				emitEvent( event::enter );
+				emitEvent( "enter" );
 				PutTextAtCursor("\n");
 			}
 			break;
@@ -593,7 +591,7 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 				}
 			}
 			
-			emitEvent( event::change );
+			emitEvent( "change" );
 			break;
 		}
 	}

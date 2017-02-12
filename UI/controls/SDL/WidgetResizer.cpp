@@ -12,12 +12,12 @@ void WidgetResizer::OnMouseMove( int mX, int mY, bool mouseState ) {
 		wgt->SetRect( r.x, r.y, last_rect.w + (mX - last_pos.x), last_rect.h + (mY - last_pos.y) );
 	}
 }
-void WidgetResizer::OnMouseDown( int mX, int mY ) {
+void WidgetResizer::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(!getWidget()) return;
 	last_rect = getWidget()->GetRect();
 	last_pos = {mX,mY};
 }
-void WidgetResizer::OnMouseUp( int mX, int mY ) {
+void WidgetResizer::OnMouseUp( int mX, int mY, MouseButton button ) {
 	
 }
 

@@ -22,7 +22,7 @@ void Button::onFontChange() {
 }
 
 
-void Button::STYLE_FUNC(value) {
+void Button::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value);
@@ -72,18 +72,16 @@ void Button::SetText( std::string _text ) {
 	update_text();
 }
 
-void Button::OnMouseDown( int mX, int mY ) {
+void Button::OnMouseDown( int mX, int mY, MouseButton which_button ) {
 	m_is_mouseDown = true;
 	update_text();
 }
 
-void Button::OnMouseUp( int mX, int mY ) {
+void Button::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 	
 	m_is_mouseDown = false;
 	update_text();
-	if(check_collision(mX, mY)) {
-		emitEvent( event::click );
-	}
+
 }
 
 void Button::onPositionChange() {
@@ -103,7 +101,7 @@ void Button::OnKeyUp( SDL_Keycode &sym, SDL_Keymod mod ) {
 	if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
 		m_is_mouseDown = false;
 		update_text();
-		emitEvent( event::click );
+		emitEvent( "click" );
 	}
 }
 

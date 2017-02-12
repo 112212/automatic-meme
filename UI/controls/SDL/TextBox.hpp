@@ -12,7 +12,7 @@ namespace ng {
 class TextBox : public Control {
 	private:
 		struct TextLine {
-			unsigned int tex;
+			int tex;
 			int w,h;
 			// std::string text;
 			Colorstring text;
@@ -71,7 +71,7 @@ class TextBox : public Control {
 		bool m_mousedown;
 
 		void onPositionChange();
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 		
 	public:
 	
@@ -80,8 +80,8 @@ class TextBox : public Control {
 		
 		//
 		virtual void Render( Point position, bool isSelected );
-		virtual void OnMouseDown( int mX, int mY );
-		virtual void OnMouseUp( int mX, int mY );
+		virtual void OnMouseDown( int mX, int mY, MouseButton button );
+		virtual void OnMouseUp( int mX, int mY, MouseButton button );
 		virtual void OnMouseMove( int mX, int mY, bool mouseState );
 		virtual void OnLostFocus();
 		virtual void OnGetFocus();

@@ -8,6 +8,9 @@
 #include <iostream>
 #include <ratio>
 #include <chrono>
+#include "Control.hpp"
+// only for tooltip
+#include "controls/Label.hpp"
 
 namespace ng {
 GuiEngine::GuiEngine() : ControlManager(this) {
@@ -215,6 +218,10 @@ void GuiEngine::AddControl( Control* control ) {
 	map_id_control[control->id] = control;
 }
 
+/*
+	TODO: remove all events which are still in queue for this control which is being removed
+		  if its widget, then remove all children events from event queue
+*/
 void GuiEngine::RemoveControl( Control* control ) {
 	if(control->engine != this) return;
 	
@@ -226,7 +233,7 @@ void GuiEngine::RemoveControl( Control* control ) {
 	
 	map_id_control.erase(id);
 	
-	// if its widget, make sure nothi breaks
+	// if its widget, make sure nothing breaks
 	if(control->isWidget) {
 		Widget* widget = (Widget*)control;
 		
@@ -321,7 +328,7 @@ void GuiEngine::RemoveControl( Control* control ) {
 		hasIntercepted = false; 										\
 }
 
-void GuiEngine::OnMouseDown( int mX, int mY ) {
+void GuiEngine::OnMouseDown( int mX, int mY, unsigned int button ) {
 	m_mouse_down = true;
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	
@@ -337,7 +344,7 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 	active_control = selected_control;
 	if( selected_control ) {
 		if(m_focus_lock) {
-			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y ));
+			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ));
 			if(m_focus_lock)
 				return;
 			if(m_lock_once) {
@@ -347,16 +354,16 @@ void GuiEngine::OnMouseDown( int mX, int mY ) {
 		}
 
 		if( check_control_collision(selected_control, control_coords.x, control_coords.y) ) {
-			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y ));
+			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ));
 		} else {
 			unselectControl();
 			check_for_new_collision( mX, mY );
 			if(selected_control) {
 				selected_control->OnGetFocus();
-				INTERCEPT_HOOK(mouse_down, OnMouseDown( mX-sel_widget_offset.x, mY-sel_widget_offset.y ));
+				INTERCEPT_HOOK(mouse_down, OnMouseDown( mX-sel_widget_offset.x, mY-sel_widget_offset.y, (MouseButton)button ));
 			}
 		}
-	} else WIDGET_HOOK(mouse_down, OnMouseDown( mX, mY ));
+	} else WIDGET_HOOK(mouse_down, OnMouseDown( mX, mY, (MouseButton)button ));
 	active_control = selected_control;
 	if(selected_control && selected_control->IsDraggable()) {
 		dragging = true;
@@ -370,22 +377,29 @@ void GuiEngine::SetTooltipDelay(double seconds) {
 	m_tooltip_delay = seconds;
 }
 
-void GuiEngine::OnMouseUp( int mX, int mY ) {
+void GuiEngine::OnMouseUp( int mX, int mY, unsigned int button ) {
 	m_mouse_down = false;
+	
+	// ------- dragging -----
 	if(dragging) {
 		Control* dragging_control = selected_control;
 		UnselectControl();
 		check_for_new_collision(mX, mY);
 		if(last_selected_widget) {
-			dragging_control->emitEvent( event::drag );
+			dragging_control->emitEvent( "drag" );
 		}
 		dragging = false;
 		return;
 	}
+	// -----------------------
+		
 	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	if( selected_control ) {
-		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y ));
-	} else WIDGET_HOOK(mouse_up, OnMouseUp( mX, mY ));
+		if(selected_control->check_collision(control_coords.x, control_coords.y)) {
+			selected_control->emitEvent( "click", {std::to_string(control_coords.x), std::to_string(control_coords.y)} );
+		}
+		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y, (MouseButton)button ));
+	} else WIDGET_HOOK(mouse_up, OnMouseUp( mX, mY, (MouseButton)button ));
 }
 
 void GuiEngine::ShowTooltip(Control* control) {
@@ -736,17 +750,19 @@ void GuiEngine::SetRelativeMode(bool relative_mode) {
 	cursor.SetRelativeMode(relative_mode);
 }
 
-void GuiEngine::SubscribeEvent( std::string id, event event_type, std::function<void(Control*)> callback ) {
+// OnEvent function
+void GuiEngine::OnEvent( std::string id, std::string event_type, EventCallback callback ) {
 	auto it = map_id_control.find(id);
 	if(it != map_id_control.end()) {
-		it->second->SubscribeEvent(event_type, callback);
+		it->second->OnEvent(event_type, callback);
 	}
 }
-void GuiEngine::OnEvent( std::string id, event event_type, std::function<void(Control*)> callback ) {
-	auto it = map_id_control.find(id);
-	if(it != map_id_control.end()) {
-		it->second->SubscribeEvent(event_type, callback);
-	}
+
+std::map<std::string, EventCallback> GuiEngine::function_map;
+
+bool GuiEngine::AddFunction( std::string function_name, EventCallback callback ) {
+	function_map[function_name] = callback;
+	return true;
 }
 
 // ------------------------------------------------------------------------------
@@ -899,10 +915,10 @@ void GuiEngine::OnEvent( std::string id, event event_type, std::function<void(Co
 				OnKeyUp( event.key.keysym.sym, (SDL_Keymod)event.key.keysym.mod );
 				break;
 			case SDL_MOUSEBUTTONUP:
-				OnMouseUp( p.x, p.y );
+				OnMouseUp( p.x, p.y, event.button.button );
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				OnMouseDown( p.x, p.y );
+				OnMouseDown( p.x, p.y, event.button.button );
 				break;
 			case SDL_MOUSEWHEEL:
 				OnMWheel( event.wheel.y );

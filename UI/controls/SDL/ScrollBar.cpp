@@ -32,7 +32,7 @@ void ScrollBar::Render( Point pos, bool isSelected ) {
 	Control::Render(pos, isSelected);
 }
 
-void ScrollBar::STYLE_FUNC(value) {
+void ScrollBar::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetValue( std::stoi(value) );
@@ -76,7 +76,7 @@ void ScrollBar::onPositionChange() {
 	updateSlider();
 }
 
-void ScrollBar::OnMouseUp( int mX, int mY ) {
+void ScrollBar::OnMouseUp( int mX, int mY, MouseButton button ) {
 	sendGuiCommand( GUI_UNLOCK );
 }
 
@@ -86,7 +86,7 @@ ScrollBar* ScrollBar::Clone() {
 	return s;
 }
 
-void ScrollBar::OnMouseDown( int mX, int mY ) {
+void ScrollBar::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(m_is_readonly) return;
 	const Rect& rect = GetRect();
 	m_slider_click_offset = 0;
@@ -178,7 +178,7 @@ void ScrollBar::OnLostFocus() {
 void ScrollBar::onChange() {
 	m_value = getValue();
 	updateSlider();
-	emitEvent( event::change );
+	emitEvent( "change" );
 }
 
 Rect ScrollBar::getSliderRect() {
@@ -202,7 +202,7 @@ void ScrollBar::OnMWheel( int updown ) {
 	m_value = std::max<int>(m_min_value, std::min<int>(m_max_value, m_value - updown * m_mwheel_const));
 	m_slider_pix = ((m_value-m_min_value) * ( (m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size) ) / (m_max_value-m_min_value);
 	updateSlider();
-	emitEvent( event::change );
+	emitEvent( "change" );
 }
 
 void ScrollBar::setValue( int value ) {

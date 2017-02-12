@@ -4,7 +4,6 @@
 #include <vector>
 #include <queue>
 
-// #include "Control.hpp"
 #include "common/ControlManager.hpp"
 
 #ifdef USE_SFML
@@ -18,9 +17,8 @@
 #endif
 
 #include "common/Cursor.hpp"
+#include "Control.hpp"
 
-// only for tooltip
-#include "controls/Label.hpp"
 
 // ---- GUI configuration ---
 #ifndef NO_SELECTED_CONTROL_ON_TOP
@@ -35,13 +33,8 @@
 
 
 namespace ng {
-#ifdef USE_EVENT_QUEUE
-struct Event {
-	std::string id;
-	int event_type;
-	Control* control;
-};
-#endif
+	
+class Label;
 
 class GuiEngine : public ControlManager
 #ifdef USE_SFML
@@ -75,6 +68,7 @@ class GuiEngine : public ControlManager
 		// --------------------
 		
 		// -- tooltip --
+		
 		Label* m_tooltip;
 		bool m_tooltip_shown;
 		double m_tooltip_delay;
@@ -108,6 +102,13 @@ class GuiEngine : public ControlManager
 		void unselectWidget();
 		void recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove);
 		
+		#define GUIFUNC(name) \
+			void _guifunc_##name (Control* control, Argv& argv); \
+			bool _guifunc_bool_##name = GuiEngine::AddFunction( #name, (_guifunc_##name) ); \
+			void _guifunc_##name  (Control* control, Argv& argv)
+		
+		static std::map<std::string, std::function<void(Control*,Argv&)>> function_map;
+		
 		friend class Widget;
 		friend class Control;
 		
@@ -117,6 +118,8 @@ class GuiEngine : public ControlManager
 		~GuiEngine();
 		GuiEngine& operator=(GuiEngine const& o) = default;
 		GuiEngine& operator=(GuiEngine && o);
+		
+		
 		
 		#ifdef USE_SFML
 			void draw(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -159,12 +162,12 @@ class GuiEngine : public ControlManager
 			Event PopEvent();
 		#endif
 		
-		void SubscribeEvent( std::string id, event event_type, std::function<void(Control*)> callback );
-		void OnEvent( std::string id, event event_type, std::function<void(Control*)> callback );
+		static bool AddFunction( std::string function_name, EventCallback callback );
+		void OnEvent( std::string id, std::string event_type, EventCallback callback );
 		
 		// events
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, unsigned int button );
+		void OnMouseUp( int mX, int mY, unsigned int button );
 		void OnMouseMove( int mX, int mY );
 		void OnMWheel( int updown );
 };

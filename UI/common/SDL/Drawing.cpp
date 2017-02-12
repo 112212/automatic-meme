@@ -63,32 +63,24 @@ namespace Drawing {
     }
 
 	static const char* vertexShader_code =
-	"\n\
-	#version 330\n\
-	\n\
-	layout (location = 0) in vec2 position;\n\
-	layout (location = 1) in vec4 color;\n\
-	\n\
-	out vec4 inColor;\n\
-	\n\
-	void main() {\n\
-		gl_Position = vec4( position, 0.0, 1.0 );\n\
-		\n\
-		inColor = color;\n\
-	}\n\
-	";
+	"#version 330\n"
+	"layout (location = 0) in vec2 position;"
+	"layout (location = 1) in vec4 color;"
+	"out vec4 inColor;"
+	"void main() {"
+	"	gl_Position = vec4( position, 0.0, 1.0 );"
+	"	inColor = color;"
+	"}";
 
 	static const char* fragmentShader_code =
-	"#version 330\n\
-	\n\
-	in vec4 inColor;\n\
-	\n\
-	out vec4 color;\n\
-	\n\
-	void main() {\n\
-		color = vec4(inColor);\n\
-	}\n\
-	";
+	"#version 330\n"
+	"in vec4 inColor;"
+	"out vec4 color;"
+	"in vec4 gl_FragCoord;"
+
+	"void main() {"
+	"	color = vec4(inColor);"
+	"}";
 	
 	
 	

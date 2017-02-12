@@ -104,7 +104,7 @@ void TrackBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 	}
 }
 
-void TrackBar::STYLE_FUNC(value) {
+void TrackBar::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			setValue( std::stoi(value) );
@@ -132,7 +132,7 @@ void TrackBar::STYLE_FUNC(value) {
 	}
 }
 
-void TrackBar::OnMouseDown( int mX, int mY ) {
+void TrackBar::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(m_is_readonly || !canChange()) return;
 	const Rect& rect = GetRect();
 	if(m_is_vertical) {
@@ -197,7 +197,7 @@ void TrackBar::onChange() {
 		updateTextLocation();
 	}
 	
-	emitEvent( event::change );
+	emitEvent( "change" );
 }
 
 void TrackBar::updateTextLocation() {

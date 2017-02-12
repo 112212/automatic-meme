@@ -34,8 +34,8 @@ class ScrollBar : public Control {
 		
 		ScrollBar* Clone();
 		void OnMouseMove( int mX, int mY, bool mouseState );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton button );
+		void OnMouseUp( int mX, int mY, MouseButton button );
 		void OnLostFocus();
 		void OnMWheel( int updown );
 		

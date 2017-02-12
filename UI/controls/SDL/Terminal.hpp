@@ -29,7 +29,7 @@ class Terminal : public Widget {
 		void tbox_enter(Control *c);
 		void execute_command(std::string cmd);
 		void onFontChange();
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod );
 		
 	public:
@@ -48,8 +48,8 @@ class Terminal : public Widget {
 		void AppendLog(const std::string& s);
 		void Focus();
 		
-		void OnMouseDown( int x, int y );
-		void OnMouseUp( int x, int y );
+		void OnMouseDown( int x, int y, MouseButton button );
+		void OnMouseUp( int x, int y, MouseButton button );
 };
 }
 #endif

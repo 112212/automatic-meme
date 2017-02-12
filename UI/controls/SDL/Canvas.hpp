@@ -23,19 +23,20 @@ class Canvas : public Control {
 		bool maketex;
 		
 		void Render( Point pos, bool isSelected );
-		void OnMouseDown( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton which_button );
 		void OnMouseMove( int mX, int mY, bool mouseState );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseUp( int mX, int mY, MouseButton button );
 		void OnLostFocus();
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 	public:
 		Canvas();
 		~Canvas();
-		
+		Point point;
 		Canvas* Clone();
 		void RefreshTexture();
 		void PutPixel(int x, int y);
 		void SetPixelSize(int size);
+		
 		void SetBackgroundColor(int color);
 		void SetAlignToGrid(bool align) { align_to_grid = align; }
 		void DisplayGrid( bool grid ) { display_grid = grid; }

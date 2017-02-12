@@ -26,7 +26,7 @@ class Container : public Widget {
 		static int depth;
 		Widget* innerWidget;
 		
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 	public:
 		Container();
 		~Container();
@@ -35,8 +35,8 @@ class Container : public Widget {
 		
 		Container* Clone();
 		void OnMWheel( int updown );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int x, int y );
+		void OnMouseDown( int x, int y, MouseButton which_button );
+		void OnMouseUp( int x, int y, MouseButton which_button );
 		void OnMouseMove( int x, int y, bool lmb );
 		
 		void AddItem( Control* control );

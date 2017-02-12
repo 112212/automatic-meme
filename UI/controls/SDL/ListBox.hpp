@@ -47,14 +47,14 @@ class ListBox : public Control {
 		void updateBox();
 		
 		void Render( Point pos, bool isSelected );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton which_button );
+		void OnMouseUp( int mX, int mY, MouseButton which_button );
 		void OnLostFocus();
 		virtual void OnGetFocus();
 		virtual void OnMWheel( int updown );
 		void OnLostControl();
 		void OnMouseMove( int mX, int mY, bool mouseState );
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 		
 	public:
 		ListBox();

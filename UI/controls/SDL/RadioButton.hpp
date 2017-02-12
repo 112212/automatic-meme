@@ -22,10 +22,10 @@ class RadioButton : public Control {
 		void handleRadioButtonChange();
 		
 		void Render( Point pos, bool isSelected );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton button );
+		void OnMouseUp( int mX, int mY, MouseButton button );
 		void OnLostFocus();
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 	public:
 	
 		RadioButton();
@@ -37,8 +37,9 @@ class RadioButton : public Control {
 		void SetText( std::string text );
 		void SetGroup( int group ) { m_group = group; }
 		void Unselect() { m_isSelected = false; }
-		void Select() { m_isSelected = true; handleRadioButtonChange(); emitEvent( change ); }
+		void Select();
 		int GetGroup() { return m_group; }
 };
+
 }
 #endif

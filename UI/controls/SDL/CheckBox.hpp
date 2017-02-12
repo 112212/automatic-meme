@@ -20,7 +20,7 @@ class CheckBox : public Control {
 		void onPositionChange();
 		static int m_font_index;
 		void updateText();
-		void STYLE_FUNC(value);
+		void OnSetStyle(std::string& style, std::string& value);
 		
 	public:
 
@@ -29,8 +29,8 @@ class CheckBox : public Control {
 		
 		CheckBox* Clone();
 		void Render( Point pos, bool isSelected );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton which_button);
+		void OnMouseUp( int mX, int mY, MouseButton which_button );
 		void OnLostFocus();
 		
 		bool IsSelected();

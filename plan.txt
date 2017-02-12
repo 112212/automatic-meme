@@ -153,7 +153,7 @@ TODO:
 +	setting font by parsing it
 -	implement default font directory for linux and windows and make it as search path for fonts
 +	tabbing for textbox and button
--	tooltip
++	tooltip
 +	add option to limit number of characters in textbox
 +	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 +	recursive theme (define theme for textboxes inside terminal for example)
@@ -172,7 +172,6 @@ OpenGL port of controls:
 - 	TabContainer
 
 TO FIX:
-	- Anchoring
 
 ; controls to check for Clone and setType and events
 + Button.cpp
@@ -213,35 +212,66 @@ New Features in new version
 	; animated image (.gif or so)
 	effect="effect1 {speed=10,offset=10};
 			effect2; effect3, ..."
-
-; - basic event scripting
 			
-; - sound effects
++ c++ event binding, function binding
+	; event names as string or enum (problem adding new events would require mapping enum to string for usage in xml)
 
-; - grid container
+- processing events in other thread
 
-; - tab container
++ basic event scripting
+- add basic functions such as {effect, style, sound} and parameters parsing
 
-; - changing styles on event
+- problem deleting control while event didn't get handled yet (event queue and event handling in other thread)
+	; solve by mutexes, when control is deleted remove any existing things in queue
+
+- sound effects
+
+- grid container
+- tab container
+
+- changing styles on event
 
 ;;; first ------------
-; + textbox scrollbar
+* textbox scrollbar
 
-; + draggable
++ draggable
 	control may allow dragging and use OnDrag function
-
-; + widget resizer
+	
++ widget resizer
 	widget resizer control to put anywhere in widget
 
-; * tooltips
+* tooltips
 	tooltip="whatever text"
 	tooltip control which can be modified
 
-; - rotate on all controls
+- rotate on label only
+	; rotate over some given point?
 
-; + all events are now global (except some custom events which may be added to some controls)
-	ng::event::* and not ng::TextBox::event::*
++ all events are now strings
 
-; * cursor
+* cursor
+
++ anchoring fix (remove anchor tag)
+	
+- Canvas layering
+	; put line, circle, whatever into canvas
+	; instant clear layer by swapping bit (xor)
+	; layer bit shows ...
+	; special shader for rendering layered canvas
+
++ don't use macro STYLE_FUNC its ugly
+
+------------------
+use max width as next row trigger (expand)
+use current
+
+relative children use current but clipped parent size
+absolute (non-determined size) children use new parent size calculated from other relatives and determined absolutes
+then parent might or might not get resized later
+then min, max is used only for clipping or optionally fitting or expanding
+rect="25, 546, k(2,6), e(4,7)"
+
+fitting as default
+
 
 ---------------------------

@@ -33,7 +33,6 @@ interactible(true), visible(true), anchor({{0,0},0})
 Control::~Control() {
 }
 
-// int Control::m_hoverbordercolor = 0xff1D1DBB;
 const Point Control::GetOffset() {
 	if(engine)
 		return engine->sel_widget_offset;
@@ -110,32 +109,34 @@ void Control::SetId(std::string id) {
 }
 
 
-// void Control::setType( controlType type ) {
 void Control::setType( const char* type ) {
 	this->type = type;
 	update_cache(CacheUpdateFlag::all);
 }
 
 // emit global event
-void Control::emitEvent( int event_id ) {
+void Control::emitEvent( std::string event_id, Argv& argv ) {
 	#ifdef USE_EVENT_QUEUE
 	if(engine) {
-		engine->m_events.push( { id, event_id, this } );
+		engine->m_events.push( { event_id, this, argv } );
 	}
 	#endif
 	
-	for( auto sub : subscribers ) {
-		if(sub.first == event_id) {
-			sub.second(this);
+	for(auto sub : subscribers) {
+		if(sub.event_id == event_id) {
+			std::vector<std::string> v;
+			v.reserve(argv.size() + sub.args.size());
+			v.insert(v.begin(), argv.begin(), argv.end());
+			v.insert(v.end(), sub.args.begin(), sub.args.end());
+			GuiEngine::function_map[ sub.function_name ](this, v);
 		}
 	}
+	
 }
 
 void Control::Focus() {
 	if(engine) {
 		engine->Focus(this);
-	} else {
-		std::cout << "no focus fail\n";
 	}
 }
 
@@ -153,12 +154,11 @@ bool Control::IsSelected() {
 	}
 }
 
-void Control::SubscribeEvent( event event_type, std::function<void(Control*)> callback ) {
-	subscribers.emplace_back((event)event_type, callback);
-}
-// alias
-void Control::OnEvent( event event_type, std::function<void(Control*)> callback ) {
-	subscribers.emplace_back((event)event_type, callback);
+static int last_anon_id = 0;
+void Control::OnEvent( std::string event_type, std::function<void(Control*, Argv&)> callback ) {
+	std::string anon_id = std::string("_anon") + std::to_string(last_anon_id++);
+	subscribers.emplace_back(event_type, anon_id);
+	GuiEngine::function_map[ anon_id ] = callback;
 }
 
 void Control::sendGuiCommand( int eventId ) {
@@ -246,12 +246,11 @@ void Control::SetAnchor( float W, float w, float x, float H, float h, float y ) 
 }
 
 void Control::SetAnchor( Rect r ) {
-	Anchor a{{0,0},0};
-	a.x = r.x;
-	a.y = r.y;
-	a.sx = r.w;
-	a.sy = r.h;
-	this->anchor = a;
+	this->anchor = Anchor{{0,0},0};
+	this->anchor.x = r.x;
+	this->anchor.y = r.y;
+	this->anchor.w_min[0] = r.w;
+	this->anchor.h_min[0] = r.h;
 }
 
 void Control::SetAnchor( const Anchor& anchor ) {
@@ -264,8 +263,8 @@ const Anchor& Control::GetAnchor() {
 
 // make these virtuals optional
 void Control::OnMouseMove( int mX, int mY, bool mouseState ) {}
-void Control::OnMouseDown( int mX, int mY ) {}
-void Control::OnMouseUp( int mX, int mY ) {}
+void Control::OnMouseDown( int mX, int mY, MouseButton button ) {}
+void Control::OnMouseUp( int mX, int mY, MouseButton button ) {}
 #ifdef USE_SFML
 	void Control::Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected ) {}
 	void Control::OnKeyDown( sf::Event::KeyEvent &sym ) {}
@@ -274,10 +273,10 @@ void Control::OnMouseUp( int mX, int mY ) {}
 	void Control::Render( Point pos, bool selected ) {
 		pos.x += m_rect.x;
 		pos.y += m_rect.y;
-		Drawing::FillRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
 		if(m_style.alpha != 1.0f) {
 			Drawing::SetMaxAlpha(m_style.alpha);
 		}
+		Drawing::FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
 		if(m_style.image_tex > 0) {
 			Drawing::TexRect(pos.x, pos.y, m_rect.w, m_rect.h, 
 				m_style.image_tex, m_style.image_repeat, m_style.image_size.w, m_style.image_size.h);
@@ -326,95 +325,204 @@ void Control::SetAlpha(float alpha) {
 	m_style.alpha = alpha;
 }
 
+static void split_string(const std::string& str, std::vector<std::string>& values, char delimiter) {
+	size_t prevpos = 0;
+	size_t pos = str.find(delimiter, prevpos);
+	while(pos != str.npos) {
+		int len = pos-prevpos;
+		if(len != 0)
+			values.push_back( str.substr(prevpos, len) );
+		prevpos = pos + 1;
+		pos = str.find(delimiter, prevpos);
+	}
+	if(prevpos < str.size())
+		values.push_back( str.substr(prevpos) );
+}
+
+
+void monomial_expr_parse(const char* str, const char *names, float *result) {
+	int current_index=0;
+	const char* s = str;
+	int names_length = strlen(names);
+	int is_first = 1;
+	int is_minus = 0;
+	memset(result, 0, sizeof(float)*(names_length+1));
+	float res = 0;
+	while(1) {
+		const char c = *s;
+		if(c == '\0' || c == '+' || c == '-') {
+			if(c == '-') {
+				is_minus = 1;
+			}
+			result[current_index] += res;
+			is_first = 1;
+			if(c == '\0')
+				break;
+			res = 0;
+			current_index = 0;
+		} else if(isdigit(c) || c == '.') {
+			float num = strtof(s, (char**)&s);
+			if(is_minus) {
+				is_minus = 0;
+				num = -num;
+			}
+			if(is_first) {
+				res = num;
+				is_first = 0;
+			} else {
+				res *= num;
+			}
+			continue;
+		} else if(c == '%') {
+			res *= 0.01;
+		} else {
+			int i;
+			for(i=0; i < names_length; i++) {
+				if(names[i] == c) {
+					if(res == 0) res = 1;
+					current_index=i+1;
+					break;
+				}
+			}
+		}
+		s++;
+	}
+}
 
 Anchor Anchor::parseRect(std::string s) {
 	Anchor a{{0,0},0};
-	float *n = &a.x;
-	float *nx = n;
-	std::string digit = "0";
-	enum Part {
-		x,y,w,h
-	};
-	a.ax = a.ay = 1;
-	float num;
-	bool ispercent = false;
-	Part part = Part::x;
-	for(const char *c = s.c_str(); ; c++) {
-		if(*c && isdigit(*c) || *c == '.')
-			digit += *c;
-		switch(*c) {
-			case ',':
-				part = (Part)((int)part+1);
-			case '+':
-			case '-':
-			case '\0':
-				if(part == Part::x) n = &a.x;
-				if(part == Part::y) n = &a.y;
-				else if(part == Part::w) n = &a.sx;
-				else if(part == Part::h) n = &a.sy;
-				num = std::stof(digit);
-				digit = (*c == '-' ? "-0" : "0");
-				if(ispercent) num *= .01;
-				*nx += num;
-				ispercent = false;
-				break;
-			case '%':
-				ispercent = true;
-				if(part == Part::x) n = &a.W;
-				else if(part == Part::y) n = &a.H;
-				else if(part == Part::w) n = &a.sW;
-				else if(part == Part::h) n = &a.sH;
-				break;
-			case 'L': break;
-			case 'R':
-				a.ax = -1;
-				a.W = 1;
-				a.w = -1;
-				break;
-			case 'T': break;
-			case 'U': break;
-			case 'M':
-				if(part == Part::x) {
-					a.w = -0.5;
-					a.W = 0.5;
-				} else if(part == Part::y) {
-					a.h = -0.5;
-					a.H = 0.5;
+	std::vector<std::string> parts;
+	split_string(s, parts, ',');
+	const char* names[] = { "wW", "hH", "W", "H" };
+	float res[4];
+	int p = 0;
+	if(s[0] == 'a') {
+		std::cout << "ABS\n";
+		a.absolute_coordinates = true;
+	}
+	a.w_func = a.h_func = fit;
+	
+	a.w_min[0] = 0;
+	a.w_max[0] = 9999;
+	a.w_min[1] = 0;
+	a.w_max[1] = 0;
+	
+	a.h_min[0] = 0;
+	a.h_max[0] = 9999;
+	a.h_min[1] = 0;
+	a.h_max[1] = 0;
+					
+	for(int i=0; i < parts.size(); i++) {
+		const std::string& cur = parts[i];
+		if(p <= 1) {
+			monomial_expr_parse(cur.c_str(), names[p], res);
+			std::cout << "parsing rect(" << p << "):" << cur << " => " << res[0] << ", " << res[1] << ", " << res[2] << std::endl;
+			size_t pos;
+			if(p == 0) {
+				if((pos=cur.find_first_of("LR")) != std::string::npos) {
+					if(cur[pos] == 'L') {
+						std::cout << "found L\n";
+						a.absolute_coordinates = true;
+					} else if(cur[pos] == 'R') {
+						std::cout << "found R\n";
+						a.W += 1;
+						a.w += -1;
+						a.absolute_coordinates = true;
+					}
 				}
-				break;
-			case 'D':
-			case 'B':
-				a.ay = -1;
-				a.H = 1;
-				a.h = -1;
-				break;
+				a.x += res[0];
+				a.w += res[1];
+				a.W += res[2];
+			} else if(p == 1) {
+				if((pos=cur.find_first_of("UDB")) != std::string::npos) {
+					if(cur[pos] == 'U') {
+						a.absolute_coordinates = true;
+					} else if(cur.find_first_of("DB",pos) != std::string::npos) {
+						a.H += 1;
+						a.h += -1;
+						a.absolute_coordinates = true;
+						std::cout << "found B\n";
+					}
+				}
+				a.y += res[0];
+				a.h += res[1];
+				a.H += res[2];
+			}
+		} else if(p >= 2) {
+			size_t pos = 0;
 			
-			case 'x': n = &a.x; break;
-			case 'y': n = &a.y; break;
-			case 'w': n = &a.w; break;
-			case 'h': n = &a.h; break;
-			case 'W': n = &a.W; break;
-			case 'H': n = &a.H; break;
-			case 'r': a.isrelative = true; break;
-			case 'a': {
-				int adv = digit == "-0" ? -1 : 1;
-				digit = "0";
-				if(part == Part::x) a.ax = adv;
-				if(part == Part::y) a.ay = adv;
-				break;
+			if((pos = parts[i].find("(", pos)) != std::string::npos) {
+					monomial_expr_parse(parts[i].c_str()+pos, names[p], res);
+					if(i+1 >= parts.size() || parts[i].find(")", pos+1) != std::string::npos) {
+						// has only min
+						if(p == 2) {
+							a.w_min[0] = res[0];
+							a.w_min[1] += res[1];
+						} else {
+							a.h_min[0] = res[0];
+							a.h_min[1] += res[1];
+						}
+						continue;
+					}
+					if(p == 2) {
+						a.w_min[0] = res[0];
+						a.w_min[1] += res[1];
+					} else {
+						a.h_min[0] = res[0];
+						a.h_min[1] += res[1];
+					}
+					monomial_expr_parse(parts[i+1].c_str(), names[p], res);
+					if(p == 2) {
+						a.w_max[0] = res[0];
+						a.w_max[1] += res[1];
+					} else {
+						a.h_max[0] = res[0];
+						a.h_max[1] += res[1];
+					}
+					
+					// std::cout << "parsing rect(" << parts[i+1] << "):" << cur << " => " << res[0] << ", " << res[1] << std::endl;
+					i++;
+			} else {
+				monomial_expr_parse(cur.c_str(), names[p], res);
+				std::cout << "parsing rect(" << p << "): " << cur << " => " << res[0] << ", " << res[1] << std::endl;
+				if(p == 2) {
+					a.w_min[0] += res[0];
+					a.w_min[1] += res[1];
+					a.w_max[0] = a.w_min[0];
+					a.w_max[1] = a.w_min[1];
+					a.w_func = Anchor::SizeFunction::none;
+				} else if(p == 3) {
+					a.h_min[0] += res[0];
+					a.h_min[1] += res[1];
+					a.h_max[0] = a.h_min[0];
+					a.h_max[1] = a.h_min[1];
+					a.h_func = Anchor::SizeFunction::none;
+				}
+			}
+			auto set_func = [&](Anchor::SizeFunction f){
+				if(p == 2) {
+					a.w_func = f;
+				} else if(p == 3) {
+					a.h_func = f;
+				}
+			};
+			
+			if(parts[i].find("keep", pos) != std::string::npos) {
+				set_func(Anchor::SizeFunction::keep);
+			} else if(parts[i].find("fit", pos) != std::string::npos) {
+				set_func(Anchor::SizeFunction::fit);
+			} else if(parts[i].find("expand", pos) != std::string::npos) {
+				set_func(Anchor::SizeFunction::expand);
 			}
 		}
-		nx = n;
-		if(*c == 0)
-			break;
-		
+		p++;
 	}
+	std::cout << a << std::endl;
 	return a;
 }
 
 
-
-
+#ifdef USE_SDL
 void Control::SetImage(std::string image, bool repeat) {
 	SDL_Surface* surf = IMG_Load(image.c_str());
 	m_style.image_size.w = surf->w;
@@ -425,8 +533,10 @@ void Control::SetImage(std::string image, bool repeat) {
 	}
 	
 	m_style.image_repeat = repeat;
-	
 }
+#endif
+
+
 
 void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
@@ -434,7 +544,7 @@ void Control::SetStyle(std::string style, std::string value) {
 		_case("rect"): {
 			Anchor a = Anchor::parseRect(value);
 			SetAnchor(a);
-			SetRect(a.x, a.y, a.sx, a.sy);
+			SetRect(a.x, a.y, a.w_min[0], a.h_min[0]);
 		}
 		_case("zindex"):
 			SetZIndex(std::stoi(value));
@@ -473,6 +583,21 @@ void Control::SetStyle(std::string style, std::string value) {
 		}
 			break;
 		default:
+			// if style start with on_...
+			if(tolower(style[0]) == 'o' && tolower(style[1]) == 'n') {
+				// parse value and add calls to subscribers
+				std::string type = style.substr(2);
+				std::vector<std::string> commands;
+				std::vector<std::string> params;
+				split_string(value, commands, ';');
+				for(auto &cmd : commands) {
+					params.clear();
+					split_string(cmd, params, ' ');
+					subscribers.emplace_back( type, params[0] );
+					subscribers.back().args.insert(subscribers.back().args.begin(), params.begin()+1, params.end());
+				}
+			}
+			
 			OnSetStyle(style, value);
 	}
 
@@ -481,27 +606,24 @@ void Control::SetStyle(std::string style, std::string value) {
 void Control::STYLE_FUNC(value) {}
 
 Anchor& Anchor::operator+=(const Anchor& b) {
-		W += b.W;
-		w += b.w;
-		x += b.x;
-		
-		H += b.H;
-		h += b.h;
-		y += b.y;
-		
-		isrelative = isrelative ^ b.isrelative;
-		ax = b.ax;
-		ay = b.ay;
-		
-		return *this;
+	W += b.W;
+	w += b.w;
+	x += b.x;
+	
+	H += b.H;
+	h += b.h;
+	y += b.y;
+	
+	absolute_coordinates |= b.absolute_coordinates;
+	
+	return *this;
 }
 
 std::ostream& operator<< (std::ostream& stream, const Anchor& a) {
 	return stream << a.W << ", " << a.w << ", " << a.x << " ; " <<
 		a.H << ", " << a.h << ", " << a.y << " ; " <<
-		a.sW<< "+" << a.sx << ", " << a.sH << "+" << a.sy << " ; (" << 
-		a.coord.x << ", " << a.coord.y << ") adv (" << a.ax << ", " << 
-		a.ay << ")" << " r: " << a.isrelative << std::endl;
+		a.w_min[1] << "+" << a.w_min[0] << ", " << a.h_min[1] << "+" << a.h_min[0] << " ; (" << 
+		a.coord.x << ", " << a.coord.y << " a: " << a.absolute_coordinates << std::endl;
 }
 
 

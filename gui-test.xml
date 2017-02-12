@@ -13,12 +13,11 @@
 		<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" textwrap="true" wordwrap="true" />
 	</theme>
 -->
-	<anchor pos="rR,B">
+
 		<trackbar rect="0,0,100,30" id="1" range="0,100" value="15" /><br/>
 		<textbox rect="0,0,100,30" id="terminal" value="" />
-	</anchor>
 	
-	<anchor pos="rL+50,T+100">
+	<widget rect="a0,0,60%W" id="keke">
 		
 		<button id="2" rect="0,0,100,50" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,30" value="test" backgroundcolor="#ff202080"/>
 		<container id="100" rect="0,0,200,200" backgroundcolor="#ff000000" id="w1">
@@ -30,20 +29,20 @@
 			<widgetmover rect="180,0,10,10"/>
 		</container>
 		
-		<form rect="0,0,200,200" id="form">
-			<textbox rect="r0,0,200,30" placeholder="username" />
-			<textbox rect="r0,0,200,30" placeholder="password" max_length="10" />
-			<textbox rect="r0,0,200,30" placeholder="username" password="true"/>
-			<textbox rect="r0,0,200,30" placeholder="password" />
-			<textbox rect="r0,0,200,30" placeholder="username" />
-			<textbox rect="r0,0,200,30" placeholder="password" />
-			<button rect="r0,10,200,20" value="ok"/>
-			<button rect="r0,10,200,20" value="ok"/>
-			<button rect="r0,10,200,20" value="ok"/>
-			<button rect="r0,10,200,20" value="ok"/>
+		<form rect="0,0,200" id="form">
+			<textbox rect="0,0,200,30" placeholder="username" />
+			<textbox rect="0,0,200,30" placeholder="password" max_length="10" />
+			<textbox rect="0,0,200,30" placeholder="username" password="true"/>
+			<textbox rect="0,0,200,30" placeholder="password" />
+			<textbox rect="0,0,200,30" placeholder="username" />
+			<textbox rect="0,0,200,30" placeholder="password" />
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
 		</form>
 
-		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,-5%+200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" draggable="f" >
+		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" draggable="true" onclick="hehe 6 87 hehe hhaha ; hehe 5">
 			<item>heheheeh</item>
 			<item>hghfghf</item>
 			<item>jhgjghjhg</item>
@@ -88,13 +87,13 @@ due to network packet loss. " ></textbox>
 	test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf
 test3^g
 hehehehe
-fddgdf" onHoverImage=""></label>
-		<widget rect="0,0,100,200">
-			<radiobutton rect="0,50,100,30" value="haha"></radiobutton>
-			<radiobutton rect="0,90,100,30" value="hehe"></radiobutton>
-			<radiobutton rect="0,140,100,30" value="cool"></radiobutton>
-			<widgetmover rect="r0,0,100,20" zindex="50"></widgetmover>
-			<widgetresizer rect="r0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
+fddgdf"></label>
+		<widget rect="0,0">
+			<radiobutton id="haha" rect="0,0,100,30" value="haha"></radiobutton><br/>
+			<radiobutton id="hehe" rect="0,0,100,30" value="hehe"></radiobutton><br/>
+			<radiobutton id="cool" rect="0,0,100,30" value="cool"></radiobutton><br/>
+			<widgetmover rect="0,0,100,20" zindex="50"></widgetmover><br/>
+			<widgetresizer rect="0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
 		</widget>
 		
 		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4">
@@ -113,18 +112,20 @@ fddgdf" onHoverImage=""></label>
 		<scrollbar rect="0,0,50,300" id="25" minvalue="50" orientation="vertical" slidersize="30"></scrollbar>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
-		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
 -->
+		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
 		
-		<anchor pos="L,B">
-			<terminal rect="0,0,400,300" font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" id="term" 
-				wordwrap="false" textwrap="true" colors="false" log_colors="true" bordercolor="#00000000"
-				fadeout_speed="200" fadeout_delay="1000" />
-		</anchor>
+		
 <!--
 		<widget rect="0,0,400,300">
 			<terminal font="/usr/share/fonts/TTF/Ubuntu-R.ttf,18" rect="0,0,400,300" id="term" max_length="5" textwrap="true"/>
 		</widget>
 -->
-	</anchor>
+	</widget>
+	<widget rect="L,B" id="testthis">
+			<terminal rect="0,0,400,300" font="/usr/share/fonts/TTF/Ubuntu-R.ttf,15" id="term" 
+				wordwrap="false" textwrap="true" colors="false" log_colors="true" bordercolor="#00000000"
+				fadeout_speed="200" fadeout_delay="1000" /><br/>
+			<button rect="R,0,100,20"/>
+	</widget>
 </gui>

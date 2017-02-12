@@ -11,8 +11,8 @@ class WidgetMover : public Control {
 		WidgetMover();
 		
 		void OnMouseMove( int mX, int mY, bool mouseState );
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton button );
+		void OnMouseUp( int mX, int mY, MouseButton button );
 		void Render( Point pos, bool isSelected );
 };
 }

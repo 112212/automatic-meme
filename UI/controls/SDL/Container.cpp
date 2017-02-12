@@ -39,11 +39,11 @@ void Container::OnMWheel( int updown ) {
 	}
 }
 
-void Container::OnMouseDown( int mX, int mY ) {
+void Container::OnMouseDown( int mX, int mY, MouseButton which_button ) {
 	// intercept();
 }
 
-void Container::OnMouseUp( int x, int y ) {
+void Container::OnMouseUp( int x, int y, MouseButton which_button ) {
 	// intercept();
 }
 
@@ -220,7 +220,7 @@ void Container::onOverflow() {
 		m_scroll_v = new ScrollBar();
 		m_scroll_v->SetVertical( true );
 		m_scroll_v->SetRect( r.w-thickness, 0, thickness, r.h - thickness );
-		m_scroll_v->OnEvent( event::change, [this](Control *c) {
+		m_scroll_v->OnEvent( "change", [this](Control *c, Argv& argv) {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();
 			m_ty = -val * max_v / 100;
@@ -235,7 +235,7 @@ void Container::onOverflow() {
 	if( !m_scroll_h && overflow_h ) {
 		m_scroll_h = new ScrollBar();
 		m_scroll_h->SetRect( 0, r.h-thickness, r.w - thickness, thickness );
-		m_scroll_h->OnEvent( event::change, [this](Control* c) {
+		m_scroll_h->OnEvent( "change", [this](Control* c, Argv& argv) {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();
 			m_tx = -val * max_h / 100;
@@ -255,7 +255,7 @@ Container* Container::Clone() {
 	return c;
 }
 
-void Container::STYLE_FUNC(value) {
+void Container::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("background_color"):
 			background_color = Colors::ParseColor(value);

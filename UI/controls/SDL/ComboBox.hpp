@@ -74,8 +74,8 @@ class ComboBox : public Control {
 		ComboBox();
 		~ComboBox();
 		
-		void OnMouseDown( int mX, int mY );
-		void OnMouseUp( int mX, int mY );
+		void OnMouseDown( int mX, int mY, MouseButton which_button );
+		void OnMouseUp( int mX, int mY, MouseButton which_button );
 		//~ virtual void OnKeyDown( SDL_Keycode &sym, SDL_Keymod &mod, Uint16 &unicode );
 		void OnLostFocus();
 		void OnGetFocus();

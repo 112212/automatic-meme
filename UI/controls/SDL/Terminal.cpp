@@ -14,7 +14,7 @@ Terminal::Terminal() {
 	AddControl(m_log);
 	AddControl(m_terminal);
 	setInterceptMask(imask::mouse_up | imask::key_down);
-	m_terminal->SubscribeEvent( event::enter, [this](Control *c) { return tbox_enter(c); });
+	m_terminal->OnEvent( "enter", [this](Control *c, const Argv& a) { return tbox_enter(c); });
 	m_log_immediate = true;
 	m_state = invisible;
 	m_tick = 0;
@@ -32,7 +32,7 @@ void Terminal::tbox_enter(Control* c) {
 	// m_log_msg = "> " + m_command;
 	t->SetText("");
 	// m_log_immediate = false;
-	emitEvent(event::enter);
+	emitEvent("enter", {m_command});
 	// m_log_immediate = true;
 	// WriteLog(m_log_msg);
 }
@@ -81,11 +81,11 @@ void Terminal::AppendLog(const std::string& s) {
 	appear();
 }
 
-void Terminal::OnMouseDown( int x, int y ) {
+void Terminal::OnMouseDown( int x, int y, MouseButton button ) {
 
 }
 
-void Terminal::OnMouseUp( int x, int y ) {
+void Terminal::OnMouseUp( int x, int y, MouseButton button ) {
 	if(m_log->GetSelectedText().size() == 0)
 		m_terminal->Activate();
 	appear();
@@ -135,7 +135,7 @@ Terminal* Terminal::Clone() {
 	return t;
 }
 
-void Terminal::STYLE_FUNC(value) {
+void Terminal::OnSetStyle(std::string& style, std::string& value) {
 	if(style.substr(0,3) == "log") {
 		// log_* applies styles to log window
 		m_log->SetStyle(style.substr(4), value);
@@ -200,15 +200,15 @@ void Terminal::onPositionChange() {
 	m_terminal->SetRect(0,GetRect().h-h,GetRect().w,h);
 	
 	Anchor a = m_log->GetAnchor();
-	a.sx = 0;
-	a.sy = GetRect().h - h;
+	a.w_min[0] = 0;
+	a.h_min[0] = GetRect().h - h;
 	a.y = 0;
 	a.x = 0;
-	a.sW = 1;
-	a.sH = 0;
+	a.w_min[1] = 1;
+	a.h_min[1] = 0;
 	m_log->SetAnchor(a);
-	a.y = a.sy;
-	a.sy = h;
+	a.y = a.h_min[0];
+	a.h_min[0] = h;
 	m_terminal->SetAnchor(a);
 }
 

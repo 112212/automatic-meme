@@ -66,7 +66,7 @@ void Canvas::RefreshTexture() {
 	maketex = true;
 }
 
-void Canvas::STYLE_FUNC(value) {
+void Canvas::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("grid"):
 			display_grid = (value == "true" );
@@ -93,10 +93,10 @@ void Canvas::SetPixelSize(int size) {
 }
 
 
-void Canvas::OnMouseDown( int mX, int mY ) {
+void Canvas::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(!m_is_readonly)
 		PutPixel(mX-GetRect().x, mY-GetRect().y);
-	
+	point = Point(mX-GetRect().x, mY-GetRect().y);
 	m_is_mouseDown = true;
 }
 
@@ -157,11 +157,11 @@ void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
 		last_x = x;
 		last_y = y;
 		
-		emitEvent( event::change );
+		emitEvent( "change" );
 	}
 }
 
-void Canvas::OnMouseUp( int mX, int mY ) {
+void Canvas::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 	m_is_mouseDown = false;
 	last_x = last_y = -1;
 }

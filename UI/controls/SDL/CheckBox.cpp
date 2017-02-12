@@ -58,7 +58,7 @@ void CheckBox::updateText() {
 	tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 }
 
-void CheckBox::OnMouseDown( int mX, int mY ) {
+void CheckBox::OnMouseDown( int mX, int mY, MouseButton which_button ) {
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
 		m_surf_text = TTF_RenderText_Blended( m_font, m_text, {0,255,0} );
@@ -66,7 +66,7 @@ void CheckBox::OnMouseDown( int mX, int mY ) {
 	}
 }
 
-void CheckBox::OnMouseUp( int mX, int mY ) {
+void CheckBox::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
 		m_surf_text = TTF_RenderText_Blended( m_font, m_text, {255,255,255} );
@@ -74,7 +74,7 @@ void CheckBox::OnMouseUp( int mX, int mY ) {
 	}
 	if(check_collision(mX, mY)) {
 		m_isChecked = !m_isChecked;
-		emitEvent( event::change );
+		emitEvent( "change" );
 	}
 }
 
@@ -95,7 +95,7 @@ void CheckBox::onPositionChange() {
 
 void CheckBox::Check() {
 	m_isChecked = true;
-	emitEvent( change );
+	emitEvent( "change" );
 }
 
 void CheckBox::Uncheck() {
@@ -103,14 +103,14 @@ void CheckBox::Uncheck() {
 }
 
 void CheckBox::SetValue( bool check ) {
-	 { m_isChecked = check; }
+	m_isChecked = check;
 }
 
 bool CheckBox::IsSelected() {
 	return m_isChecked;
 }
 
-void CheckBox::STYLE_FUNC(value) {
+void CheckBox::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value.c_str());

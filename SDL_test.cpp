@@ -17,6 +17,14 @@ void test(Control* test) {
 	cout << "clicked\n";
 }
 
+GUIFUNC(hehe) {
+	cout << control->GetId() << endl;
+	for(auto &v : argv) {
+		cout << "argv: " << v << "( " << v.size() << ") " << endl;
+	}
+	cout << endl;
+}
+
 int main() {
 	
 	
@@ -24,15 +32,6 @@ int main() {
         throw std::string("Failed to initialize SDL: ") + SDL_GetError();
     }
     
-    /*
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,1);
-	*/
-	
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
@@ -90,9 +89,9 @@ int main() {
 	gui.LoadXml("gui-test.xml");
 	gui.SetTooltipDelay(0.5);
 	
-	gui.OnEvent("form", event::submit, [](Control* c) {
-		cout << "submit\n";
-	});
+	// gui.OnEvent("form", "submit", [](Control* c, const Argv& argv) {
+		// cout << "submit\n";
+	// });
 	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
 		// cout << "clicked at 1 \n";
 	// });
@@ -151,33 +150,34 @@ int main() {
 	// std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
 	// w1->LoadXml(s);
 	
-	Terminal &t = *((Terminal*)gui.GetControlById("term"));
-	t.SubscribeEvent( event::enter, [](Control* c) {
-		Terminal* t = (Terminal*)c;
-		// cout << "command: " << t->GetText() << endl;
-		t->AppendLog("> " + t->GetLastCommand());
-		t->SetText("ROFL");
-	});
-	t.Focus();
 	
-	Label* lb = (Label*)gui.GetControlById("label");
+	// Terminal &t = *((Terminal*)gui.GetControlById("term"));
+	// t.OnEvent( "enter", [](Control* c, Argv& argv) {
+		// Terminal* t = (Terminal*)c;
+		 //~ cout << "command: " << t->GetText() << endl;
+		 //~ t->AppendLog("> " + t->GetLastCommand());
+		// t->AppendLog("> " + argv[0]);
+		// t->SetText("ROFL");
+	// });
+	// t.Focus();
 	
-	gui.OnEvent("combo", event::drag, [&](Control* c) {
-		Widget* wgt = gui.GetSelectedWidget();
-		cout << "Combo dragged onto: " << wgt->GetType() << " (" << wgt->GetId() << ")\n";
-	});
+	// Label* lb = (Label*)gui.GetControlById("label");
 	
-	t.WriteLog("hahahaha");
+	// gui.OnEvent("combo", "drag", [&](Control* c, Argv& argv) {
+		// Widget* wgt = gui.GetSelectedWidget();
+		// cout << "Combo dragged onto: " << wgt->GetType() << " (" << wgt->GetId() << ")\n";
+	// });
 	
-	TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
+	// t.WriteLog("hahahaha");
+	
+	// TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
 	// tb->SetWordWrap(true);
 	// tb->SetTextWrap(true);
 	
 	// tb->SetTextWrap(false);
 		
-	gui.ApplyAnchoring();
 	
-	SDL_GL_SetSwapInterval(0);
+	SDL_GL_SetSwapInterval(1);
 	
 	bool running = true;
 	while(running) {

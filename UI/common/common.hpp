@@ -7,11 +7,11 @@ namespace ng {
 	
 	
 struct Point {
-	union{
-		int x,min;
+	union {
+		int x,min,w;
 	};
 	union {
-		int y,max;
+		int y,max,h;
 	};
 	Point() {}
 	Point(int _x, int _y) : x(_x),y(_y) {}
@@ -19,22 +19,15 @@ struct Point {
 	Point Offset(const Point& r) const { return Point(x+r.x, y+r.y); }
 };
 
+typedef Point Size;
+
 struct Rect : Point {
 	int w;
 	int h;
 	Rect() {}
 	Rect(int _x, int _y, int _w, int _h) : Point(_x,_y),w(_w),h(_h) {}
-	
 };
 
-struct Size {
-	int w,h;
-};
-
-
-#define STYLE_FUNC(value) OnSetStyle(std::string& style, std::string& value)
-#define STYLE_SWITCH switch(hash(style.c_str()))	
-#define _case(a) break; case hash(a)
 
 // TODO: number conversions, do i need it? or i can use some of the std:: conversions if exist
 int old_bcd_to_binary( const char* str, int start, int end );

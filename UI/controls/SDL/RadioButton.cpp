@@ -47,14 +47,14 @@ void RadioButton::SetText( std::string text ) {
 	}
 }
 
-void RadioButton::STYLE_FUNC(value) {
+void RadioButton::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value);
 	}
 }
 
-void RadioButton::OnMouseDown( int mX, int mY ) {
+void RadioButton::OnMouseDown( int mX, int mY, MouseButton which_button ) {
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
 		m_surf_text = TTF_RenderText_Blended( m_font, m_text.c_str(), {0,255,0} );
@@ -84,7 +84,7 @@ void RadioButton::handleRadioButtonChange() {
 	}
 }
 
-void RadioButton::OnMouseUp( int mX, int mY ) {
+void RadioButton::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 	m_is_mouseDown = false;
 	if(m_surf_text) {
 		SDL_FreeSurface(m_surf_text);
@@ -93,11 +93,17 @@ void RadioButton::OnMouseUp( int mX, int mY ) {
 	}
 	if(check_collision(mX, mY)) {
 		if( !m_isSelected ) {
-			emitEvent( event::change );
+			emitEvent( "change" );
 			handleRadioButtonChange();
 			m_isSelected = true;
 		}
 	}
+}
+
+void RadioButton::Select() { 
+	m_isSelected = true; 
+	handleRadioButtonChange(); 
+	emitEvent( "change" ); 
 }
 
 void RadioButton::OnLostFocus() {
