@@ -28,6 +28,7 @@ enum Alignment {
 	right,
 	center
 };
+
 class Label : public Control {
 	private:
 		std::string m_text;

@@ -25,6 +25,11 @@ GUIFUNC(hehe) {
 	cout << endl;
 }
 
+GUIFUNC(say) {
+	if(argv.empty()) return;
+	cout << "control " << control->GetId() << " says: " << argv[0] << endl;
+}
+
 int main() {
 	
 	

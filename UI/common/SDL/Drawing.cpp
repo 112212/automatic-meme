@@ -84,42 +84,27 @@ namespace Drawing {
 	
 	
 	
-	static const char* vertexShader2_code =
-	"\n\
-	#version 330\n\
-	\n\
-	layout (location = 0) in vec2 position;\n\
-	layout (location = 1) in vec2 texCoord;\n\
-	\n\
-	out vec2 inTexCoord;\n\
-	\n\
-	void main() {\n\
-		gl_Position = vec4( position, 0.0, 1.0 );\n\
-		\n\
-		//inTexCoord = texCoord;\n\
-		\n\
-		inTexCoord = vec2(1.0 - texCoord.x, 1.0 - texCoord.y);\n\
-	}\n\
-	";
+	static const char* texture_vertexshader_code =
+	"#version 330\n"
+	"layout (location = 0) in vec2 position;"
+	"layout (location = 1) in vec2 texCoord;"
+	"out vec2 inTexCoord;"
+	"void main() {"
+		"gl_Position = vec4( position, 0.0, 1.0 );"
+		"inTexCoord = vec2(1.0 - texCoord.x, 1.0 - texCoord.y);"
+	"}";
 
-	static const char* fragmentShader2_code =
-	"\n\
-	#version 330\n\
-	\n\
-	in vec2 inTexCoord;\n\
-	\n\
-	out vec4 color;\n\
-	\n\
-	uniform sampler2D textureUniform;\n\
-	uniform float max_alpha;\n\
-	\n\
-	void main() {\n\
-		vec4 c = texture(textureUniform, inTexCoord);\n\
-		c.a = min(max_alpha, c.a);\n\
-		color = c;\n\
-	}\n\
-	";
-
+	static const char* texture_fragmentshader_code =
+	"#version 330\n"
+	"in vec2 inTexCoord;"
+	"out vec4 color;"
+	"uniform sampler2D textureUniform;"
+	"uniform float max_alpha;"
+	"void main() {"
+		"vec4 c = texture(textureUniform, inTexCoord);"
+		"c.a = min(max_alpha, c.a);"
+		"color = c;"
+	"}";
 
 	static GLuint vao = 0,
 		vbo_position = 0,
@@ -145,7 +130,7 @@ namespace Drawing {
 		if(!inited) {			
 			try {
 				shader = loadShader( vertexShader_code, fragmentShader_code );
-				shader2 = loadShader( vertexShader2_code, fragmentShader2_code );
+				shader2 = loadShader( texture_vertexshader_code, texture_fragmentshader_code );
 			} catch( std::string& e ) {
 				std::cout << e << std::endl;
 			}

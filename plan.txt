@@ -148,7 +148,7 @@ TODO:
 + 	copy & paste for textbox
 + 	anchoring (group anchor, single element anchor)
 +	theme loader (default values)
--	xml defining borders, defining selection by background alpha
+-	xml defining borders, defining selection by background alpha of image
 +	new control registration to xml
 +	setting font by parsing it
 -	implement default font directory for linux and windows and make it as search path for fonts
@@ -168,11 +168,11 @@ TODO:
 -	drag n drop file to gui (SDL_DropEvent)
 
 OpenGL port of controls:
-- 	GridContainer
 - 	TabContainer
 
 TO FIX:
-
+	- textbox color bug (low priority)
+	
 ; controls to check for Clone and setType and events
 + Button.cpp
 + Canvas.cpp
@@ -180,7 +180,6 @@ TO FIX:
 + ComboBox.cpp
 + Container.cpp
 - Dialog.cpp
-- GridContainer.cpp
 + Label.cpp
 + ListBox.cpp
 + RadioButton.cpp
@@ -195,7 +194,7 @@ TO FIX:
 New Features in new version
 ---------------------------
 
-; polygonal dimensions
+- polygonal dimensions
 	SetPolygon() instead of SetRect ...
 	sizeVertical()
 	sizeHorizontal()
@@ -203,7 +202,7 @@ New Features in new version
 	getAABB()
 	isConvex()
 	
-; effects
+- effects
 	LoopEffect("effect name", {"effect params"})
 	StopEffect()
 	; playing effect or animation
@@ -226,7 +225,6 @@ New Features in new version
 
 - sound effects
 
-- grid container
 - tab container
 
 - changing styles on event
@@ -236,51 +234,44 @@ New Features in new version
 	; horizontal scrollbar is missing
 
 + draggable
-	control may allow dragging and use OnDrag function
+	; control may allow dragging and use OnDrag function
 	
 + widget resizer
-	widget resizer control to put anywhere in widget
+	; widget resizer control to put anywhere in widget
 
 * tooltips
-	tooltip="whatever text"
-	tooltip control which can be modified
+	; tooltip="whatever text"
+	; tooltip control which can be modified
 
-- rotate on label only
-	; rotate over some given point?
+- rotate around center on label only
 
 + all events are now strings
 
 * cursor
+	; actual changing cursor image is missing
 
 + anchoring fix (remove anchor tag)
+	; use max width as next row trigger (expand)
+	; relative children use current but clipped parent size
+	; absolute (non-determined size) children use new parent size calculated from other relatives and determined absolutes
+	; then parent might or might not get resized later
+	; then min, max is used only for clipping or optionally fitting or expanding
+	; rect="25, 546, k(2,6), e(4,7)"
+	; fitting as default
 	
-- basic events on everything
 
-- Canvas layering
++ basic events on everything
+	+ drag
+	+ click
+	+ hover
+	+ leave
+	
+- Canvas layers and drawing functions
 	; put line, circle, whatever into canvas
 	; instant clear layer by swapping bit (xor)
 	; layer bit shows ...
 	; special shader for rendering layered canvas
 
 + don't use macro STYLE_FUNC its ugly
-
-------------------
-use max width as next row trigger (expand)
-use current
-
-relative children use current but clipped parent size
-absolute (non-determined size) children use new parent size calculated from other relatives and determined absolutes
-then parent might or might not get resized later
-then min, max is used only for clipping or optionally fitting or expanding
-rect="25, 546, k(2,6), e(4,7)"
-
-fitting as default
-
-TOFIX:
-	+ texture bug textbox
-	+ textbox scrollbar
-	+ container scrollbar
-	
-
 
 ---------------------------

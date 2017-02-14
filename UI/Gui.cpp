@@ -462,11 +462,13 @@ void GuiEngine::OnMouseMove( int mX, int mY ) {
 		{
 			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
 			if(!m_focus) {
+				// selected_control->emitEvent("hover");
 				selected_control->OnGetFocus();
 				m_focus = true;
 			}
 		} else {
 			selected_control->OnLostFocus();
+			// selected_control->emitEvent("leave");
 			m_focus = false;
 			if(!(m_focus_lock || m_keyboard_lock)) {
 				unselectControl();
@@ -513,7 +515,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 			while(p != sel_first_depth_widget and !(x >= o.x && x <= o.x + r.w && 
 				y >= o.y && y <= o.y + r.h)) {
 				p->selected_control = 0;
-				const Point &o2 = p->offset;
+				const Point &o2 = p->m_offset;
 				o = {o.x - r.x - o2.x, o.y - r.y - o2.y};
 				p = p->widget;
 				r = p->m_rect;
@@ -529,7 +531,7 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 			while(p && !(x >= o.x && x <= o.x + r.w && 
 				y >= o.y && y <= o.y + r.h)) {
 				p->selected_control = 0;
-				const Point &o2 = p->offset;
+				const Point &o2 = p->m_offset;
 				o = {o.x - r.x - o2.x, o.y - r.y - o2.y};
 				p = p->widget;
 				if(p) {
@@ -591,8 +593,8 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 				w->cached_absolute_offset.x = offset.x + it->rect.x;
 				w->cached_absolute_offset.y = offset.y + it->rect.y;
 				
-				offset.x += it->rect.x + w->offset.x;
-				offset.y += it->rect.y + w->offset.y;
+				offset.x += it->rect.x + w->m_offset.x;
+				offset.y += it->rect.y + w->m_offset.y;
 				
 				it = w->cache.rbegin();
 				it_end = w->cache.rend();
@@ -622,9 +624,12 @@ void GuiEngine::check_for_new_collision( int x, int y ) {
 		sel_intercept |= sel_intercept_vector[i].intercept_mask;
 		
 	if(last_control != selected_control) {
-		if(last_control)
+		if(last_control) {
+			last_control->emitEvent("leave");
 			last_control->OnLostControl();
+		}
 		if(selected_control) {
+			selected_control->emitEvent("hover");
 			selected_control->OnGetFocus();
 			m_focus = true;
 			m_keyboard_lock = false;
@@ -646,16 +651,16 @@ void GuiEngine::Focus(Control* control) {
 			last_selected_widget = w;
 			Point ofs{0,0};
 			while(w->widget) {
-				ofs.x += w->offset.x;
-				ofs.y += w->offset.y;
+				ofs.x += w->m_offset.x;
+				ofs.y += w->m_offset.y;
 				w = w->widget;
 			}
 			sel_first_depth_widget = w;
 			w = wgt;
 			Point o = ofs;
 			while(w->widget) {
-				o.x -= w->offset.x;
-				o.y -= w->offset.y;
+				o.x -= w->m_offset.x;
+				o.y -= w->m_offset.y;
 				w = w->widget;
 				w->cached_absolute_offset = o;
 			}

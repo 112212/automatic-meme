@@ -17,7 +17,7 @@
 		<trackbar rect="0,0,100,30" id="1" range="0,100" value="15" /><br/>
 		<textbox rect="0,0,100,30" id="terminal" value="" />
 	
-	<widget rect="a0,0,60%W" id="keke">
+	<widget rect="a0,0,0.9W" id="keke">
 		
 		<button id="2" rect="0,0,100,50" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,30" value="test" backgroundcolor="#ff202080"/>
 		<container id="100" rect="0,0,200,200" backgroundcolor="#ff000000" id="w1">
@@ -29,8 +29,8 @@
 			<widgetmover rect="180,0,10,10"/>
 		</container>
 		
-		<form rect="0,0,200" id="form">
-			<textbox rect="0,0,200,30" placeholder="username" />
+		<form rect="0,0,200" id="form" >
+			<textbox rect="0,0,200,30" placeholder="username" onhover="say hoveeer" onleave="say lalalala" id="username" />
 			<textbox rect="0,0,200,30" placeholder="password" max_length="10" />
 			<textbox rect="0,0,200,30" placeholder="username" password="true"/>
 			<textbox rect="0,0,200,30" placeholder="password" />
@@ -42,7 +42,7 @@
 			<button rect="0,10,200,20" value="ok"/>
 		</form>
 
-		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" draggable="true" onclick="hehe 6 87 hehe hhaha ; hehe 5">
+		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" draggable="true" onclick="hehe 6 87 hehe hhaha; hehe 5">
 			<item>heheheeh</item>
 			<item>hghfghf</item>
 			<item>jhgjghjhg</item>

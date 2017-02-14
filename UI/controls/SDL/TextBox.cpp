@@ -94,7 +94,7 @@ void TextBox::Render( Point pos, bool selected ) {
 		}
 		
 		// placeholder or text
-		if(!isActive() && m_lines.size() == 1 && m_lines[0].text.size() == 0 && !m_placeholder.text.empty()) {
+		if(!isActive() && m_lines.size() == 1 && !m_placeholder.text.empty() && m_lines[0].text.size() == 0 ) {
 			Drawing::TexRect( r.x+5, r.y+5, m_placeholder.w, m_placeholder.h, m_placeholder.tex);
 		} else {
 			j=0;
@@ -297,7 +297,9 @@ void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 			m_cursor = pt;
 			m_cursor_max_x = m_cursor.x;
 			updatePosition();
-			m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
+			
+			if(m_lines.size()-m_lines_max > 0)
+				m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
 		}
 	}
 }
@@ -598,7 +600,8 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 		}
 	}
 	
-	m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
+	if(m_lines.size()-m_lines_max > 0)
+		m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
 }
 
 std::string TextBox::GetText( ) {
