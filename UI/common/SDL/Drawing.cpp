@@ -114,15 +114,9 @@ namespace Drawing {
 	static GLuint shader = 0;
 	static GLuint shader2 = 0;
 	
-	static float max_alpha = 1.0f;
-	void SetMaxAlpha(float _max_alpha) {
-		max_alpha = _max_alpha;
-	}
 	
-	static float rotation = 0.0f;
-	void SetRotation(float _rotation) {
-		rotation = _rotation;
-	}
+	
+	
 
 	void Init() {
 		static bool inited = false;
@@ -155,6 +149,38 @@ namespace Drawing {
 		w = sizeX;
 		h = sizeY;
 	}
+	
+	static float max_alpha = 1.0f;
+	void SetMaxAlpha(float _max_alpha) {
+		max_alpha = _max_alpha;
+	}
+	
+	static float rotation = 0.0f;
+	static float rot_sin, rot_cos;
+	void SetRotation(float _rotation, int cx, int cy) {
+		if(rotation != _rotation) {
+			rotation = _rotation;
+			if(rotation == 0.0f) return;
+			rot_cos = cos(rotation * M_PI/180.0f);
+			rot_sin = sin(rotation * M_PI/180.0f);
+			SetRotationPoint(cx,cy);
+		}
+	}
+	
+	static float center_x, center_y;
+	void SetRotationPoint(int x, int y) {
+		center_x = (x * 2.0f) / sizeX - 1.0f;
+		center_y = -((y * 2.0f) / sizeY - 1.0f);
+	}
+	
+	static void rotate(GLfloat* p) {
+		// [ cos -sin ]   [ x ]
+		// [ sin cos  ]   [ y ]
+		float x = p[0] - center_x;
+		float y = p[1] - center_y;
+		p[0] = (x * rot_cos - y * rot_sin) + center_x;
+		p[1] = (x * rot_sin + y * rot_cos) + center_y;
+	}
 
 	void Rect(int x, int y, int w, int h, GLuint color) {
 		glUseProgram(shader);
@@ -171,6 +197,13 @@ namespace Drawing {
 			x2, -y2,
 			x2, -y1,
 		};
+		
+		if(rotation != 0.0f) {
+			rotate(&positions[0]);
+			rotate(&positions[2]);
+			rotate(&positions[4]);
+			rotate(&positions[6]);
+		}
 
 		float cr = (float)((color >> 16) & 0xff) / 255.0f;
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
@@ -216,6 +249,13 @@ namespace Drawing {
 			x2, -y2,
 			x2, -y1,
 		};
+		
+		if(rotation != 0.0f) {
+			rotate(&positions[0]);
+			rotate(&positions[2]);
+			rotate(&positions[4]);
+			rotate(&positions[6]);
+		}
 
 		float cr = (float)((color >> 16) & 0xff) / 255.0f;
 		float cg = (float)((color >> 8) & 0xff) / 255.0f;
@@ -354,23 +394,33 @@ namespace Drawing {
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
+	
+	
 
 	//void TexRect(int x, int y, int w, int h, GLuint texture) {
 	void TexRect(int x, int y, int w, int h, GLuint texture, bool repeat, int texWidth, int texHeight) {
 		glUseProgram(shader2);
 		glBindVertexArray(vao);
 
-		float x1 = (float)(x) / sizeX * 2.0 - 1.0;
-		float y1 = (float)(y) / sizeY * 2.0 - 1.0;
-		float x2 = (float)(x+w) / sizeX * 2.0 - 1.0;
-		float y2 = (float)(y+h) / sizeY * 2.0 - 1.0;
-
+		
+		float x1 = ((float)(x) / sizeX) * 2.0 - 1.0;
+		float y1 = -(((float)(y) / sizeY) * 2.0 - 1.0);
+		float x2 = ((float)(x+w) / sizeX) * 2.0 - 1.0;
+		float y2 = -(((float)(y+h) / sizeY) * 2.0 - 1.0);
+		
 		GLfloat positions[] = {
-			x1, -y1,
-			x1, -y2,
-			x2, -y2,
-			x2, -y1,
+			x1, y1,
+			x1, y2,
+			x2, y2,
+			x2, y1,
 		};
+		
+		if(rotation != 0.0f) {
+			rotate(&positions[0]);
+			rotate(&positions[2]);
+			rotate(&positions[4]);
+			rotate(&positions[6]);
+		}
 
 		GLfloat texCoords[] = {
 			repeat ? (float)w/texWidth : 1.0f, repeat ? (float)h/texHeight : 1.0f,

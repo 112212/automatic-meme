@@ -34,8 +34,9 @@ Label::~Label() {
 }
 
 void Label::Render( Point pos, bool isSelected ) {
-	Control::Render(pos, isSelected);
 	const Rect& rect = GetRect();
+	Drawing::SetRotation(m_angle, rect.x+rect.w/2, rect.y+rect.h/2);
+	Control::Render(pos, isSelected);
 	int j=0;
 	int line_height = TTF_FontHeight(m_style.font)-5;
 	for( auto i = text_lines.begin(); i != text_lines.end(); i++,j++) {
@@ -48,6 +49,7 @@ void Label::Render( Point pos, bool isSelected ) {
 			Drawing::TexRect( rect.x + (rect.w - i->w)/2, rect.y+5+j*line_height, i->w, i->h, i->tex);
 		}
 	}
+	Drawing::SetRotation(0);
 }
 
 static void find_and_replace(std::string& source, std::string const& find, std::string const& replace) {
@@ -128,6 +130,9 @@ void Label::OnSetStyle(std::string& style, std::string& value) {
 			else if(value == "center")
 				SetAlignment( Alignment::center );
 			break;
+			
+		_case("rotation"):
+			SetRotation(std::stof(value));
 	}
 }
 

@@ -243,7 +243,7 @@ New Features in new version
 	; tooltip="whatever text"
 	; tooltip control which can be modified
 
-- rotate around center on label only
++ rotate around center on label only
 
 + all events are now strings
 

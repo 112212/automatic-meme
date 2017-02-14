@@ -83,11 +83,17 @@ of a few milliseconds can cause a laggy gameplay feeling and make it
 hard to hit other players or interact with moving objects. Besides 
 bandwidth limitations and network latencies, information can get lost 
 due to network packet loss. " ></textbox>
+
+
+
 		<label id="label" align="center" rect="0,0,150,80" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1 hhfghgf hfghghgfhhhcangfdgfgfdhhgfhgf
 	test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf
 test3^g
 hehehehe
-fddgdf"></label>
+fddgdf" rotation="50"></label>
+
+
+
 		<widget rect="0,0">
 			<radiobutton id="haha" rect="0,0,100,30" value="haha"></radiobutton><br/>
 			<radiobutton id="hehe" rect="0,0,100,30" value="hehe"></radiobutton><br/>
