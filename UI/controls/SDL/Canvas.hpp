@@ -44,6 +44,13 @@ class Canvas : public Control {
 		SDL_Surface* GetDrawingSurface() { return m_drawing; }
 		void Clear(int color);
 		void SetReadOnly( bool isReadOnly ) { m_is_readonly = isReadOnly; }
+		// TODO:
+			/*
+				void DrawLine(Point a, Point b, int layer = 0);
+				void DrawRect(Point a, Point b, int layer = 0);
+				void DrawCircle(Point a, int radius, int layer = 0);
+				void DrawImage(Point a, int layer = 0);
+			*/
 
 };
 

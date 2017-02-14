@@ -27,6 +27,7 @@ class Colorstring {
 	
 	size_t size() { return m_str.size(); }
 	size_t length() { return m_str.size(); }
+	bool empty() { return m_str.empty(); }
 	
 	void erase (size_t pos = 0, size_t len = std::string::npos);
 	

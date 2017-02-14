@@ -94,7 +94,7 @@ void TextBox::Render( Point pos, bool selected ) {
 		}
 		
 		// placeholder or text
-		if(!isActive() && m_lines.size() == 1 && m_lines[0].text.size() == 0) {
+		if(!isActive() && m_lines.size() == 1 && m_lines[0].text.size() == 0 && !m_placeholder.text.empty()) {
 			Drawing::TexRect( r.x+5, r.y+5, m_placeholder.w, m_placeholder.h, m_placeholder.tex);
 		} else {
 			j=0;
@@ -244,6 +244,7 @@ void TextBox::OnMouseDown( int x, int y, MouseButton button ) {
 	
 	if(m_scrollbar->check_collision(x-rect.x, y-rect.y)) {
 		m_scrollbar->OnMouseDown(x - rect.x, y - rect.y, button);
+		m_position.y = std::max(0, (int)(m_scrollbar->GetPercentageValue() * (m_lines.size() - m_lines_max) ));
 		m_scrollbar_selected = true;
 	} else {
 		m_cursor_blink_counter = m_cursor_blinking_rate;
@@ -296,6 +297,7 @@ void TextBox::OnMouseMove( int x, int y, bool mouseState ) {
 			m_cursor = pt;
 			m_cursor_max_x = m_cursor.x;
 			updatePosition();
+			m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
 		}
 	}
 }
@@ -595,6 +597,8 @@ void TextBox::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 			break;
 		}
 	}
+	
+	m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
 }
 
 std::string TextBox::GetText( ) {
@@ -794,6 +798,7 @@ void TextBox::PutTextAtCursor(std::string text) {
 
 void TextBox::OnMWheel( int updown ) {
 	m_position.y = std::min<int>(std::max<int>(0, m_position.y-updown), m_lines.size()-GetRect().h/m_line_height);
+	m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
 }
 
 // ----------- Wrapping ------------------------------------------------

@@ -22,7 +22,7 @@ class Widget : public Control, public ControlManager  {
 		Control* selected_control;
 		Point cached_absolute_offset;
 		Size min, max;
-		Point offset;
+		Point m_offset;
 		void setRect( int x, int y, int w, int h );
 	protected:
 		enum imask {
@@ -68,7 +68,7 @@ class Widget : public Control, public ControlManager  {
 			void RenderWidget( Point position, bool isSelected );
 		#endif
 		void SetOffset(int x, int y);
-		const Point& GetOffset() { return offset; }
+		const Point& GetOffset() { return m_offset; }
 };
 
 }

@@ -836,7 +836,7 @@ bool GuiEngine::AddFunction( std::string function_name, EventCallback callback )
 	}
 	void GuiEngine::Render() {
 		
-		// measure time
+		// measure time for animations
 		auto now = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> d = now - time_point;
 		double last_time = m_time;

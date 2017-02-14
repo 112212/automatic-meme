@@ -233,6 +233,7 @@ New Features in new version
 
 ;;; first ------------
 * textbox scrollbar
+	; horizontal scrollbar is missing
 
 + draggable
 	control may allow dragging and use OnDrag function
@@ -253,6 +254,8 @@ New Features in new version
 
 + anchoring fix (remove anchor tag)
 	
+- basic events on everything
+
 - Canvas layering
 	; put line, circle, whatever into canvas
 	; instant clear layer by swapping bit (xor)
@@ -272,6 +275,12 @@ then min, max is used only for clipping or optionally fitting or expanding
 rect="25, 546, k(2,6), e(4,7)"
 
 fitting as default
+
+TOFIX:
+	+ texture bug textbox
+	+ textbox scrollbar
+	+ container scrollbar
+	
 
 
 ---------------------------

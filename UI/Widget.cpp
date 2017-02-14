@@ -8,7 +8,7 @@ Widget::Widget() : ControlManager(this),
 	selected_control(0), intercept_mask(0) {
 	setType( "widget" );
 	isWidget = true;
-	offset = {0,0};
+	m_offset = {0,0};
 }
 
 Widget::~Widget() {
@@ -87,11 +87,11 @@ void Widget::setRect( int x, int y, int w, int h ) {
 
 void Widget::SetOffset(int x, int y) {
 	if(inSelectedBranch()) {
-		engine->sel_widget_offset.x += x-offset.x;
-		engine->sel_widget_offset.y += y-offset.y;
+		engine->sel_widget_offset.x += x-m_offset.x;
+		engine->sel_widget_offset.y += y-m_offset.y;
 	}
-	offset.x = x;
-	offset.y = y;
+	m_offset.x = x;
+	m_offset.y = y;
 }
 
 Control* Widget::Clone() {
@@ -134,7 +134,8 @@ void Widget::Render( Point position, bool isSelected ) {
 void Widget::RenderWidget( Point position, bool isSelected ) {
 	
 	Control::Render(position, isSelected);
-	position = position.Offset(m_rect).Offset(offset);
+	position = position.Offset(m_rect);
+	position = position.Offset(m_offset);
 	for(auto &ca : cache) {
 		if(ca.visible) {
 			auto &c = ca.control;

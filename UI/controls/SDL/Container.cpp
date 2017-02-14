@@ -2,6 +2,7 @@
 #include "../../common/SDL/Drawing.hpp"
 #include "Container.hpp"
 #include "../../Gui.hpp"
+#include <iostream>
 
 // select only one
 #define CLIP_METHOD_STENCIL
@@ -147,7 +148,7 @@ void Container::Render( Point pos, bool isSelected ) {
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 #endif
 	// Drawing::FillRect(x, y, w, h, background_color);
-	// Control::Render(pos,isSelected);
+	Control::Render(pos,isSelected);
 	innerWidget->Render(Point(x,y),isSelected);
 	
 	
@@ -181,8 +182,8 @@ void Container::Render( Point pos, bool isSelected ) {
 
 void Container::onPositionChange() {
 	const Rect& r = GetRect();
-	if( r.w > max_h ) max_h = 0; //m_rect.w;
-	if( r.h > max_v ) max_v = 0; //m_rect.h;
+	if( r.w > max_h ) max_h = r.w;
+	if( r.h > max_v ) max_v = r.h;
 	
 	innerWidget->SetRect(0,0, r.w-10, r.h-10);
 }
@@ -229,6 +230,7 @@ void Container::onOverflow() {
 		Anchor a = m_scroll_v->GetAnchor();
 		a.x = r.w-thickness;
 		a.y = 0;
+		a.absolute_coordinates = true;
 		m_scroll_v->SetAnchor(a);
 		Widget::AddControl(m_scroll_v);
 	}
@@ -239,11 +241,13 @@ void Container::onOverflow() {
 			ScrollBar *sb = (ScrollBar*)c;
 			int val = sb->GetValue();
 			m_tx = -val * max_h / 100;
+			
 			innerWidget->SetOffset(m_tx, innerWidget->GetOffset().y);
 		});
 		Anchor a = m_scroll_h->GetAnchor();
 		a.x = 0;
 		a.y = r.h-thickness;
+		a.absolute_coordinates = true;
 		m_scroll_h->SetAnchor(a);
 		Widget::AddControl(m_scroll_h);
 	}
