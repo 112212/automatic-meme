@@ -267,10 +267,14 @@ New Features in new version
 	+ leave
 	
 - Canvas layers and drawing functions
+	; Canvas must be very fast, use update texture instead of GetTextureFromSurface ...
+	; limit to 4 layers
+	; pallete texture (determines which layer is used) => takes n bits per each layer
 	; put line, circle, whatever into canvas
-	; instant clear layer by swapping bit (xor)
-	; layer bit shows ...
+	; instant clear layer by incrementing value and clear layer can be spread to multiple clears so big clear spike each 255
 	; special shader for rendering layered canvas
+	
+- remove my bcd functions from common
 
 + don't use macro STYLE_FUNC its ugly
 

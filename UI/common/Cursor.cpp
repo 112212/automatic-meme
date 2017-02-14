@@ -13,8 +13,8 @@ Cursor::Cursor() : m_relative_mode(false) {
 void Cursor::InitCursors() {
 	defaultCursor = SDL_GetCursor();
  
-	textCursor = xpm_to_cursor( cursor, 25 );
-	zoomCursor = xpm_to_cursor( zoom, 25 );
+	// textCursor = xpm_to_cursor( cursor, 25 );
+	// zoomCursor = xpm_to_cursor( zoom, 25 );
 }
 void Cursor::CleanupCursors() {
 	SDL_FreeCursor( defaultCursor );
@@ -52,6 +52,7 @@ void Cursor::MoveCursor(int dx, int dy) {
 
 
 // -----------------
+/*
 SDL_Cursor* Cursor::xpm_to_cursor(const char **xpm, int len) {
 	
 	int xpat = -1;
@@ -151,5 +152,6 @@ SDL_Cursor* Cursor::xpm_to_cursor(const char **xpm, int len) {
 	
 	return curs;
 }
+*/
 
 }

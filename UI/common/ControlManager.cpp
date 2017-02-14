@@ -196,7 +196,6 @@ void ControlManager::ApplyAnchoring() {
 	bool any_auto = false;
 	int wmax = 0;
 	if(this_widget) {
-		std::cout << "widget " << this_widget->GetId() << " >>\n";
 		const Rect &r = this_widget->GetRect();
 		const Anchor &a = this_widget->GetAnchor();
 		
@@ -221,7 +220,6 @@ void ControlManager::ApplyAnchoring() {
 		
 		any_auto = w_auto || h_auto;
 	} else {
-		std::cout << "root >>\n";
 		Drawing::GetResolution(wres, hres);
 		wmax = wres;
 	}
@@ -271,7 +269,6 @@ void ControlManager::ApplyAnchoring() {
 		// control forced on next line or overflow
 		if( !a.absolute_coordinates && (p.y != lasty || (max_x + a.x + r.w > wmax)) ) {
 			lasty = p.y;
-			std::cout << c->GetId() << " NEW ROW\n";
 			
 			// starts at x beginning (min_x)
 			max_x = min_x;
@@ -291,7 +288,6 @@ void ControlManager::ApplyAnchoring() {
 		if(a.absolute_coordinates) {
 			// TODO: defer if anchor and needed
 			c->SetPosition(xc, yc);
-			std::cout << "ABSOLUTE\n";
 		} else {
 			c->SetPosition(max_x + xc, min_y + yc);
 			
@@ -328,7 +324,6 @@ void ControlManager::ApplyAnchoring() {
 				w = std::max<int>(w, c2.x);
 			}
 			x += a.w*w;
-			std::cout << "AUTO x " << x << ", " << w << "\n";
 		}
 		
 		if(h_auto) {
@@ -338,7 +333,6 @@ void ControlManager::ApplyAnchoring() {
 				h = std::max<int>(h, c2.y);
 			}
 			y += a.h*h;
-			std::cout << "AUTO y " << y << ", " << h << "\n";
 		}
 		
 		// TODO: clip w, h with min, max
@@ -346,8 +340,6 @@ void ControlManager::ApplyAnchoring() {
 	}
 	
 	// TODO: process deferred stuff
-	
-	std::cout << "<< leaving " << (this_widget ? this_widget->GetId() : "root") << "\n";
 	
 }
 

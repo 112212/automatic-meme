@@ -15,7 +15,8 @@ cpp = \
 	UI/common/Colors.cpp \
 	UI/common/Fonts.cpp \
 	UI/common/Colorstring.cpp \
-	UI/common/Cursor.cpp
+	UI/common/Cursor.cpp \
+	UI/common/Texture.cpp
 
 exe := 
 link := 

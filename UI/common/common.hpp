@@ -30,11 +30,11 @@ struct Rect : Point {
 
 
 // TODO: number conversions, do i need it? or i can use some of the std:: conversions if exist
-int old_bcd_to_binary( const char* str, int start, int end );
-void old_binary_to_bcd( int binary, char* str, int start, int end );
-int bcd_to_binary( const char* str, int start, int length );
-void binary_to_bcd( int binary, char* str, int start, int length );
-unsigned int hex_to_binary( const char* str, int start, int length );
+// int old_bcd_to_binary( const char* str, int start, int end );
+// void old_binary_to_bcd( int binary, char* str, int start, int end );
+// int bcd_to_binary( const char* str, int start, int length );
+// void binary_to_bcd( int binary, char* str, int start, int length );
+// unsigned int hex_to_binary( const char* str, int start, int length );
 
 constexpr unsigned int hash(const char *s, int off = 0) {
     return s[off] ? (hash(s, off+(s[off+1] == '_' ? 2 : 1))*33) ^ s[off] : 5381;

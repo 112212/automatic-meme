@@ -105,6 +105,28 @@ namespace Drawing {
 		"c.a = min(max_alpha, c.a);"
 		"color = c;"
 	"}";
+	
+	static const char* layered_texture_vertexshader_code = 
+	"#version 330\n"
+	"layout (location = 0) in vec2 position;"
+	"layout (location = 1) in vec2 texCoord;"
+	"out vec2 inTexCoord;"
+	"void main() {"
+		"gl_Position = vec4( position, 0.0, 1.0 );"
+		"inTexCoord = vec2(1.0 - texCoord.x, 1.0 - texCoord.y);"
+	"}";
+	
+	static const char* layered_texture_framentshader_code = 
+	"#version 330\n"
+	"in vec2 inTexCoord;"
+	"out vec4 color;"
+	"uniform sampler2D textureUniform;"
+	"uniform float max_alpha;"
+	"void main() {"
+		"vec4 c = texture(textureUniform, inTexCoord);"
+		"c.a = min(max_alpha, c.a);"
+		"color = c;"
+	"}";
 
 	static GLuint vao = 0,
 		vbo_position = 0,
@@ -113,9 +135,7 @@ namespace Drawing {
 
 	static GLuint shader = 0;
 	static GLuint shader2 = 0;
-	
-	
-	
+	static GLuint layered_texture_shader = 0;
 	
 
 	void Init() {
@@ -125,6 +145,7 @@ namespace Drawing {
 			try {
 				shader = loadShader( vertexShader_code, fragmentShader_code );
 				shader2 = loadShader( texture_vertexshader_code, texture_fragmentshader_code );
+				layered_texture_shader = loadShader( layered_texture_vertexshader_code, layered_texture_vertexshader_code );
 			} catch( std::string& e ) {
 				std::cout << e << std::endl;
 			}
@@ -395,7 +416,10 @@ namespace Drawing {
 		glUseProgram(0);
 	}
 	
-	
+	// TODO:
+	// void DrawLayeredTexture() {
+		
+	// }
 
 	//void TexRect(int x, int y, int w, int h, GLuint texture) {
 	void TexRect(int x, int y, int w, int h, GLuint texture, bool repeat, int texWidth, int texHeight) {

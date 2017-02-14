@@ -8,6 +8,7 @@ void printChars(char* str, int start, int end) {
 	}
 }
 
+/*
 inline unsigned int binary_search_log10( unsigned int num ) {
 	// fast log10
 	if(num >= 100000u) { // 4 zeros (9,8,7,6,5)
@@ -149,6 +150,7 @@ unsigned int hex_to_binary( const char* str, int start, int length ) {
 	}
 	return retval;
 }
+*/
 
 #ifdef USE_SDL
 const char sdl_code_conversion_table[] = 

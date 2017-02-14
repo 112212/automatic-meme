@@ -397,7 +397,7 @@ Anchor Anchor::parseRect(std::string s) {
 	float res[4];
 	int p = 0;
 	if(s[0] == 'a') {
-		std::cout << "ABS\n";
+		// std::cout << "ABS\n";
 		a.absolute_coordinates = true;
 	}
 	a.w_func = a.h_func = fit;
@@ -416,15 +416,15 @@ Anchor Anchor::parseRect(std::string s) {
 		const std::string& cur = parts[i];
 		if(p <= 1) {
 			monomial_expr_parse(cur.c_str(), names[p], res);
-			std::cout << "parsing rect(" << p << "):" << cur << " => " << res[0] << ", " << res[1] << ", " << res[2] << std::endl;
+			// std::cout << "parsing rect(" << p << "):" << cur << " => " << res[0] << ", " << res[1] << ", " << res[2] << std::endl;
 			size_t pos;
 			if(p == 0) {
 				if((pos=cur.find_first_of("LR")) != std::string::npos) {
 					if(cur[pos] == 'L') {
-						std::cout << "found L\n";
+						// std::cout << "found L\n";
 						a.absolute_coordinates = true;
 					} else if(cur[pos] == 'R') {
-						std::cout << "found R\n";
+						// std::cout << "found R\n";
 						a.W += 1;
 						a.w += -1;
 						a.absolute_coordinates = true;
@@ -441,7 +441,7 @@ Anchor Anchor::parseRect(std::string s) {
 						a.H += 1;
 						a.h += -1;
 						a.absolute_coordinates = true;
-						std::cout << "found B\n";
+						// std::cout << "found B\n";
 					}
 				}
 				a.y += res[0];
@@ -484,7 +484,7 @@ Anchor Anchor::parseRect(std::string s) {
 					i++;
 			} else {
 				monomial_expr_parse(cur.c_str(), names[p], res);
-				std::cout << "parsing rect(" << p << "): " << cur << " => " << res[0] << ", " << res[1] << std::endl;
+				// std::cout << "parsing rect(" << p << "): " << cur << " => " << res[0] << ", " << res[1] << std::endl;
 				if(p == 2) {
 					a.w_min[0] += res[0];
 					a.w_min[1] += res[1];
@@ -517,7 +517,7 @@ Anchor Anchor::parseRect(std::string s) {
 		}
 		p++;
 	}
-	std::cout << a << std::endl;
+	// std::cout << a << std::endl;
 	return a;
 }
 
