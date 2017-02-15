@@ -154,7 +154,6 @@ void Texture::Image(Point dstPoint, int* buffer, int w, int h, Point srcPoint, S
 }
 
 
-
 Size& Texture::GetTextureSize() {
 	return size;
 }

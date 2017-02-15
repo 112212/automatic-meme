@@ -100,14 +100,10 @@ void Canvas::PutPixel(int x, int y) {
 		y = y - y%pixel_size;
 	}
 	int i,j;
-	// unsigned int *pixels = (unsigned int*)layers[0].GetTexture();
 	Size &r = layers[0].GetTextureSize();
 	for(i=0; i < pixel_size; i++) {
-		if(y+i < r.h)
 		for(j=0; j < pixel_size; j++) {
-			if(x+j < r.w)
-				layers[0].Pixel(Point(x+j,y+i), pixel_color);
-			// pixels[(y+i)*r.w + x+j] = pixel_color;
+			layers[0].Pixel(Point(x+j,y+i), pixel_color);
 		}
 	}
 	maketex = true;

@@ -14,7 +14,6 @@ controls="
 	Terminal
 	TrackBar
 	Dialog
-	GridContainer
 	RadioButton
 	WidgetMover
 	WidgetResizer
