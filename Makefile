@@ -46,7 +46,6 @@ control_names := Button 	    \
 				TextBox         \
 				ListBox         \
 				TrackBar        \
-				GridContainer   \
 				Container       \
 				Dialog			\
 				Terminal		\

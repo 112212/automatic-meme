@@ -438,7 +438,6 @@ namespace XmlLoader {
 				TAGTYPE("trackbar", TrackBar);
 				TAGTYPE("scrollbar", ScrollBar);
 				TAGTYPE("checkbox", CheckBox);
-				TAGTYPE("gridcontainer", GridContainer);
 				TAGTYPE("terminal", Terminal);
 				TAGTYPE("form", Form);
 				
