@@ -5,7 +5,10 @@
 #include "../../common/Cursor.hpp"
 
 namespace ng {
+#ifndef NO_TEXTURE
 #define NO_TEXTURE 0xffffffff
+#endif
+
 TextBox::TextBox() : m_mousedown(false), m_position{0,0}, 
 m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
  {

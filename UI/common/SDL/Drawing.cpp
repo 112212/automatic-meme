@@ -64,6 +64,7 @@ namespace Drawing {
 
 	static const char* vertexShader_code =
 	"#version 330\n"
+	"#extension GL_ARB_separate_shader_objects : enable\n"
 	"layout (location = 0) in vec2 position;"
 	"layout (location = 1) in vec4 color;"
 	"out vec4 inColor;"
@@ -86,6 +87,7 @@ namespace Drawing {
 	
 	static const char* texture_vertexshader_code =
 	"#version 330\n"
+	"#extension GL_ARB_separate_shader_objects : enable\n"
 	"layout (location = 0) in vec2 position;"
 	"layout (location = 1) in vec2 texCoord;"
 	"out vec2 inTexCoord;"
@@ -106,27 +108,6 @@ namespace Drawing {
 		"color = c;"
 	"}";
 	
-	static const char* layered_texture_vertexshader_code = 
-	"#version 330\n"
-	"layout (location = 0) in vec2 position;"
-	"layout (location = 1) in vec2 texCoord;"
-	"out vec2 inTexCoord;"
-	"void main() {"
-		"gl_Position = vec4( position, 0.0, 1.0 );"
-		"inTexCoord = vec2(1.0 - texCoord.x, 1.0 - texCoord.y);"
-	"}";
-	
-	static const char* layered_texture_framentshader_code = 
-	"#version 330\n"
-	"in vec2 inTexCoord;"
-	"out vec4 color;"
-	"uniform sampler2D textureUniform;"
-	"uniform float max_alpha;"
-	"void main() {"
-		"vec4 c = texture(textureUniform, inTexCoord);"
-		"c.a = min(max_alpha, c.a);"
-		"color = c;"
-	"}";
 
 	static GLuint vao = 0,
 		vbo_position = 0,
@@ -135,7 +116,6 @@ namespace Drawing {
 
 	static GLuint shader = 0;
 	static GLuint shader2 = 0;
-	static GLuint layered_texture_shader = 0;
 	
 
 	void Init() {
@@ -145,7 +125,6 @@ namespace Drawing {
 			try {
 				shader = loadShader( vertexShader_code, fragmentShader_code );
 				shader2 = loadShader( texture_vertexshader_code, texture_fragmentshader_code );
-				layered_texture_shader = loadShader( layered_texture_vertexshader_code, layered_texture_vertexshader_code );
 			} catch( std::string& e ) {
 				std::cout << e << std::endl;
 			}
@@ -177,7 +156,7 @@ namespace Drawing {
 	}
 	
 	static float rotation = 0.0f;
-	static float rot_sin, rot_cos;
+	static float rot_sin=0.0f, rot_cos=1.0f;
 	void SetRotation(float _rotation, int cx, int cy) {
 		if(rotation != _rotation) {
 			rotation = _rotation;
@@ -188,7 +167,7 @@ namespace Drawing {
 		}
 	}
 	
-	static float center_x, center_y;
+	static float center_x=0.0f, center_y=0.0f;
 	void SetRotationPoint(int x, int y) {
 		center_x = (x * 2.0f) / sizeX - 1.0f;
 		center_y = -((y * 2.0f) / sizeY - 1.0f);
@@ -416,10 +395,33 @@ namespace Drawing {
 		glUseProgram(0);
 	}
 	
-	// TODO:
-	// void DrawLayeredTexture() {
+	
+	void TexRect(int x, int y, Texture& tex, bool repeat) {
+		Size &s = tex.GetTextureSize();
+		Point a, b;
+		if(s.w == 0 || s.h == 0 || !tex.GetTexture() ) return;
+		unsigned int texid = tex.GetTextureId();
+		if(tex.GetUpdateRegion(a,b)) {
+			if(texid == NO_TEXTURE) {
+				glGenTextures(1, &texid);
+				tex.SetTextureId(texid);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture( GL_TEXTURE_2D, texid );
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, s.w, s.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, tex.GetTexture() );
+			} else {
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, texid);
+				// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				// glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, s.w, s.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.GetTexture() );
+				glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, s.w, s.h, GL_BGRA, GL_UNSIGNED_BYTE, tex.GetTexture() );
+			}
+		}
 		
-	// }
+		TexRect(x, y, s.w, s.h, tex.GetTextureId(), repeat, s.w, s.h);
+	}
 
 	//void TexRect(int x, int y, int w, int h, GLuint texture) {
 	void TexRect(int x, int y, int w, int h, GLuint texture, bool repeat, int texWidth, int texHeight) {

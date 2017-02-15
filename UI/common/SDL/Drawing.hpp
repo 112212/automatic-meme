@@ -1,6 +1,7 @@
 #ifndef _CSURFACE_H_
 #define _CSURFACE_H_
 #include <SDL2/SDL.h>
+#include "../Texture.hpp"
 namespace ng {
 
 namespace Drawing {
@@ -18,10 +19,12 @@ namespace Drawing {
 	void SetRotation(float rotation, int cx=0, int cy=0);
 	void SetRotationPoint(int x, int y);
 
+	
 	unsigned int GetTextureFromSurface(SDL_Surface* surface, unsigned int textureID);
 	unsigned int GetTextureFromSurface2(SDL_Surface* surface, unsigned int textureID);
 	void DeleteTexture(unsigned int textureID);
 	void TexRect(int x, int y, int w, int h, unsigned int texture, bool repeat = false, int texWidth = 1, int texHeight = 1);
+	void TexRect(int x, int y, Texture& tex, bool repeat = false);
 }
 
 }

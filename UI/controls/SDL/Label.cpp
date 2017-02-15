@@ -49,7 +49,7 @@ void Label::Render( Point pos, bool isSelected ) {
 			Drawing::TexRect( rect.x + (rect.w - i->w)/2, rect.y+5+j*line_height, i->w, i->h, i->tex);
 		}
 	}
-	Drawing::SetRotation(0);
+	Drawing::SetRotation(0.0f);
 }
 
 static void find_and_replace(std::string& source, std::string const& find, std::string const& replace) {

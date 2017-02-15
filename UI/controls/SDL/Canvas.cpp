@@ -6,19 +6,20 @@ Canvas::Canvas() {
 	setType( "canvas" );
 	pixel_size = 1;
 	pixel_color = 0xffffffff;
-	m_drawing = nullptr;
-	tex_drawing = 0;
+	// m_drawing = nullptr;
+	// tex_drawing = 0;
 	last_x = last_y = -1;
 	m_is_readonly = false;
 	align_to_grid = false;
 	display_grid = false;
-	maketex=true;
+	maketex = true;
 	m_style.background_color = 0;
 	grid_color = 0xff808080;
 }
 
 Canvas::~Canvas() {
-	Drawing::DeleteTexture(tex_drawing);
+	// Drawing::DeleteTexture(tex_drawing);
+	
 }
 
 void Canvas::Render( Point pos, bool isSelected ) {
@@ -28,13 +29,13 @@ void Canvas::Render( Point pos, bool isSelected ) {
 	
 	Drawing::FillRect(x, y, rect.w, rect.h, m_style.background_color );
 	Control::Render(pos, isSelected);
-	
+	/*
 	if(display_grid) {
 		unsigned int* p = (unsigned int*)m_drawing->pixels;
 		int w = m_drawing->w;
 		int h;
 		// horizontal
-		for(int y=0; y < rect.h; y+=pixel_size) {
+		for(int y=0; y < rect.h; y += pixel_size) {
 			h = y*w;
 			for(int x=0; x < rect.w; x++) {
 				p[x + h] = grid_color;
@@ -43,23 +44,15 @@ void Canvas::Render( Point pos, bool isSelected ) {
 		// vertical
 		for(int y=0; y < rect.h; y++) {
 			h = y*w;
-			for(int x=0; x < rect.w; x+=pixel_size) {
+			for(int x=0; x < rect.w; x += pixel_size) {
 				p[x + h] = grid_color;
 			}
 		}
 	}
-	
-	if(maketex) {
-		
-		maketex = false;
-		SDL_Rect r = { x, y, rect.w, rect.h };
-		tex_drawing = Drawing::GetTextureFromSurface( m_drawing, tex_drawing );
-		Drawing::TexRect( r.x, r.y, r.w, r.h, tex_drawing );
-	} else if(m_drawing && tex_drawing) {
-		Drawing::TexRect( x, y, m_drawing->w, m_drawing->h, tex_drawing );
-	}
-	
-	
+	*/
+	for(int i=1; i >= 0; i--)
+		Drawing::TexRect( x, y, layers[i] );
+
 }
 
 void Canvas::RefreshTexture() {
@@ -107,31 +100,22 @@ void Canvas::PutPixel(int x, int y) {
 		y = y - y%pixel_size;
 	}
 	int i,j;
-	if(m_drawing) {
-		unsigned int *pixels = (unsigned int*)m_drawing->pixels;
-		for(i=0; i < pixel_size; i++) {
-			if(y+i < m_drawing->h)
-			for(j=0; j < pixel_size; j++) {
-				if(x+j < m_drawing->w)
-				pixels[(y+i)*m_drawing->w + x+j] = pixel_color;
-			}
+	// unsigned int *pixels = (unsigned int*)layers[0].GetTexture();
+	Size &r = layers[0].GetTextureSize();
+	for(i=0; i < pixel_size; i++) {
+		if(y+i < r.h)
+		for(j=0; j < pixel_size; j++) {
+			if(x+j < r.w)
+				layers[0].Pixel(Point(x+j,y+i), pixel_color);
+			// pixels[(y+i)*r.w + x+j] = pixel_color;
 		}
 	}
 	maketex = true;
 }
 
-void Canvas::put_pixel_interpolate(int x, int y, int last_x, int last_y) {
-	int diffx = last_x-x;
-	int diffy = last_y-y;
-	float step = 1/(float)std::max(abs(diffx), abs(diffy));
-	float interp;
-	for(interp=0; interp < 1; interp+=step) {
-		PutPixel(x+diffx*interp, y+diffy*interp);
-	}
-}
-
 void Canvas::Clear(int color) {
-	SDL_FillRect(m_drawing, 0, color);
+	layers[0].Clear(m_style.background_color);
+	
 }
 
 Canvas* Canvas::Clone() {
@@ -152,7 +136,7 @@ void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
 			last_y = y;
 		}
 
-		put_pixel_interpolate(x, y, last_x, last_y);
+		layers[0].Line(Point(x, y), Point(last_x, last_y), pixel_color);
 		
 		last_x = x;
 		last_y = y;
@@ -172,14 +156,13 @@ void Canvas::OnLostFocus() {
 
 void Canvas::onPositionChange() {
 
-	int R=0x00ff0000,
-		G=0x0000ff00,
-		B=0x000000ff,
-		A=0xff000000;
-	if(!m_drawing) {
-		m_drawing = SDL_CreateRGBSurface(0,GetRect().w,GetRect().h,32,R,G,B,A );
-		maketex = true;
-		SDL_FillRect( m_drawing, NULL, 0 );
-	}
+
+	const Rect &r = GetRect();
+	layers[0].Resize( r.w, r.h );
+	layers[1].Resize( r.w, r.h );
+	
+	layers[0].Clear(m_style.background_color);
+	layers[1].Clear(0xffffffff);
+	
 }
 }

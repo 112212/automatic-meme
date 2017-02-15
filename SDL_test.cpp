@@ -25,6 +25,11 @@ GUIFUNC(hehe) {
 	cout << endl;
 }
 
+
+GUIFUNC(position) {
+	const Rect& r = control->GetRect();
+	cout << "control " << control->GetId() << " is at " << r.x << ", " << r.y << endl;
+}
 GUIFUNC(say) {
 	if(argv.empty()) return;
 	cout << "control " << control->GetId() << " says: " << argv[0] << endl;
@@ -93,6 +98,11 @@ int main() {
 	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf");
 	gui.LoadXml("gui-test.xml");
 	gui.SetTooltipDelay(0.5);
+	
+	gui.AddFunction("clear_canvas", [](Control* control, Argv &argv) {
+		Canvas *c = (Canvas*)gui.GetControlById("canvas2");
+		c->Clear(0xffffffff);
+	});
 	
 	// gui.OnEvent("form", "submit", [](Control* c, const Argv& argv) {
 		// cout << "submit\n";

@@ -2,7 +2,7 @@
 	<theme>
 		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,20" down_color="#00ff00" />
 		<listbox id="200" rect="0,0,200,200" backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
-		<canvas backgroundcolor="#050550" />
+		<canvas backgroundcolor="#3000ff00" />
 		<textbox backgroundcolor="#050550" />
 		<terminal>
 			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" backgroundcolor="#33777777" bordercolor="#FF1228D1" hoverbordercolor="#FF1228D1" />
@@ -102,13 +102,13 @@ fddgdf" rotation="50"></label>
 			<widgetresizer rect="0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
 		</widget>
 		
-		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4">
+		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4" onhover="position">
 			<item>hehehehe</item>
 			<item>hghgfhf</item>
 			<item>jhjhg</item>
 			<item>343</item>
 			<item>564645</item>
-			<item>777</item>
+			<item>777 :D</item>
 		</listbox>
 		
 <!--
@@ -119,8 +119,8 @@ fddgdf" rotation="50"></label>
 		<checkbox rect="0,0,100,30" font="/usr/share/fonts/TTF/arial.ttf,15" value="hehehe"></checkbox>
 		<checkbox rect="0,0,100,30" value="hahaha" checked="true"></checkbox>
 -->
-		<canvas rect="0,0,200,200" grid="false" color="#0021FF" pixelsize="4" aligntogrid="false" grid_color="#220000" ></canvas>
-		
+		<canvas rect="0,0,200,200" grid="false" color="#0000ff" pixelsize="4" aligntogrid="false" grid_color="#220000" id="canvas2" ></canvas>
+		<button onclick="clear_canvas" value="clear canvas" rect="0,0,150, 40"/>
 		
 <!--
 		<widget rect="0,0,400,300">

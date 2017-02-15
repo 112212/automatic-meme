@@ -2,20 +2,19 @@
 #define NG_CANVAS_HPP
 
 #include "../../Control.hpp"
-
+#include "../../common/Texture.hpp"
 namespace ng {
 #define MAX_LAYERS 4
 class Canvas : public Control {
 	private:
-		SDL_Surface* m_drawing;
-		// Texture layers[MAX_LAYERS];
-		Uint32 tex_drawing;
+		// SDL_Surface* m_drawing;
+		Texture layers[MAX_LAYERS];
+		// Uint32 tex_drawing;
 		bool m_is_mouseDown;
 		bool m_is_readonly;
 		void onPositionChange();
 		int pixel_size;
 		
-		void put_pixel_interpolate(int x, int y, int last_x, int last_y);
 		int pixel_color;
 		int grid_color;
 		int last_x, last_y;
@@ -32,8 +31,10 @@ class Canvas : public Control {
 	public:
 		Canvas();
 		~Canvas();
+		
 		Point point;
 		Canvas* Clone();
+		
 		void RefreshTexture();
 		void PutPixel(int x, int y);
 		void SetPixelSize(int size);
@@ -42,7 +43,8 @@ class Canvas : public Control {
 		void SetAlignToGrid(bool align) { align_to_grid = align; }
 		void DisplayGrid( bool grid ) { display_grid = grid; }
 		void SetPixelColor(int color) { pixel_color = color; }
-		SDL_Surface* GetDrawingSurface() { return m_drawing; }
+		// SDL_Surface* GetDrawingSurface() { return m_drawing; }
+		Texture& GetLayer(int layer=0) { return layers[layer]; }
 		void Clear(int color);
 		void SetReadOnly( bool isReadOnly ) { m_is_readonly = isReadOnly; }
 		
