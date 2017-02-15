@@ -5,10 +5,17 @@
 #include <SDL2/SDL_opengl.h>
 #include <vector>
 #include <iostream>
-#include <glm/glm.hpp>
+#include <cmath>
 
 namespace ng {
 namespace Drawing {
+	
+	struct vec2 {
+		float x,y;
+	};
+	struct vec4 {
+		float x,y,z,w;
+	};
 	
 	// shaders
 	static unsigned int readShader(std::string shaderStr, unsigned int shaderType)
@@ -316,29 +323,30 @@ namespace Drawing {
 		float ca = (float)(color >> 24) / 255.0f;
 		ca = std::min<float>(max_alpha, ca);
 		
-		std::vector<glm::vec4> colors;
-		std::vector<glm::vec2> positions;
+		
+		std::vector<vec4> colors;
+		std::vector<vec2> positions;
 
-		glm::vec2 centerPos = glm::vec2(x1, -y1);
+		vec2 centerPos{x1, -y1};
 		positions.push_back(centerPos);
 
-		for(int i = 0; i <= triangleAmount + 1;i++) {
-			glm::vec2 pos = glm::vec2(
-				x1 + (radius * cos(i *  twicePi / triangleAmount) / sizeX),
-				-y1 + (radius * sin(i * twicePi / triangleAmount) / sizeY)
-			);
+		for(int i = 0; i <= triangleAmount + 1; i++) {
+			vec2 pos = {
+				x1 + (radius * cosf(i *  twicePi / triangleAmount) / sizeX),
+				-y1 + (radius * sinf(i * twicePi / triangleAmount) / sizeY)
+			};
 
 			positions.push_back(pos);
-			colors.emplace_back(cr, cg, cb, ca);
+			colors.push_back({cr, cg, cb, ca});
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * positions.size(), &positions[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * positions.size(), &positions[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * colors.size(), &colors[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec4) * colors.size(), &colors[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
@@ -353,7 +361,7 @@ namespace Drawing {
 		glBindVertexArray(vao);
 
 		int triangleAmount = 15;
-		GLfloat twicePi = 2.0f * 3.141592;
+		GLfloat twicePi = 2.0f * 3.141592f;
 
 		float x1 = (float)(x) / sizeX * 2.0 - 1.0;
 		float y1 = (float)(y) / sizeY * 2.0 - 1.0;
@@ -366,26 +374,26 @@ namespace Drawing {
 		float ca = (float)(color >> 24) / 255.0f;
 		ca = std::min<float>(max_alpha, ca);
 		
-		std::vector<glm::vec4> colors;
-		std::vector<glm::vec2> positions;
+		std::vector<vec4> colors;
+		std::vector<vec2> positions;
 
 		for(int i = 0; i <= triangleAmount;i++) {
-			glm::vec2 pos = glm::vec2(
-				x1 + (radius * cos(i *  twicePi / triangleAmount) / sizeX),
-				-y1 + (radius * sin(i * twicePi / triangleAmount) / sizeY)
-			);
+			vec2 pos = {
+				x1 + (radius * cosf(i *  twicePi / triangleAmount) / sizeX),
+				-y1 + (radius * sinf(i * twicePi / triangleAmount) / sizeY)
+			};
 
 			positions.push_back(pos);
-			colors.push_back(glm::vec4(cr, cg, cb, ca));
+			colors.push_back({cr, cg, cb, ca});
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * positions.size(), &positions[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * positions.size(), &positions[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * colors.size(), &colors[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec4) * colors.size(), &colors[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
