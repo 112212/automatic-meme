@@ -126,6 +126,10 @@ void Texture::Pixel(Point a, unsigned int color) {
 }
 
 void Texture::Rect(Point a, Point b, unsigned int color, bool fill) {
+	a.x = std::min(a.x, b.x);
+	a.y = std::min(a.y, b.y);
+	b.x = std::max(a.x, b.x);
+	b.y = std::max(a.y, b.y);
 	unsigned int *upper_line = buffer + (size.w * a.y) + a.x;
 	unsigned int *lower_line = buffer + (size.w * b.y) + a.x;
 	int c = b.x-a.x;
@@ -133,7 +137,11 @@ void Texture::Rect(Point a, Point b, unsigned int color, bool fill) {
 		upper_line[i] = color;
 		lower_line[i] = color;
 	}
-	// TODO: vert lines
+	for(int i=a.y; i <= b.y; i++) {
+		buffer[(size.w * i) + a.x] = color;
+		buffer[(size.w * i) + b.x] = color;
+	}
+	
 }
 
 void Texture::Clear(unsigned int color) {

@@ -330,7 +330,6 @@ void GuiEngine::RemoveControl( Control* control ) {
 
 void GuiEngine::OnMouseDown( int mX, int mY, unsigned int button ) {
 	m_mouse_down = true;
-	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	
 #ifndef OVERLAPPING_CHECK
 	if( !selected_control ) {
@@ -341,8 +340,10 @@ void GuiEngine::OnMouseDown( int mX, int mY, unsigned int button ) {
 		check_for_new_collision( mX, mY );
 	}
 #endif
+	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
 	active_control = selected_control;
 	if( selected_control ) {
+		
 		if(m_focus_lock) {
 			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ));
 			if(m_focus_lock)
@@ -354,7 +355,9 @@ void GuiEngine::OnMouseDown( int mX, int mY, unsigned int button ) {
 		}
 
 		if( check_control_collision(selected_control, control_coords.x, control_coords.y) ) {
+			selected_control->emitEvent( "mousedown", {std::to_string(control_coords.x-selected_control->m_rect.x), std::to_string(control_coords.y-selected_control->m_rect.y)} );
 			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ));
+			
 		} else {
 			unselectControl();
 			check_for_new_collision( mX, mY );
@@ -363,6 +366,7 @@ void GuiEngine::OnMouseDown( int mX, int mY, unsigned int button ) {
 				INTERCEPT_HOOK(mouse_down, OnMouseDown( mX-sel_widget_offset.x, mY-sel_widget_offset.y, (MouseButton)button ));
 			}
 		}
+		
 	} else WIDGET_HOOK(mouse_down, OnMouseDown( mX, mY, (MouseButton)button ));
 	active_control = selected_control;
 	if(selected_control && selected_control->IsDraggable()) {

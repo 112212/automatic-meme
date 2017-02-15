@@ -32,7 +32,6 @@ class Canvas : public Control {
 		Canvas();
 		~Canvas();
 		
-		Point point;
 		Canvas* Clone();
 		
 		void RefreshTexture();

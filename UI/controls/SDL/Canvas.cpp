@@ -89,7 +89,6 @@ void Canvas::SetPixelSize(int size) {
 void Canvas::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(!m_is_readonly)
 		PutPixel(mX-GetRect().x, mY-GetRect().y);
-	point = Point(mX-GetRect().x, mY-GetRect().y);
 	m_is_mouseDown = true;
 }
 
@@ -153,7 +152,7 @@ void Canvas::onPositionChange() {
 	const Rect &r = GetRect();
 	for(int i=0; i < MAX_LAYERS; i++) {
 		layers[i].Resize( r.w, r.h );
-		layers[i].Clear(m_style.background_color);
+		layers[i].Clear(0);
 	}
 	
 }
