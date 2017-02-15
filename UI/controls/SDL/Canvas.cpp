@@ -50,7 +50,7 @@ void Canvas::Render( Point pos, bool isSelected ) {
 		}
 	}
 	*/
-	for(int i=1; i >= 0; i--)
+	for(int i=MAX_LAYERS-1; i >= 0; i--)
 		Drawing::TexRect( x, y, layers[i] );
 
 }
@@ -93,7 +93,7 @@ void Canvas::OnMouseDown( int mX, int mY, MouseButton button ) {
 	m_is_mouseDown = true;
 }
 
-void Canvas::PutPixel(int x, int y) {
+void Canvas::PutPixel(int x, int y, int layer) {
 	if(x < 0 or y < 0) return;
 	if(align_to_grid) {
 		x = x - x%pixel_size;
@@ -103,15 +103,13 @@ void Canvas::PutPixel(int x, int y) {
 	Size &r = layers[0].GetTextureSize();
 	for(i=0; i < pixel_size; i++) {
 		for(j=0; j < pixel_size; j++) {
-			layers[0].Pixel(Point(x+j,y+i), pixel_color);
+			layers[layer].Pixel(Point(x+j,y+i), pixel_color);
 		}
 	}
-	maketex = true;
 }
 
-void Canvas::Clear(int color) {
-	layers[0].Clear(m_style.background_color);
-	
+void Canvas::Clear(int color, int layer) {
+	layers[layer].Clear(m_style.background_color);
 }
 
 Canvas* Canvas::Clone() {
@@ -152,13 +150,11 @@ void Canvas::OnLostFocus() {
 
 void Canvas::onPositionChange() {
 
-
 	const Rect &r = GetRect();
-	layers[0].Resize( r.w, r.h );
-	layers[1].Resize( r.w, r.h );
-	
-	layers[0].Clear(m_style.background_color);
-	layers[1].Clear(0xffffffff);
+	for(int i=0; i < MAX_LAYERS; i++) {
+		layers[i].Resize( r.w, r.h );
+		layers[i].Clear(m_style.background_color);
+	}
 	
 }
 }

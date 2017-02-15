@@ -36,7 +36,7 @@ class Canvas : public Control {
 		Canvas* Clone();
 		
 		void RefreshTexture();
-		void PutPixel(int x, int y);
+		void PutPixel(int x, int y, int layer = 0);
 		void SetPixelSize(int size);
 		
 		void SetBackgroundColor(int color);
@@ -45,7 +45,7 @@ class Canvas : public Control {
 		void SetPixelColor(int color) { pixel_color = color; }
 		// SDL_Surface* GetDrawingSurface() { return m_drawing; }
 		Texture& GetLayer(int layer=0) { return layers[layer]; }
-		void Clear(int color);
+		void Clear(int color, int layer = 0);
 		void SetReadOnly( bool isReadOnly ) { m_is_readonly = isReadOnly; }
 		
 
