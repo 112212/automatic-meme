@@ -228,7 +228,7 @@ void Control::SetRect( int x, int y, int w, int h ) {
 		engine->updateCache(this, CacheUpdateFlag::position);
 	}
 	
-	onPositionChange();
+	onRectChange();
 }
 
 bool Control::custom_check = false;
@@ -296,7 +296,7 @@ void Control::OnMouseUp( int mX, int mY, MouseButton button ) {}
 	}
 #endif
 void Control::OnLostFocus() {}
-void Control::onPositionChange() {}
+void Control::onRectChange() {}
 void Control::onFontChange() {}
 
 void Control::OnGetFocus() {}

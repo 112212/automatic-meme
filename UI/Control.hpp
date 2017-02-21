@@ -170,7 +170,7 @@ class Control {
 		const std::vector<Control*>& getEngineControls();
 		
 		// internal virtual (use from within control)
-		virtual void onPositionChange();
+		virtual void onRectChange();
 		virtual void onFontChange();
 		virtual bool customBoundary( int x, int y );
 		

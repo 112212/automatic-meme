@@ -106,8 +106,9 @@ void Canvas::AddLayers(int layers) {
 }
 
 void Canvas::OnMouseDown( int mX, int mY, MouseButton button ) {
-	if(!m_is_readonly)
+	if(!m_is_readonly) {
 		PutPixel(mX-GetRect().x, mY-GetRect().y);
+	}
 	m_is_mouseDown = true;
 }
 
