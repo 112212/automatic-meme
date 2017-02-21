@@ -91,7 +91,7 @@ void Canvas::SetPixelSize(int size) {
 Texture& Canvas::GetLayer(int layer) {
 	if(layer < layers.size()) {
 		return layers[layer];
-	} else if(layer >= layers.size()) {
+	} else {
 		const Rect &r = GetRect();
 		layers.emplace_back(r.w, r.h);
 		return layers.back();

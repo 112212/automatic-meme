@@ -94,12 +94,17 @@ void CheckBox::onRectChange() {
 }
 
 void CheckBox::Check() {
-	m_isChecked = true;
-	emitEvent( "change" );
+	if(!m_isChecked) {
+		m_isChecked = true;
+		emitEvent( "change" );
+	}
 }
 
 void CheckBox::Uncheck() {
-	m_isChecked = false;
+	if(m_isChecked) {
+		emitEvent( "change" );
+		m_isChecked = false;
+	}
 }
 
 void CheckBox::SetValue( bool check ) {

@@ -56,10 +56,8 @@ void Texture::Resize(int w, int h) {
 	c2 = Point(0,0);
 }
 
-// TODO: bresenham
 void Texture::Line(Point a, Point b, unsigned int color) {
 	if(a.y == b.y && a.x == b.y) return;
-	// return;
 	if(a.y > b.y || (a.y == b.y && a.x > b.x)) {
 		Point tmp;
 		tmp = a;
@@ -79,7 +77,6 @@ void Texture::Line(Point a, Point b, unsigned int color) {
 		int x2 = b.x;
 		int y = a.y*size.w;
 		while(x1 <= x2) {
-			// plot(x1, a.y);
 			buffer[y + x1] = color;
 			x1++;
 		}
@@ -109,9 +106,7 @@ void Texture::Line(Point a, Point b, unsigned int color) {
 					return;
 				}
 				buffer[ y*size.w + x ] = color;
-				// plot(x,y);
 			}
-			// plot(x,y);
 			buffer[ y*size.w + x ] = color;
 			d -= dx;
 		}
