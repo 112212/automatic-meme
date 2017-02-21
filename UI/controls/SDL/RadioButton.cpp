@@ -111,7 +111,7 @@ void RadioButton::OnLostFocus() {
 }
 
 
-void RadioButton::onPositionChange() {
+void RadioButton::onRectChange() {
 	if(m_text.size())
 		SetText( m_text );
 }

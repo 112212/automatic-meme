@@ -122,7 +122,7 @@ void ListBox::OnLostFocus() {
 	}
 }
 
-void ListBox::onPositionChange() {
+void ListBox::onRectChange() {
 	updateItemsSize();
 }
 

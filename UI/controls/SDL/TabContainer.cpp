@@ -41,7 +41,7 @@ void TabContainer::AddTab( std::string tab_name ) {
 	// text.setCharacterSize( characterSize );
 	// text.setStri( tab_name );
 	tabtexts.push_back( text );
-	onPositionChange();
+	onRectChange();
 }
 
 int TabContainer::getTextWidth( std::string txt ) {
@@ -79,7 +79,7 @@ void TabContainer::Render( SDL_Renderer* ren, SDL_Rect pos, bool isSelected ) {
 
 // not portable
 const int tab_overlap = 15;
-void TabContainer::onPositionChange() {
+void TabContainer::onRectChange() {
 	int acc = esc.getSize().x;
 	for(auto &i : tabrects) {
 		i.setPosition( m_rect.x + acc, m_rect.y );

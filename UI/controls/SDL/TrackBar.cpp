@@ -227,7 +227,7 @@ Rect TrackBar::getSliderRect() {
 	return r;
 }
 
-void TrackBar::onPositionChange() {
+void TrackBar::onRectChange() {
 	onChange();
 }
 

@@ -17,7 +17,7 @@ class RadioButton : public Control {
 		int m_group;
 		TTF_Font* m_font;
 		std::string m_text;
-		void onPositionChange();
+		void onRectChange();
 		
 		void handleRadioButtonChange();
 		

@@ -161,6 +161,10 @@ void Texture::Image(Point dstPoint, int* buffer, int w, int h, Point srcPoint, S
 	// TODO
 }
 
+// void Texture::Text(std::string text_line, int x, int y) {
+	
+// }
+
 
 Size& Texture::GetTextureSize() {
 	return size;

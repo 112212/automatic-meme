@@ -4,7 +4,7 @@
 #include "../../Control.hpp"
 #include "../../common/Texture.hpp"
 namespace ng {
-#define MAX_LAYERS 4
+#define MAX_LAYERS 10
 class Canvas : public Control {
 	private:
 		// SDL_Surface* m_drawing;
@@ -12,7 +12,7 @@ class Canvas : public Control {
 		// Uint32 tex_drawing;
 		bool m_is_mouseDown;
 		bool m_is_readonly;
-		void onPositionChange();
+		void onRectChange();
 		int pixel_size;
 		
 		int pixel_color;

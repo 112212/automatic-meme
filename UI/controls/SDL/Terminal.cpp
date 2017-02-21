@@ -189,12 +189,12 @@ void Terminal::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
 }
 
 void Terminal::onFontChange() {
-	onPositionChange();
+	onRectChange();
 	if(getEngine())
 		getEngine()->ApplyAnchoring();
 }
 
-void Terminal::onPositionChange() {
+void Terminal::onRectChange() {
 	int h = TTF_FontHeight(m_style.font) + 7;
 	m_log->SetRect(0,0,GetRect().w, GetRect().h-h);
 	m_terminal->SetRect(0,GetRect().h-h,GetRect().w,h);

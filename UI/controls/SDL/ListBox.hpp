@@ -12,7 +12,7 @@ class ListBox : public Control {
 		bool m_drawscrollbar;
 		bool m_scrollbar_focus;
 		
-		void onPositionChange();
+		void onRectChange();
 		
 		TTF_Font* m_font;
 		

@@ -23,7 +23,7 @@ class ComboBox : public Control {
 		bool m_textbox_focus;
 		bool m_is_textbox_mode;
 		
-		void onPositionChange();
+		void onRectChange();
 		
 		// items
 		std::vector<std::string> m_items;

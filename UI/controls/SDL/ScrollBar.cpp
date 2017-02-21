@@ -72,7 +72,7 @@ void ScrollBar::updateSlider() {
 	}
 }
 
-void ScrollBar::onPositionChange() {
+void ScrollBar::onRectChange() {
 	updateSlider();
 }
 

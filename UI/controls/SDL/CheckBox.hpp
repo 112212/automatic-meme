@@ -17,7 +17,7 @@ class CheckBox : public Control {
 		TTF_Font* m_font;
 		Uint32 tex_text;
 		char* m_text;
-		void onPositionChange();
+		void onRectChange();
 		static int m_font_index;
 		void updateText();
 		void OnSetStyle(std::string& style, std::string& value);

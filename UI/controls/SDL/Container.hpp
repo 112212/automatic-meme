@@ -18,7 +18,7 @@ class Container : public Widget {
 		Uint32 background_color;
 		ScrollBar* m_scroll_v;
 		ScrollBar* m_scroll_h;
-		void onPositionChange();
+		void onRectChange();
 		void onOverflow();
 		bool isOnVerticalScrollbar( int x, int y );
 		bool isOnHorizontalScrollbar( int x, int y );

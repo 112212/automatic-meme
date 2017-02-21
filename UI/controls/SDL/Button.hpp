@@ -15,7 +15,7 @@ class Button : public Control {
 		int m_down_color;
 		int m_up_color;
 		
-		void onPositionChange();
+		void onRectChange();
 		void update_text();
 		void OnSetStyle(std::string& style, std::string& value);
 		void OnMouseDown( int mX, int mY, MouseButton which_button );

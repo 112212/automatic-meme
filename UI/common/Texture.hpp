@@ -30,6 +30,7 @@ class Texture {
 		void Rect(Point a, Point b, unsigned int color = 0, bool fill = false);
 		void Circle(Point a, int radius);
 		void Image(Point dstPoint, int* buffer, int w, int h, Point srcPoint, Size srcRegion);
+		// void Text(std::string text_line, int x, int y);
 		void Clear(unsigned int color);
 		
 		

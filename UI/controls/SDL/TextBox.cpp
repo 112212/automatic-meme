@@ -223,7 +223,7 @@ void TextBox::onFontChange() {
 		m_lines_max = 1;
 }
 
-void TextBox::onPositionChange() {
+void TextBox::onRectChange() {
 	onFontChange();
 	const Rect& r = this->GetRect();
 	int w = 20;

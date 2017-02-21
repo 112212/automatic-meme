@@ -24,7 +24,7 @@ class Terminal : public Widget {
 			appearing
 		} m_state;
 		bool m_log_immediate;
-		void onPositionChange();
+		void onRectChange();
 		void appear();
 		void tbox_enter(Control *c);
 		void execute_command(std::string cmd);

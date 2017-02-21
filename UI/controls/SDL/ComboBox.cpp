@@ -413,7 +413,7 @@ void ComboBox::updateItemsSize() {
 	}
 }
 
-void ComboBox::onPositionChange() {
+void ComboBox::onRectChange() {
 	const Rect& rect = GetRect();
 	if(!m_max_width)
 		m_max_width = rect.w;

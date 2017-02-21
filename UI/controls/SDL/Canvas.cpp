@@ -147,7 +147,7 @@ void Canvas::OnLostFocus() {
 	m_is_mouseDown = false;
 }
 
-void Canvas::onPositionChange() {
+void Canvas::onRectChange() {
 
 	const Rect &r = GetRect();
 	for(int i=0; i < MAX_LAYERS; i++) {

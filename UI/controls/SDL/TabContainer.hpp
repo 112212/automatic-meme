@@ -14,7 +14,7 @@ class TabContainer : public Widget {
 		std::vector<Container*> tabcontainers;
 		Container* cur_container;
 		int selectedTab;
-		void onPositionChange();
+		void onRectChange();
 		int getTextWidth( const std::string &txt );
 		inline int getTabHeight();
 		

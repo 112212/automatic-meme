@@ -70,7 +70,7 @@ class TextBox : public Control {
 		
 		bool m_mousedown;
 
-		void onPositionChange();
+		void onRectChange();
 		void OnSetStyle(std::string& style, std::string& value);
 		
 	public:

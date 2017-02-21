@@ -20,7 +20,7 @@ class ScrollBar : public Control {
 		
 		Rect getSliderRect();
 		void onChange();
-		void onPositionChange();
+		void onRectChange();
 		void setValue( int value );
 		int getValue();
 		void updateSlider();

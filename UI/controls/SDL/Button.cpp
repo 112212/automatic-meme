@@ -84,7 +84,7 @@ void Button::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 
 }
 
-void Button::onPositionChange() {
+void Button::onRectChange() {
 	update_text();
 }
 

@@ -180,7 +180,7 @@ void Container::Render( Point pos, bool isSelected ) {
 	
 }
 
-void Container::onPositionChange() {
+void Container::onRectChange() {
 	const Rect& r = GetRect();
 	if( r.w > max_h ) max_h = r.w;
 	if( r.h > max_v ) max_v = r.h;

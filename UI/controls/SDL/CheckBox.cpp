@@ -89,7 +89,7 @@ CheckBox* CheckBox::Clone() {
 	return c;
 }
 
-void CheckBox::onPositionChange() {
+void CheckBox::onRectChange() {
 	if(m_text) updateText(); // update poziciju teksta :)
 }
 
