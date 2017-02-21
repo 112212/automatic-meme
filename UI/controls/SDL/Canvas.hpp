@@ -4,14 +4,14 @@
 #include "../../Control.hpp"
 #include "../../common/Texture.hpp"
 namespace ng {
-#define MAX_LAYERS 10
 class Canvas : public Control {
 	private:
 		// SDL_Surface* m_drawing;
-		Texture layers[MAX_LAYERS];
+		std::vector<Texture> layers;
 		// Uint32 tex_drawing;
 		bool m_is_mouseDown;
 		bool m_is_readonly;
+		bool m_should_update_texture_sizes;
 		void onRectChange();
 		int pixel_size;
 		
@@ -28,6 +28,8 @@ class Canvas : public Control {
 		void OnMouseUp( int mX, int mY, MouseButton button );
 		void OnLostFocus();
 		void OnSetStyle(std::string& style, std::string& value);
+		
+		void updateTextureSizes();
 	public:
 		Canvas();
 		~Canvas();
@@ -38,12 +40,13 @@ class Canvas : public Control {
 		void PutPixel(int x, int y, int layer = 0);
 		void SetPixelSize(int size);
 		
+		void AddLayers(int layers);
 		void SetBackgroundColor(int color);
 		void SetAlignToGrid(bool align) { align_to_grid = align; }
 		void DisplayGrid( bool grid ) { display_grid = grid; }
 		void SetPixelColor(int color) { pixel_color = color; }
 		// SDL_Surface* GetDrawingSurface() { return m_drawing; }
-		Texture& GetLayer(int layer=0) { return layers[layer]; }
+		Texture& GetLayer(int layer=0);
 		void Clear(int color, int layer = 0);
 		void SetReadOnly( bool isReadOnly ) { m_is_readonly = isReadOnly; }
 		

@@ -12,9 +12,11 @@ Canvas::Canvas() {
 	m_is_readonly = false;
 	align_to_grid = false;
 	display_grid = false;
+	m_should_update_texture_sizes = false;
 	maketex = true;
 	m_style.background_color = 0;
 	grid_color = 0xff808080;
+	
 }
 
 Canvas::~Canvas() {
@@ -50,8 +52,9 @@ void Canvas::Render( Point pos, bool isSelected ) {
 		}
 	}
 	*/
-	for(int i=MAX_LAYERS-1; i >= 0; i--)
-		Drawing::TexRect( x, y, layers[i] );
+	for(auto rit = layers.rbegin(); rit != layers.rend(); rit++) {
+		Drawing::TexRect( x, y, *rit );
+	}
 
 }
 
@@ -85,6 +88,22 @@ void Canvas::SetPixelSize(int size) {
 	pixel_size = size;
 }
 
+Texture& Canvas::GetLayer(int layer) {
+	if(layer < layers.size()) {
+		return layers[layer];
+	} else if(layer >= layers.size()) {
+		const Rect &r = GetRect();
+		layers.emplace_back(r.w, r.h);
+		return layers.back();
+	}
+}
+
+void Canvas::AddLayers(int layers) {
+	for(int i=0; i < layers; i++) {
+		const auto& r = GetRect();
+		this->layers.emplace_back(r.w, r.h);
+	}
+}
 
 void Canvas::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(!m_is_readonly)
@@ -104,6 +123,14 @@ void Canvas::PutPixel(int x, int y, int layer) {
 		for(j=0; j < pixel_size; j++) {
 			layers[layer].Pixel(Point(x+j,y+i), pixel_color);
 		}
+	}
+}
+
+void Canvas::updateTextureSizes() {
+	const Rect &r = GetRect();
+	for(Texture& t : layers) {
+		t.Resize( r.w, r.h );
+		t.Clear(0);
 	}
 }
 
@@ -148,12 +175,8 @@ void Canvas::OnLostFocus() {
 }
 
 void Canvas::onRectChange() {
-
-	const Rect &r = GetRect();
-	for(int i=0; i < MAX_LAYERS; i++) {
-		layers[i].Resize( r.w, r.h );
-		layers[i].Clear(0);
-	}
 	
+	updateTextureSizes();
 }
+
 }
