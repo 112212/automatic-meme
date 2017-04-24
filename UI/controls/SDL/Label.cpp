@@ -28,6 +28,7 @@ Label::Label() {
 	setInteractible(false);
 	text_lines.clear();
 	m_alignment = Alignment::left;
+	m_angle = 0;
 }
 
 Label::~Label() {
@@ -42,11 +43,11 @@ void Label::Render( Point pos, bool isSelected ) {
 	for( auto i = text_lines.begin(); i != text_lines.end(); i++,j++) {
 		if(5+j*line_height+i->h > rect.h) break;
 		if(m_alignment == Alignment::left) {
-			Drawing::TexRect( rect.x, rect.y+5+j*line_height, i->w, i->h, i->tex);
+			Drawing::TexRect( pos.x + rect.x, pos.y + rect.y+5+j*line_height, i->w, i->h, i->tex);
 		} else if(m_alignment == Alignment::right) {
-			Drawing::TexRect( rect.x + rect.w - i->w, rect.y+5+j*line_height, i->w, i->h, i->tex);
+			Drawing::TexRect( pos.x + rect.x + rect.w - i->w, pos.y + rect.y+5+j*line_height, i->w, i->h, i->tex);
 		} else if(m_alignment == Alignment::center) {
-			Drawing::TexRect( rect.x + (rect.w - i->w)/2, rect.y+5+j*line_height, i->w, i->h, i->tex);
+			Drawing::TexRect( pos.x + rect.x + (rect.w - i->w)/2, pos.y + rect.y+5+j*line_height, i->w, i->h, i->tex);
 		}
 	}
 	Drawing::SetRotation(0.0f);
@@ -56,6 +57,12 @@ static void find_and_replace(std::string& source, std::string const& find, std::
     for(std::string::size_type i = 0; (i = source.find(find, i)) != std::string::npos; i += replace.length()) {
         source.replace(i, find.length(), replace);
     }
+}
+
+void Label::AppendText( std::string text ) {
+	m_text += text;
+	// TODO: optimize
+	SetText(m_text);
 }
 
 void Label::SetText( std::string text ) {
@@ -73,8 +80,9 @@ void Label::SetText( std::string text ) {
 		std::string s = m_text.substr(pos);
 		int max_text = Fonts::getMaxText(m_style.font, s, max_text_width);
 		int p = s.find('\n');
-		if(p != s.npos)
-			max_text = std::min( max_text, p);
+		if(p != s.npos) {
+			max_text = std::min(max_text, p);
+		}
 		
 		Colorstring cstr;
 		if(max_text < s.size()) {
@@ -85,8 +93,10 @@ void Label::SetText( std::string text ) {
 		
 		SDL_Surface* surf = cstr.get_surface(m_style.font, last_color);
 		int ncol = cstr.GetLastColor();
-		if(ncol > 0)
+		if(ncol > 0) {
 			last_color = ncol;
+		}
+		
 		if(j < text_lines.size()) {
 			text_lines[j] = { Drawing::GetTextureFromSurface(surf, text_lines[j].tex), surf->w, surf->h };
 			j++;
@@ -106,6 +116,10 @@ void Label::SetText( std::string text ) {
 			pos++;
 		}
 	}
+}
+
+void Label::onRectChange() {
+	SetText(m_text);
 }
 
 void Label::SetAlignment( Alignment alignment ) {

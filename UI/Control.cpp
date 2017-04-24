@@ -554,6 +554,8 @@ void Control::SetStyle(std::string style, std::string value) {
 			setInteractible(value == "true");
 		_case("visible"):
 			SetVisible(value=="true");
+		_case("color"):
+			m_style.color = Colors::ParseColor(value);
 		_case("bordercolor"):
 			m_style.border_color = Colors::ParseColor(value);
 		_case("background_color"):

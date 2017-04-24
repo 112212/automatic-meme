@@ -17,6 +17,7 @@
 	#include "controls/SDL/RadioButton.hpp"
 	#include "controls/SDL/WidgetMover.hpp"
 	#include "controls/SDL/WidgetResizer.hpp"
+	#include "controls/SDL/ProgressBar.hpp"
 #elif USE_SFML
 	#include "controls/SFML/Button.hpp"
 	#include "controls/SFML/Canvas.hpp"
@@ -34,6 +35,7 @@
 	#include "controls/SFML/RadioButton.hpp"
 	#include "controls/SFML/WidgetMover.hpp"
 	#include "controls/SFML/WidgetResizer.hpp"
+	#include "controls/SFML/ProgressBar.hpp"
 #endif
 #include "controls/Form.hpp"
 #endif

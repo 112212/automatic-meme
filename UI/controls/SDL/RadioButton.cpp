@@ -51,6 +51,10 @@ void RadioButton::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("value"):
 			SetText(value);
+		_case("selected"):
+			if(value == "true") {
+				Select();
+			}
 	}
 }
 

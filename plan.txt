@@ -274,8 +274,11 @@ New Features in new version
 	; instant clear layer by incrementing value and clear layer can be spread to multiple clears so big clear spike each 255
 	; special shader for rendering layered canvas
 	
-+ remove my bcd functions from common
++ progressbar
 
-+ don't use macro STYLE_FUNC its ugly
+- layered
 
+- gui caching
+
+-? put all parsers in separate file (maybe)
 ---------------------------

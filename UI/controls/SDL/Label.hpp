@@ -41,6 +41,7 @@ class Label : public Control {
 		};
 		
 		std::vector<TextLine> text_lines;
+		void onRectChange();
 		void OnSetStyle(std::string& style, std::string& value);
 		void Render( Point pos, bool isSelected );
 	public:
@@ -49,6 +50,7 @@ class Label : public Control {
 
 		Control* Clone();
 		void SetText( std::string text );
+		void AppendText( std::string text );
 		void SetAlignment( Alignment alignment );
 		void SetRotation(int angle);
 };

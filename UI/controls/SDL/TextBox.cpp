@@ -804,7 +804,10 @@ void TextBox::PutTextAtCursor(std::string text) {
 
 void TextBox::OnMWheel( int updown ) {
 	m_position.y = std::min<int>(std::max<int>(0, m_position.y-updown), m_lines.size()-GetRect().h/m_line_height);
-	m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
+	if(m_lines.size() != m_lines_max)
+		m_scrollbar->SetValue( m_position.y * 100 / (m_lines.size()-m_lines_max) );
+	else
+		m_scrollbar->SetValue(100);
 }
 
 // ----------- Wrapping ------------------------------------------------

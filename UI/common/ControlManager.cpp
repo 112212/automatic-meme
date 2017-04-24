@@ -440,6 +440,7 @@ namespace XmlLoader {
 				TAGTYPE("checkbox", CheckBox);
 				TAGTYPE("terminal", Terminal);
 				TAGTYPE("form", Form);
+				TAGTYPE("progressbar", ProgressBar);
 				
 				
 				TAGTYPE("tooltip", Label);

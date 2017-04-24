@@ -17,6 +17,8 @@ namespace Drawing {
 		float x,y,z,w;
 	};
 	
+	#define SHADER_VERSION "#version 130\n"
+	
 	// shaders
 	static unsigned int readShader(std::string shaderStr, unsigned int shaderType)
 	{
@@ -69,11 +71,15 @@ namespace Drawing {
         return shaderProgram;
     }
 
+
 	static const char* vertexShader_code =
-	"#version 330\n"
-	"#extension GL_ARB_separate_shader_objects : enable\n"
-	"layout (location = 0) in vec2 position;"
-	"layout (location = 1) in vec4 color;"
+	SHADER_VERSION
+	// "#version 330\n"
+	// "#extension GL_ARB_separate_shader_objects : enable\n"
+	// "layout (location = 0) in vec2 position;"
+	// "layout (location = 1) in vec4 color;"
+	"in vec2 position;"
+	"in vec4 color;"
 	"out vec4 inColor;"
 	"void main() {"
 	"	gl_Position = vec4( position, 0.0, 1.0 );"
@@ -81,10 +87,11 @@ namespace Drawing {
 	"}";
 
 	static const char* fragmentShader_code =
-	"#version 330\n"
+	SHADER_VERSION
+	// "#version 330\n"
 	"in vec4 inColor;"
 	"out vec4 color;"
-	"in vec4 gl_FragCoord;"
+	// "in vec4 gl_FragCoord;"
 
 	"void main() {"
 	"	color = vec4(inColor);"
@@ -93,10 +100,13 @@ namespace Drawing {
 	
 	
 	static const char* texture_vertexshader_code =
-	"#version 330\n"
-	"#extension GL_ARB_separate_shader_objects : enable\n"
-	"layout (location = 0) in vec2 position;"
-	"layout (location = 1) in vec2 texCoord;"
+	SHADER_VERSION
+	// "#version 330\n"
+	// "#extension GL_ARB_separate_shader_objects : enable\n"
+	// "layout (location = 0) in vec2 position;"
+	// "layout (location = 1) in vec2 texCoord;"
+	"in vec2 position;"
+	"in vec2 texCoord;"
 	"out vec2 inTexCoord;"
 	"void main() {"
 		"gl_Position = vec4( position, 0.0, 1.0 );"
@@ -104,7 +114,8 @@ namespace Drawing {
 	"}";
 
 	static const char* texture_fragmentshader_code =
-	"#version 330\n"
+	SHADER_VERSION
+	// "#version 330\n"
 	"in vec2 inTexCoord;"
 	"out vec4 color;"
 	"uniform sampler2D textureUniform;"

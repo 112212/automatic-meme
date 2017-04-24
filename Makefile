@@ -36,7 +36,7 @@ obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(cpp)))
 
 controls_path := UI/controls
 
-# all controls which contains non-header (.cpp) code
+# all controls which contains non-header only (.cpp) code
 control_names := Button 	    \
 				RadioButton 	\
 				ComboBox 		\
@@ -52,7 +52,7 @@ control_names := Button 	    \
 				Canvas			\
 				WidgetMover		\
 				WidgetResizer	\
-				
+				ProgressBar		
 # 				TabContainer     \
 
 ############ SFML ##############
@@ -87,7 +87,6 @@ sdl_test_build: $(sdl_test_obj) build/SDL_test.o
 	$(CXX)g++ $^ -o sdl_test $(sdl_link) $(CFLAGS)
 
 sdl_test: dirs sdl_test_build
-	
 
 libout := libgui.a
 
@@ -119,6 +118,6 @@ dirs:
 	@mkdir -p $(build)/UI/controls/SFML
 	
 $(build)/%.o: %.cpp
-	$(CXX)g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc) $(CFLAGS)
+	$(CXX)g++ -c $< -o $@ -std=gnu++11 $(flags) $(defs) $(inc) $(CFLAGS)
 
 

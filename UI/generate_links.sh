@@ -17,6 +17,7 @@ controls="
 	RadioButton
 	WidgetMover
 	WidgetResizer
+	ProgressBar
 "
 
 common_header_only_controls="

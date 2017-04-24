@@ -107,6 +107,8 @@ void Button::OnKeyUp( SDL_Keycode &sym, SDL_Keymod mod ) {
 
 Button* Button::Clone() {
 	Button *btn = new Button;
+	btn->m_down_color = m_down_color;
+	btn->m_up_color = m_up_color;
 	copyStyle(btn);
 	return btn;
 }

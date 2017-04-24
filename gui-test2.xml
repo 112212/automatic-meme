@@ -1,7 +1,0 @@
-<gui>
-	
-	<widget rect="50,100, 800, 800">
-		
-		<button id="2" rect="0,0,100,50" value="test" backgroundcolor="#ff202080"/>
-	</widget>
-</gui>

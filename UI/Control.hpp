@@ -135,6 +135,7 @@ class Control {
 			int border_color;
 			int hoverborder_color;
 			int background_color;
+			int color;
 			std::string tooltip;
 			
 			TTF_Font* font;
