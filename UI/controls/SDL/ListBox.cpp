@@ -20,6 +20,14 @@ ListBox::~ListBox() {
 		delete m_scrollbar;
 }
 
+void ListBox::Clear() {
+	for(TextLine& t : text_lines) {
+		Drawing::DeleteTexture(t.tex);
+	}
+	text_lines.clear();
+	m_items.clear();
+}
+
 void ListBox::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;

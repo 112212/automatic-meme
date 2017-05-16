@@ -28,6 +28,7 @@ interactible(true), visible(true), anchor({{0,0},0})
 	m_style.image_tex = 0xffffffff;
 	m_style.alpha = 1.0f;
 	m_style.draggable = false;
+	anchor = Anchor::parseRect("0,0");
 }
 
 Control::~Control() {

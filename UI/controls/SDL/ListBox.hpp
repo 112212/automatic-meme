@@ -62,7 +62,7 @@ class ListBox : public Control {
 		
 		
 
-		void Clear() { m_items.clear(); }
+		void Clear();
 		void AddItem( std::string item );
 		int GetSelectedIndex();
 		void SetSelectedIndex( int index );

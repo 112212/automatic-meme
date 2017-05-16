@@ -17,7 +17,7 @@ class ProgressBar : public Control {
 		
 		TextLine progress_text;
 	public:
-		ProgressBar();
+		ProgressBar(std::string id="");
 		~ProgressBar();
 		
 		void Render( Point position, bool isSelected );

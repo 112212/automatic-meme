@@ -45,7 +45,7 @@ class Label : public Control {
 		void OnSetStyle(std::string& style, std::string& value);
 		void Render( Point pos, bool isSelected );
 	public:
-		Label();
+		Label(std::string id="");
 		~Label();
 
 		Control* Clone();

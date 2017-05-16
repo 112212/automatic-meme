@@ -24,7 +24,7 @@ void RadioButton::Render( Point pos, bool isSelected ) {
 	
 	Drawing::Circle( x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS, Colors::White );
 	if(m_surf_text) {
-		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y-5, m_surf_text->w, m_surf_text->h, tex_text );
+		Drawing::TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y+2, m_surf_text->w, m_surf_text->h, tex_text );
 	}
 	if(m_isSelected) {
 		Drawing::FillCircle(x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS-2, Colors::Yellow );
@@ -43,7 +43,7 @@ void RadioButton::SetText( std::string text ) {
 	tex_text = Drawing::GetTextureFromSurface(m_surf_text, tex_text);
 	if(m_surf_text) {
 		m_text_loc.x = GetRect().x + RADIO_BUTTON_RADIUS + 15;
-		m_text_loc.y = GetRect().y + RADIO_BUTTON_RADIUS;
+		m_text_loc.y = GetRect().y;
 	}
 }
 

@@ -28,7 +28,7 @@ class Button : public Control {
 		
 		void Render( Point pos, bool isSelected );
 	public:
-		Button();
+		Button(std::string id="");
 		~Button();
 		
 		enum event {

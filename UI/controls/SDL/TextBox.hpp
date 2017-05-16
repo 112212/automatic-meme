@@ -75,7 +75,7 @@ class TextBox : public Control {
 		
 	public:
 	
-		TextBox();
+		TextBox(std::string id="");
 		~TextBox();
 		
 		//

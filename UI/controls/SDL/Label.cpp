@@ -23,7 +23,8 @@
 #include "../../common/SDL/Drawing.hpp"
 #include "../../common/Colorstring.hpp"
 namespace ng {
-Label::Label() {
+Label::Label(std::string id) {
+	SetId(id);
 	setType( "label" );
 	setInteractible(false);
 	text_lines.clear();

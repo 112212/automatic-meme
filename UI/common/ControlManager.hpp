@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 #include <istream>
+
+
 namespace ng {
 	
 	
@@ -31,6 +33,8 @@ class ControlManager {
 		int next_z_index;
 		int binary_search(int z_index);
 		void rescale_z_indices(int spacing);
+		Point coords;
+		Control* get(const std::string& id);
 	protected:
 		Widget* this_widget;
 		GuiEngine* this_engine;
@@ -43,7 +47,10 @@ class ControlManager {
 		void removeControlFromCache(Control* control);
 	public:
 		inline const std::vector<Control*>& GetControls() { return controls; }
+		void RemoveControls();
 		void ApplyAnchoring();
+		void BreakRow();
+		
 		static void RegisterControl(std::string tag, std::function<Control*()> control_constructor);
 		static Control* CreateControl(std::string tag, std::string id="");
 		void LoadXml(std::string xml_filename);
@@ -52,6 +59,12 @@ class ControlManager {
 		ControlManager(Widget* c);
 		ControlManager(GuiEngine* c);
 		~ControlManager();
+		
+		template<typename C>
+		C* Get(const std::string id) {
+			return static_cast<C*>(get(id));
+		}
 };
 }
+
 #endif

@@ -74,8 +74,7 @@ void Widget::LockWidget(bool lock) {
 }
 
 void Widget::RemoveControl( Control* control ) {
-	if(!engine)
-		removeControlFromCache(control);
+	removeControlFromCache(control);
 }
 
 void Widget::setRect( int x, int y, int w, int h ) {

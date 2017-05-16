@@ -16,6 +16,7 @@ struct Point {
 	Point() {}
 	Point(int _x, int _y) : x(_x),y(_y) {}
 	bool operator< (const Point& b) const { return x < b.x || (x == b.x && y < b.y); }
+	bool operator==(const Point& b) const { return b.x == x && b.y == y; }
 	Point Offset(const Point& r) const { return Point(x+r.x, y+r.y); }
 };
 

@@ -34,10 +34,6 @@ struct Anchor {
 	float x,y;
 	float W,w,H,h;
 	
-	// TODO: remove
-	// float sW,sH;
-	// float sx,sy;
-	
 	bool absolute_coordinates;
 	
 	// only for widgets
@@ -126,7 +122,6 @@ class Control {
 			attributes = 2
 		};
 		
-		// compiler screams ambiguous for this, so had to add _
 		void update_cache(CacheUpdateFlag flag);
 	protected:
 		int z_index;

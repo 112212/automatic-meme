@@ -31,9 +31,9 @@ namespace XmlLoader {
 	  control->m_rect, \
 	  control }
 	  
-ControlManager::ControlManager(Widget* c) : next_z_index(0), this_widget(c), this_engine(0) {
+ControlManager::ControlManager(Widget* c) : next_z_index(0), this_widget(c), this_engine(0), coords(0,0) {
 }
-ControlManager::ControlManager(GuiEngine* c) : next_z_index(0), this_engine(c), this_widget(0) {
+ControlManager::ControlManager(GuiEngine* c) : next_z_index(0), this_engine(c), this_widget(0), coords(0,0) {
 }
 
 ControlManager::~ControlManager() {
@@ -154,6 +154,10 @@ void ControlManager::rescale_z_indices(int spacing) {
 	next_z_index = cur;
 }
 
+void ControlManager::BreakRow() {
+	coords.x = 0;
+	coords.y++;
+}
 
 void ControlManager::addControlToCache(Control* control) {
 	int z_index = control->z_index;
@@ -163,12 +167,16 @@ void ControlManager::addControlToCache(Control* control) {
 		next_z_index += CACHE_SPACING;
 	} else {
 		int put_at = binary_search(z_index);
-		if(put_at == cache.size()-1)
+		if(put_at == cache.size()-1) {
 			cache.push_back(CONTROL_CACHE(control));
-		else
+		} else {
 			cache.insert(cache.begin()+put_at, CONTROL_CACHE(control));
+		}
 	}
-	
+	if(control->anchor.coord == Point(0,0)) {
+		control->anchor.coord = coords;
+		coords.x++;
+	}
 	controls.push_back(control);
 }
 
@@ -187,6 +195,15 @@ void ControlManager::removeControlFromCache(Control* control) {
 			break;
 		}
 	}
+	
+	if(cache.empty()) {
+		coords = {0,0};
+	}
+}
+
+void ControlManager::RemoveControls() {
+	cache.clear();
+	controls.clear();
 }
 
 void ControlManager::ApplyAnchoring() {
@@ -365,6 +382,23 @@ Control* ControlManager::CreateControl(std::string tag, std::string id) {
 	return ctrl;
 }
 
+
+Control* ControlManager::get(const std::string& id) {
+	for(auto c : controls) {
+		if(c->id == id) {
+			return (Control*)c;
+		}
+		
+		if(c->isWidget) {
+			Control* p = static_cast<Widget*>(c)->get(id);
+			if(p) {
+				return p;
+			}
+		}
+	}
+	return 0;
+}
+
 } // namespace ng
 
 
@@ -472,29 +506,10 @@ namespace XmlLoader {
 		}
 	}
 	
-	// TODO: remove anchor tag
 	void loadXmlRecursive(GuiEngine* engine, Widget* widget, xml_node<>* node, Anchor anchor) {
 		Control* control = nullptr;
 		Point c{0,0};
 		for(; node; node = node->next_sibling()) {
-			/*
-			if(!strcmp(node->name(), "anchor")) {
-				Anchor anchor1{{0,0},0};
-				bool relative = false;
-				for(auto *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
-					
-					if(!strcmp(attr->name(), "pos")) {
-						anchor1 = Anchor::parseRect(attr->value());
-					} else if(!strcmp(attr->name(), "relative")) {
-						if(!strcmp(attr->value(),"true")) {
-							relative = true;
-						}
-					}
-				}
-				anchor1.isrelative |= relative;
-				loadXmlRecursive(engine, widget, node->first_node(), anchor1);
-				continue;
-			} else */
 			if(!strcmp(node->name(), "theme")) {
 				if(node->first_attribute() && !strcmp(node->first_attribute()->name(), "prefix") ) {
 					loadTheme(node->first_attribute()->value(), node->first_node());
@@ -563,6 +578,7 @@ namespace XmlLoader {
 		
 		delete[] data;
 	}
+	
 	void LoadXml(GuiEngine* engine, Widget* widget, std::string filename) {
 		std::fstream f;
 		f.open(filename);

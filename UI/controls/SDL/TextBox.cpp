@@ -9,9 +9,8 @@ namespace ng {
 #define NO_TEXTURE 0xffffffff
 #endif
 
-TextBox::TextBox() : m_mousedown(false), m_position{0,0}, 
-m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
- {
+TextBox::TextBox(std::string id) : m_mousedown(false), m_position{0,0}, m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0) {
+	SetId(id);
 	setType( "textbox" );
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_cursor_blink_counter = 0;
@@ -27,11 +26,16 @@ m_cursor{0,0}, m_anchor{-1,-1}, m_cursor_max_x(0)
 	m_color_input = false;
 	m_placeholder.text = "";
 	m_colors = true;
+	m_line_max = 1;
+	m_lines_max = 1;
+	m_cursor = {0,0};
+	m_position = {0,0};
+	m_line_max_width = 10;
 	
 	m_scrollbar = new ScrollBar();
 	m_scrollbar->SetVisible(false);
-	
 	m_scrollbar->SetVertical(true);
+	
 	SetText("");
 }
 
@@ -133,8 +137,9 @@ int TextBox::m_selection_color = 0xff808080;
 
 void TextBox::SetText( std::string text ) {
 	if(!m_style.font) return;
-	if(m_lines.size() > 0)
+	if(m_lines.size() > 0) {
 		SetSelection( Point(m_lines.back().text.size(), m_lines.size()-1), {0,0} );
+	}
 	m_cursor = Point(0,0);
 	PutTextAtCursor(text);
 	m_cursor = Point(0,0);

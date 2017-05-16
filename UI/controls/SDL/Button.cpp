@@ -4,7 +4,8 @@
 // #include <SDL2/SDL_opengl.h>
 
 namespace ng {
-Button::Button() {
+Button::Button(std::string id) {
+	SetId(id);
 	setType( "button" );
 	tex_text = 0;
 	need_update = false;

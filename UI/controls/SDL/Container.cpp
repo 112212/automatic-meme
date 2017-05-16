@@ -5,8 +5,8 @@
 #include <iostream>
 
 // select only one
-#define CLIP_METHOD_STENCIL
-// #define CLIP_METHOD_SCISSOR
+// #define CLIP_METHOD_STENCIL
+#define CLIP_METHOD_SCISSOR
 
 namespace ng {
 Container::Container() {
@@ -59,16 +59,16 @@ const int thickness = 8;
 
 
 #ifdef CLIP_METHOD_SCISSOR
-	Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
-		int Ax = std::max(a.x, b.x);
-		int Ay = std::max(a.y, b.y);
-		int Bx = std::min(a.x+a.w,b.x+b.w);
-		int By = std::min(a.y+a.h,b.y+b.h);
-		if(Ax < Bx && Ay < By) {
-			return {Ax,Ay,Bx-Ax,By-Ay};
-		}
-		return {0,0,0,0};
+Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
+	int Ax = std::max(a.x, b.x);
+	int Ay = std::max(a.y, b.y);
+	int Bx = std::min(a.x+a.w,b.x+b.w);
+	int By = std::min(a.y+a.h,b.y+b.h);
+	if(Ax < Bx && Ay < By) {
+		return {Ax,Ay,Bx-Ax,By-Ay};
 	}
+	return {0,0,0,0};
+}
 #endif
 
 void Container::Render( Point pos, bool isSelected ) {
@@ -217,6 +217,7 @@ void Container::AddItem( Control* control ) {
 void Container::onOverflow() {
 	
 	const Rect& r = GetRect();
+	// if vertical scrollbar needs to be added
 	if( !m_scroll_v && overflow_v ) {
 		m_scroll_v = new ScrollBar();
 		m_scroll_v->SetVertical( true );
@@ -227,13 +228,17 @@ void Container::onOverflow() {
 			m_ty = -val * max_v / 100;
 			innerWidget->SetOffset(innerWidget->GetOffset().x, m_ty);
 		});
+		
 		Anchor a = m_scroll_v->GetAnchor();
 		a.x = r.w-thickness;
 		a.y = 0;
 		a.absolute_coordinates = true;
 		m_scroll_v->SetAnchor(a);
+		
 		Widget::AddControl(m_scroll_v);
 	}
+	
+	// if horizontal scrollbar needs to be added
 	if( !m_scroll_h && overflow_h ) {
 		m_scroll_h = new ScrollBar();
 		m_scroll_h->SetRect( 0, r.h-thickness, r.w - thickness, thickness );
@@ -244,10 +249,12 @@ void Container::onOverflow() {
 			
 			innerWidget->SetOffset(m_tx, innerWidget->GetOffset().y);
 		});
+		
 		Anchor a = m_scroll_h->GetAnchor();
 		a.x = 0;
 		a.y = r.h-thickness;
 		a.absolute_coordinates = true;
+		
 		m_scroll_h->SetAnchor(a);
 		Widget::AddControl(m_scroll_h);
 	}
