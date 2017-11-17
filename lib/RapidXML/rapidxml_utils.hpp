@@ -5,11 +5,11 @@
 // Version 1.13
 // Revision $DateTime: 2009/05/13 01:46:17 $
 //! \file rapidxml_utils.hpp This file contains high-level rapidxml utilities that can be useful
-//! in certain simple scenarios. They should probably not be used if maximizi performance is the main objective.
+//! in certain simple scenarios. They should probably not be used if maximizing performance is the main objective.
 
 #include "rapidxml.hpp"
 #include <vector>
-#include <stri>
+#include <string>
 #include <fstream>
 #include <stdexcept>
 
@@ -27,12 +27,12 @@ namespace rapidxml
         //! \param filename Filename to load.
         file(const char *filename)
         {
-            usi namespace std;
+            using namespace std;
 
             // Open stream
             basic_ifstream<Ch> stream(filename, ios::binary);
             if (!stream)
-                throw runtime_error(stri("cannot open file ") + filename);
+                throw runtime_error(string("cannot open file ") + filename);
             stream.unsetf(ios::skipws);
             
             // Determine stream size
@@ -40,7 +40,7 @@ namespace rapidxml
             size_t size = stream.tellg();
             stream.seekg(0);   
             
-            // Load data and add terminati 0
+            // Load data and add terminating 0
             m_data.resize(size + 1);
             stream.read(&m_data.front(), static_cast<streamsize>(size));
             m_data[size] = 0;
@@ -50,13 +50,13 @@ namespace rapidxml
         //! \param stream Stream to load from
         file(std::basic_istream<Ch> &stream)
         {
-            usi namespace std;
+            using namespace std;
 
-            // Load data and add terminati 0
+            // Load data and add terminating 0
             stream.unsetf(ios::skipws);
             m_data.assign(istreambuf_iterator<Ch>(stream), istreambuf_iterator<Ch>());
             if (stream.fail() || stream.bad())
-                throw runtime_error("error readi stream");
+                throw runtime_error("error reading stream");
             m_data.push_back(0);
         }
         

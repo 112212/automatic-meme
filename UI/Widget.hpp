@@ -1,74 +1,75 @@
-#ifndef WIDGET
-#define WIDGET 
+#ifndef _WIDGET_HPP_
+#define _WIDGET_HPP_
 
 #include "Control.hpp"
-#include "common/ControlManager.hpp"
+#include "managers/ControlManager.hpp"
 
 namespace ng {
-class GuiEngine;
+class Gui;
 
 class Widget : public Control, public ControlManager  {
 	
 	private:
 		unsigned int intercept_mask;
-		friend class GuiEngine;
+		friend class Gui;
 		friend class Control;
 		friend class ControlManager;
-		void set_engine(GuiEngine* engine);
+		void set_engine(Gui* engine);
 		
-		#ifdef USE_SFML
-			sf::RectangleShape rect;
-		#endif
 		Control* selected_control;
 		Point cached_absolute_offset;
 		Size min, max;
 		Point m_offset;
 		void setRect( int x, int y, int w, int h );
 	protected:
+	
+		// ----- intercept events -----
 		enum imask {
 			mouse_up = 0x01,
 			mouse_down = 0x02,
 			mouse_move = 0x04,
-			key_down = 0x08,
-			key_up = 0x10,
-			mwheel = 0x20
+			mwheel = 0x08,
+			key_down = 0x10,
+			key_up = 0x20,
+			key_text = 0x40,
 		};
-		void intercept();
 		void setInterceptMask(unsigned int mask);
-		unsigned int getInterceptMask() { return intercept_mask; }
+		void intercept();
+		// ----------------------------
+		
 		bool isSelected();
 		bool inSelectedBranch();
-		Control* getSelectedControl() { return selected_control; }
-		const Point& getAbsoluteOffset() { return cached_absolute_offset; };
+		
+		unsigned int getInterceptMask() { return intercept_mask; }
+		inline Control* getSelectedControl() { return selected_control; }
+		inline const Point& getAbsoluteOffset() { return cached_absolute_offset; };
+		virtual void parseXml(rapidxml::xml_node<char>* node);
+		
 	public:
 		Widget();
 		~Widget();
 		
 		Control* Clone();
-		void OnMouseMove( int mX, int mY, bool mouseState ){}
-		void OnMouseDown( int mX, int mY, MouseButton button ){}
-		void OnMouseUp( int mX, int mY, MouseButton button ){}
-		void OnLostFocus(){}
-		void OnGetFocus(){}
-		void OnLostControl(){}
+		
+		void OnMouseMove( int mX, int mY, bool mouseState ) {}
+		void OnMouseDown( int mX, int mY, MouseButton button ) {}
+		void OnMouseUp( int mX, int mY, MouseButton button ) {}
+		
+		void OnLostFocus() {}
+		void OnGetFocus() {}
+		void OnLostControl() {}
 		void OnMWheel( int updown ){}
 		
-		#ifdef USE_SFML
-			virtual void Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected );
-		#elif USE_SDL
-			virtual void Render( Point position, bool isSelected );
-		#endif
-		
+		virtual void Render( Point position, bool isSelected );
 		virtual void AddControl( Control* control );
+		
 		void RemoveControl( Control* control );
 		void LockWidget(bool lock);
-		#ifdef USE_SFML
-			void RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected);
-		#elif USE_SDL
-			void RenderWidget( Point position, bool isSelected );
-		#endif
+		void RenderWidget( Point position, bool isSelected );
 		void SetOffset(int x, int y);
 		const Point& GetOffset() { return m_offset; }
+		
+		std::string GetSelectedRadioButton(int group=0);
 };
 
 }

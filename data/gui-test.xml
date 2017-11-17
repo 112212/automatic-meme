@@ -1,0 +1,191 @@
+<gui>
+	<theme>
+		<all onhover="play_sound data/click2.wav;"/>
+		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,20" down_color="#00ff00" />
+		<listbox id="200" rect="0,0,200,200" backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10"/>
+		<canvas backgroundcolor="#3000ff00" />
+		<textbox backgroundcolor="#050550" />
+		<label noborder="true"/>
+<!--
+		<widget id="1st" hoverbordercolor="nochange"/>
+-->
+		<trackbar noborder="true"/>
+		<terminal>
+			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,13" backgroundcolor="#33777777" bordercolor="#FF1228D1" hoverbordercolor="#FF1228D1" />
+		</terminal>
+		<tooltip rect="0,0,100,100" value="heyya">
+			
+		</tooltip>
+	</theme>
+<!--
+	<theme prefix="terminal/">
+		<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,13" textwrap="true" wordwrap="true" />
+	</theme>
+-->
+
+<!--
+	<widget rect="0,0,1W,1H">
+-->
+		
+	<widget rect="a0,0,0.95W" id="keke">
+		<widget>
+			<button id="2" rect="0,0,100,50" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,30" value="test" backgroundcolor="#ff202080"/>
+			<br/>
+			<label id="fps" value="fps" rect="0,0,100,50" tooltip="lol fps"/>
+		</widget>
+		<container id="container1" rect="0,0,200,200" backgroundcolor="#ff000000">
+			<container id="container2" rect="0,0,150,150">
+				<button id="5" rect="0,0,200,50" value="1"/>
+				<button id="55" rect="0,20,200,50" value="3"></button>
+				<button id="56" rect="50,105,200,50" value="4"></button>
+			</container>
+<!--
+			<widgetmover rect="180,0,10,10"/>
+-->
+		</container>
+		
+		<form rect="0,0,200" id="form" >
+			<textbox rect="0,0,200,30" placeholder="username" onhover="say onhover" onleave="say onleave" id="username" />
+			<textbox rect="0,0,200,30" placeholder="password" max_length="10" />
+			<textbox rect="0,0,200,30" placeholder="username" password="true"/>
+			<textbox rect="0,0,200,30" placeholder="password" />
+			<textbox rect="0,0,200,30" placeholder="username" />
+			<textbox rect="0,0,200,30" placeholder="password" />
+			<button rect="0,10,200,20" value="ok" id="sp" onclick="say onclick"/>
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
+		</form>
+
+<!--
+		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,200,30" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,15" value="3" draggable="true" onclick="hehe 6 87 hehe hhaha; hehe 5">
+-->
+		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,200,30" font="hehe1,10" value="3" draggable="true" onclick="hehe 6 87 hehe hhaha; hehe 5">
+			<item>heheheeh</item>
+			<item>hghfghf ow yea nice</item>
+			<item>jhgjghjhg</item>
+			<item>kjhkhj</item>
+			<item>ljklj</item>
+			<item>ytrytr</item>
+			<item>rwerew</item>
+		</combobox>
+<!--
+		font="hehe1,10"
+-->
+		<textbox font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20"  id="mojtbox" font="hehe1,10" multiline="true" textwrap="true" rect="0,0,300,200" value="Multiplayer games based on the Source Engine use a Client-Server networking architecture. 
+Usual^rly a server is a dedicated host that runs the game and is authoritative about world simulation, 
+game rules, and playe^gr input processing. A client is a player's computer connected to a game server. 
+The client and server communicate with each other by sending small data packets at a high frequency 
+
+(usually 20 to 30 packets per second). A client receives the current world state from the server and g
+enerates video and audio output based on these updates. The client also samples data from input devices 
+(keyboard, mouse, microphone, etc.) and sends these input samples back 
+to the server for further processing. Clients only communicate with the 
+game server and not between each other (like in a peer-to-peer 
+
+application). In contrast with a single player game, a multiplayer game 
+has to deal with a variety of new problems caused by packet-based 
+communication.  Network bandwidth is limited, so the server can't send 
+a new update packet to all clients for every single world change. 
+Instead, the server takes snapshots of the current world state at a 
+constant rate and broadcasts these snapshots to the clients. Network 
+
+packets take a certain amount of time to travel between the client and 
+the server (i.e. half the ping time). This means that the client time 
+is always a little bit behind the server time. Furthermore, client 
+input packets are also delayed on their way back, so the server is 
+processing temporally delayed user commands. In addition, each client 
+
+has a different network delay which varies over time due to other 
+background traffic and the client's framerate. These time differences 
+between server and client causes logical problems, becoming worse with 
+increasing network latencies. In fast-paced action games, even a delay 
+of a few milliseconds can cause a laggy gameplay feeling and make it 
+hard to hit other players or interact with moving objects. Besides 
+bandwidth limitations and network latencies, information can get lost 
+due to network packet loss. " ></textbox>
+
+	<widget noborder="true">
+		<label value="cursor size: " rect="0,0,100,30"/>
+		<trackbar id="curs" range="50,200" rect="0,0,100,30"/>
+		<br/>
+		<scrollbar id="lol" range="50,200" rect="0,10,100,30"/>
+		<scrollbar id="lol" range="50,200" orientation="vertical" rect="0,10,30,100"/>
+	</widget>
+		
+<br/>
+
+		<label id="label" align="center" rect="0,0,150,150" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="hehehe test1 hhfghgf hfghghgfhhhcangfdgfgfdhhgfhgf
+	test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf
+test3^g
+hehehehe
+fddgdf" rotation="50"></label>
+		
+
+
+		<widget id="gut" rect="0,0,expand(100,500),expand(100,500)">
+			<radiobutton id="haha" rect="0,0,100,30" value="haha"></radiobutton><br/>
+			<radiobutton id="hehe" rect="0,0,100,30" value="hehe"></radiobutton><br/>
+			<radiobutton id="cool" rect="0,0,100,30" value="cool"></radiobutton><br/>
+			<widgetmover rect="0,0,100,20" zindex="50"></widgetmover><br/>
+			<widgetresizer rect="0,0,100,20" zindex="50" tooltip="resizes widget"></widgetresizer>
+		</widget>
+		
+		<listbox id="200" rect="0,0,200,200" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" value="4" onhover="position 600 200">
+			<item>hehehehe</item>
+			<item>hghgfhf</item>
+			<item>jhjhg</item>
+			<item>343</item>
+			<item>564645</item>
+			<item>777 :D</item>
+		</listbox>
+		
+
+		<canvas rect="0,0,200,200" grid="false" color="#0000ff" pixelsize="1" aligntogrid="false" grid_color="#220000" id="canvas2" ></canvas>
+		<button onclick="clear_canvas" value="clear canvas" rect="0,0,150, 40"/>
+		
+		<widget>
+			<widget id="put_here" rect="0,0,300,100" backgroundcolor="#094D33">
+				
+			</widget>
+			<br/>
+			<widget id="or_here" rect="0,0,300,100">
+			</widget>
+		
+		</widget>
+		
+		<trackbar rect="0,0,100,30" id="1" range="0,100" value="15" /><br/>
+		<textbox rect="0,0,100,30" id="terminal" value="" />
+		
+		<tabcontainer id="tabcontainer" rect="0,0,200,100">
+			<tab name="lol">
+				<button id="hh1" value="btn1" rect="0,0,50,50"  tooltip="heyyy"/>
+			</tab>
+			<tab name="hehe">
+				<button id="hh" value="haha" rect="0,0,50,50"/>
+				<button id="hh" value="haha" rect="0,0,50,50"/>
+			</tab>
+		</tabcontainer>
+		
+		<dialog id="dialog" caption="hehe" rect="0,0,(100,200),(100,200)" onclose="say close dialog?;position 550 150">
+			<button id="hh1" value="wut" rect="0,0,50,50"/>
+		</dialog>
+		
+	</widget>
+	
+	
+	
+	
+	<widget rect="L,B" id="testthis" noborder="true">
+			<terminal rect="0,0,400,300" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,10" id="term" 
+				wordwrap="false" textwrap="true" colors="false" log_colors="true" bordercolor="#00000000"
+				fadeout_speed="200" fadeout_delay="1000" backgroundcolor="#00000000" />
+<!--
+				<br/>
+-->
+			<button rect="0,0,50,20" value="yay"/>
+	</widget>
+<!--
+	</widget>
+-->
+</gui>

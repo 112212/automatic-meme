@@ -1,20 +1,30 @@
+#include "RapidXML/rapidxml.hpp"
+#include "controls/RadioButton.hpp"
+#include <iostream>
+
 #include "Widget.hpp"
 #include "Gui.hpp"
-#include <iostream>
-#include "common/SDL/Drawing.hpp"
 
 namespace ng {
-Widget::Widget() : ControlManager(this), 
+Widget::Widget() : Control(), ControlManager(this), 
 	selected_control(0), intercept_mask(0) {
 	setType( "widget" );
 	isWidget = true;
 	m_offset = {0,0};
+	
+	layout.SetSizeRange( 0, 0, 0, 0, 9999, 0, 9999, 0 );
+	
+	min.w = 0;
+	min.h = 0;
+	max.w = 0;
+	max.h = 0;
 }
 
 Widget::~Widget() {
+	
 }
 
-void Widget::set_engine(GuiEngine* engine) {
+void Widget::set_engine(Gui* engine) {
 	this->engine = engine;
 	for(Control* c : controls) {
 		if(c->isWidget) {
@@ -27,8 +37,9 @@ void Widget::set_engine(GuiEngine* engine) {
 }
 
 void Widget::intercept() {
-	if(engine)
+	if(engine) {
 		engine->hasIntercepted = true;
+	}
 }
 
 void Widget::setInterceptMask(unsigned int mask) {
@@ -36,8 +47,12 @@ void Widget::setInterceptMask(unsigned int mask) {
 }
 
 void Widget::AddControl( Control* control ) {
-	if(control->widget or control->engine) return;
+	if(control->widget or control->engine) {
+		return;
+	}
+	
 	control->widget = this;
+	
 	if(engine) {
 		if(control->isWidget) {
 			Widget* w = static_cast<Widget*>(control);
@@ -45,17 +60,22 @@ void Widget::AddControl( Control* control ) {
 			engine->recursiveProcessWidgetControls(w, true);
 		} else {
 			engine->map_id_control[control->id] = control;
+			control->engine = engine;
 		}
 	}
 	
 	addControlToCache(control);
+	if(engine) {
+		ProcessLayout();
+	}
 }
 
 bool Widget::isSelected() {
-	if(engine)
+	if(engine) {
 		return engine->last_selected_widget == this;
-	else
+	} else {
 		return false;
+	}
 }
 
 bool Widget::inSelectedBranch() {
@@ -64,17 +84,21 @@ bool Widget::inSelectedBranch() {
 
 void Widget::LockWidget(bool lock) {
 	if(!engine) {
+		// TODO: use debug system
 		std::cout << "\n[GUI] widget cannot be locked if not bound to an engine\n";
 		return;
 	}
-	if(lock)
+	if(lock) {
 		engine->LockWidget(this);
-	else
+	} else {
 		sendGuiCommand( GUI_WIDGET_UNLOCK );
+	}
 }
 
 void Widget::RemoveControl( Control* control ) {
 	removeControlFromCache(control);
+	control->widget = 0;
+	control->engine = 0;
 }
 
 void Widget::setRect( int x, int y, int w, int h ) {
@@ -99,62 +123,82 @@ Control* Widget::Clone() {
 	return w;
 }
 
-#ifdef USE_SFML
-void Widget::Render( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected) {
-	RenderWidget(ren,state,isSelected);
-}
-void Widget::RenderWidget( sf::RenderTarget &ren, sf::RenderStates state, bool isSelected) {
-	
-	state.transform.translate( m_rect.x + offset.x, m_rect.y + offset.y );
-
-	for(auto &ca : cache) {
-		if(ca.visible) {
-			auto &c = ca.control;
-			#ifdef SELECTED_CONTROL_ON_TOP
-				if(c != selected_control) {
-					c->Render(ren, state, false);
-				}
-			#else
-				c->Render(ren, state, c == selected_control);
-			#endif
-		}
-	}
-	
-	#ifdef SELECTED_CONTROL_ON_TOP
-	if(selected_control) {
-		selected_control->Render(ren,state,true);
-	}
-	#endif
-}
-#elif USE_SDL
 void Widget::Render( Point position, bool isSelected ) {
 	RenderWidget(position,isSelected);
 }
+
 void Widget::RenderWidget( Point position, bool isSelected ) {
+
+	bool use_clipping = true;
 	
-	Control::Render(position, isSelected);
+	Rect old_box;
+	bool save_clipping;
+	
+	Point orig_position = position;
+	
+	Control::Render(orig_position, isSelected);
+	
 	position = position.Offset(m_rect);
+	// ------ clipping ---------
+	// must go between these 2 "position.Offset"
+	if(use_clipping) {
+		save_clipping = Drawing().GetClipRegion(old_box.x, old_box.y, old_box.w, old_box.h);
+		int margin = 1;
+		old_box.x-=margin;
+		old_box.y-=margin;
+		old_box.h+=margin;
+		old_box.w+=margin;
+		ng::Rect clipRect = ng::Rect( std::max(0,position.x-margin), std::max(0, position.y-margin), m_rect.w+margin*2, m_rect.h+margin*2 );
+		if(save_clipping) {
+			clipRect = getIntersectingRectangle(old_box, clipRect);
+		}
+		Drawing().PushClipRegion( clipRect.x, clipRect.y, clipRect.w, clipRect.h );
+	}
+	// ---------------------------
 	position = position.Offset(m_offset);
+	
 	for(auto &ca : cache) {
 		if(ca.visible) {
 			auto &c = ca.control;
 			#ifdef SELECTED_CONTROL_ON_TOP
 				if(c != selected_control) {
-					c->Render( position, false );
+					c->render( position, false );
 				}
 			#else
-				c->Render( position, c == selected_control);
+				c->render( position, isSelected && c == selected_control );
 			#endif
-			Drawing::SetMaxAlpha(1.0f);
 		}
 	}
 	
 	#ifdef SELECTED_CONTROL_ON_TOP
 	if(selected_control && selected_control->visible) {
-		selected_control->Render(position,true);
-		Drawing::SetMaxAlpha(1.0f);
+		selected_control->render(position,true);
 	}
 	#endif
+	
+	if(use_clipping) {
+		Drawing().PopClipRegion();
+	}
+	
 }
-#endif
+
+std::string Widget::GetSelectedRadioButton(int group) {
+	for(auto &c : controls) {
+		RadioButton* rb = dynamic_cast<RadioButton*>(c);
+		if( rb ) {
+			if(group == rb->GetGroup() && rb->IsSelected()) {
+				return rb->GetId();
+			}
+		}
+	}
+	return "";
+}
+
+void Widget::parseXml(rapidxml::xml_node<>* node) {
+	Layout layout;
+	for(;node;node=node->next_sibling()) {
+		parseAndAddControl(node, layout);
+	}
+}
+
 }

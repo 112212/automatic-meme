@@ -10,8 +10,8 @@ class Form : public Widget {
 		}
 
 	private:
-		void OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {
-			if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
+		void OnKeyDown( Keycode &sym, Keymod mod ) {
+			if(sym == KEY_RETURN || sym == KEY_KP_ENTER) {
 				emitEvent("submit");
 				intercept();
 			}

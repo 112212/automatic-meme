@@ -1,4 +1,4 @@
 *.o
 *.a
 sdl_test
-sfml_test
+docs

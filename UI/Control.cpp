@@ -1,44 +1,68 @@
-#include "common/common.hpp"
-#include "common/ControlManager.hpp"
+#include "common.hpp"
+// #include "ControlManager.hpp"
 #include "Control.hpp"
 #include <iostream>
 
-#include <SDL2/SDL_image.h>
-
 #include "Gui.hpp"
 #include "Widget.hpp"
+#include "Effect.hpp"
 
 #include <algorithm>
-
-#ifdef USE_SDL
-	#include "common/SDL/Drawing.hpp"
-#endif
+#include "managers/Images.hpp"
+#include <cstring>
+#include "Border.hpp"
+// #include "RapidXML/rapidxml.hpp"
 
 namespace ng {
-Control::Control() : id("0"), engine(0), widget(0), 
+static int control_cnt = 0;
+Control::Control() : id( "____" ), engine(0), widget(0), 
 z_index(0), type("control"), isWidget(false),
-interactible(true), visible(true), anchor({{0,0},0}) 
+interactible(true), visible(true) 
 {
+	render_enabled=true;
+	id = "unnamed"+std::to_string((control_cnt++));
 	m_rect.x = m_rect.y = 0;
 	m_rect.w = m_rect.h = 50;
 	m_style.border_color = 0xff333376;
 	m_style.hoverborder_color = 0xff1228D1;
+	// m_style.border_color = 0;
+	// m_style.hoverborder_color = 0;
 	m_style.background_color = 0;
 	m_style.font = Fonts::GetFont( "default", 13 );
-	m_style.image_tex = 0xffffffff;
+	m_style.image_tex = 0;
 	m_style.alpha = 1.0f;
 	m_style.draggable = false;
-	anchor = Anchor::parseRect("0,0");
+	// std::cout << "creating control: " << type << ", "  << this << "\n";
+	SetBorder(new Border());
+	layout = Layout::parseRect("0,0");
 }
+
+#define WE(x) if(widget) { widget->x; } else if(engine) { engine->x; }
 
 Control::~Control() {
 }
 
+void Control::process_prerender_effects() {
+	for(Effect* e : effects) {
+		e->gui = engine;
+		e->delta_time = engine->getDeltaTime();
+		e->control = this;
+		e->prerender();
+	}
+}
+
+void Control::process_postrender_effects() {
+	for(Effect* e : effects) {
+		e->postrender();
+	}
+}
+
 const Point Control::GetOffset() {
-	if(engine)
+	if(engine) {
 		return engine->sel_widget_offset;
-	else
+	} else {
 		return {0,0};
+	}
 }
 
 const Point Control::GetGlobalPosition() {
@@ -61,12 +85,31 @@ void Control::SetZIndex( int zindex ) {
 	}
 }
 
+void Control::SendToFront() {
+	WE(sendToFront(this));
+}
+void Control::SendToBack() {
+	WE(sendToBack(this));
+}
+
+void Control::SendUpper() {
+	SetZIndex(GetZIndex()+1);
+}
+
+void Control::SendLower() {
+	SetZIndex(GetZIndex()-1);
+}
+
+void Control::SendAfterControl(Control* c) {
+	SetZIndex(c->GetZIndex()+1);
+}
+
+void Control::SendBeforeControl(Control* c) {
+	SetZIndex(c->GetZIndex()-1);
+}
+
 void Control::update_cache(CacheUpdateFlag flag) {
-	if(widget) {
-		widget->updateCache(this,flag);
-	} else if(engine) {
-		engine->updateCache(this,flag);
-	}
+	WE(updateCache(this,flag));
 }
 
 bool Control::isSelected() {
@@ -106,6 +149,7 @@ void Control::setInteractible(bool interactible) {
 }
 
 void Control::SetId(std::string id) {
+	// std::cout << "renaming " << this->id << " => " << id << " " << this << "\n";
 	this->id = id;
 }
 
@@ -115,30 +159,54 @@ void Control::setType( const char* type ) {
 	update_cache(CacheUpdateFlag::all);
 }
 
+void Control::poseEmitEvent( Control* c, std::string event_id, const Argv& args ) {
+	c->emitEvent(event_id, args);
+}
+
 // emit global event
-void Control::emitEvent( std::string event_id, Argv& argv ) {
+void Control::emitEvent( std::string event_id, const Argv& argv ) {
 	#ifdef USE_EVENT_QUEUE
 	if(engine) {
 		engine->m_events.push( { event_id, this, argv } );
 	}
 	#endif
 	
+	
+	// std::cout << "evt " << event_id << "\n";
 	for(auto sub : subscribers) {
+		auto sub_func = Gui::function_map.find(sub.function_name);
+		if(sub_func == Gui::function_map.end()) continue;
+		
 		if(sub.event_id == event_id) {
-			std::vector<std::string> v;
-			v.reserve(argv.size() + sub.args.size());
-			v.insert(v.begin(), argv.begin(), argv.end());
-			v.insert(v.end(), sub.args.begin(), sub.args.end());
-			GuiEngine::function_map[ sub.function_name ](this, v);
+			Args args;
+			args.event_args = argv;
+			args.control = this;
+			args.cmd_args = sub.args;
+			
+			
+			sub_func->second(args);
+			// std::cout << "emitting " << event_id << " " << args.event_args.size() << "\n";
 		}
 	}
 	
+}
+
+double Control::getDeltaTime() {
+	if(engine) {
+		return engine->getDeltaTime();
+	}
+	return 0;
 }
 
 void Control::Focus() {
 	if(engine) {
 		engine->Focus(this);
 	}
+}
+
+
+void Control::parseXml(rapidxml::xml_node<char>* node) {
+	
 }
 
 void Control::Activate() {
@@ -156,10 +224,10 @@ bool Control::IsSelected() {
 }
 
 static int last_anon_id = 0;
-void Control::OnEvent( std::string event_type, std::function<void(Control*, Argv&)> callback ) {
+void Control::onEvent( std::string event_type, EventCallback callback ) {
 	std::string anon_id = std::string("_anon") + std::to_string(last_anon_id++);
 	subscribers.emplace_back(event_type, anon_id);
-	GuiEngine::function_map[ anon_id ] = callback;
+	Gui::function_map[ anon_id ] = callback;
 }
 
 void Control::sendGuiCommand( int eventId ) {
@@ -175,8 +243,10 @@ void Control::tabToNextControl() {
 	});
 	auto f = std::find(controls.begin(), controls.end(), this);
 	auto p = std::find_if(f+1, controls.end(), [](Control* c) { return c->interactible; });
-	if(p == controls.end())
+	if(p == controls.end()) {
 		p = std::find_if(controls.begin(), f, [](Control* c) { return c->interactible; });
+	}
+	
 	if(p != f) {
 		(*p)->Activate();
 	}
@@ -185,12 +255,13 @@ void Control::tabToNextControl() {
 std::vector<Control*> empty_vector;
 
 const std::vector<Control*>& Control::getParentControls() {
-	if(widget)
+	if(widget) {
 		return widget->controls;
-	else if(engine)
+	} else if(engine) {
 		return engine->GetControls();
-	else
+	} else {
 		return empty_vector;
+	}
 }
 
 const std::vector<Control*>& Control::getWidgetControls() {
@@ -206,15 +277,45 @@ const std::vector<Control*>& Control::getEngineControls() {
 		return empty_vector;
 }
 
-bool Control::check_collision(int x, int y) {
-	Rect& r = m_rect;
-	return (x >= r.x && x <= r.x+r.w && y >= r.y && y <= r.y+r.h);
+void Control::SetPosition( int x, int y ) { 
+	SetRect(x, y, m_rect.w, m_rect.h); 
+}
+
+void Control::SetSize( int w, int h ) {
+	SetRect(m_rect.x, m_rect.y, w, h);
+}
+
+std::string Control::GetType() {
+	return type;
+}
+
+std::string Control::GetId() {
+	return id;
+}
+
+int Control::GetZIndex() {
+	return z_index;
+}
+
+std::string Control::GetTooltip() {
+	return m_style.tooltip;
+}
+
+bool Control::CheckCollision(int x, int y) {
+	// std::cout << "Control [" << GetId() << "] " << this << " checking collision\n";
+	bool check = m_border->CheckCollision(x,y);
+	// std::cout << "Result [" << GetId() << "] checking collision: " << check << "\n";
+	return check;
 }
 
 void Control::SetRect( int x, int y, int w, int h ) {
 
-	if(isWidget)
-		((Widget*)this)->setRect(x,y,w,h);
+	if(m_rect.x == x && m_rect.y == y && m_rect.w == w && m_rect.h == h) {
+		return;
+	}
+	if(isWidget) {
+		static_cast<Widget*>(this)->setRect(x,y,w,h);
+	}
 	
 	m_rect.x = x;
 	m_rect.y = y;
@@ -222,17 +323,11 @@ void Control::SetRect( int x, int y, int w, int h ) {
 	m_rect.h = h;
 
 	Widget* widget = getWidget();
-	GuiEngine* engine = getEngine();
-	if(widget) {
-		widget->updateCache(this, CacheUpdateFlag::position);
-	} else if(engine) {
-		engine->updateCache(this, CacheUpdateFlag::position);
-	}
+	Gui* engine = getEngine();
+	WE(updateCache(this, CacheUpdateFlag::position));
 	
 	onRectChange();
 }
-
-bool Control::custom_check = false;
 
 void Control::SetTooltip(std::string tooltip) {
 	this->m_style.tooltip = tooltip;
@@ -242,68 +337,119 @@ void Control::SetRect( Rect r ) {
 	SetRect(r.x, r.y, r.w, r.h);
 }
 
-void Control::SetAnchor( float W, float w, float x, float H, float h, float y ) {
-	this->anchor = (Anchor){ .coord = anchor.coord, .x = x, .y = y, .W = W, .w = w, .H = H, .h = h };
+void Control::SetLayout( float W, float w, float x, float H, float h, float y ) {
+	this->layout = Layout( layout.coord, x, y, W, w, H, h );
 }
 
-void Control::SetAnchor( Rect r ) {
-	this->anchor = Anchor{{0,0},0};
-	this->anchor.x = r.x;
-	this->anchor.y = r.y;
-	this->anchor.w_min[0] = r.w;
-	this->anchor.h_min[0] = r.h;
+void Control::SetLayout( Rect r ) {
+	this->layout = Layout();
+	this->layout.x = r.x;
+	this->layout.y = r.y;
+	this->layout.w_min[0] = r.w;
+	this->layout.h_min[0] = r.h;
 }
 
-void Control::SetAnchor( const Anchor& anchor ) {
-	this->anchor = anchor;
+void Control::SetLayout( const Layout& layout ) {
+	this->layout = layout;
 }
-const Anchor& Control::GetAnchor() {
-	return anchor;
+Layout& Control::GetLayout() {
+	return layout;
 }
 
-
-// make these virtuals optional
-void Control::OnMouseMove( int mX, int mY, bool mouseState ) {}
-void Control::OnMouseDown( int mX, int mY, MouseButton button ) {}
-void Control::OnMouseUp( int mX, int mY, MouseButton button ) {}
-#ifdef USE_SFML
-	void Control::Render( sf::RenderTarget& ren, sf::RenderStates state, bool isSelected ) {}
-	void Control::OnKeyDown( sf::Event::KeyEvent &sym ) {}
-	void Control::OnKeyUp( sf::Event::KeyEvent &sym ) {}
-#elif USE_SDL
-	void Control::Render( Point pos, bool selected ) {
-		pos.x += m_rect.x;
-		pos.y += m_rect.y;
-		if(m_style.alpha != 1.0f) {
-			Drawing::SetMaxAlpha(m_style.alpha);
-		}
-		Drawing::FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
-		if(m_style.image_tex > 0) {
-			Drawing::TexRect(pos.x, pos.y, m_rect.w, m_rect.h, 
-				m_style.image_tex, m_style.image_repeat, m_style.image_size.w, m_style.image_size.h);
-		}
-		#ifdef SELECTION_MARK
-			Drawing::Rect(pos.x, pos.y, m_rect.w, m_rect.h, 
-				selected ? m_style.hoverborder_color : m_style.border_color );
-		#else
-			Drawing::Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_bordercolor );
-		#endif
+void Control::AddEffect(Effect* effect) {
+	effect->control = this;
+	if(engine) {
+		effect->gui = engine;
 	}
-	void Control::OnKeyDown( SDL_Keycode &sym, SDL_Keymod mod ) {}
-	void Control::OnKeyUp(  SDL_Keycode &sym, SDL_Keymod mod ) {}
-	void Control::SetFont( std::string name, int size ) { 
-		TTF_Font* f = Fonts::GetFont(name, size); 
-		if(f) m_style.font = f; 
+	effect->Init();
+	effects.push_back(effect);
+}
+
+void Control::RemoveEffect(Effect* effect) {
+	auto it = std::remove(effects.begin(), effects.end(), effect);
+	effects.resize(std::distance(effects.begin(), it));
+}
+
+Effect* Control::GetEffect(std::string effect_name) {
+	auto it = std::find_if(effects.begin(), effects.end(), [&](Effect* e) {
+		return e->name == effect_name;
+	});
+	if(it == effects.end()) {
+		return 0;
+	} else {
+		return *it;
 	}
-#endif
+}
+
+void Control::RemoveEffect(std::string effect_name) {
+	auto it = std::remove_if(effects.begin(), effects.end(), [&](Effect* e) {
+		return e->name == effect_name;
+	});
+	effects.resize(std::distance(effects.begin(), it));
+}
+
+void Control::SetRenderEnabled(bool enable) {
+	render_enabled = enable;
+}
+
+
+void Control::render(Point position, bool isSelected) {
+	process_prerender_effects();
+	if(render_enabled) {
+		Render(position, isSelected);
+	}
+	process_postrender_effects();
+}
+
+// overridable
+void Control::Render( Point pos, bool selected ) {
+	pos = m_rect.Offset(pos);
+	if(m_style.background_color != 0) {
+		Drawing().FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
+	}
+	
+	if(m_style.image_tex) {
+		Drawing().TexRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.image_tex, m_style.image_repeat, 
+			m_style.image_size.w, m_style.image_size.h);
+	}
+	#ifdef SELECTION_MARK
+		if(selected) {
+			if(m_style.hoverborder_color != 0) {
+				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverborder_color );
+			}
+		} else {
+			if(m_style.border_color != 0) {
+				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.border_color );
+			}
+		}
+	#else
+		Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_bordercolor );
+	#endif
+}
+
+void Control::SetFont( std::string name, int size ) { 
+	Font* f = Fonts::GetFont(name, size); 
+	if(f) {
+		m_style.font = f; 
+	}
+}
+
+// --- empty overridables ---
+void Control::OnKeyDown( Keycode sym, Keymod mod ) {}
+void Control::OnKeyUp( Keycode sym, Keymod mod ) {}
 void Control::OnLostFocus() {}
 void Control::onRectChange() {}
 void Control::onFontChange() {}
 
 void Control::OnGetFocus() {}
 void Control::OnLostControl() {}
+void Control::OnText( std::string s ) {}
+
+void Control::OnMouseMove( int mX, int mY, bool mouseState ) {}
+void Control::OnMouseDown( int mX, int mY, MouseButton button ) {}
+void Control::OnMouseUp( int mX, int mY, MouseButton button ) {}
 void Control::OnMWheel( int updown ) {}
-bool Control::customBoundary( int x, int y ) {}
+// --------------------------
 
 void Control::Unselect() {
 	if(engine && (engine->GetSelectedControl() == this)) {
@@ -312,18 +458,69 @@ void Control::Unselect() {
 	}
 }
 
+void Control::Unattach() {
+	if(widget) {
+		widget->RemoveControl(this);
+		widget = 0;
+	} else if(engine) {
+		engine->RemoveControl(this);
+	}
+	engine = 0;
+}
+
 Control* Control::Clone() {
 	Control* c = new Control;
 	copyStyle(c);
 	return c;
 }
 
+Gui* Control::GetEngine() {
+	return engine;
+}
+
+void Control::SetFont(Font* fnt) {
+	if(fnt) {
+		m_style.font = fnt;
+	}
+}
+
+Font* Control::GetFont() {
+	return m_style.font;
+}
+
+void Control::shareEngineBackend(Control* c) {
+	c->engine = engine;
+}
+
+void Control::removeEngine(Control* c) {
+	c->engine = 0;
+}
+
+bool Control::IsBeingDragged() {
+	return engine->dragging && engine->selected_control == this;
+}
+
+void Control::cloneBase(Control* clone_to) {
+	clone_to->subscribers.insert(clone_to->subscribers.end(), this->subscribers.begin(), this->subscribers.end());
+}
+
+void Control::CopyStyle(Control* copy_to) {
+	copyStyle(copy_to);
+}
+
 void Control::copyStyle(Control* copy_to) {
 	copy_to->m_style = this->m_style;
+	cloneBase(copy_to);
 }
 
 void Control::SetAlpha(float alpha) {
 	m_style.alpha = alpha;
+}
+
+void Control::SetBorder(Border* border) {
+	m_border = border;
+	m_border->m_rect = &m_rect;
+	// m_border->control = this;
 }
 
 static void split_string(const std::string& str, std::vector<std::string>& values, char delimiter) {
@@ -331,17 +528,19 @@ static void split_string(const std::string& str, std::vector<std::string>& value
 	size_t pos = str.find(delimiter, prevpos);
 	while(pos != str.npos) {
 		int len = pos-prevpos;
-		if(len != 0)
+		if(len != 0) {
 			values.push_back( str.substr(prevpos, len) );
+		}
 		prevpos = pos + 1;
 		pos = str.find(delimiter, prevpos);
 	}
-	if(prevpos < str.size())
+	if(prevpos < str.size()) {
 		values.push_back( str.substr(prevpos) );
+	}
 }
 
 
-void monomial_expr_parse(const char* str, const char *names, float *result) {
+static void monomial_expr_parse(const char* str, const char *names, float *result) {
 	int current_index=0;
 	const char* s = str;
 	int names_length = strlen(names);
@@ -390,8 +589,74 @@ void monomial_expr_parse(const char* str, const char *names, float *result) {
 	}
 }
 
-Anchor Anchor::parseRect(std::string s) {
-	Anchor a{{0,0},0};
+Layout::Layout( Point coord, float x, float y, float W, float w, float H, float h ) {
+	this->coord = coord;
+	this->x = x;
+	this->y = y;
+	this->W = W;
+	this->w = w;
+	this->H = H;
+	this->h = h;
+	this->w_func = SizeFunction::none;
+	this->h_func = SizeFunction::none;
+}
+
+Layout::Layout() {
+	coord = {0,0};
+	x=0;y=0;
+	W=0;w=0;H=0;h=0;
+	absolute_coordinates=false;
+	w_func = SizeFunction::none;
+	h_func = SizeFunction::none;
+	w_min[0]=w_min[1]=0;
+	w_max[0]=w_max[1]=0;
+	h_min[0]=h_min[1]=0;
+	h_max[0]=h_max[1]=0;
+}
+
+void Layout::SetCoord( Point coord ) {
+	this->coord = coord;
+}
+
+void Layout::SetPosition( float x, float y, float w, float W, float h, float H, bool absolute_coordinates ) {
+	this->x = x;
+	this->y = y;
+	this->w = w;
+	this->W = W;
+	this->h = h;
+	this->H = H;
+	this->absolute_coordinates = absolute_coordinates;
+}
+
+void Layout::SetSizeRange( float min_w, float min_W, float min_h, float min_H, float max_w, float max_W, float max_h, float max_H, SizeFunction w_func, SizeFunction h_func ) {
+	w_min[0]=min_w;
+	w_max[0]=max_w;
+	w_min[1]=min_W;
+	w_max[1]=max_W;
+	
+	h_min[0]=min_h;
+	h_max[0]=max_h;
+	h_min[1]=min_H;
+	h_max[1]=max_H;
+	this->w_func = w_func;
+	this->h_func = h_func;
+}
+
+void Layout::SetSize( float w, float W, float h, float H ) {
+	w_min[0]=w_max[0]=w;
+	w_min[1]=w_max[1]=W;
+	h_min[0]=h_max[0]=h;
+	h_min[1]=h_max[1]=H;
+	w_func = SizeFunction::none;
+	h_func = SizeFunction::none;
+}
+
+Layout::Layout(std::string s) {
+	*this = parseRect(s);
+}
+
+Layout Layout::parseRect(std::string s) {
+	Layout a;
 	std::vector<std::string> parts;
 	split_string(s, parts, ',');
 	const char* names[] = { "wW", "hH", "W", "H" };
@@ -420,14 +685,16 @@ Anchor Anchor::parseRect(std::string s) {
 			// std::cout << "parsing rect(" << p << "):" << cur << " => " << res[0] << ", " << res[1] << ", " << res[2] << std::endl;
 			size_t pos;
 			if(p == 0) {
-				if((pos=cur.find_first_of("LR")) != std::string::npos) {
+				if((pos=cur.find_first_of("LRM")) != std::string::npos) {
 					if(cur[pos] == 'L') {
-						// std::cout << "found L\n";
 						a.absolute_coordinates = true;
 					} else if(cur[pos] == 'R') {
-						// std::cout << "found R\n";
 						a.W += 1;
 						a.w += -1;
+						a.absolute_coordinates = true;
+					} else if(cur[pos] == 'M') {
+						a.W += 0.5;
+						a.w += -0.5;
 						a.absolute_coordinates = true;
 					}
 				}
@@ -435,14 +702,16 @@ Anchor Anchor::parseRect(std::string s) {
 				a.w += res[1];
 				a.W += res[2];
 			} else if(p == 1) {
-				if((pos=cur.find_first_of("UDB")) != std::string::npos) {
+				if((pos=cur.find_first_of("UDBM")) != std::string::npos) {
 					if(cur[pos] == 'U') {
 						a.absolute_coordinates = true;
+					} else if(cur[pos] == 'M') {
+						a.H += 0.5;
+						a.h += -0.5;
 					} else if(cur.find_first_of("DB",pos) != std::string::npos) {
 						a.H += 1;
 						a.h += -1;
 						a.absolute_coordinates = true;
-						// std::cout << "found B\n";
 					}
 				}
 				a.y += res[0];
@@ -451,6 +720,23 @@ Anchor Anchor::parseRect(std::string s) {
 			}
 		} else if(p >= 2) {
 			size_t pos = 0;
+			
+			auto set_func = [&](Layout::SizeFunction f){
+				// std::cout << "setting " << (const char*[]){"none","keep","fit","expand"}[f] << "\n";
+				if(p == 2) {
+					a.w_func = f;
+				} else if(p == 3) {
+					a.h_func = f;
+				}
+			};
+			
+			if(parts[i].find("keep", pos) != std::string::npos) {
+				set_func(Layout::SizeFunction::keep);
+			} else if(parts[i].find("fit", pos) != std::string::npos) {
+				set_func(Layout::SizeFunction::fit);
+			} else if(parts[i].find("expand", pos) != std::string::npos) {
+				set_func(Layout::SizeFunction::expand);
+			}
 			
 			if((pos = parts[i].find("(", pos)) != std::string::npos) {
 					monomial_expr_parse(parts[i].c_str()+pos, names[p], res);
@@ -491,60 +777,51 @@ Anchor Anchor::parseRect(std::string s) {
 					a.w_min[1] += res[1];
 					a.w_max[0] = a.w_min[0];
 					a.w_max[1] = a.w_min[1];
-					a.w_func = Anchor::SizeFunction::none;
+					a.w_func = Layout::SizeFunction::none;
 				} else if(p == 3) {
 					a.h_min[0] += res[0];
 					a.h_min[1] += res[1];
 					a.h_max[0] = a.h_min[0];
 					a.h_max[1] = a.h_min[1];
-					a.h_func = Anchor::SizeFunction::none;
+					a.h_func = Layout::SizeFunction::none;
 				}
 			}
-			auto set_func = [&](Anchor::SizeFunction f){
-				if(p == 2) {
-					a.w_func = f;
-				} else if(p == 3) {
-					a.h_func = f;
-				}
-			};
 			
-			if(parts[i].find("keep", pos) != std::string::npos) {
-				set_func(Anchor::SizeFunction::keep);
-			} else if(parts[i].find("fit", pos) != std::string::npos) {
-				set_func(Anchor::SizeFunction::fit);
-			} else if(parts[i].find("expand", pos) != std::string::npos) {
-				set_func(Anchor::SizeFunction::expand);
-			}
 		}
 		p++;
 	}
-	// std::cout << a << std::endl;
 	return a;
 }
 
-
-#ifdef USE_SDL
-void Control::SetImage(std::string image, bool repeat) {
-	SDL_Surface* surf = IMG_Load(image.c_str());
-	m_style.image_size.w = surf->w;
-	m_style.image_size.h = surf->h;
-	if(surf) {
-		m_style.image_tex = Drawing::GetTextureFromSurface2(surf, m_style.image_tex);
-		SDL_FreeSurface(surf);
+Rect Control::GetParentWidgetRegion() {
+	if(widget) {
+		return widget->GetRect();
+	} else {
+		int w,h;
+		Drawing().GetResolution(w,h);
+		return Rect(0,0,w,h);
 	}
-	
+}
+
+void Control::SetImage(std::string image, bool repeat) {
+	Image* img = Images::LoadImage(image);
+	if(!img) {
+		return;
+	}
+	Size s = img->GetImageSize();
+	m_style.image_tex = img;
+	m_style.image_size.w = s.w;
+	m_style.image_size.h = s.h;
 	m_style.image_repeat = repeat;
 }
-#endif
-
 
 
 void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
 	STYLE_SWITCH {
 		_case("rect"): {
-			Anchor a = Anchor::parseRect(value);
-			SetAnchor(a);
+			Layout a = Layout::parseRect(value);
+			SetLayout(a);
 			SetRect(a.x, a.y, a.w_min[0], a.h_min[0]);
 		}
 		_case("zindex"):
@@ -556,20 +833,36 @@ void Control::SetStyle(std::string style, std::string value) {
 		_case("visible"):
 			SetVisible(value=="true");
 		_case("color"):
-			m_style.color = Colors::ParseColor(value);
+			m_style.color = Color(value).GetUint32();
 		_case("bordercolor"):
-			m_style.border_color = Colors::ParseColor(value);
-		_case("background_color"):
-			m_style.background_color = Colors::ParseColor(value);
+			m_style.border_color = Color(value).GetUint32();
+		_case("backgroundcolor"):
+			m_style.background_color = Color(value).GetUint32();
 		_case("hoverbordercolor"):
-			m_style.hoverborder_color = Colors::ParseColor(value);
-		_case("border"):
-		_case("font"): {
-			TTF_Font* f = Fonts::GetParsedFont(value);
-			if(f) {
-				m_style.font = f;
+			if(value == "nochange" || value == "bordercolor") {
+				m_style.hoverborder_color = m_style.border_color;
+			} else {
+				m_style.hoverborder_color = Color(value).GetUint32();
 			}
-			onFontChange();
+		_case("hovercolor"):
+			m_style.hovercolor = Color(value).GetUint32();
+		_case("hoverbackground_color"):
+			m_style.hoverbackground_color = Color(value).GetUint32();
+		_case("border"):
+		_case("noborder"):
+			if(value == "true") {
+				m_style.border_color = 0;
+				m_style.hoverborder_color = 0;
+			}
+		_case("font"): {
+			Font* f = Fonts::GetParsedFont(value);
+			if(f) {
+				std::cout << GetId() << " loading font: " << value << "\n";
+				m_style.font = f;
+				onFontChange();
+			} else {
+				std::cout << GetId() << " FAIL loading font: " << value << "\n";
+			}
 		}
 		_case("tooltip"):
 			m_style.tooltip = value;
@@ -608,7 +901,7 @@ void Control::SetStyle(std::string style, std::string value) {
 
 void Control::STYLE_FUNC(value) {}
 
-Anchor& Anchor::operator+=(const Anchor& b) {
+Layout& Layout::operator+=(const Layout& b) {
 	W += b.W;
 	w += b.w;
 	x += b.x;
@@ -622,13 +915,38 @@ Anchor& Anchor::operator+=(const Anchor& b) {
 	return *this;
 }
 
-std::ostream& operator<< (std::ostream& stream, const Anchor& a) {
+std::ostream& operator<< (std::ostream& stream, const Layout& a) {
 	return stream << a.W << ", " << a.w << ", " << a.x << " ; " <<
 		a.H << ", " << a.h << ", " << a.y << " ; " <<
 		a.w_min[1] << "+" << a.w_min[0] << ", " << a.h_min[1] << "+" << a.h_min[0] << " ; (" << 
 		a.coord.x << ", " << a.coord.y << " a: " << a.absolute_coordinates << std::endl;
 }
 
+
+// ---- backend accessor helpers ----
+Screen& Control::Drawing() {
+	if(engine) {
+		return *engine->backend.screen;
+	} else {
+		return *default_backend.screen;
+	}
+}
+
+Speaker& Control::Sound() {
+	if(engine) {
+		return *engine->backend.speaker;
+	} else {
+		return *default_backend.speaker;
+	}
+}
+
+System& Control::GetSystem() {
+	if(engine) {
+		return *engine->backend.system;
+	} else {
+		return *default_backend.system;
+	}
+}
 
 }
 

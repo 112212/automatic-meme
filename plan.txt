@@ -1,270 +1,54 @@
------------------------
-Requirements:
 
-	+ add
-	; adding widget to gui engine makes all widgets and controls recursively get engine pointer
-	; adding widget to widget just sets backref and adds it to cache and control vector
-
-	+ remove
-	; update all cache from underlying widget/engine
-
-	+ move
-	; update cache from underlying widget/engine
-
-	+ move widget
-	; using control backref to widget, set rect of underlying widget and if has underlying widget,
-	  call its function, otherwise send gui command for refreshing it cache entry for that moved widget
-
-	+ select
-	; recursively searching for controls which have mouse pointer inside it
-
-	+ custom boundary
-	; by marking 'custom_check' boolean to true
-
-	+ radio button
-	; handled by control by using backref to widget and widgets vector of controls
-
-	+ draw widget
-	; since widget is actually control, no addional code is needed
-	; drawing widget will make widget draws its own controls and widgets
-
-	+ lock2 combobox
-	; cannot hover or select other controls
-
-	+ lock1 textbox
-	; can hover and select other controls, keyboard events sent only if mouse not on control
-
-	+ control to gui events
-	; by gui being friend with control base class and allowing it to call gui's private function to send event
-
-	+ global control events for specific gui instance
-	; every control has gui engine pointer, control base class has function for sending events
-
-	+ themes
-	; only default values setting in xml + registering new controls to gui
-
-	+ make selected branch be rendered last to be on Top Most
-	; sel_widget will now point to first depth widget so that it can be skipped and rendered last
-	; every widget will have 'sel_control' which points to widget where target control is, or
-	; i points that control itself. These widgets or controls pointed by sel_control will
-	; be rendered last
-	; on control deselection, its necessary to go from selected control and walk up the tree to
-	; reset sel_control to 0
-
-	+ z-index
-	; sort elements by z-index in m_controls and then just render in ascending order
-
-	+ widget lock
-	; widget gets locked so that only controls inside this widget are active
-	; something like m_focus_lock but widget-wise
-	; perhaps (sel_widget -> target widget) + (m_widget_lock = true)
-
-	+ non-interactible controls
-	; control won't be added to cache for checking mouse collision
-	; not affected by z-index because of not being in same cache and sorted
-	; always drawn before other controls, so always appear in background
-	; used for decoration and non-selectable text
-	; has to be in cache
-
-	+ control invisibility
-	; hide, show control
-	; has to be in cache
-
-	+ user input redirect to widget
-	; widget has to be able to activate input interception and can block it
-	; from reaching selected control
-
-	+ control selection and deselection optimization in widget
-	; same way as checking whether mouse pointer is still in control
-	; it can be checked whether mouse pointer is still in widget and
-	; continue checking from there, if pointer is not in this widget, check if it
-	; is in parents widget and so on
-
-	+ flexible input redirect to widget
-	; on control or widget selection it will be generated vector of lists.
-	; each list if not empty contains widgets to call for intercepting
-	; command from control, and if one of them chooses to intercept then stop
-	; it will be vector of vectors (instead of vector of lists)
-	; with predefined capacity but not limited.
-	; vector with pointers are null terminated
-
-	+ speed up updating cache by using binary search on z-index key
-	; make z-index unique, if its chosen to make control have same z-index
-	; as some other control, then simply put it next to it (or before it)
-	; ** make its z-index be in middle of 2 surrounding z-indices **
-	; ex: 10 (add here) 20, if new control asks for index 10
-	; new control will get z-index (10+20)/2 = 15
-	; to have bigger equidistant holes between 2 controls z-indices
-	; so if collision happens, first check whether control can be placed next to
-	; control which was collided with, if not then rescale all
-
-	+ anchoring
-	; combinations {L,R,M,a%+b','}{T,B,M,c%+d}
-	; SetRect will unapply anchoring (marking isAnchored = false)
-	; new per control functions
-	; new functions SetAnchor( A, B ), SetAnchor( bool ) ; A, B - those combinations
-	; setting size can be done by percentage + offset (added sizePercent, sizeOffset)
-	; new function ApplyAnchors()
-	; - adding new control applies anchoring automatically
-	
 
 TODO:
-+ 	cache_entry struct
-+ 	widget control
-+ 	widget struct
-+ 	control changes
-+ 	gui engine struct changes
-+ 	adding widget
-+ 	remove control/widget
-+ 	move controls
-+ 	move widget
-+ 	controls render inside widget
-+ 	select
-+ 	custom boundary
-+ 	radio button
-+ 	draw widget
-+ 	lock2 combobox (focus lock)
-+ 	lock1 textbox (keyboard lock)
-+ 	control to gui events
-+ 	global control events for specific gui instance
-+ 	introduce z-index and make rendering strictly ordered
-+ 	make selected control render last along with its recursively parent widgets
-+ 	widget lock / widget unlock
-+ 	SDL port of rendering
-+ 	SDL port of controls
-+ 	control vision (show,hide)
-+ 	non-interactible controls
-+ 	get control by id, get control by name
-+ 	user input redirect to widget
-+ 	control selection and deselection optimization in widget
-+ 	speed up updating cache by using binary search on z-index key, make z-index unique
-+ 	flexible input redirect to widget
-+ 	overlapping check compile time option
-+ 	new control widget mover
-+ 	xml loader
-+	terminal control (2 textboxes in a widget)
-+	textbox text wrapping
-+ 	colored text
-+ 	copy & paste for textbox
-+ 	anchoring (group anchor, single element anchor)
 +	theme loader (default values)
 -	xml defining borders, defining selection by background alpha of image
 +	new control registration to xml
 +	setting font by parsing it
--	implement default font directory for linux and windows and make it as search path for fonts
 +	tabbing for textbox and button
 +	tooltip
 +	add option to limit number of characters in textbox
 +	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
 +	recursive theme (define theme for textboxes inside terminal for example)
 +	textbox password masking (asteriks)
--	support for unicode in textbox
-+	terminal: arrow up brings text from history
++	support for unicode in textbox
 +	textbox and terminal CTRL + left(right) arrow for jumping over words
 +	label textalign (left, right, center)
 +	clone check for every function to exist
 +	added OnEvent alias to SubscribeEvent function
 +	separate SDL and SFML controls
 -	drag n drop file to gui (SDL_DropEvent)
-
-OpenGL port of controls:
-- 	TabContainer
+-	proper removal of controls
+-	memory leak tests
 
 TO FIX:
-	- textbox color bug (low priority)
-	
-; controls to check for Clone and setType and events
-+ Button.cpp
-+ Canvas.cpp
-+ CheckBox.cpp
-+ ComboBox.cpp
-+ Container.cpp
-- Dialog.cpp
-+ Label.cpp
-+ ListBox.cpp
-+ RadioButton.cpp
-+ ScrollBar.cpp
-- TabContainer.cpp
-+ Terminal.cpp
-+ TextBox.cpp
-+ TrackBar.cpp
-+ WidgetMover.cpp
+	- label needs bigger size to fit smaller text
 
 ---------------------------
 New Features in new version
 ---------------------------
 
-- polygonal dimensions
-	SetPolygon() instead of SetRect ...
-	sizeVertical()
-	sizeHorizontal()
-	sizeLine()
-	getAABB()
-	isConvex()
-	
++ polygonal dimensions
+
 - effects
-	LoopEffect("effect name", {"effect params"})
-	StopEffect()
-	; playing effect or animation
-	PlayEffect("effect name", {"effect params"}, std::function call_after_effect_finished)
-	; shader postprocessing effect	
-	; animated image (.gif or so)
-	effect="effect1 {speed=10,offset=10};
+	effect="effect1 {speed=10,offset=10}; effect1 speed=10 offset=10;
 			effect2; effect3, ..."
-			
-+ c++ event binding, function binding
-	; event names as string or enum (problem adding new events would require mapping enum to string for usage in xml)
 
-- processing events in other thread
 
-+ basic event scripting
 - add basic functions such as {effect, style, sound} and parameters parsing
 
-- problem deleting control while event didn't get handled yet (event queue and event handling in other thread)
-	; solve by mutexes, when control is deleted remove any existing things in queue
-
-- sound effects
-
-- tab container
+- processing events in other thread
+	- problem deleting control while event didn't get handled yet (event queue and event handling in other thread)
+		; solve by mutexes, when control is deleted remove any existing things in queue
 
 - changing styles on event
 
-;;; first ------------
 * textbox scrollbar
 	; horizontal scrollbar is missing
-
-+ draggable
-	; control may allow dragging and use OnDrag function
-	
-+ widget resizer
-	; widget resizer control to put anywhere in widget
 
 * tooltips
 	; tooltip="whatever text"
 	; tooltip control which can be modified
-
-+ rotate around center on label only
-
-+ all events are now strings
-
-* cursor
-	; actual changing cursor image is missing
-
-+ anchoring fix (remove anchor tag)
-	; use max width as next row trigger (expand)
-	; relative children use current but clipped parent size
-	; absolute (non-determined size) children use new parent size calculated from other relatives and determined absolutes
-	; then parent might or might not get resized later
-	; then min, max is used only for clipping or optionally fitting or expanding
-	; rect="25, 546, k(2,6), e(4,7)"
-	; fitting as default
-	
-
-+ basic events on everything
-	+ drag
-	+ click
-	+ hover
-	+ leave
 	
 + Canvas layers and drawing functions
 	; Canvas must be very fast, use update texture instead of GetTextureFromSurface ...
@@ -274,11 +58,29 @@ New Features in new version
 	; instant clear layer by incrementing value and clear layer can be spread to multiple clears so big clear spike each 255
 	; special shader for rendering layered canvas
 	
-+ progressbar
-
-- layered
-
 - gui caching
+- anti-aliased line for canvas
 
--? put all parsers in separate file (maybe)
 ---------------------------
+
+- review textbox scrollbars
+
+- docs
+
+- movie?
+* effect
+	+ oneshot effect
+	- postprocessing
+
+- select control inside widget or control
+
+	*/scrollbar/* => scrollbar within any 
+	*/Dialog => Dialog inside within any Widget/Control
+	Terminal/* => Terminal/*
+	Terminal/** => Terminal/*/*/*/...
+	
+- fix tooltips
+- add menu control
+- add right click menu
+- add graph control
+	- add histogram mode

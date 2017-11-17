@@ -1,25 +1,24 @@
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include "UI/Gui.hpp"
-
-#include "UI/common/Cursor.hpp"
 #include "UI/AllControls.hpp"
+#include "UI/TiledImage.hpp"
+#include "UI/TiledFont.hpp"
+#include "UI/managers/Images.hpp"
+#include "UI/backend/SDL/SDLBackend.hpp"
+#include "UI/managers/Effects.hpp"
 
-#include "UI/common/SDL/Drawing.hpp"
-
-#include <sstream>
-ng::GuiEngine gui;
+ng::Gui gui;
 #include <iostream>
+
 using namespace std;
 using namespace ng;
+
 void test(Control* test) {
 	cout << "clicked\n";
 }
 
 GUIFUNC(hehe) {
-	cout << control->GetId() << endl;
-	for(auto &v : argv) {
+	cout << args.control->GetId() << endl;
+	for(auto &v : args.cmd_args) {
 		cout << "argv: " << v << "( " << v.size() << ") " << endl;
 	}
 	cout << endl;
@@ -27,196 +26,123 @@ GUIFUNC(hehe) {
 
 
 GUIFUNC(position) {
-	const Rect& r = control->GetRect();
-	cout << "control " << control->GetId() << " is at " << r.x << ", " << r.y << endl;
+	const Rect& r = args.control->GetRect();
+	cout << "control " << args.control->GetId() << " is at " << r.x << ", " << r.y << endl;
+	if(!args.control->GetEffect("Move")) {
+		std::cout << "no effect\n";
+		ng::Effect* ef = new ng::Effects::Move(Point(std::stoi(args.cmd_args[0]),std::stoi(args.cmd_args[1])), 0.4);
+		ng::Effect* ef2 = new ng::Effects::Resize(Size(100,100), 0.5);
+		args.control->AddEffect(ef);
+		args.control->AddEffect(ef2);
+	} else {
+		std::cout << "have effect\n";
+	}
 }
+
 GUIFUNC(say) {
-	if(argv.empty()) return;
-	cout << "control " << control->GetId() << " says: " << argv[0] << endl;
+	if(args.cmd_args.empty()) return;
+	string l;
+	for(auto s : args.cmd_args) {
+		l += s + " ";
+	}
+	cout << "control " << args.control->GetId() << " says: " << l << endl;
 }
+
+/*
+class MyEffect : public Effect {
+	public:
+		MyEffect() : Effect("MyEffect") {}
+		void PreRender() {
+			// Drawing().SetMaxAlpha(0.5);
+			cout << name << " pre rendering control: " << control->GetId() << "\n";
+		}
+		void PostRender() {
+			cout << name << " post rendering control: " << control->GetId() << "\n";
+		}
+};
+*/
 
 int main() {
-	
-	
-	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        throw std::string("Failed to initialize SDL: ") + SDL_GetError();
-    }
-    
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	
 	int sizeX = 1280;
 	int sizeY = 900;
-	SDL_Window* win = SDL_CreateWindow("gui sdl test", 100, 100, sizeX, sizeY, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	if(!win) {
-		cout << "creating window error\n";
-		SDL_Quit();
-		return 1;
-	}
-	
-	SDL_GLContext glcontext = SDL_GL_CreateContext(win);
-	if (!glcontext) {
-		cout << "Couldn't create context: %s" << SDL_GetError() << endl;
-		// SDL_DestroyRenderer(ren);
-		SDL_DestroyWindow(win);
-		SDL_Quit();
-		return 0;
-	}
-	
-	SDL_GL_MakeCurrent(win, glcontext);
-	
-	SDL_Renderer* ren = 0;
-	
-	glewExperimental = GL_TRUE; 
-    glewInit();
-	// Cursor::InitCursors();
-    
-	// SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
-	// if(!ren) {
-		// SDL_DestroyWindow(win);
-	// }
-	
 
-	int stencil;
-	SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencil);
-	cout << "stencil: " << stencil << endl;
+	ng::SDLBackend::SetupSDLWindow("SDL test", 100, 100, sizeX, sizeY);
 	
-	// Drawing::Init();
-	// Drawing::SetResolution( sizeX, sizeY );
 	
-	gui = GuiEngine(sizeX, sizeY);
-	// gui.SetSize(sizeX, sizeY);
-	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf");
-	gui.LoadXml("gui-test.xml");
+	gui = Gui(sizeX, sizeY);
+	gui.SetDefaultFont("/usr/share/fonts/TTF/Ubuntu-B.ttf", 10);
+	// ng::Fonts::PutFont("hehe1", new ng::TiledFont( ng::Images::GetImage("lazyfont.png"), Size(39,55)), 13 );
+	ng::Fonts::PutFont("hehe1", new ng::TiledFont( ng::Images::GetImage("data/lazyfont.png"), Size(39,55), 0x00ffff), 10 );
+	
+	gui.LoadXml("data/gui-test.xml");
+	// gui.LoadXml("basic.xml");
 	gui.SetTooltipDelay(0.5);
+	ng::SDLBackend::SetSDLBackend(&gui);
 	
-	gui.AddFunction("clear_canvas", [](Control* control, Argv &argv) {
+	gui.AddFunction("clear_canvas", [](Args& args) {
 		Canvas *c = (Canvas*)gui.GetControlById("canvas2");
-		c->Clear(0xffffffff);
+		c->Clear(0);
 	});
 	
-	// gui.OnEvent("form", "submit", [](Control* c, const Argv& argv) {
-		// cout << "submit\n";
-	// });
-	// gui.SubscribeEvent("5", EVENT_BUTTON_CLICK, [](Control* c){
-		// cout << "clicked at 1 \n";
-	// });
-	// gui.SubscribeEvent("55", EVENT_BUTTON_CLICK, [](Control* c){
-		// cout << "clicked at 3 \n";
-	// });
-	// gui.SubscribeEvent("56", EVENT_BUTTON_CLICK, [](Control* c){
-		// cout << "clicked at 4 \n";
-	// });
-	
-	// gui.SubscribeEvent("2", EVENT_BUTTON_CLICK, [](Control* c){
-		// cout << "clicked at nikola\n";
-		// Button* b = (Button*)c;
-		// b->SetText("you clicked at me");
-		// b->SetRect(50,50,200, 50);
-	// });
-	
-	// gui.SubscribeEvent("546", EVENT_TRACKBAR_CHANGE, [](Control *c) {
-		// cout << "trackbar changed: " << ((TrackBar*)c)->GetValue() << endl;
-	// });
-	
-	// gui.SubscribeEvent("20", EVENT_SCROLLBAR_CHANGE, [](Control* c) {
-		// ScrollBar* s = (ScrollBar*)c;
-		// cout << "value is: " << s->GetValue() << endl;
-	// });
-	
-	// Drawing::SetResolution( sizeX, sizeY );
-	// gui.SetSize(sizeX, sizeY);
-	// Drawing::Init();
-	
-	/*
-	TextBox* tb_debug = (TextBox*)gui.GetControlById("debug");
-	//tb_debug->SetText("text");
-	//tb_debug->SetRect(0, 0, 100, 50);
-	
-	Canvas* cv_minimap = (Canvas*)gui.GetControlById("minimap");
-	// cv_minimap->SetBackgroundColor(0x00000000);
-	cv_minimap->SetPixelColor(0x00ff0000);
-	cv_minimap->PutPixel(1,1);
-	cv_minimap->SetPixelColor(0xff00ff00);
-	cv_minimap->PutPixel(2,2);
-	*/
-	
-	// Button* btn = (Button*)ControlManager::CreateControl("button");
-	// Anchor a = btn->GetAnchor();
-	// a.sx = 300;
-	// a.sy = 100;
-	// a.isrelative = true;
-	// btn->SetAnchor(a);
-	// btn->SetText("test create button");
-	// btn->SetId("36");
-	// gui.AddControl(btn);
-	
-	// Widget* w1 = (Widget*)gui.GetControlById("w1");
-	
-	// std::stringstream s("<gui><button rect=\"0,150,100,100\" value=\"hehe\"/></gui>");
-	// w1->LoadXml(s);
 	
 	
-	// Terminal &t = *((Terminal*)gui.GetControlById("term"));
-	// t.OnEvent( "enter", [](Control* c, Argv& argv) {
-		// Terminal* t = (Terminal*)c;
-		 //~ cout << "command: " << t->GetText() << endl;
-		 //~ t->AppendLog("> " + t->GetLastCommand());
-		// t->AppendLog("> " + argv[0]);
-		// t->SetText("ROFL");
-	// });
-	// t.Focus();
+	// gui.GetCursor().SetCursorImage("Hand.png", Point(-50,-37));
+	ng::Image* curs = new ng::TiledImage( ng::Images::GetImage( "data/AppStarting.png" ), Size(128,128) );
+	gui.GetCursor().SetCursorImage( CursorType::pointer, curs, Point(-50,-38) );
+	// ng::Image* curs_input = ng::Images::GetImage("Hand.png");
+	// gui.GetCursor().SetCursorImage( CursorType::textinput, curs_input, Point(-50,-38) );
 	
-	// Label* lb = (Label*)gui.GetControlById("label");
+	gui.HideOSCursor();
+	gui.GetCursor().SetCursorImage( CursorType::textinput, "data/Hand.png", Point(-50,-38) );
+	curs->SetAnimated(true);
+	curs->SetAnimationSpeed(10);
+
+	gui.SetTooltipDelay(1.0);
+	// gui.GetCursor().SetCursorImage( curs, Point(0,0) );
 	
-	// gui.OnEvent("combo", "drag", [&](Control* c, Argv& argv) {
-		// Widget* wgt = gui.GetSelectedWidget();
-		// cout << "Combo dragged onto: " << wgt->GetType() << " (" << wgt->GetId() << ")\n";
-	// });
 	
-	// t.WriteLog("hahahaha");
 	
-	// TextBox* tb = (TextBox*)gui.GetControlById("mojtbox");
-	// tb->SetWordWrap(true);
-	// tb->SetTextWrap(true);
 	
-	// tb->SetTextWrap(false);
-		
+	// gui.GetCursor().SetSize(400,400);
 	
-	SDL_GL_SetSwapInterval(1);
+	// curs->SetTile(13);
 	
-	bool running = true;
-	while(running) {
-		SDL_Event e;
-		while(SDL_PollEvent(&e)) {
-			if(e.type == SDL_KEYDOWN) {
-				if(e.key.keysym.sym == 'q' || 
-					e.key.keysym.sym == SDLK_ESCAPE) {
-					running = false;
-				}
-			} else if(e.type == SDL_QUIT)
-				running = false;
-			gui.OnEvent(e);
+	
+	
+	gui.OnEvent("curs", "change", [&](Args& args) {
+		int val = static_cast<ng::TrackBar*>(args.control)->GetValue();
+		gui.GetCursor().SetSize(val,val);
+	});
+	
+	gui.OnEvent("put_here", "drag", [](Args args) {
+		cout << "drag evt\n";
+	});
+	
+	gui.OnEvent("combo", "drag", [&](Args& args) {
+		cout << "drag combo\n";
+		ng::Widget* wgt = gui.GetSelectedWidget();
+		cout << "drop on: " << wgt->GetId() << "\n";
+		if(wgt->GetId() == "put_here" || wgt->GetId() == "or_here") {
+			args.control->Unattach();
+			wgt->AddControl(args.control);
+			args.control->SetDraggable(false);
 		}
-		Drawing::GetResolution(sizeX, sizeY);
-		glViewport(0, 0, sizeX, sizeY);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-        
-		gui.Render();
-		SDL_GL_SwapWindow(win); 
-	}
+	});
 	
-	// SDL_DestroyRenderer(ren);
-	SDL_DestroyWindow(win);
-	SDL_Quit();
+	auto lbfps = gui.Get<ng::Label>("fps");
+	gui.OnFpsChange([&](uint32_t fps) {
+		lbfps->SetText("fps: " + std::to_string(fps));
+	});
+	
+	// gui.Get<ng::ComboBox>("combo")->AddEffect(new ng::Effects::AutoFade());
+	
+	gui.OnEvent("term", "enter", [](Args& args) {
+		Terminal* t = static_cast<Terminal*>(args.control);
+		
+		t->AppendLog(t->GetLastCommand());
+	});
+	
+	
+	ng::SDLBackend::SDLMainLoop(&gui);
+	ng::SDLBackend::CloseBackend();
 }
