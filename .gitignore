@@ -1,4 +1,13 @@
 *.o
 *.a
 sdl_test
+xcb_test
+xlib_test
+win32_test.exe
+build_win/config.h
+build/config.h
 docs
+doxy
+build
+Doxyfile
+*.nogit

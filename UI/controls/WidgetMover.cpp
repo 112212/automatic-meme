@@ -8,15 +8,17 @@ WidgetMover::WidgetMover() {
 
 void WidgetMover::OnMouseMove( int mX, int mY, bool mouseState ) {
 	if(mouseState) {
-		Widget* w = getWidget();
+		Control* w = getParent();
 		const Rect &r = w->GetRect();
 		
-		Rect mr = w->GetParentWidgetRegion();
+		Rect mr = w->GetParentRect();
 		
 		// mX, mY - parent widget local coords
 		// r.x, r.y - widgets local to its parent coords
 		int dx = mX - last_pos.x;
 		int dy = mY - last_pos.y;
+		// int x = clip(r.x + dx, 0, mr.w-r.w);
+		// int y = clip(r.y + dy, 0, mr.h-r.h);
 		int x = clip(r.x + dx, 0, mr.w-r.w);
 		int y = clip(r.y + dy, 0, mr.h-r.h);
 		w->SetPosition(x, y);
@@ -25,8 +27,8 @@ void WidgetMover::OnMouseMove( int mX, int mY, bool mouseState ) {
 	}
 }
 void WidgetMover::OnMouseDown( int mX, int mY, MouseButton button ) {
-	if(!getWidget()) return;
-	
+	if(!getParent()) return;
+	const Rect &r = GetRect();
 	last_pos = {mX,mY};
 }
 void WidgetMover::OnMouseUp( int mX, int mY, MouseButton button ) {
@@ -36,4 +38,6 @@ void WidgetMover::OnMouseUp( int mX, int mY, MouseButton button ) {
 void WidgetMover::Render( Point pos, bool isSelected ) {
 	Control::Render(pos,isSelected);
 }
+
+
 }

@@ -6,30 +6,28 @@
 
 namespace ng {
 TabContainer::TabContainer() {
+	setType("tabcontainer");
 	m_cur_tab = -1;
 	setInterceptMask(imask::mouse_down);
 	m_tab_height = 40;
 }
 
-void TabContainer::OnLostControl() {
-	
-}
 
-Widget* TabContainer::NewTab(std::string tabname) {
+Control* TabContainer::NewTab(std::string tabname) {
 	TabContext tab;
-	tab.widget = new Widget();
+	tab.widget = createControl("control","new-tab-widget");
 	tab.tabname = tabname;
 	
 	int tab_idx = m_tabs.size();
 	Layout tl;
 	tl.SetCoord( Point( tab_idx, 0 ) );
 	tl.SetSize(80,0,30,0);
-	Button* lb = (Button*)ControlManager::CreateControl("button");//new Button();
-	
+	// Button* lb = createControl<Button>("button", GetId() + "_"+tabname+"_tab");
+	Button* lb = createControl<Button>("button", "tab");
 	tab.tab = lb;
 	lb->SetText(tabname.c_str());
 	// lb->SetAlignment( Alignment::center );
-	lb->SetId(tabname);
+	// lb->SetId(tabname);
 	lb->SetLayout(tl);
 	AddControl(lb);
 	
@@ -39,7 +37,7 @@ Widget* TabContainer::NewTab(std::string tabname) {
 	tab.widget->SetLayout(l);
 	AddControl(tab.widget);
 	
-	lb->OnEvent("click", [this, tab_idx](Args& args) {
+	lb->OnEvent("click", [=](Args& args) {
 		m_tabs[m_cur_tab].widget->SetVisible(false);
 		m_cur_tab = tab_idx;
 		m_tabs[m_cur_tab].widget->SetVisible(true);
@@ -57,13 +55,13 @@ Widget* TabContainer::NewTab(std::string tabname) {
 }
 
 Control* TabContainer::Clone() {
-	TabContainer* l = new TabContainer();
+	TabContainer* l = createControl<TabContainer>("tabcontainer");
 	copyStyle(l);
 	return l;
 }
 
 
-Widget* TabContainer::GetTabWidget(std::string tabname) {
+Control* TabContainer::GetTabWidget(std::string tabname) {
 	for(TabContext& t : m_tabs) {
 		if(t.tabname == tabname) {
 			return t.widget;
@@ -72,7 +70,7 @@ Widget* TabContainer::GetTabWidget(std::string tabname) {
 	return 0;
 }
 
-Widget* TabContainer::GetTabWidget(int idx) {
+Control* TabContainer::GetTabWidget(int idx) {
 	if(idx < m_tabs.size()) {
 		return m_tabs[idx].widget;
 	} else {
@@ -87,8 +85,8 @@ void TabContainer::parseXml(rapidxml::xml_node<>* node) {
 			if(!attr) {
 				continue;
 			}
-			Widget* wgt = NewTab(attr->value());
-			Layout l;			
+			Control* wgt = NewTab(attr->value());
+			Layout l;
 			for(rapidxml::xml_node<> *node2=node->first_node(); node2; node2=node2->next_sibling()) {
 				wgt->parseAndAddControl(node2, l);
 			}
@@ -101,7 +99,6 @@ void TabContainer::Render( Point pos, bool isSelected ) {
 	RenderWidget(pos, isSelected);
 	Control::Render(pos, isSelected);
 }
-
 
 const int tab_overlap = 15;
 void TabContainer::onRectChange() {

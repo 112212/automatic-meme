@@ -9,7 +9,7 @@ class System {
 	
 	public:
 		virtual void SetCursorVisibility(bool visible) {}
-		virtual std::string GetClipboard() {}
+		virtual std::string GetClipboard() { return "";}
 		virtual void SetClipboard(std::string text) {}
 		virtual bool GetKeystate(Keyboard_Scancode c) {return false;}
 };

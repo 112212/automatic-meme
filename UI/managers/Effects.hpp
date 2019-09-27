@@ -3,7 +3,18 @@
 #include "../Effect.hpp"
 namespace ng {
 namespace Effects {
-		
+	
+	class Fade : public OneShotEffect {
+		private:
+			bool direction;
+			void Init();
+			void PreRender();
+			void PostRender();
+			void OnRemove();
+		public:
+			Fade(double time, bool direction=false);
+	};
+	
 	class AutoFade : public Effect {
 		private:
 			double delay;

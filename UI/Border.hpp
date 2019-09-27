@@ -1,5 +1,5 @@
-#ifndef BORDER_HPP
-#define BORDER_HPP
+#ifndef NG_BORDER_HPP
+#define NG_BORDER_HPP
 
 #include "common.hpp"
 #include <iostream>
@@ -14,10 +14,9 @@ class Border {
 		Rect* m_rect;
 		// Control* control;
 	public:
-		virtual bool CheckCollision(int x, int y) {
+		virtual bool CheckCollision(const Point& p) {
 			Rect& r = *m_rect;
-			// std::cout << control->GetId() << " " << control << " Border: " << r.x << ", " << r.y << "\n";
-			return (x >= r.x && x <= r.x+r.w && y >= r.y && y <= r.y+r.h);
+			return (p.x >= r.x && p.x <= r.x+r.w && p.y >= r.y && p.y <= r.y+r.h);
 		}
 };
 

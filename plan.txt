@@ -1,86 +1,163 @@
+TODO ASAP:
 
+	backends:
+	---------------
+	* xlib backend
+	* xcb backend
+	+ wingdi backend
+	- generic backend
+	
+	- backend: system - linux
+	- backend: system - windows
+	- handling windows on backends
 
-TODO:
-+	theme loader (default values)
--	xml defining borders, defining selection by background alpha of image
-+	new control registration to xml
-+	setting font by parsing it
-+	tabbing for textbox and button
-+	tooltip
-+	add option to limit number of characters in textbox
-+	GUI engine mechanism activate() ; activates keyboard input to control by mouse down event on control
-+	recursive theme (define theme for textboxes inside terminal for example)
-+	textbox password masking (asteriks)
-+	support for unicode in textbox
-+	textbox and terminal CTRL + left(right) arrow for jumping over words
-+	label textalign (left, right, center)
-+	clone check for every function to exist
-+	added OnEvent alias to SubscribeEvent function
-+	separate SDL and SFML controls
--	drag n drop file to gui (SDL_DropEvent)
--	proper removal of controls
--	memory leak tests
+	- implement extensions so that they are general, by inclusion they register automatically
+	
+	extensions:
+		- freetype2
+		- micro ttf library
+		+ libbmp
+		- libjpeg
+
+	------------ optimizing -----------
+	- rendering on invalidate
+	- gui caching
+	- make cache optimization optional (measure performance)
+	
+	1. bitmap back behind object (only if object is shadowing other one)
+	2. redraw whole object if object shadowing it is moved or resized or whatever
+	3. 
+
+	-----------------------------------
+
+	+ right click handing
+	- add horizontal control
+	
+	- file browser control
+		- uses system backend to do file browsing and file access (which is abstracted)
+
+	graph control:
+		- graph: optional scrollbars
+		- add histogram mode
 
 TO FIX:
-	- label needs bigger size to fit smaller text
+	- text wrapping
+	- scrolling container with mouse
 
----------------------------
-New Features in new version
----------------------------
-
-+ polygonal dimensions
-
-- effects
-	effect="effect1 {speed=10,offset=10}; effect1 speed=10 offset=10;
-			effect2; effect3, ..."
-
-
-- add basic functions such as {effect, style, sound} and parameters parsing
-
-- processing events in other thread
-	- problem deleting control while event didn't get handled yet (event queue and event handling in other thread)
-		; solve by mutexes, when control is deleted remove any existing things in queue
-
-- changing styles on event
-
-* textbox scrollbar
-	; horizontal scrollbar is missing
-
-* tooltips
-	; tooltip="whatever text"
-	; tooltip control which can be modified
 	
-+ Canvas layers and drawing functions
-	; Canvas must be very fast, use update texture instead of GetTextureFromSurface ...
-	; limit to 4 layers
-	; pallete texture (determines which layer is used) => takes n bits per each layer
-	; put line, circle, whatever into canvas
-	; instant clear layer by incrementing value and clear layer can be spread to multiple clears so big clear spike each 255
-	; special shader for rendering layered canvas
+TODO LATER:
+
+	------------- GUI size ----------------
+	- scaling + input scale transform
+	- add selection rect
+	- add input transform from selection rect into control normal rect
+	- add drawing postprocessing (render to texture) to scale down control => render transform from rect to selection rect
+	---------------------------------------
 	
-- gui caching
-- anti-aliased line for canvas
-
----------------------------
-
-- review textbox scrollbars
-
-- docs
-
-- movie?
-* effect
-	+ oneshot effect
-	- postprocessing
-
-- select control inside widget or control
-
-	*/scrollbar/* => scrollbar within any 
-	*/Dialog => Dialog inside within any Widget/Control
-	Terminal/* => Terminal/*
-	Terminal/** => Terminal/*/*/*/...
+	- processing events in other thread
 	
-- fix tooltips
-- add menu control
-- add right click menu
-- add graph control
-	- add histogram mode
+	- proper removal of controls
+		- problem deleting control while event didn't get handled yet (event queue and event handling in other thread)
+			; solve by mutexes, when control is deleted remove any existing things in queue
+
+	add basic functions such as effect, style, sound and parameters parsing
+		- effect
+			; effect="effect1 {speed=10,offset=10}; effect1 speed=10 offset=10;
+				effect2; effect3, ..."
+		+ style
+		+ sound
+
+	basic image full sw support
+		+ fill polygons
+		- rotating
+		- transformation matrix?
+		- basic processing
+			; or separate image processing
+	- new scene control?
+		- easy input (vectorization scene)
+	
+	- xml defining borders, defining selection by background alpha of image
+	
+	* effect
+		+ oneshot effect
+		- postprocessing
+	
+	- anti-aliased line for canvas
+	- docs
+	- memory leak tests
+	- accessor for properties (styles)
+	- listbox show details
+	- listbox caption
+	- drag n drop file to gui (SDL_DropEvent)
+	
+	- config in xml
+		- disable auto <br/> on overflow
+
+====================
+android implementation:
+
+	https://gamedev.stackexchange.com/questions/131341/is-it-possible-to-use-c-in-sdl-for-android
+		https://pastebin.com/N6XpyhZL
+	https://github.com/georgik/sdl2-android-example
+
+====================
+
+**GUI doing**
+
+- make extensions backend independent
+	- auto register extension by when selected (find out way) - get extensions out of backends (since they are independent of backend)
+
+- optimize rendering
+	- render only when needed (invalidate mechanism), but keep option to disable this (in case of issues)
+
+===
+
+/ solve png for windows
+- solve ttf font (portable way)
+
+- win32 nicer text
+	https://docs.microsoft.com/en-us/windows/desktop/api/wingdi/nf-wingdi-bitblt
+
+- win32 opengl
+	https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
+
+
+============================
+
+Definition of:
+
+- backend: system
+	- copy paste
+	- window control
+
+
+============================
+
+
+KEY PROBLEMS TO SOLVE (GOAL of this gui):
+	- simple to embed in other project
+	- simple to choose backend
+		- also to put backend together from backend pieces
+			(like choose sound platform, choose video platform, choose input platform, ...)
+	- simple to choose extensions (independent of backend)
+	- avail optimizations for backend (rendering)
+		- backend independent caching
+	- build systems
+		cmake
+		makefile
+	- full backend support
+		- sound
+		- image
+		- input
+		- system
+			- window (optional support for backend, abstracted window rendering)
+			- borderless window
+			- menu
+	- powerful (and reusable) controls
+	- make easy to document
+		- easy to start
+		- easy to use
+		- easy to do advanced stuff
+		- try minify limitations
+		- and yet optimized
+	- try to not use macros anywhere if possible

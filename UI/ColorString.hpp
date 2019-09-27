@@ -1,13 +1,11 @@
-#ifndef COLORSTRING_HPP
-#define COLORSTRING_HPP
+#ifndef NG_COLORSTRING_HPP
+#define NG_COLORSTRING_HPP
 #include <string>
 #include <vector>
 #include <iostream>
 #include <utility>
 
 #include "Font.hpp"
-
-using std::cout; using std::endl;
 
 namespace ng {
 class ColorString {
@@ -93,6 +91,7 @@ class ColorString {
 				yellow,
 				cyan,
 				purple,
+				black
 			} color;
 		};
 		

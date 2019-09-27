@@ -1,13 +1,14 @@
-#ifndef SOUND_HPP
-#define SOUND_HPP
+#ifndef NG_SOUND_HPP
+#define NG_SOUND_HPP
 
 #include <string>
 #include "common.hpp"
+#include "Resource.hpp"
 
 namespace ng {
 	
 class Speaker;
-class Sound {
+class Sound : public Resource {
 	private:
 		friend class Speaker;
 		

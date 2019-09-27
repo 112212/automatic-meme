@@ -38,6 +38,7 @@ class Label : public Control {
 
 		std::vector<Image*> text_lines;
 		void onRectChange();
+		void onFontChange();
 		void OnSetStyle(std::string& style, std::string& value);
 		void Render( Point pos, bool isSelected );
 	public:
@@ -50,6 +51,7 @@ class Label : public Control {
 		void SetAlignment( Alignment alignment );
 		void SetRotation(int angle);
 		int GetRotation();
+		virtual Rect GetContentRect();
 };
 }
 #endif

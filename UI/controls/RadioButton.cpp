@@ -6,6 +6,7 @@ RadioButton::RadioButton() {
 	m_group = 0;
 	m_isSelected = false;
 	tex_text = 0;
+	m_checksize = 14;
 }
 
 
@@ -25,14 +26,14 @@ void RadioButton::Render( Point pos, bool isSelected ) {
 	
 	Control::Render(pos,isSelected);
 	
-	Drawing().Circle( x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS, Color::White );
+	Drawing().Circle( x+m_checksize, y+rect.h/2, m_checksize, Color::White );
 	if(tex_text) {
 		Size s = tex_text->GetImageSize();
 		// Drawing().TexRect( m_text_loc.x+pos.x, m_text_loc.y+pos.y+2, s.w, s.h, tex_text );
-		Drawing().TexRect( m_text_loc.x+pos.x, pos.y+rect.y+rect.h/4, s.w, s.h, tex_text );
+		Drawing().TexRect( m_text_loc.x+pos.x, pos.y+rect.y+(rect.h-s.h)*0.5, s.w, s.h, tex_text );
 	}
 	if(m_isSelected) {
-		Drawing().FillCircle(x+RADIO_BUTTON_RADIUS, y+rect.h/2, RADIO_BUTTON_RADIUS-2, Color::Yellow );
+		Drawing().FillCircle( x+m_checksize, y+rect.h/2, m_checksize, Color::Yellow );
 	}
 	
 	
@@ -41,8 +42,11 @@ void RadioButton::Render( Point pos, bool isSelected ) {
 
 void RadioButton::SetText( std::string text ) {
 	m_text = text;
+	if(!m_style.font) {
+		return;
+	}
 	tex_text = m_style.font->GetTextImage( m_text, 0xffffff );
-	m_text_loc.x = GetRect().x + RADIO_BUTTON_RADIUS + 15;
+	m_text_loc.x = GetRect().x + m_checksize + 15;
 	m_text_loc.y = GetRect().y;
 }
 
@@ -51,26 +55,27 @@ void RadioButton::OnSetStyle(std::string& style, std::string& value) {
 		_case("value"):
 			SetText(value);
 		_case("selected"):
-			if(value == "true") {
+			if(toBool(value)) {
 				Select();
 			}
 		_case("group"):
 			m_group = std::stoi(value);
+		_case("checksize"):
+			m_checksize = std::stoi(value);
 	}
 }
 
 void RadioButton::OnMouseDown( int mX, int mY, MouseButton which_button ) {
+	if(!m_style.font) {
+		return;
+	}
 	tex_text = m_style.font->GetTextImage( m_text, 0x00ff00 );
 	m_is_mouseDown = true;
 }
 
 void RadioButton::handleRadioButtonChange() {
 	std::vector<Control*> controls;
-	if(getWidget()) {
-		controls = getWidgetControls();
-	} else {
-		controls = getEngineControls();
-	}
+	controls = getParentControls();
 	int len = controls.size();
 	int group = m_group;
 	for(int i=0; i < len; i++) {
@@ -88,8 +93,12 @@ void RadioButton::handleRadioButtonChange() {
 
 void RadioButton::OnMouseUp( int mX, int mY, MouseButton which_button ) {
 	m_is_mouseDown = false;
+	if(!m_style.font) {
+		return;
+	}
+	const Rect& r = GetRect();
 	tex_text = m_style.font->GetTextImage( m_text, 0xffffff );
-	if(CheckCollision(mX, mY)) {
+	if(CheckCollision(Point(mX,mY)+r)) {
 		if( !m_isSelected ) {
 			emitEvent( "change" );
 			handleRadioButtonChange();

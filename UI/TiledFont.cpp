@@ -3,8 +3,13 @@
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+#include "Color.hpp"
 #include "BasicImage.hpp"
+#include "managers/ResourceManager.hpp"
+#include "managers/Images.hpp"
+#include "common.hpp"
 #include "utf8/utf8.h"
+
 namespace ng {
 	
 TiledFont::TiledFont(Image* img, Size tile_size, unsigned int bg_key, int fontsize, bool monosized, char* charset) {
@@ -28,7 +33,43 @@ TiledFont::TiledFont(Image* img, Size tile_size, unsigned int bg_key, int fontsi
 	}
 	process_image();
 	
-	m_fontsize *= 0.08;
+	m_fontsize /= 13.0f;
+}
+
+Resource* TiledFont::GetFont(File* f, Kvp kvp) {
+	bool monosized = toBool(GetKv(kvp, "monosize"));
+	char* charset = 0;
+	auto cs = GetKv(kvp, "charset");
+	if(!cs.empty()) {
+		charset = (char*)cs.c_str();
+	}
+	int fontsize = 13;
+	auto fs = GetKv(kvp, "fontsize");
+	if(!fs.empty()) {
+		fontsize = std::stoi(fs);
+	}
+	auto bgc = GetKv(kvp, "bgcolor");
+	unsigned int bg_key = 0;
+	if(!bgc.empty()) {
+		bg_key = Color(bgc).GetUint32();
+	}
+	
+	Size tilesize = {64,64};
+	auto ts = GetKv(kvp, "tilesize");
+	std::vector<std::string> vs;
+	split_string(ts, vs, ',');
+	if(vs.size() == 2) {
+		tilesize.w = std::stoi(vs[0]);
+		tilesize.h = std::stoi(vs[1]);
+	}
+	std::cout << "[TiledFont] loading tiledfont: " << f->path << "\n";
+	Image* img = Images::GetImage(f->path);
+	std::cout << "[TiledFont] result: " << img << "\n";
+	if(!img) {
+		return 0;
+	}
+	
+	return new TiledFont(img, tilesize, bg_key, fontsize, monosized, charset);
 }
 
 Rect TiledFont::getCharRect(uint32_t c) {
@@ -39,6 +80,7 @@ void TiledFont::setCharRect(uint32_t c, Rect r) {
 	m_char_rect[ m_char_index[c] ] = r;
 }
 
+// determine size of each character
 void TiledFont::process_image() {
 	Size s = m_img->GetImageSize();
 	int tw = m_tilesize.w;
@@ -116,6 +158,7 @@ void TiledFont::process_image() {
 					}
 				}
 				j4:
+				r.w = std::max(4, r.w);
 				r.x--;
 				if(r.x < 0) r.x = 0;
 				r.w+=2;
@@ -123,15 +166,7 @@ void TiledFont::process_image() {
 				if(r.y < 0) r.y = 0;
 				r.h+=2;
 				o = r;
-			
-				// if(r.w == 0 || r.h == 0) {
-					// exit(-1);
-				// }
-				
-				// o.w = r.w;
-				// o.h = r.h;
-				// o.x = r.x;
-				// o.y = r.y;
+
 			}
 			
 			m_char_rect[tile] = o;
@@ -146,14 +181,10 @@ void TiledFont::process_image() {
 	
 	int tile_y = tile / row_tiles;
 	int tile_x = tile % row_tiles;
-	// r.x = tw / 4;
-	// r.y = th / 4;
 	space_rect.w = r.w;
 	space_rect.h = r.h;
-	std::cout << "space rect: " << space_rect.x << ", " << space_rect.y << " => " << space_rect.x/tw << ", " << space_rect.y/th << "\n";
 	
 	setCharRect(' ', space_rect);
-	// m_char_rect[ tile ] = space_rect;
 }
 
 GlyphMetrics TiledFont::GetGlyphMetrics( uint32_t c ) {
@@ -202,13 +233,13 @@ Image* TiledFont::GetTextImage( std::string text, uint32_t color ) {
 		}
 		
 		Rect &r = m_char_rect[idx->second];
-		w += m_fontsize*r.w;
+		w += m_fontsize * r.w;
 		h = std::max<int>(h, m_fontsize*r.h);
 	}
 	
 	h+=1;
 	
-	
+	// std::cout << "img: " << w << ", " << h << "\n";
 	Image* img = new BasicImage(w, h);
 	Rect dst(0,0,0,0);
 	for(auto it = text.begin(); it != it_end; ) {
@@ -224,17 +255,14 @@ Image* TiledFont::GetTextImage( std::string text, uint32_t color ) {
 		Rect &r = m_char_rect[idx->second];
 		dst.w = m_fontsize * r.w;
 		dst.h = m_fontsize * r.h;
+		
 		dst.y = std::max(0, h - dst.h - 5);
-		// dst.w = m_tilesize.w;
-		// dst.h = m_tilesize.h;
-		img->PutImage(m_img, dst, r, m_bg_key, color);
-		// dst.x += m_tilesize.w;
+		// std::cout << "render: " << (char)idx->second << " : " << r << " : " << dst << "\n";
+		img->PutImage(m_img, dst, r, m_bg_key, 0x00ffffff, color);
 		dst.x += dst.w;
 	}
 	return img;
 }
-// static Font* GetFont( File file, int font_size );
-		
 
 TiledFont::~TiledFont() {
 	

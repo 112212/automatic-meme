@@ -1,8 +1,9 @@
-#ifndef TILED_FONT_HPP
-#define TILED_FONT_HPP
+#ifndef NG_TILED_FONT_HPP
+#define NG_TILED_FONT_HPP
 #include "Font.hpp"
 #include "Image.hpp"
 #include "common.hpp"
+#include "managers/ResourceManager.hpp"
 #include <vector>
 #include <chrono>
 #include <map>
@@ -31,7 +32,7 @@ class TiledFont : public Font {
 		
 		virtual GlyphMetrics GetGlyphMetrics( uint32_t c );
 		virtual Image* GetTextImage( std::string text, uint32_t color );
-		// static Font* GetFont( File file, int font_size );
+		static Resource* GetFont(File* f, Kvp kvp);
 		
 };
 

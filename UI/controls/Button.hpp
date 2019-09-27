@@ -12,6 +12,7 @@ class Button : public Control {
 		std::string text;
 		Point text_loc;
 		bool m_is_mouseDown;
+		bool m_disabled;
 		int m_down_color;
 		int m_up_color;
 		
@@ -36,9 +37,12 @@ class Button : public Control {
 			max_events
 		};
 		
+		std::string GetText() { return text; }
 		void SetText( std::string text );
 		
 		Button* Clone();
+		
+		Rect GetContentRect();
 };
 }
 #endif

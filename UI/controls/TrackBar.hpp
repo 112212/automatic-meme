@@ -5,7 +5,7 @@
 namespace ng {
 
 
-typedef Point Range;
+
 
 class TrackBar : public Control {
 	private:
@@ -23,7 +23,7 @@ class TrackBar : public Control {
 		int m_value;
 		
 		Rect getSliderRect();
-		void onChange();
+		void onChange(bool force=false);
 		void onRectChange();
 		void setValue( int value );
 		int getValue();
@@ -44,7 +44,6 @@ class TrackBar : public Control {
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY, MouseButton button );
 		void OnLostFocus();
-		void OnLostControl();
 		
 		void SetVertical( bool isVertical ) { m_is_vertical = isVertical; onChange(); }
 		int GetPercentageValue();

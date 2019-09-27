@@ -1,7 +1,7 @@
 #ifndef NG_WGT_MOVER_HPP
 #define NG_WGT_MOVER_HPP
 #include "../Control.hpp"
-#include "../Widget.hpp"
+#include "../Control.hpp"
 namespace ng {
 class WidgetMover : public Control {
 	private:

@@ -1,5 +1,5 @@
-#ifndef _FONTS_HPP_
-#define _FONTS_HPP_
+#ifndef NG_FONTS_HPP
+#define NG_FONTS_HPP
 
 
 #include <utility> // std::pair
@@ -17,13 +17,13 @@ struct File {
 };
 */
 class Font;
-typedef std::function<Font*(File,int)> FontConstructor;
+// typedef std::function<Font*(File,int)> FontConstructor;
 class Fonts {
 	private:
 		// font short names
 		static std::map< typename std::pair<std::string, int> , Font*> fonts;
 		static std::map< std::string, std::string > fonts_path;
-		static std::map< std::string, FontConstructor > registered_font_engines;
+		// static std::map< std::string, FontConstructor > registered_font_engines;
 		
 	public:
 		static Font* GetFont( std::string short_name, int font_size );
@@ -32,9 +32,7 @@ class Fonts {
 		static Font* GetParsedFont( std::string fontString );
 		static bool FontExists( std::string short_name, int font_size );
 		
-		static void RegisterFontExtension( std::string ext, FontConstructor font_constructor);
-		
-		
+		// static void RegisterFontExtension( std::string ext, FontConstructor font_constructor);
 };
 
 

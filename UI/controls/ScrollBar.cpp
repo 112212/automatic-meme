@@ -17,6 +17,8 @@ ScrollBar::ScrollBar() {
 	m_max_value = 100;
 	m_mwheel_const = 4;
 	m_slider_click_offset = 0;
+	m_slider_color = Color::White;
+	m_is_dragging = false;
 }
 
 ScrollBar::~ScrollBar() {
@@ -24,8 +26,8 @@ ScrollBar::~ScrollBar() {
 
 void ScrollBar::Render( Point pos, bool isSelected ) {
 	const Rect& r = GetRect();
-	Drawing().FillRect(m_slider.x+pos.x, m_slider.y+pos.y, m_slider.w, m_slider.h, Color::White);
 	Control::Render(pos, isSelected);
+	Drawing().FillRect(m_slider.x+pos.x, m_slider.y+pos.y, m_slider.w, m_slider.h, m_slider_color);
 }
 
 void ScrollBar::SetSliderSize( int s ) {
@@ -62,6 +64,9 @@ void ScrollBar::OnSetStyle(std::string& style, std::string& value) {
 				m_slider.w = m_slider_size;
 			}
 			updateSlider();
+		_case("vertical"):
+			SetVertical( toBool(value) );
+			updateSlider();
 		_case("orientation"):
 			if(value == "vertical" || value == "horizontal") {
 				SetVertical( value == "vertical" );
@@ -84,13 +89,28 @@ void ScrollBar::onRectChange() {
 }
 
 void ScrollBar::OnMouseUp( int mX, int mY, MouseButton button ) {
-	sendGuiCommand( GUI_UNLOCK );
+	// sendGuiCommand( GUI_UNLOCK );
+	m_is_dragging = false;
 }
 
 ScrollBar* ScrollBar::Clone() {
 	ScrollBar* s = new ScrollBar();
 	copyStyle(s);
 	return s;
+}
+
+void ScrollBar::SetVisibleRange(int range) {
+	Rect r = GetRect();
+	int slider_size = m_is_vertical ? r.h : r.w;
+	if(m_min_value == m_max_value) {
+		SetSliderSize( slider_size  );
+	} else {
+		SetSliderSize( clip( slider_size * range / (m_max_value - m_min_value), 10, slider_size ) );
+	}
+}
+
+bool ScrollBar::IsDraggingSlider() {
+	return m_is_dragging;
 }
 
 void ScrollBar::OnMouseDown( int mX, int mY, MouseButton button ) {
@@ -109,15 +129,20 @@ void ScrollBar::OnMouseDown( int mX, int mY, MouseButton button ) {
 		}
 	}
 	
+	m_is_dragging = true;
+	
 	m_slider_click_offset = 0;
 	if(m_on_it) {
-		sendGuiCommand( GUI_FOCUS_LOCK );
+		// TODO: check why did i use this??
+		// sendGuiCommand( GUI_FOCUS_LOCK );
 	}
 	
 	if(m_is_vertical) {
-		int y = mY - rect.y - m_slider_size/2;
+		int y = mY - m_slider_size/2;
+		
 		if(y != m_slider_pix) {
 			if(m_on_it) {
+				
 				m_slider_click_offset = y - m_slider_pix;
 			} else {
 				m_on_it = true;
@@ -127,7 +152,8 @@ void ScrollBar::OnMouseDown( int mX, int mY, MouseButton button ) {
 				
 		}
 	} else {
-		int x = mX - rect.x - m_slider_size/2;
+		// int x = mX - rect.x - m_slider_size/2;
+		int x = mX - m_slider_size/2;
 		if(x != m_slider_pix) {
 			if(m_on_it) {
 				m_slider_click_offset = x - m_slider_pix;
@@ -149,13 +175,13 @@ void ScrollBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 	
 	if(m_on_it && mouseState) {
 		if(m_is_vertical) {
-			int y = mY - r.y  - m_slider_size/2;
+			int y = mY - m_slider_size/2;
 			if(y != m_slider_pix) {
 				m_slider_pix = clip(y - m_slider_click_offset, 0, r.h - m_slider_size);
 				onChange();
 			}
 		} else {
-			int x = mX - r.x  - m_slider_size/2;
+			int x = mX  - m_slider_size/2;
 			if(x != m_slider_pix) {
 				m_slider_pix = clip(x - m_slider_click_offset, 0, r.w - m_slider_size);
 				onChange();
@@ -175,12 +201,21 @@ void ScrollBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 
 float ScrollBar::GetPercentageValue() {
 	float d = (m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size;
-	return (m_slider_pix) / d;
+	if(d == 0.0f) {
+		return 0;
+	} else {
+		return (m_slider_pix) / d;
+	}
 }
 
 int ScrollBar::getValue() {
 	int d = (m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size;
-	return (m_slider_pix*(m_max_value-m_min_value)) / d + m_min_value;
+	if(d == 0) return 0;
+	if(m_max_value == m_min_value) {
+		return m_min_value;
+	} else {
+		return (m_slider_pix*(m_max_value-m_min_value)) / d + m_min_value;
+	}
 }
 
 int ScrollBar::GetValue() {
@@ -194,43 +229,36 @@ void ScrollBar::OnLostFocus() {
 void ScrollBar::onChange() {
 	m_value = getValue();
 	updateSlider();
-	emitEvent( "change" );
+	emitEvent( "change", {m_value} );
 }
 
 Rect ScrollBar::getSliderRect() {
-	Rect r;
 	Rect rect = GetRect();
 	if( m_is_vertical ) {
-		r.x = rect.x;
-		r.y = rect.y + m_slider_pix;
-		r.w = rect.w;
-		r.h = m_slider_size;
+		return Rect(0, m_slider_pix, rect.w, m_slider_size);
 	} else {
-		r.x = rect.x + m_slider_pix;
-		r.y = rect.y;
-		r.h = rect.h;
-		r.w = m_slider_size;
+		return Rect(m_slider_pix, 0, m_slider_size, rect.h);
 	}
-	return r;
 }
 
 void ScrollBar::OnMWheel( int updown ) {
-	m_value = clip(m_value - updown * m_mwheel_const, m_min_value, m_max_value);
-	int d = (m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size;
-	m_slider_pix = ((m_value-m_min_value) * d ) / (m_max_value-m_min_value);
-	updateSlider();
-	emitEvent( "change" );
+	setValue(m_value - updown * m_mwheel_const);
+	emitEvent( "change", {m_value} );
 }
 
 void ScrollBar::setValue( int value ) {
 	m_value = clip(value, m_min_value, m_max_value);
 	int d = ( (m_is_vertical ? GetRect().h : GetRect().w) - m_slider_size );
-	m_slider_pix = ( (m_value-m_min_value) * d ) / (m_max_value-m_min_value);
+	if(m_min_value == m_max_value) {
+		m_slider_pix = 0;
+	} else {
+		m_slider_pix = ( (m_value-m_min_value) * d ) / (m_max_value-m_min_value);
+	}
 	updateSlider();
 }
 
 void ScrollBar::SetValue( int value ) {
-	setValue( value );
+	setValue(value);
 }
 
 void ScrollBar::SetRange( int min, int max ) {

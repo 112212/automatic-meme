@@ -2,7 +2,7 @@
 #define NG_TEXTBOX_HPP
 
 #include "../Control.hpp"
-#include "../Widget.hpp"
+#include "../Control.hpp"
 #include "../ColorString.hpp"
 #include "ScrollBar.hpp"
 
@@ -18,6 +18,7 @@ class TextBox : public Control {
 			ColorString text;
 			bool wrap;
 			int last_color;
+			int char_count;
 			TextLine() : tex(0),wrap(false),last_color(0) {}
 		};
 		std::vector<TextLine> m_lines;
@@ -32,7 +33,6 @@ class TextBox : public Control {
 		// scrollbar
 		ScrollBar *m_scrollbar_v;
 		ScrollBar *m_scrollbar_h;
-		bool m_scrollbar_selected;
 		int m_scrollbar_thickness;
 		
 		Point m_cursor;
@@ -42,18 +42,23 @@ class TextBox : public Control {
 		double m_cursor_blinking_rate;
 		int m_readonly;
 		bool m_colors;
+		bool m_should_refresh_line_max;
+		bool m_update_viewport;
+		bool m_hscroll;
 		
 		bool m_color_input;
 		bool m_locked;
 		bool m_password;
 		int m_max_length;
 		int m_text_max;
-		int m_lines_max;
+		// int m_lines_max;
 		int m_line_height;
-		int m_line_max_width;
+		// int m_line_max_width;
+		Point m_viewport_offset;
+		Size m_text_area_chars;
+		Size m_text_area;
 		
-		static int m_selection_color;
-		static int m_cursor_color;
+		int m_selection_color;
 		
 		void updatePosition();
 		void onFontChange();
@@ -87,6 +92,7 @@ class TextBox : public Control {
 		virtual void OnMouseDown( int mX, int mY, MouseButton button );
 		virtual void OnMouseUp( int mX, int mY, MouseButton button );
 		virtual void OnMouseMove( int mX, int mY, bool mouseState );
+		virtual void OnActivate();
 		
 		virtual void OnLostFocus();
 		virtual void OnGetFocus();

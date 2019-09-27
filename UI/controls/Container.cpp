@@ -5,26 +5,25 @@
 
 namespace ng {
 Container::Container() {
-	setType( "dialog" );
+	setType( "container" );
 	m_is_mouseDown = false;
 	m_num_controls = 0;
 	overflow_h = overflow_v = false;
 	m_scroll_h = m_scroll_v = 0;
 	max_v = max_h = 0;
 	m_tx = m_ty = 0;
-	innerWidget = new Widget();
-	innerWidget->SetId( GetId() + "_innerWidget" );
+	innerWidget = createControl("control", "container");
+	innerWidget->SetLayout("0,0,W,H");
 	background_color = 0;
-	Widget::AddControl(innerWidget);
+	Control::AddControl(innerWidget);
 	setInterceptMask(imask::mwheel);
 }
-
 
 Container::~Container() {
 }
 
 void Container::OnMWheel( int updown ) {
-	if(!getEngine()) return;
+	std::cout << "onmwheel sel: " << GetId() << " " << getEngine()->GetSelectedWidget()->GetId() << "\n";
 	if(getEngine()->GetSelectedWidget() == (Control*)innerWidget or isSelected()) {
 		if(m_scroll_v && !(m_scroll_h && getEngine()->GetSelectedControl() == m_scroll_h)) {
 			m_scroll_v->OnMWheel(updown);
@@ -52,7 +51,7 @@ int Container::depth = -1;
 const int thickness = 8;
 
 void Container::Render( Point pos, bool isSelected ) {
-	// Control::Render(pos,isSelected);
+	Control::Render(pos,isSelected);
 	RenderWidget(pos, isSelected);
 }
 
@@ -63,28 +62,34 @@ void Container::onRectChange() {
 }
 
 
-void Container::AddControl( Control* control ) {
+void Container::AddControl( Control* control, bool processlayout ) {
 	AddItem(control);
 }
 
 void Container::AddItem( Control* control ) {
 	innerWidget->AddControl( control );
 	
-	const Rect& r2 = GetRect();
+	const Rect& r = GetRect();
+	
+	ProcessLayout(false);
 	
 	// detect overflow
-	const Rect &r = control->GetRect();
-	if( r.x + r.w > r2.w ) {
-		if( r.x + r.w - r2.w > max_h ) {
-			max_h = r.x + r.w - r2.w;
+	const Rect &cr = control->GetRect();
+	
+	if( cr.x + cr.w > r.w ) {
+		if( cr.x + cr.w - r.w > max_h ) {
+			max_h = cr.x + cr.w - r.w;
 		}
 		overflow_h = true; // horizontal overflow
+		// std::cout << "container AddItem: h " << control->GetId() << "\n";
+		// std::cout << "max h: " << max_h << ", " << cr.x+cr.w << " , " << r.w << "\n";
 	}
-	if( r.y + r.h > r2.h ) {
-		if( r.y + r.h - r2.h > max_v ) {
-			max_v = r.y + r.h - r2.h;
+	if( cr.y + cr.h > r.h ) {
+		if( cr.y + cr.h - r.h > max_v ) {
+			max_v = cr.y + cr.h - r.h;
 		}
 		overflow_v = true; // vertical overflow
+		// std::cout << "container AddItem: v\n";
 	}
 	
 	onOverflow();
@@ -95,18 +100,22 @@ void Container::checkOverflow() {
 	const Rect& r2 = GetRect();
 	
 	auto controls = innerWidget->GetControls();
+	max_h = 0;
+	max_v = 0;
 	for(auto &control : controls) {
 		// detect overflow
 		const Rect &r = control->GetRect();
-		max_h = 0;
-		max_v = 0;
+		
 		if( r.x + r.w > r2.w ) {
-			max_h = std::max(r.x+r.w-r2.w + thickness + 10, max_h);
+			max_h = std::max(r.x + r.w - r2.w + thickness + 10, max_h);
 			overflow_h = true; // horizontal overflow
+			
+			// std::cout << GetId() << " hoverflow\n";
 		}
 		if( r.y + r.h > r2.h ) {
 			max_v = std::max(r.y + r.h - r2.h + thickness + 10, max_v);
 			overflow_v = true; // vertical overflow
+			// std::cout << GetId() << " voverflow\n";
 		}
 	}
 	onOverflow();
@@ -116,7 +125,7 @@ void Container::onOverflow() {
 	
 	Rect r = GetRect();
 	if( !m_scroll_v && overflow_v ) {
-		m_scroll_v = new ScrollBar();
+		m_scroll_v = createControl<ScrollBar>("scrollbar", "vscroll");
 		m_scroll_v->SetVertical( true );
 		m_scroll_v->OnEvent( "change", [this](Args& args) {
 			ScrollBar *sb = (ScrollBar*)args.control;
@@ -125,12 +134,12 @@ void Container::onOverflow() {
 			innerWidget->SetOffset(innerWidget->GetOffset().x, m_ty);
 		});
 		
-		Widget::AddControl(m_scroll_v);
+		Control::AddControl(m_scroll_v);
 	}
 	
 	// if horizontal scrollbar needs to be added
 	if( !m_scroll_h && overflow_h ) {
-		m_scroll_h = new ScrollBar();
+		m_scroll_h = createControl<ScrollBar>("scrollbar", "hscroll");
 		m_scroll_h->OnEvent( "change", [this](Args& args) {
 			ScrollBar *sb = (ScrollBar*)args.control;
 			int val = sb->GetValue();
@@ -140,7 +149,7 @@ void Container::onOverflow() {
 		});
 		
 		
-		Widget::AddControl(m_scroll_h);
+		Control::AddControl(m_scroll_h);
 	}
 	
 	if(overflow_v || overflow_h) {
@@ -159,18 +168,17 @@ void Container::onOverflow() {
 		innerWidget->SetLayout(l);
 		
 		if(overflow_v) {
-			Layout vl = Layout::parseRect("R,0");
+			Layout vl("R,T");
 			vl.SetSize(thickness, 0, horiz, 1);
 			m_scroll_v->SetLayout(vl);
 		}
 		
 		if(overflow_h) {
-			Layout hl = Layout::parseRect("0,B");
+			Layout hl("L,B");
 			hl.SetSize(vert, 1, thickness, 0);
 			m_scroll_h->SetLayout(hl);
 		}
 		
-		innerWidget->SetId( GetId() + "_innerWidget" );
 		ProcessLayout();
 		
 		Rect r = GetRect();
@@ -191,7 +199,7 @@ void Container::onOverflow() {
 }
 
 Container* Container::Clone() {
-	Container* c = new Container;
+	Container* c = new Container();
 	copyStyle(c);
 	return c;
 }
@@ -199,7 +207,7 @@ Container* Container::Clone() {
 void Container::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("background_color"):
-			background_color = Color::ParseColor(value);
+			background_color = Color(value).GetUint32();
 	}
 }
 

@@ -1,11 +1,11 @@
-#ifndef INPUT_HPP
-#define INPUT_HPP
+#ifndef NG_INPUT_HPP
+#define NG_INPUT_HPP
 namespace ng {
 
 enum MouseButton {
-	BUTTON_LEFT,
-	BUTTON_MIDDLE,
-	BUTTON_RIGHT,
+	BUTTON_LEFT = 1,
+	BUTTON_MIDDLE = 2,
+	BUTTON_RIGHT = 3,
 	BUTTON_X1,
 	BUTTON_X2
 };

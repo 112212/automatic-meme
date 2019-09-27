@@ -1,6 +1,7 @@
-#ifndef TEXTURE_HPP
-#define TEXTURE_HPP
+#ifndef NG_IMAGE_HPP
+#define NG_IMAGE_HPP
 #include "common.hpp"
+#include "Resource.hpp"
 #include <string>
 
 #ifndef NO_TEXTURE
@@ -10,17 +11,19 @@
 namespace ng {
 class Font;
 class Screen;
-class Image {
+class Image : public Resource {
 	private:
 		friend class Screen;
 		
 		Point c1,c2;
+		Point d1,d2;
 		Screen* screen;
 		unsigned int screen_cache_id;
 		
 	protected:
 		// affected regions
 		void UpdateAffectedRegion(const Point& p);
+		void UpdateDirtyRegion(const Point& p);
 		void SetFullAffectedRegion();
 		Screen* getScreen();
 	public:
@@ -40,7 +43,7 @@ class Image {
 		// virtual void Clear(unsigned int color);
 		//
 		
-		virtual void PutImage(Image* img, Rect dstRegion, Rect srcRegion, unsigned int background_key=0, unsigned int fg_color=0);
+		virtual void PutImage(Image* img, Rect dstRegion, Rect srcRegion, uint32_t background_key=0, uint32_t bg_mask_check=0x00ffffff, uint32_t fg_color=0);
 		
 		virtual void Update(int ms=-1);
 		virtual void SetTile(int tile_num);
@@ -56,7 +59,9 @@ class Image {
 		virtual const Rect GetImageCropRegion();
 		
 		bool GetAffectedRegion(Point& a, Point &b);
+		bool GetDirtyRegion(Point& a, Point &b);
 		virtual void ResetAffectedRegion();
+		virtual void ResetDirtyRegion();
 		
 		virtual uint32_t GetTextureId();
 };

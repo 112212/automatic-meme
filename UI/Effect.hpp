@@ -1,5 +1,5 @@
-#ifndef EFFECT_HPP
-#define EFFECT_HPP
+#ifndef NG_EFFECT_HPP
+#define NG_EFFECT_HPP
 #include <string>
 #include <iostream>
 #include "Control.hpp"
@@ -23,6 +23,8 @@ class Effect {
 		Gui* gui;
 		Control* control;
 		double delta_time;
+		
+		bool is_exclusive;
 
 		virtual void Init() {};
 		virtual void PreRender() = 0;
@@ -33,12 +35,13 @@ class Effect {
 		inline System& GetSystem() { return control->GetSystem(); }
 		
 	public:
-		Effect() : name("unknown_effect") {}
-		Effect(std::string name) : name(name) {}
+		Effect() : name("unknown_effect"), is_exclusive(true) {}
+		Effect(std::string name) : name(name), is_exclusive(true) {}
 };
 
 class OneShotEffect : public Effect {
 	private:
+		std::function<void()> m_on_remove_effect;
 		virtual void prerender() {
 			time += delta_time;
 			if(time > end_time) {
@@ -49,7 +52,11 @@ class OneShotEffect : public Effect {
 		virtual void postrender() {
 			PostRender();
 			if(time >= end_time) {
-				std::cout << "removing effect " << name << "\n";
+				// std::cout << "removing effect " << name << "\n";
+				if(m_on_remove_effect) {
+					m_on_remove_effect();
+				}
+				OnRemove();
 				control->RemoveEffect(this);
 			}
 		}
@@ -60,8 +67,12 @@ class OneShotEffect : public Effect {
 		virtual void Init() {};
 		virtual void PreRender() = 0;
 		virtual void PostRender() = 0;
+		virtual void OnRemove() {}
 	public:
-		OneShotEffect(std::string name) : Effect(name) {}
+		void SetOnRemoveEffect(std::function<void()> f) {
+			m_on_remove_effect = f;
+		}
+		OneShotEffect(std::string name, double end_time) : Effect(name), end_time(end_time), time(0) {}
 };
 
 }

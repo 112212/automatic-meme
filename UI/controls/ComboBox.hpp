@@ -2,8 +2,8 @@
 #define NG_COMBOBOX_HPP
 
 #include "../Control.hpp"
-#include "ScrollBar.hpp"
 #include "TextBox.hpp"
+#include "ListBox.hpp"
 
 #include <vector>
 namespace ng {
@@ -18,8 +18,6 @@ class ComboBox : public Control {
 		bool m_is_mouseDown;
 		bool m_is_onarrow;
 		bool m_is_opened;
-		bool m_drawscrollbar;
-		bool m_scrollbar_focus;
 		bool m_textbox_focus;
 		bool m_is_textbox_mode;
 		
@@ -31,11 +29,15 @@ class ComboBox : public Control {
 		Image* tex_sel;
 		// Font* m_font;
 		
-		std::vector<Image*> text_lines;
+		struct TextLine {
+			std::string str;
+			Image* img;
+		};
+		std::vector<TextLine> text_lines;
 		
 		Rect m_scrollrect;
-		ScrollBar *m_scrollbar;
 		TextBox *m_textbox;
+		ListBox* m_lb;
 		
 		int m_max_dropdown_items;
 		int m_dropdown_size;
@@ -53,16 +55,11 @@ class ComboBox : public Control {
 		unsigned int characterSize;
 		
 		bool isOnArrow( int mX, int mY );
-		bool isOnScrollbar( int mX, int mY );
 		bool isOnText( int mX, int mY );
 		int getMaxText( std::string txt, int w );
 		virtual void onFontChange();
-		void openBox();
 		void updateSelection();
-		int getListOffset();
-		void updateItemsSize();
 		int getAverageHeight();
-		std::string clipText( std::string s, int w );
 		
 		virtual void parseXml(rapidxml::xml_node<char>* node);
 		
@@ -76,7 +73,6 @@ class ComboBox : public Control {
 		void OnGetFocus();
 		void OnMWheel( int updown );
 		
-		void OnLostControl();
 		void OnMouseMove( int x, int y, bool mouseState );
 		void Render( Point position, bool isSelected );
 		void OnKeyDown( Keycode sym, Keymod mod );

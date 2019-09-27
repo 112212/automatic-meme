@@ -6,6 +6,7 @@ namespace ng {
 
 Screen::Screen() {
 	using_clip_region = false;
+	current_alpha = 1.0;
 }
 
 void Screen::SetResolution( int w, int h ) {
@@ -34,6 +35,29 @@ void Screen::FillCircle(int x, int y, float radius, unsigned int color) {
 
 void Screen::Circle(int x, int y, float radius, unsigned int color) {
 	
+}
+
+void Screen::Circle(Point p, float radius, uint32_t color) {
+	Circle(p.x,p.y,radius,color);
+}
+
+void Screen::Line(Point a, Point b, int color) {
+	Line(a.x,a.y,b.x,b.y,color);
+}
+
+void Screen::PushMaxAlpha(float alpha) {
+	maxAlpha.push(current_alpha);
+	SetMaxAlpha(alpha);
+	current_alpha=alpha;
+}
+void Screen::PopMaxAlpha() {
+	if(maxAlpha.empty()) {
+		SetMaxAlpha(1.0);
+	} else {
+		current_alpha = maxAlpha.top();
+		SetMaxAlpha(current_alpha);
+		maxAlpha.pop();
+	}
 }
 
 Point c1;
@@ -146,7 +170,7 @@ void Screen::SetClipRegion(int x, int y, int w, int h, bool enable) {
 }
 
 bool Screen::GetClipRegion(int &x, int &y, int &w, int &h) {
-	
+	return false;
 }
 
 
@@ -188,13 +212,13 @@ void Screen::DeleteTexture(unsigned int cache_id) {
 	
 }
 
-uint32_t 	Screen::CompileShader(std::string vertexShader, std::string fragmentShader) {}
+uint32_t 	Screen::CompileShader(std::string vertexShader, std::string fragmentShader) {return 0;}
 void 		Screen::SetShader(uint32_t shader_id) {}
-bool 		Screen::IsShadersSupported() {}
+bool 		Screen::IsShadersSupported() {return false;}
 
-int	 Screen::SetNewOffScreenRender() {}
-bool Screen::FreeOffScreenRender(int id) {}
-bool Screen::SetOffScreenRender(int id) {}
+int	 Screen::SetNewOffScreenRender() {return 0;}
+bool Screen::FreeOffScreenRender(int id) {return false;}
+bool Screen::SetOffScreenRender(int id) {return false;}
 
 void Screen::SetCache(Image* img, unsigned int cache_id) {
 	img->screen = this;
@@ -202,7 +226,7 @@ void Screen::SetCache(Image* img, unsigned int cache_id) {
 }
 
 Image* Screen::GetOffScreenTexture(int id) {
-	
+	return 0;
 }
 
 }

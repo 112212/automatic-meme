@@ -1,46 +1,534 @@
-#include "common.hpp"
-// #include "ControlManager.hpp"
-#include "Control.hpp"
+#include "RapidXML/rapidxml.hpp"
+#include "controls/RadioButton.hpp"
 #include <iostream>
-
-#include "Gui.hpp"
-#include "Widget.hpp"
-#include "Effect.hpp"
-
 #include <algorithm>
-#include "managers/Images.hpp"
-#include <cstring>
+#include "Control.hpp"
+#include "Gui.hpp"
+#include "Effect.hpp"
 #include "Border.hpp"
-// #include "RapidXML/rapidxml.hpp"
+#include "managers/Images.hpp"
+
+#define BIGNUM 9999
 
 namespace ng {
-static int control_cnt = 0;
-Control::Control() : id( "____" ), engine(0), widget(0), 
-z_index(0), type("control"), isWidget(false),
-interactible(true), visible(true) 
-{
-	render_enabled=true;
+Control::Control() 
+	: ControlManager(this)
+	, id( "____" )
+	, engine(0)
+	, parent(0)
+	, z_index(0)
+	, sel_control(0)
+	, type("control")
+	, interactible(true)
+	, visible(true)
+	, use_clipping(true)
+	, intercept_mask(0)
+	, m_is_intercepted(false)
+	, render_enabled(true)
+	, nostyling(false)
+	, m_rect(0,0,50,50)
+	, m_border(0)
+	, m_offset(0,0)
+	, min(0,0)
+	, max(BIGNUM,BIGNUM)
+{ 
+	static int control_cnt = 0;
+	// ------- [ControlBase] ------
 	id = "unnamed"+std::to_string((control_cnt++));
-	m_rect.x = m_rect.y = 0;
-	m_rect.w = m_rect.h = 50;
 	m_style.border_color = 0xff333376;
 	m_style.hoverborder_color = 0xff1228D1;
 	// m_style.border_color = 0;
 	// m_style.hoverborder_color = 0;
 	m_style.background_color = 0;
+	m_style.hoverbackground_color = 0;
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_style.image_tex = 0;
 	m_style.alpha = 1.0f;
+	m_style.color = 0;
 	m_style.draggable = false;
+	m_style.hoverimg = 0;
 	// std::cout << "creating control: " << type << ", "  << this << "\n";
-	SetBorder(new Border());
-	layout = Layout::parseRect("0,0");
+	layout = Layout("0,0");
+	// ------ [/ControlBase] ------
+	
+	// ----- widget part
+	layout.SetSizeRange( 0, 0, 0, 0, BIGNUM, 0, BIGNUM, 0 );
 }
 
-#define WE(x) if(widget) { widget->x; } else if(engine) { engine->x; }
+void Control::DisableStyling(bool tf) {
+	nostyling = tf;
+}
 
 Control::~Control() {
+	
 }
+
+void Control::OnClick(int x, int y, MouseButton btn) {
+	
+}
+
+void Control::set_engine(Gui* engine) {
+	this->engine = engine;
+	for(Control* c : controls) {
+		c->set_engine(engine);
+	}
+}
+
+void Control::intercept() {
+	if(engine) {
+		engine->hasIntercepted = true;
+	}
+}
+
+void Control::setInterceptMask(unsigned int mask) {
+	intercept_mask = mask;
+}
+
+void Control::AddControl( Control* control, bool processlayout ) {
+	if(control->parent or control->engine) {
+		return;
+	}
+	
+	control->parent = this;
+	
+	if(engine) {
+		static_cast<Control*>(control)->set_engine(engine);
+	}
+	
+	addControlToCache(control);
+	
+	// std::cout << "processing layout\n";
+	if(engine && processlayout) {
+		ProcessLayout();
+	}
+	// std::cout << "processed layout\n";
+}
+
+bool Control::isSelected() {
+	if(engine) {
+		return engine->GetSelectedControl() == this;
+	}
+	return false;
+}
+
+bool Control::inSelectedBranch() {
+	return sel_control != 0 or isSelected();
+}
+
+void Control::LockWidget(bool lock) {
+	if(!engine) {
+		// TODO: use debug system
+		std::cout << "\n[GUI] widget cannot be locked if not bound to an engine\n";
+		return;
+	}
+	if(lock) {
+		engine->LockWidget(this);
+	} else {
+		sendGuiCommand( GUI_WIDGET_UNLOCK );
+	}
+}
+
+void Control::RemoveControl( Control* control ) {
+	removeControlFromCache(control);
+	control->parent = 0;
+	control->engine = 0;
+}
+
+void Control::SetOffset(int x, int y) {
+	Point p(x,y);
+	if(inSelectedBranch() && !isSelected()) {
+		engine->sel_control_parent_window_position += p-m_offset;
+	}
+	m_offset = p;
+}
+
+Control* Control::Clone() {
+	Control *w = new Control();
+	copyStyle(w);
+	return w;
+}
+
+void Control::Render( Point position, bool isSelected ) {
+	Control::RenderBase(position, isSelected);
+	RenderWidget(position,isSelected);
+}
+
+void Control::RenderWidget( Point position, bool isSelected ) {
+	if(cache.empty()) return;
+	use_clipping = true;
+	
+	Rect old_box;
+	bool save_clipping;
+	
+	Point orig_position = position;
+	position = position.Offset(m_rect);
+	// ------ clipping ---------
+	// must go between these 2 "position.Offset"
+	if(use_clipping) {
+		save_clipping = Drawing().GetClipRegion(old_box.x, old_box.y, old_box.w, old_box.h);
+		int margin = 1;
+		old_box += Rect(-margin, -margin, margin, margin);
+		ng::Rect clipRect = ng::Rect( std::max(0,position.x-margin), std::max(0, position.y-margin), m_rect.w+margin*2, m_rect.h+margin*2 );
+		if(save_clipping) {
+			clipRect = getIntersectingRectangle(old_box, clipRect);
+		}
+		Drawing().PushClipRegion( clipRect.x, clipRect.y, clipRect.w, clipRect.h );
+	}
+	// ---------------------------
+	position = position.Offset(m_offset);
+	
+	for(auto &ca : cache) {
+		if(ca.visible) {
+			Control* const &c = ca.control;
+			// std::cout << "inner control render: " << c->GetId() << "\n";
+			#ifdef SELECTED_CONTROL_ON_TOP
+				if(c != sel_control) {
+					c->render( position, false );
+				}
+			#else
+				c->render( position, isSelected && c == sel_control );
+			#endif
+		}
+	}
+	
+	#ifdef SELECTED_CONTROL_ON_TOP
+	if(sel_control && sel_control->visible) {
+		sel_control->render(position,true);
+	}
+	#endif
+	
+	if(use_clipping) {
+		Drawing().PopClipRegion();
+		save_clipping = Drawing().GetClipRegion(old_box.x, old_box.y, old_box.w, old_box.h);
+	}
+	
+}
+
+void Control::setCursor(CursorType type) {
+	if(engine) {
+		engine->GetCursor().SetCursorType(type);
+	}
+}
+
+Control* Control::get(const std::string& id) {
+	for(auto c : controls) {
+		if(c->id == id) {
+			return c;
+		}
+		
+		Control* p = c->get(id);
+		if(p) {
+			return p;
+		}
+	}
+	return 0;
+}
+
+std::string Control::GetSelectedRadioButton(int group) {
+	for(auto &c : controls) {
+		RadioButton* rb = dynamic_cast<RadioButton*>(c);
+		if( rb ) {
+			if(group == rb->GetGroup() && rb->IsSelected()) {
+				return rb->GetId();
+			}
+		}
+	}
+	return "";
+}
+
+
+
+std::string getTabs(int depth) {
+	depth--;
+	if(depth <= 0) return "";
+	std::string s(depth*2, '\t');
+	for(int i=0; i < s.size(); i+=2) {
+		s[i] = '|';
+	}
+	return s;
+}
+
+
+void Control::SetTransparentBackground() {
+	m_style.SetTransparentBackground();
+}
+
+
+#define dbg(x)
+
+dbg(static int depth = 0;)
+
+// -------------------------------------------
+// ------- Processing layout -----------------
+// -------------------------------------------
+Point Control::layoutProcessControls(std::vector<Control*>& controls_copy) {
+	
+	dbg(std::cout << getTabs(depth) << "layoutProcessControls " << "\n";)
+	bool w_auto = false;
+	bool h_auto = false;
+	bool any_auto = false;
+	
+	int lasty = 0;
+	int min_x = 0, min_y = 0;
+	int max_x = min_x, max_y = min_y;
+	const Layout &pa = GetLayout();
+	// max_x = a.padding.x;
+	// max_y = a.padding.y;
+	if(pa.w_func != Layout::SizeFunction::none) {
+		dbg(std::cout << getTabs(depth) << "w_func is: " << pa.w_func << "\n";)
+		w_auto = true;
+	}
+	if(pa.h_func != Layout::SizeFunction::none) {
+		dbg(std::cout << getTabs(depth) << "h_func is: " << pa.h_func << "\n";)
+		h_auto = true;
+	}
+	any_auto = w_auto || h_auto;
+	
+	const Rect pr = GetRect();
+	// corner points for auto
+	Point c2 = Point(0,0);
+	for(Control* c : controls_copy) {
+		// if(!c->IsVisible()) continue;
+		const Layout &a = c->GetLayout();
+		if(!a.enabled) continue;
+		const Rect &r = c->GetRect();
+		const Point p = a.coord;
+		
+		// dbg(std::cout << "processing control: " << c->GetId() << "\n");
+		
+		// calculate min, max of this control if its widget
+		
+		Size _min = Size(pr.w, pr.h);
+		Size _max = max;
+		if(a.w_func == Layout::SizeFunction::none) {
+			_min.w = pr.w;
+			_max.w = _min.w;
+		}
+		
+		if(a.h_func == Layout::SizeFunction::none) {
+			_min.h = pr.h;
+			_max.h = _min.h;
+		}
+		
+		
+		c->min.w = a.w_min[0] + a.w_min[1] * _min.w;
+		c->max.w = a.w_max[0] + a.w_max[1] * _max.w;
+		
+		c->min.h = a.h_min[0] + a.h_min[1] * _min.h;
+		c->max.h = a.h_max[0] + a.h_max[1] * _max.h;
+		
+		// c->min.w = a.w_min[0] + a.w_min[1] * pr.w;
+		// c->max.w = a.w_max[0] + a.w_max[1] * pr.w;
+		
+		// c->min.h = a.h_min[0] + a.h_min[1] * pr.h;
+		// c->max.h = a.h_max[0] + a.h_max[1] * pr.h;
+		
+		dbg(std::cout << getTabs(depth) << "inside widget [" << c->GetId()
+				  << "] " << c->min.w 
+				  << ", " << c->max.w 
+				  << ", " << c->min.h 
+				  << ", " << c->max.h << " ABS " << a.absolute_coordinate_x << ", " << a.absolute_coordinate_y << "\n");
+				  
+		dbg(std::cout << getTabs(depth) << "+-> Entering widget [" << c->GetId() << "]\n";)
+		c->ProcessLayout();
+		// control forced on next line or overflow
+		if( !(a.absolute_coordinate_x && a.absolute_coordinate_y) && (p.y != lasty || (max_x + a.x + r.w > max.w)) ) {
+			lasty = p.y;
+			
+			// starts at x beginning (min_x)
+			max_x = min_x;
+			
+			// at new row
+			min_y = max_y;
+			dbg(std::cout << "next line or overflow\n");
+		}
+		
+		// std::cout << c->GetId() << ": " << r << "\n";
+		
+		// x + w * width + W * parent_width
+		int xc = a.x + (a.w * r.w) + (a.W * pr.w);
+		
+		// y + h * height + H * parent_height
+		int yc = a.y + (a.h * r.h) + (a.H * pr.h);
+		
+		int x,y;
+		
+		
+		if(a.absolute_coordinate_x && a.absolute_coordinate_y) {
+			c->SetPosition(xc+a.padding.x, yc+a.padding.y);
+		} else {
+			if(a.absolute_coordinate_x) {
+				x = xc;
+				max_x = 0;
+				min_y = max_y;
+				lasty = p.y;
+				// max_y = std::max<int>(min_y + yc + r.h, max_y);
+			} else {
+				x = xc + max_x;
+				dbg(std::cout << "x = " << x << "\n");
+				max_x += xc + r.w;
+			}
+			
+			if(a.absolute_coordinate_y) {
+				y = yc;
+				// max_x = 0;
+				// min_y = max_y;
+				// lasty = p.y;
+			} else {
+				y = yc + min_y;
+				max_y = std::max<int>(min_y + yc + r.h, max_y);
+			}
+			
+			c->SetPosition(x+a.padding.x, y+a.padding.y);
+		}
+		
+		if(any_auto) {
+			// auto max
+			if(w_auto) {
+				c2.x = std::max<int>(c2.x, r.x + r.w - a.padding.x);
+			}
+			
+			if(h_auto) {
+				c2.y = std::max<int>(c2.y, r.y + r.h - a.padding.y);
+			}
+		}
+		
+		c->SetSize(r.w - a.padding.x - a.padding.w, r.h - a.padding.y - a.padding.h);
+	}
+	return c2;
+}
+
+
+void Control::ProcessLayout(bool asRoot) {
+	bool w_auto = false;
+	bool h_auto = false;
+	int wres, hres;
+	int wmax = 0;
+	
+	dbg(depth++;)
+
+	const Rect &r = GetRect();
+	const Layout &a = GetLayout();
+	
+	dbg(std::cout << getTabs(depth) << "ProcessLayout (Control [" << GetId() << "])\n";)
+	
+	// resolve wres
+	if(a.w_func != Layout::SizeFunction::none) {
+		dbg(std::cout << getTabs(depth) << "w_func is: " << a.w_func << "\n";)
+		w_auto = true;
+	}
+	
+	// if(asRoot) {
+		// wres = r.w;
+		// wmax = r.w;
+	// } else 
+	{
+		wres = clip(r.w, min.w, max.w);
+		wmax = max.w;
+	}
+	
+	// this_widget->m_rect.w = wres;
+	dbg(std::cout << getTabs(depth) << "setting w: " << wres << "\n";)
+	
+	// resolve hres
+	if(a.h_func != Layout::SizeFunction::none) {
+		dbg(std::cout << getTabs(depth) << "h_func is: " << a.h_func << "\n";)
+		h_auto = true;
+	}
+	
+	// if(asRoot) {
+		// hres = r.h;
+	// } else 
+	{	
+		hres = clip(r.h, min.h, max.h);
+	}
+	// std::cout << GetId() << " " << r << " min: " << min << ", " << max << "\n";
+	
+	dbg(std::cout << getTabs(depth) << "setting h: " << hres << "\n";)
+	
+	// SetRect(r.x, r.y, wres, hres);
+	SetSize(wres, hres);
+	
+	dbg(std::cout << getTabs(depth) << "size is set\n";)
+	bool any_auto = w_auto || h_auto;
+	Point c2;
+	std::vector<Control*> controls_copy;
+	if(!controls.empty()) {
+		controls_copy = controls;
+		// sort controls by coords
+		std::sort(controls_copy.begin(), controls_copy.end(), [](Control* ca, Control* cb) {
+			const Point &p1 = ca->GetLayout().coord;
+			const Point &p2 = cb->GetLayout().coord;
+			return p1.y < p2.y || (p1.y == p2.y && p1.x < p2.x);
+		});
+		
+		c2 = layoutProcessControls(controls_copy);
+	}
+	
+	// if widget with auto sizes, must calculate it
+	if(!asRoot && any_auto) {
+		dbg(std::cout << getTabs(depth) << "has any_auto\n";)
+		const Rect &r = GetRect();
+		const Layout &a = GetLayout();
+		Control* p = parent;
+		const Rect& pr = p->GetRect();
+		
+		int w = r.w;
+		int h = r.h;
+		int x = r.x;
+		int y = r.y;
+		
+		
+		Rect cr = GetContentRect();
+		if(w_auto) {
+			if(a.w_func == Layout::SizeFunction::fit) {
+				w = clip(c2.x, std::max(min.w, cr.w), max.w);
+			} else if(a.w_func == Layout::SizeFunction::expand) {
+				w = std::max<int>(w, c2.x);
+			}
+			x += a.w*w;
+			if(p) {
+				x += a.W*pr.w;
+			}
+		}
+		
+		if(h_auto) {
+			if(a.h_func == Layout::SizeFunction::fit) {
+				h = clip(c2.y, std::max(min.h, cr.h), max.h);
+			} else if(a.h_func == Layout::SizeFunction::expand) {
+				h = std::max<int>(h, c2.y);
+			}
+			y += a.h*h;
+			if(p) {
+				x += a.H*pr.h;
+			}
+		}
+		
+		SetRect(x, y, w, h);
+		
+	}
+		// layoutProcessControls(controls_copy);
+	
+	dbg(
+		std::cout << getTabs(depth-1) << "<----- Leaving widget [" << GetId() << "]\n";
+	)
+	dbg(depth--;)
+}
+
+
+void Control::parseXml(rapidxml::xml_node<>* node) {
+	Layout layout;
+	for(;node;node=node->next_sibling()) {
+		// std::cout << "\tControl::parseXml (" << GetId() << ") :" << node->name() << "\n";
+		parseAndAddControl(node, layout);
+	}
+	// std::cout << "\tleaving Control::parseXml (" << GetId() << ")\n";
+}
+
+
+// ----------------------- [ControlBase] ---------------------
+
+
 
 void Control::process_prerender_effects() {
 	for(Effect* e : effects) {
@@ -57,19 +545,14 @@ void Control::process_postrender_effects() {
 	}
 }
 
-const Point Control::GetOffset() {
-	if(engine) {
-		return engine->sel_widget_offset;
-	} else {
-		return {0,0};
-	}
+
+Rect Control::GetContentRect() {
+	return Rect(0,0,0,0);
 }
 
+// get control's window position
 const Point Control::GetGlobalPosition() {
-	Point ofs = GetOffset();
-	ofs.x += m_rect.x;
-	ofs.y += m_rect.y;
-	return ofs;
+	return GetOffset().Offset(m_rect);
 }
 
 void Control::SetDraggable( bool draggable ) {
@@ -78,18 +561,20 @@ void Control::SetDraggable( bool draggable ) {
 
 void Control::SetZIndex( int zindex ) {
 	if(zindex == z_index) return;
-	if(widget) {
-		widget->setZIndex(this, zindex);
-	} else if(engine) {
-		engine->setZIndex(this, zindex);
+	if(parent) {
+		parent->setZIndex((Control*)this, zindex);
 	}
 }
 
 void Control::SendToFront() {
-	WE(sendToFront(this));
+	if(parent) {
+		parent->sendToFront((Control*)this);
+	}
 }
 void Control::SendToBack() {
-	WE(sendToBack(this));
+	if(parent) {
+		parent->sendToBack((Control*)this);
+	}
 }
 
 void Control::SendUpper() {
@@ -109,11 +594,9 @@ void Control::SendBeforeControl(Control* c) {
 }
 
 void Control::update_cache(CacheUpdateFlag flag) {
-	WE(updateCache(this,flag));
-}
-
-bool Control::isSelected() {
-	return engine && engine->selected_control == this;
+	if(parent) {
+		parent->updateCache((Control*)this,flag);
+	}
 }
 
 bool Control::isActive() {
@@ -125,11 +608,18 @@ void Control::SetVisible(bool visible) {
 		this->interactible = visible;
 		this->visible = visible;
 		if(!visible && engine && engine->active_control == this) {
-			engine->active_control = 0;
+			// engine->active_control = 0;
+			engine->Activate(0);
 		}
 		update_cache(CacheUpdateFlag::attributes);
-		if(!visible && isWidget && ((Widget*)this)->inSelectedBranch() ) {
-			sendGuiCommand(GUI_UNSELECT_WIDGETS);
+		if(!visible && ((Control*)this)->inSelectedBranch() ) {
+			// TODO: review
+			
+		}
+		if(visible) {
+			emitEvent("show");
+		} else {
+			emitEvent("hide");
 		}
 	}
 }
@@ -149,7 +639,6 @@ void Control::setInteractible(bool interactible) {
 }
 
 void Control::SetId(std::string id) {
-	// std::cout << "renaming " << this->id << " => " << id << " " << this << "\n";
 	this->id = id;
 }
 
@@ -159,19 +648,19 @@ void Control::setType( const char* type ) {
 	update_cache(CacheUpdateFlag::all);
 }
 
-void Control::poseEmitEvent( Control* c, std::string event_id, const Argv& args ) {
-	c->emitEvent(event_id, args);
+bool Control::poseEmitEvent( Control* c, std::string event_id, const Argv& args ) {
+	return c->emitEvent(event_id, args);
 }
 
 // emit global event
-void Control::emitEvent( std::string event_id, const Argv& argv ) {
+bool Control::emitEvent( std::string event_id, const Argv& argv ) {
 	#ifdef USE_EVENT_QUEUE
 	if(engine) {
 		engine->m_events.push( { event_id, this, argv } );
 	}
 	#endif
 	
-	
+	bool emitted = false;
 	// std::cout << "evt " << event_id << "\n";
 	for(auto sub : subscribers) {
 		auto sub_func = Gui::function_map.find(sub.function_name);
@@ -180,15 +669,14 @@ void Control::emitEvent( std::string event_id, const Argv& argv ) {
 		if(sub.event_id == event_id) {
 			Args args;
 			args.event_args = argv;
-			args.control = this;
+			args.control = (Control*)this;
 			args.cmd_args = sub.args;
-			
-			
+			emitted=true;
 			sub_func->second(args);
 			// std::cout << "emitting " << event_id << " " << args.event_args.size() << "\n";
 		}
 	}
-	
+	return emitted;
 }
 
 double Control::getDeltaTime() {
@@ -200,27 +688,19 @@ double Control::getDeltaTime() {
 
 void Control::Focus() {
 	if(engine) {
-		engine->Focus(this);
+		engine->Focus((Control*)this);
 	}
 }
 
-
-void Control::parseXml(rapidxml::xml_node<char>* node) {
-	
-}
 
 void Control::Activate() {
 	if(engine) {
-		engine->Activate(this);
+		engine->Activate((Control*)this);
 	}
 }
 
-bool Control::IsSelected() {
-	if(IsWidget()) {
-		return ((Widget*)this)->inSelectedBranch();
-	} else {
-		return engine && engine->GetSelectedControl() == this;
-	}
+void Control::OnActivate() {
+	
 }
 
 static int last_anon_id = 0;
@@ -230,9 +710,10 @@ void Control::onEvent( std::string event_type, EventCallback callback ) {
 	Gui::function_map[ anon_id ] = callback;
 }
 
-void Control::sendGuiCommand( int eventId ) {
+void Control::sendGuiCommand( int eventId, Control* target ) {
 	if(engine) {
-		engine->processControlEvent(eventId);
+		if(!target) target=this;
+		engine->processControlEvent(eventId, target);
 	}
 }
 
@@ -255,30 +736,23 @@ void Control::tabToNextControl() {
 std::vector<Control*> empty_vector;
 
 const std::vector<Control*>& Control::getParentControls() {
-	if(widget) {
-		return widget->controls;
-	} else if(engine) {
-		return engine->GetControls();
+	if(parent) {
+		return parent->controls;
 	} else {
 		return empty_vector;
 	}
 }
 
-const std::vector<Control*>& Control::getWidgetControls() {
-	if(widget)
-		return widget->controls;
-	else
-		return empty_vector;
-}
-const std::vector<Control*>& Control::getEngineControls() {
-	if(engine)
-		return engine->GetControls();
-	else
-		return empty_vector;
+void Control::SetPosition( Point pt ) {
+	SetRect(pt.x, pt.y, m_rect.w, m_rect.h); 
 }
 
 void Control::SetPosition( int x, int y ) { 
 	SetRect(x, y, m_rect.w, m_rect.h); 
+}
+
+void Control::SetSize( Size size ) {
+	SetRect(m_rect.x, m_rect.y, size.w, size.h);
 }
 
 void Control::SetSize( int w, int h ) {
@@ -293,6 +767,28 @@ std::string Control::GetId() {
 	return id;
 }
 
+std::string Control::GetFullId() {
+	std::stack<std::string> ids;
+	Control* d = this;
+	while(d->parent) {
+		ids.push(d->GetId());
+		d = d->parent;
+	}
+	
+	std::string fid = "";
+	bool first=true;
+	while(!ids.empty()) {
+		if(first) {
+			first=false;
+		} else {
+			fid += "/";
+		}
+		fid += ids.top();
+		ids.pop();
+	}
+	return fid;
+}
+
 int Control::GetZIndex() {
 	return z_index;
 }
@@ -301,30 +797,53 @@ std::string Control::GetTooltip() {
 	return m_style.tooltip;
 }
 
-bool Control::CheckCollision(int x, int y) {
-	// std::cout << "Control [" << GetId() << "] " << this << " checking collision\n";
-	bool check = m_border->CheckCollision(x,y);
-	// std::cout << "Result [" << GetId() << "] checking collision: " << check << "\n";
-	return check;
+bool Control::CheckCollisionA(const Point& p) {
+	return CheckCollision(p - GetParentRect());
+}
+bool Control::CheckCollision(const Point& p) {
+	Rect& r = m_rect;
+	if(p.x >= r.x && p.x <= r.x+r.w && p.y >= r.y && p.y <= r.y+r.h) {
+		if(m_border) {
+			return m_border->CheckCollision(p);
+		} else {
+			return true;
+		}
+	} else {
+		return false;
+	}
 }
 
 void Control::SetRect( int x, int y, int w, int h ) {
-
-	if(m_rect.x == x && m_rect.y == y && m_rect.w == w && m_rect.h == h) {
+	w = std::max(0,w);
+	h = std::max(0,h);
+	
+	Rect newRect = Rect(x,y,w,h);
+	if(m_rect == newRect) {
 		return;
 	}
-	if(isWidget) {
-		static_cast<Widget*>(this)->setRect(x,y,w,h);
+	
+	if(inSelectedBranch()) {
+		Point dp = newRect - m_rect;
+		
+		if(!isSelected()) {
+			engine->sel_control_parent_window_position += dp;
+		}
+		
+		Control* c = this;
+		while(c) {
+			c->cached_absolute_offset = c->cached_absolute_offset + dp;
+			c = c->sel_control;
+		}
+		m_rect=newRect;
+	} else {
+		m_rect=newRect;
+		cached_absolute_offset = getAbsoluteOffset();
+		// std::cout << "abs " << GetId() << " " <<  cached_absolute_offset << "\n";
 	}
 	
-	m_rect.x = x;
-	m_rect.y = y;
-	m_rect.w = w;
-	m_rect.h = h;
-
-	Widget* widget = getWidget();
-	Gui* engine = getEngine();
-	WE(updateCache(this, CacheUpdateFlag::position));
+	if(parent) {
+		parent->updateCache((Control*)this, CacheUpdateFlag::position);
+	}
 	
 	onRectChange();
 }
@@ -337,8 +856,12 @@ void Control::SetRect( Rect r ) {
 	SetRect(r.x, r.y, r.w, r.h);
 }
 
-void Control::SetLayout( float W, float w, float x, float H, float h, float y ) {
+void Control::SetLayout( float x, float w, float W, float y, float h, float H ) {
 	this->layout = Layout( layout.coord, x, y, W, w, H, h );
+}
+
+void Control::SetLayout( std::string str_layout ) {
+	this->layout = Layout(str_layout);
 }
 
 void Control::SetLayout( Rect r ) {
@@ -356,18 +879,141 @@ Layout& Control::GetLayout() {
 	return layout;
 }
 
+void Control::SetLayoutEnabled(bool enabled) {
+	layout.SetEnabled(enabled);
+}
+
 void Control::AddEffect(Effect* effect) {
-	effect->control = this;
 	if(engine) {
+		effect->control = this;
 		effect->gui = engine;
+		if(effect->is_exclusive) {
+			RemoveEffect(effect->name);
+		}
+		effect->Init();
+		effects.push_back(effect);
 	}
-	effect->Init();
-	effects.push_back(effect);
 }
 
 void Control::RemoveEffect(Effect* effect) {
 	auto it = std::remove(effects.begin(), effects.end(), effect);
 	effects.resize(std::distance(effects.begin(), it));
+}
+
+void Control::applyStyling(std::vector<ControlCreationPair>& vec, std::string group) {
+	if(vec.empty()) return;
+	auto &gstyles = ControlManager::group_styles;
+	// printCreationVector();
+	for(auto &g : gstyles) {
+		if(g.disabled) continue;
+		if(group.empty()) {
+			current_tag = g.tag_id;
+			applyStyling(g.styles, vec.begin(), vec.end());
+		} else if(g.name == group) {
+			current_tag = g.tag_id;
+			applyStyling(g.styles, vec.begin(), vec.end());
+			break;
+		}
+	}
+	current_tag = 0;
+}
+bool Control::applyStyling(std::vector<Styling>& stylings, std::vector<ControlCreationPair>::iterator it, std::vector<ControlCreationPair>::iterator vec_end) {
+	bool is_leaf = it+1 == vec_end;
+	
+	// if(is_leaf) {
+		// std::cout << "is_leaf: " << "\n";
+	// }
+	bool match = false;
+	for(auto &s : stylings) {
+		// std::cout << "Testing styling " << s.style_for << " with " << it->type << " , " << it->id << "\n";
+		if(s.style_for == "**") {
+			// apply no matter what
+			match = true;
+			applyStyling(s);
+			// if(!is_leaf) {
+				for(auto it2 = it; it2 != vec_end; it2++) {
+					if(applyStyling(s.child_styles, it2, vec_end)) {
+						break;
+					}
+				}
+			// }
+		} else if(s.style_for == "*") {
+			// apply if leaf
+			match = true;
+			if(is_leaf) {
+				// apply
+				applyStyling(s);
+			} else {
+				applyStyling(s.child_styles, it+1, vec_end);
+			}
+		} else if((s.style_for[0] == '#' && s.style_for.substr(1) == it->id) || (s.style_for == it->type)) {
+			match = true;
+			if(is_leaf) {
+				applyStyling(s);
+			} else {
+				applyStyling(s.child_styles, it+1, vec_end);
+			}
+		}
+	}
+	return false;
+}
+
+int Control::current_tag = 0;
+
+void Control::applyStyling(const Styling& styling) {
+	// std::cout << "applying style: " << styling.style_for << " to " << GetId() << "\n";
+	for(auto &attr : styling.attributes) {
+		SetStyle(attr.first, attr.second);
+	}
+}
+
+void Control::backtrackStylingCreationPairs() {
+	if(!parent) return;
+	// std::cout << "backtrack creation: \n";
+	std::stack<ControlCreationPair> bt;
+	Control* p = this;
+	while(p->parent) {
+		bt.push({p->GetId(), p->GetType()});
+		p=p->parent;
+	}
+	while(!bt.empty()) {
+		creation_vector.push_back(bt.top());
+		bt.pop();
+	}
+	
+	// printCreationVector();
+}
+
+void Control::ApplyStyle(std::string style_group) {
+	if(nostyling) return;
+	backtrackStylingCreationPairs();
+	applyStyling(creation_vector, style_group);
+	creation_vector.clear();
+}
+
+void Control::ApplyStyle(const Styling& s) {
+	if(nostyling) return;
+	applyStyling(s);
+}
+
+Control* Control::createControl(std::string type, std::string id) {
+	Control* c;
+	if(parent) {
+		// backtrack to creation_vector
+		backtrackStylingCreationPairs();
+	}
+	c = ControlManager::CreateControl(type, id);
+	if(parent) {
+		creation_vector.clear();
+	}
+	return c;
+}
+
+void Control::ForEachControl(std::function<void(Control*)> func) {
+	for(Control* c : controls) {
+		func(c);
+		c->ForEachControl(func);
+	}
 }
 
 Effect* Control::GetEffect(std::string effect_name) {
@@ -402,16 +1048,25 @@ void Control::render(Point position, bool isSelected) {
 }
 
 // overridable
-void Control::Render( Point pos, bool selected ) {
+void Control::RenderBase( Point pos, bool selected ) {
 	pos = m_rect.Offset(pos);
+	
+	if(selected && m_style.hoverbackground_color != 0) {
+		Drawing().FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverbackground_color );
+	} else
 	if(m_style.background_color != 0) {
 		Drawing().FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
 	}
 	
+	if(selected && m_style.hoverimg) {
+		Size s = m_style.hoverimg->GetImageSize();
+		Drawing().TexRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverimg, false, s.w, s.h);
+	} else
 	if(m_style.image_tex) {
 		Drawing().TexRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.image_tex, m_style.image_repeat, 
 			m_style.image_size.w, m_style.image_size.h);
 	}
+	
 	#ifdef SELECTION_MARK
 		if(selected) {
 			if(m_style.hoverborder_color != 0) {
@@ -427,14 +1082,36 @@ void Control::Render( Point pos, bool selected ) {
 	#endif
 }
 
-void Control::SetFont( std::string name, int size ) { 
-	Font* f = Fonts::GetFont(name, size); 
-	if(f) {
-		m_style.font = f; 
+void Control::SetFont( std::string name ) { 
+	Font* f = Fonts::GetFont(name, 0); 
+	m_style.font = f;
+}
+
+Point Control::getAbsCursor() {
+	return getEngine()->GetCursor().GetCursor();
+}
+
+Point Control::getCursor() {
+	// control local coords
+	return getAbsCursor() - getAbsoluteOffset();
+}
+
+const Point Control::getAbsoluteOffset() { 
+	if(inSelectedBranch()) {
+		return cached_absolute_offset;
+	} else {
+		Point pt;
+		Control* pc = this;
+		while(pc->parent) {
+			pt += pc->m_rect;
+			pc = pc->parent;
+		}
+		return pt;
 	}
 }
 
 // --- empty overridables ---
+
 void Control::OnKeyDown( Keycode sym, Keymod mod ) {}
 void Control::OnKeyUp( Keycode sym, Keymod mod ) {}
 void Control::OnLostFocus() {}
@@ -445,33 +1122,26 @@ void Control::OnGetFocus() {}
 void Control::OnLostControl() {}
 void Control::OnText( std::string s ) {}
 
+
 void Control::OnMouseMove( int mX, int mY, bool mouseState ) {}
 void Control::OnMouseDown( int mX, int mY, MouseButton button ) {}
 void Control::OnMouseUp( int mX, int mY, MouseButton button ) {}
 void Control::OnMWheel( int updown ) {}
+
 // --------------------------
 
 void Control::Unselect() {
 	if(engine && (engine->GetSelectedControl() == this)) {
 		engine->UnselectControl();
-		engine->unselectWidget();
 	}
 }
 
 void Control::Unattach() {
-	if(widget) {
-		widget->RemoveControl(this);
-		widget = 0;
-	} else if(engine) {
-		engine->RemoveControl(this);
+	if(parent) {
+		parent->RemoveControl(this);
+		parent = 0;
 	}
 	engine = 0;
-}
-
-Control* Control::Clone() {
-	Control* c = new Control;
-	copyStyle(c);
-	return c;
 }
 
 Gui* Control::GetEngine() {
@@ -488,6 +1158,8 @@ Font* Control::GetFont() {
 	return m_style.font;
 }
 
+
+
 void Control::shareEngineBackend(Control* c) {
 	c->engine = engine;
 }
@@ -497,7 +1169,7 @@ void Control::removeEngine(Control* c) {
 }
 
 bool Control::IsBeingDragged() {
-	return engine->dragging && engine->selected_control == this;
+	return engine->dragging && engine->sel_control == this;
 }
 
 void Control::cloneBase(Control* clone_to) {
@@ -505,7 +1177,7 @@ void Control::cloneBase(Control* clone_to) {
 }
 
 void Control::CopyStyle(Control* copy_to) {
-	copyStyle(copy_to);
+	copyStyle((Control*)copy_to);
 }
 
 void Control::copyStyle(Control* copy_to) {
@@ -517,325 +1189,96 @@ void Control::SetAlpha(float alpha) {
 	m_style.alpha = alpha;
 }
 
+void Control::ControlStyle::SetTransparentBackground() {
+	background_color = 0;
+	hoverimg = 0;
+	hovercolor = 0;
+	image_tex = 0;
+	hoverbackground_color = 0;
+}
+
+void Control::ControlStyle::SetTransparentBorder() {
+	hoverborder_color = 0;
+	border_color = 0;
+}
+
 void Control::SetBorder(Border* border) {
 	m_border = border;
 	m_border->m_rect = &m_rect;
 	// m_border->control = this;
 }
-
-static void split_string(const std::string& str, std::vector<std::string>& values, char delimiter) {
-	size_t prevpos = 0;
-	size_t pos = str.find(delimiter, prevpos);
-	while(pos != str.npos) {
-		int len = pos-prevpos;
-		if(len != 0) {
-			values.push_back( str.substr(prevpos, len) );
-		}
-		prevpos = pos + 1;
-		pos = str.find(delimiter, prevpos);
-	}
-	if(prevpos < str.size()) {
-		values.push_back( str.substr(prevpos) );
-	}
+Border* Control::GetBorder() {
+	return m_border;
 }
 
-
-static void monomial_expr_parse(const char* str, const char *names, float *result) {
-	int current_index=0;
-	const char* s = str;
-	int names_length = strlen(names);
-	int is_first = 1;
-	int is_minus = 0;
-	memset(result, 0, sizeof(float)*(names_length+1));
-	float res = 0;
-	while(1) {
-		const char c = *s;
-		if(c == '\0' || c == '+' || c == '-') {
-			if(c == '-') {
-				is_minus = 1;
-			}
-			result[current_index] += res;
-			is_first = 1;
-			if(c == '\0')
-				break;
-			res = 0;
-			current_index = 0;
-		} else if(isdigit(c) || c == '.') {
-			float num = strtof(s, (char**)&s);
-			if(is_minus) {
-				is_minus = 0;
-				num = -num;
-			}
-			if(is_first) {
-				res = num;
-				is_first = 0;
-			} else {
-				res *= num;
-			}
-			continue;
-		} else if(c == '%') {
-			res *= 0.01;
-		} else {
-			int i;
-			for(i=0; i < names_length; i++) {
-				if(names[i] == c) {
-					if(res == 0) res = 1;
-					current_index=i+1;
-					break;
-				}
-			}
-		}
-		s++;
-	}
-}
-
-Layout::Layout( Point coord, float x, float y, float W, float w, float H, float h ) {
-	this->coord = coord;
-	this->x = x;
-	this->y = y;
-	this->W = W;
-	this->w = w;
-	this->H = H;
-	this->h = h;
-	this->w_func = SizeFunction::none;
-	this->h_func = SizeFunction::none;
-}
-
-Layout::Layout() {
-	coord = {0,0};
-	x=0;y=0;
-	W=0;w=0;H=0;h=0;
-	absolute_coordinates=false;
-	w_func = SizeFunction::none;
-	h_func = SizeFunction::none;
-	w_min[0]=w_min[1]=0;
-	w_max[0]=w_max[1]=0;
-	h_min[0]=h_min[1]=0;
-	h_max[0]=h_max[1]=0;
-}
-
-void Layout::SetCoord( Point coord ) {
-	this->coord = coord;
-}
-
-void Layout::SetPosition( float x, float y, float w, float W, float h, float H, bool absolute_coordinates ) {
-	this->x = x;
-	this->y = y;
-	this->w = w;
-	this->W = W;
-	this->h = h;
-	this->H = H;
-	this->absolute_coordinates = absolute_coordinates;
-}
-
-void Layout::SetSizeRange( float min_w, float min_W, float min_h, float min_H, float max_w, float max_W, float max_h, float max_H, SizeFunction w_func, SizeFunction h_func ) {
-	w_min[0]=min_w;
-	w_max[0]=max_w;
-	w_min[1]=min_W;
-	w_max[1]=max_W;
-	
-	h_min[0]=min_h;
-	h_max[0]=max_h;
-	h_min[1]=min_H;
-	h_max[1]=max_H;
-	this->w_func = w_func;
-	this->h_func = h_func;
-}
-
-void Layout::SetSize( float w, float W, float h, float H ) {
-	w_min[0]=w_max[0]=w;
-	w_min[1]=w_max[1]=W;
-	h_min[0]=h_max[0]=h;
-	h_min[1]=h_max[1]=H;
-	w_func = SizeFunction::none;
-	h_func = SizeFunction::none;
-}
-
-Layout::Layout(std::string s) {
-	*this = parseRect(s);
-}
-
-Layout Layout::parseRect(std::string s) {
-	Layout a;
-	std::vector<std::string> parts;
-	split_string(s, parts, ',');
-	const char* names[] = { "wW", "hH", "W", "H" };
-	float res[4];
-	int p = 0;
-	if(s[0] == 'a') {
-		// std::cout << "ABS\n";
-		a.absolute_coordinates = true;
-	}
-	a.w_func = a.h_func = fit;
-	
-	a.w_min[0] = 0;
-	a.w_max[0] = 9999;
-	a.w_min[1] = 0;
-	a.w_max[1] = 0;
-	
-	a.h_min[0] = 0;
-	a.h_max[0] = 9999;
-	a.h_min[1] = 0;
-	a.h_max[1] = 0;
-					
-	for(int i=0; i < parts.size(); i++) {
-		const std::string& cur = parts[i];
-		if(p <= 1) {
-			monomial_expr_parse(cur.c_str(), names[p], res);
-			// std::cout << "parsing rect(" << p << "):" << cur << " => " << res[0] << ", " << res[1] << ", " << res[2] << std::endl;
-			size_t pos;
-			if(p == 0) {
-				if((pos=cur.find_first_of("LRM")) != std::string::npos) {
-					if(cur[pos] == 'L') {
-						a.absolute_coordinates = true;
-					} else if(cur[pos] == 'R') {
-						a.W += 1;
-						a.w += -1;
-						a.absolute_coordinates = true;
-					} else if(cur[pos] == 'M') {
-						a.W += 0.5;
-						a.w += -0.5;
-						a.absolute_coordinates = true;
-					}
-				}
-				a.x += res[0];
-				a.w += res[1];
-				a.W += res[2];
-			} else if(p == 1) {
-				if((pos=cur.find_first_of("UDBM")) != std::string::npos) {
-					if(cur[pos] == 'U') {
-						a.absolute_coordinates = true;
-					} else if(cur[pos] == 'M') {
-						a.H += 0.5;
-						a.h += -0.5;
-					} else if(cur.find_first_of("DB",pos) != std::string::npos) {
-						a.H += 1;
-						a.h += -1;
-						a.absolute_coordinates = true;
-					}
-				}
-				a.y += res[0];
-				a.h += res[1];
-				a.H += res[2];
-			}
-		} else if(p >= 2) {
-			size_t pos = 0;
-			
-			auto set_func = [&](Layout::SizeFunction f){
-				// std::cout << "setting " << (const char*[]){"none","keep","fit","expand"}[f] << "\n";
-				if(p == 2) {
-					a.w_func = f;
-				} else if(p == 3) {
-					a.h_func = f;
-				}
-			};
-			
-			if(parts[i].find("keep", pos) != std::string::npos) {
-				set_func(Layout::SizeFunction::keep);
-			} else if(parts[i].find("fit", pos) != std::string::npos) {
-				set_func(Layout::SizeFunction::fit);
-			} else if(parts[i].find("expand", pos) != std::string::npos) {
-				set_func(Layout::SizeFunction::expand);
-			}
-			
-			if((pos = parts[i].find("(", pos)) != std::string::npos) {
-					monomial_expr_parse(parts[i].c_str()+pos, names[p], res);
-					if(i+1 >= parts.size() || parts[i].find(")", pos+1) != std::string::npos) {
-						// has only min
-						if(p == 2) {
-							a.w_min[0] = res[0];
-							a.w_min[1] += res[1];
-						} else {
-							a.h_min[0] = res[0];
-							a.h_min[1] += res[1];
-						}
-						continue;
-					}
-					if(p == 2) {
-						a.w_min[0] = res[0];
-						a.w_min[1] += res[1];
-					} else {
-						a.h_min[0] = res[0];
-						a.h_min[1] += res[1];
-					}
-					monomial_expr_parse(parts[i+1].c_str(), names[p], res);
-					if(p == 2) {
-						a.w_max[0] = res[0];
-						a.w_max[1] += res[1];
-					} else {
-						a.h_max[0] = res[0];
-						a.h_max[1] += res[1];
-					}
-					
-					// std::cout << "parsing rect(" << parts[i+1] << "):" << cur << " => " << res[0] << ", " << res[1] << std::endl;
-					i++;
-			} else {
-				monomial_expr_parse(cur.c_str(), names[p], res);
-				// std::cout << "parsing rect(" << p << "): " << cur << " => " << res[0] << ", " << res[1] << std::endl;
-				if(p == 2) {
-					a.w_min[0] += res[0];
-					a.w_min[1] += res[1];
-					a.w_max[0] = a.w_min[0];
-					a.w_max[1] = a.w_min[1];
-					a.w_func = Layout::SizeFunction::none;
-				} else if(p == 3) {
-					a.h_min[0] += res[0];
-					a.h_min[1] += res[1];
-					a.h_max[0] = a.h_min[0];
-					a.h_max[1] = a.h_min[1];
-					a.h_func = Layout::SizeFunction::none;
-				}
-			}
-			
-		}
-		p++;
-	}
-	return a;
-}
-
-Rect Control::GetParentWidgetRegion() {
-	if(widget) {
-		return widget->GetRect();
+Rect Control::GetParentRect() {
+	if(parent) {
+		return parent->GetRect();
 	} else {
-		int w,h;
-		Drawing().GetResolution(w,h);
-		return Rect(0,0,w,h);
+		return {0,0,0,0};
 	}
 }
 
 void Control::SetImage(std::string image, bool repeat) {
 	Image* img = Images::LoadImage(image);
 	if(!img) {
+		m_style.image_tex = 0;
 		return;
 	}
 	Size s = img->GetImageSize();
 	m_style.image_tex = img;
-	m_style.image_size.w = s.w;
-	m_style.image_size.h = s.h;
+	m_style.image_size = s;
 	m_style.image_repeat = repeat;
 }
 
+void Control::SetImage(Image* image, bool repeat) {
+	Image* img = image;
+	if(!img) {
+		m_style.image_tex = 0;
+		return;
+	}
+	Size s = img->GetImageSize();
+	m_style.image_tex = img;
+	m_style.image_size = s;
+	m_style.image_repeat = repeat;
+}
+
+
+
+void Control::SetStyle(std::string style, const char* value) {
+	SetStyle(style, std::string(value));
+}
+
+void Control::SetStyle(std::string style, bool value) {
+	SetStyle(style, std::string(value ? "t" : "f"));
+}
 
 void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
 	STYLE_SWITCH {
 		_case("rect"): {
-			Layout a = Layout::parseRect(value);
+			Rect padding = layout.padding;
+			Layout a = Layout(value);
+			a.SetPadding(padding);
 			SetLayout(a);
-			SetRect(a.x, a.y, a.w_min[0], a.h_min[0]);
+			// SetRect(a.x, a.y, a.w_min[0], a.h_min[0]);
 		}
+		_case("padding"):
+			layout.SetPadding(value);
 		_case("zindex"):
 			SetZIndex(std::stoi(value));
 		_case("id"):
 			SetId(value);
 		_case("interactible"):
-			setInteractible(value == "true");
+			setInteractible(toBool(value));
 		_case("visible"):
-			SetVisible(value=="true");
+			SetVisible(toBool(value));
 		_case("color"):
 			m_style.color = Color(value).GetUint32();
 		_case("bordercolor"):
 			m_style.border_color = Color(value).GetUint32();
+		_case("bgcolor"):
+			m_style.background_color = Color(value).GetUint32();
 		_case("backgroundcolor"):
 			m_style.background_color = Color(value).GetUint32();
 		_case("hoverbordercolor"):
@@ -848,20 +1291,23 @@ void Control::SetStyle(std::string style, std::string value) {
 			m_style.hovercolor = Color(value).GetUint32();
 		_case("hoverbackground_color"):
 			m_style.hoverbackground_color = Color(value).GetUint32();
+		_case("hoverbg_color"):
+			m_style.hoverbackground_color = Color(value).GetUint32();
 		_case("border"):
 		_case("noborder"):
-			if(value == "true") {
+			if(toBool(value)) {
 				m_style.border_color = 0;
 				m_style.hoverborder_color = 0;
 			}
 		_case("font"): {
 			Font* f = Fonts::GetParsedFont(value);
 			if(f) {
-				std::cout << GetId() << " loading font: " << value << "\n";
+				// std::cout << GetId() << " loading font: " << value << "\n";
 				m_style.font = f;
 				onFontChange();
 			} else {
 				std::cout << GetId() << " FAIL loading font: " << value << "\n";
+				exit(0);
 			}
 		}
 		_case("tooltip"):
@@ -874,11 +1320,17 @@ void Control::SetStyle(std::string style, std::string value) {
 				SetImage(value, false);
 			}
 		}
+		_case("hoverimage"): {
+			m_style.hoverimg = Images::LoadImage(value);
+		}
 		_case("draggable"): {
-			m_style.draggable = value == "true";
+			m_style.draggable = toBool(value);
 		}
 			break;
+			
 		default:
+		
+			// events
 			// if style start with on_...
 			if(tolower(style[0]) == 'o' && tolower(style[1]) == 'n') {
 				// parse value and add calls to subscribers
@@ -891,35 +1343,21 @@ void Control::SetStyle(std::string style, std::string value) {
 					split_string(cmd, params, ' ');
 					subscribers.emplace_back( type, params[0] );
 					subscribers.back().args.insert(subscribers.back().args.begin(), params.begin()+1, params.end());
+					subscribers.back().tag = current_tag;
 				}
-			}
+			} else {
 			
-			OnSetStyle(style, value);
+				OnSetStyle(style, value);
+			}
 	}
 
 }
 
-void Control::STYLE_FUNC(value) {}
+void Control::OnSetStyle(std::string& style, std::string& value) {}
 
-Layout& Layout::operator+=(const Layout& b) {
-	W += b.W;
-	w += b.w;
-	x += b.x;
-	
-	H += b.H;
-	h += b.h;
-	y += b.y;
-	
-	absolute_coordinates |= b.absolute_coordinates;
-	
-	return *this;
-}
-
-std::ostream& operator<< (std::ostream& stream, const Layout& a) {
-	return stream << a.W << ", " << a.w << ", " << a.x << " ; " <<
-		a.H << ", " << a.h << ", " << a.y << " ; " <<
-		a.w_min[1] << "+" << a.w_min[0] << ", " << a.h_min[1] << "+" << a.h_min[0] << " ; (" << 
-		a.coord.x << ", " << a.coord.y << " a: " << a.absolute_coordinates << std::endl;
+void Control::getRange(Size& min, Size& max) {
+	min = this->min;
+	max = this->max;
 }
 
 
@@ -948,6 +1386,7 @@ System& Control::GetSystem() {
 	}
 }
 
+
+// -------------[/ControlBase]---------------
+
 }
-
-

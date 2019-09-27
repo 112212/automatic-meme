@@ -1,15 +1,16 @@
-#ifndef _GUI_HPP_
-#define _GUI_HPP_
+#ifndef NG_GUI_HPP
+#define NG_GUI_HPP
 
 #include <vector>
 #include <queue>
+#include <mutex>
 
 #include "managers/ControlManager.hpp"
 
 #include "Cursor.hpp"
-#include "Control.hpp"
 #include "backend/Backend.hpp"
 #include "backend/Input.hpp"
+#include "Control.hpp"
 
 #define NO_SELECTED_CONTROL_ON_TOP
 
@@ -49,36 +50,46 @@ class Label;
 
 extern Backend default_backend;
 
-class Gui : public ControlManager
+typedef std::function<void(Keycode,Keymod)>  KeyFunc;
+
+class Gui
 {
 	private:
 		Size resolution;
 		std::map<std::string, Control*> map_id_control;
+		Backend backend;
+		int selection_margin;
+		std::vector<Control*> invalidates;
+		
+		std::mutex* mutex;
 		
 		// -- selection info --
-		Control* selected_control;
-		Control* last_selected_control;
-		Widget* sel_first_depth_widget; // first widget, or widget lock
-		Point sel_widget_offset; // for widget lock
-		Widget* last_selected_widget;
-		Backend backend;
+		Control* sel_control;
+		Control* last_sel_control;
+		Control* active_control;
+		
+		Point sel_control_parent_window_position; // for widget lock
+		Control* sel_parent;
+		
 		unsigned int sel_intercept;
-		int selection_margin;
-		Size selection_margin_control_min_size;
-		bool hasIntercepted;
 		struct interceptInfo {
 			unsigned int intercept_mask;
-			Widget* widget;
+			Control* parent_control;
+			Control* last_control; // for hover
 		};
+		bool hasIntercepted;
 		std::vector<interceptInfo> sel_intercept_vector;
-		Control* active_control;
+		// void intercept_hook(Control::imask onaction, std::function<void()> action, std::function<void()> intercept_action={}, std::function<void()> no_intercept_control_action={});
 		// ------------------
+		
+		Control rootWidget;
 		
 		// -- fps measurement --
 		double m_delta_accum;
 		uint32_t m_frames;
 		uint32_t m_fps;
 		std::function<void(uint32_t)> m_on_fps_change;
+		std::function<void()> m_on_render;
 		// ---------------------
 		
 		Cursor cursor;
@@ -97,40 +108,49 @@ class Gui : public ControlManager
 		// -------------
 		
 		bool m_mouse_down;
+		
+		// ---- selection locks ----
 		bool m_keyboard_lock;
-		bool m_widget_lock;
 		bool m_focus;
 		bool m_focus_lock;
 		bool m_lock_once;
+		bool m_block_all_events;
+		bool m_unblock_all_events_on_mouse_up;
+		Control* m_lock_target;
+		// -------------------------
 		
 		double m_time;
 		double m_delta_time;
 		
 		
-		void check_for_new_collision( int mX, int mY, bool start_from_top=false );
+		void check_for_new_collision( Point pt, bool start_from_top=false );
 		int depth;
+		
+		std::vector<KeyFunc> m_keyup_cb;
+		std::vector<KeyFunc> m_keydown_cb;
 		
 		#ifdef USE_EVENT_QUEUE
 			std::queue<Event> m_events;
 		#endif
 		
+		bool check_for_lock();
 		bool check_for_drag();
 		inline double getTime() { return m_time; }
 		inline double getDeltaTime() { return m_delta_time; }
-		void processControlEvent(int event_type);
+		void processControlEvent(int event_type, Control* target);
 		void unselectControl();
-		
-		void unselectWidgets();
-		void unselectWidget();
-		void recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove);
+		void unselectControls();
 
 		static std::map<std::string, EventCallback> function_map;
 		
-		friend class Widget;
 		friend class Control;
 		friend class ControlManager;
 		
-		static void play_sound( Args& );
+		static void cmd_play_sound( Args& );
+		void cmd_style( Args& );
+		Control* get(const std::string& id);
+		
+		void renderInvalidate(Control* c);
 		
 	public:
 		Gui();
@@ -142,29 +162,33 @@ class Gui : public ControlManager
 		void Render();
 		
 		void UnselectControl() { unselectControl(); }
-		void AddControl( Control* cntrl );
+		void AddControl( Control* cntrl, bool processlayout=true );
 		void RemoveControl( Control* control );
 		void Clear();
 		
-		void LockWidget(Widget* w);
+		void LockWidget(Control* w);
 		void UnlockWidget();
 		
+		void SetStyle(std::string control, std::string style, std::string value);
 		void SetDefaultFont(std::string font, int size=13);
 		void SetSize(int w, int h);
 		void SetTooltipDelay(double seconds);
 		void SetRelativeMode(bool relative_mode);
 		void OnFpsChange(std::function<void(uint32_t)> f) { m_on_fps_change = f; }
+		void OnRender(std::function<void()> f) { m_on_render = f; }
 		
 		void Focus(Control* control);
 		void Activate(Control* control);
 		void ShowTooltip(Control* control);
 		void HideTooltip();
 		void HideOSCursor();
+		void MtLock();
+		void MtUnlock();
 		
-		Control* GetSelectedControl() { return selected_control; }
-		Widget* GetSelectedWidget() { return last_selected_widget; }
-		Control* GetActiveControl() { return active_control; }
-		Control* GetControlById(std::string id);
+		Control* GetSelectedControl();
+		Control* GetSelectedWidget();
+		Control* GetActiveControl();
+		
 		Size GetSize();
 		uint32_t GetFps();
 		
@@ -174,23 +198,64 @@ class Gui : public ControlManager
 		#endif
 		
 		static bool AddFunction( std::string function_name, EventCallback callback );
+		
+		template <typename T>
+		static bool AddFunction( std::string function_name, void (T::*callback)(Args& args), T* _this ) {
+			return AddFunction(function_name, std::bind(callback, _this, std::placeholders::_1));
+		}
+		
 		void OnEvent( std::string id, std::string event_type, EventCallback callback );
+		
+		template <typename T>
+		bool OnEvent( std::string id, std::string event_type, void (T::*callback)(Args& args), T* _this ) {
+			OnEvent(id, event_type, std::bind(callback, _this, std::placeholders::_1));
+			return true;
+		}
+		
+		void CallFunc( std::string function_name, const Argv& a={} );
 		
 		// keyboard events
 		void OnKeyDown( Keycode sym, Keymod mod );
 		void OnKeyUp( Keycode sym, Keymod mod );
 		void OnText( std::string text );
 		
+		void OnKeyDown( KeyFunc f);
+		void OnKeyUp( KeyFunc f);
+		
 		// mouse events
 		void OnMouseDown( unsigned int button );
 		void OnMouseUp( unsigned int button );
+		
 		void OnMouseMove(int mX, int mY);
 		void OnMWheel(int updown);
 		
-		void SetBackend(Backend backend);
-		const Backend& GetBackend();
+		void 			SetBackend(Backend backend);
+		const Backend&  GetBackend();
 		
 		Cursor& GetCursor();
+		
+		// forward to root widget
+		void LoadXml(std::string xml_filename);
+		void LoadXml(std::istream& stream);
+		void RemoveControls();
+		void BreakRow();
+		
+		template <typename T>
+		T* CreateControl(std::string type, std::string id="") {
+			return (T*)CreateControl(type,id);
+		}
+		Control* CreateControl(std::string type, std::string id="");
+		const std::vector<Control*>& GetControls();
+		
+		void EnableStyleGroup(std::string name, bool enable=true);
+		void DisableAllStyles();
+		void ForEachControl(std::function<void(Control* c)> func);
+		void ProcessLayout(bool asRoot=false);
+		
+		template<typename C=Control>
+		C* Get(const std::string id) {
+			return static_cast<C*>(get(id));
+		}
 };
 
 }

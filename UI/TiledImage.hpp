@@ -1,5 +1,5 @@
-#ifndef TILED_IMAGE_HPP
-#define TILED_IMAGE_HPP
+#ifndef NG_TILED_IMAGE_HPP
+#define NG_TILED_IMAGE_HPP
 #include "Image.hpp"
 #include <chrono>
 namespace ng {

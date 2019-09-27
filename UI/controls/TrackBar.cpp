@@ -12,7 +12,7 @@ TrackBar::TrackBar() {
 	m_is_readonly = false;
 	m_on_it = false;
 	m_value = 0;
-	m_font = Fonts::GetFont( "default", 13 );
+	m_font = Fonts::GetFont( "default", 15 );
 	tex_text = 0;
 	m_style.border_color = 0;
 }
@@ -30,6 +30,10 @@ void TrackBar::Render( Point pos, bool isSelected ) {
 	const Rect& rect = GetRect();
 	int x = rect.x + pos.x;
 	int y = rect.y + pos.y;
+	
+	Control::RenderBase(pos,isSelected);
+	
+	// Drawing().FillRect(x,y,rect.w, rect.h,Color::Red);
 
 	if(m_is_vertical) {
 		int x2 = x + rect.w/2;
@@ -55,7 +59,7 @@ void TrackBar::Render( Point pos, bool isSelected ) {
 		Drawing().FillCircle( x + m_slider_pix, h, m_slider_radius, m_on_it ? Color::Yellow : Color::White);
 	}
 	
-	Control::Render(pos,isSelected);
+	// Control::RenderWidget(pos,isSelected);
 	
 	if(tex_text != 0) {
 		if(m_is_vertical) {
@@ -76,7 +80,7 @@ void TrackBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 	if(mouseState) {
 		if(m_is_vertical) {
 			
-			int y = clip(rect.h - (mY - rect.y), m_slider_radius/2, rect.h - m_slider_radius/2);
+			int y = clip(rect.h - (mY), m_slider_radius/2, rect.h - m_slider_radius/2);
 			
 			if(y != m_slider_pix) {
 				m_slider_pix = y;
@@ -84,7 +88,7 @@ void TrackBar::OnMouseMove( int mX, int mY, bool mouseState ) {
 			}
 		} else {
 			
-			int x = clip(mX - rect.x, m_slider_radius/2, rect.w-m_slider_radius/2);
+			int x = clip(mX, m_slider_radius/2, rect.w-m_slider_radius/2);
 			
 			if(x != m_slider_pix) {
 				m_slider_pix = x;
@@ -109,11 +113,15 @@ void TrackBar::OnSetStyle(std::string& style, std::string& value) {
 			setValue( std::stoi(value) );
 		_case("range"): {
 				size_t i = value.find(",");
-				if(i == std::string::npos)
+				if(i == std::string::npos) {
 					SetRange( 0, std::stoi(value) );
-				else
+				} else {
 					SetRange( std::stoi(value.substr(0,i)), std::stoi(value.substr(i+1)) );
+				}
 			}
+		_case("vertical"):
+			SetVertical( toBool(value) );
+			updateSlider();
 		_case("orientation"):
 			if(value == "vertical" || value == "horizontal") {
 				SetVertical( value == "vertical" ? true : false );
@@ -124,7 +132,7 @@ void TrackBar::OnSetStyle(std::string& style, std::string& value) {
 			updateTextLocation();
 			updateSlider();
 		_case("show_number"):
-			show_num = (value == "true");
+			show_num = toBool(value);
 			if(tex_text) {
 				tex_text->Free();
 			}
@@ -137,14 +145,14 @@ void TrackBar::OnMouseDown( int mX, int mY, MouseButton button ) {
 	const Rect& rect = GetRect();
 	if(m_is_vertical) {
 
-		int y = clip(rect.h - (mY - rect.y), m_slider_radius/2, rect.h - m_slider_radius/2);
+		int y = clip(rect.h - (mY), m_slider_radius/2, rect.h - m_slider_radius/2);
 			
 		if(y != m_slider_pix) {
 			m_slider_pix = y;
 			onChange();
 		}
 	} else {
-		int x = clip(mX - rect.x, m_slider_radius/2, rect.w-m_slider_radius/2);
+		int x = clip(mX, m_slider_radius/2, rect.w-m_slider_radius/2);
 			
 		if(x != m_slider_pix) {
 			m_slider_pix = x;
@@ -182,9 +190,6 @@ void TrackBar::OnLostFocus() {
 	m_on_it = false;
 }
 
-void TrackBar::OnLostControl() {
-	m_on_it = false;
-}
 
 void TrackBar::SetRange( int _min, int _max ) {
 	if(m_slider_max+m_slider_min == _max && m_slider_min == _min) return;
@@ -197,12 +202,17 @@ void TrackBar::SetRange( int _min, int _max ) {
 	onChange();
 }
 
-void TrackBar::onChange() {
+void TrackBar::onChange(bool force) {
+	int old_val = m_value;
 	m_value = getValue();
 	
 	if(show_num) {
 		if(tex_text) {
 			delete tex_text;
+			tex_text = 0;
+		}
+		if(!m_style.font) {
+			return;
 		}
 		tex_text = m_font->GetTextImage( std::to_string( m_value ), 0xffffff );
 		Size s = tex_text->GetImageSize();
@@ -211,7 +221,9 @@ void TrackBar::onChange() {
 		updateTextLocation();
 	}
 	
-	emitEvent( "change", {m_value} );
+	if(old_val != m_value or force) {
+		emitEvent( "change", {m_value} );
+	}
 }
 
 void TrackBar::updateTextLocation() {
@@ -248,7 +260,7 @@ void TrackBar::onRectChange() {
 void TrackBar::setValue( int value ) {
 	m_value = clip(value, m_slider_min, m_slider_max);
 	updateSlider();
-	onChange();
+	onChange(true);
 }
 
 void TrackBar::updateSlider() {

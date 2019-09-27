@@ -1,6 +1,7 @@
-#ifndef _FONT_HPP
-#define _FONT_HPP
+#ifndef NG_FONT_HPP
+#define NG_FONT_HPP
 #include <string>
+#include "Resource.hpp"
 namespace ng {
 
 struct GlyphMetrics {
@@ -10,7 +11,7 @@ struct GlyphMetrics {
 
 class Image;
 
-class Font {
+class Font : public Resource {
 	protected:
 		Font();
 	public:
@@ -25,6 +26,7 @@ class Font {
 		int GetMaxTextBw( const std::string &text, int width );
 		int GetTextSize( const std::string &text );
 		int GetHeight();
+		std::string ClipText( std::string s, int w );
 };
 
 

@@ -1,5 +1,5 @@
-#ifndef _GRAPHICS_HPP_
-#define _GRAPHICS_HPP_
+#ifndef NG_GRAPHICS_HPP
+#define NG_GRAPHICS_HPP
 #include "../Image.hpp"
 #include <stack>
 #include <string>
@@ -8,6 +8,8 @@ class Screen {
 	protected:
 		void SetCache(Image* img, uint32_t cache_id);
 		std::stack<ng::Rect> clip_stack;
+		std::stack<float> maxAlpha;
+		float current_alpha;
 		bool using_clip_region;
 	public:
 		Screen();
@@ -33,10 +35,17 @@ class Screen {
 		
 		virtual void SetClipRegion(int x, int y, int w, int h, bool enable=true);
 		virtual bool GetClipRegion(int &x, int &y, int &w, int &h);
+		
+		void Circle(Point p, float radius, uint32_t color);
+		void Line(Point a, Point b, int color);
+		
 		void EnableClipRegion();
 		void DisableClipRegion();
 		void PushClipRegion(int x, int y, int w, int h);
 		void PopClipRegion();
+		
+		void PushMaxAlpha(float alpha);
+		void PopMaxAlpha();
 		
 		virtual int	 SetNewOffScreenRender();
 		virtual bool FreeOffScreenRender(int id);
@@ -47,9 +56,7 @@ class Screen {
 		virtual uint32_t CompileShader(std::string vertexShader, std::string fragmentShader);
 		virtual void SetShader(uint32_t shader_id);
 		virtual bool IsShadersSupported();
-		
-		
-		// virtual void Set
+
 		
 		virtual void TexRect(int x, int y, int w, int h, Image* tex, bool repeat = false, int texWidth = 1, int texHeight = 1);
 		virtual void TexRect(int x, int y, Image* tex, bool repeat = false);

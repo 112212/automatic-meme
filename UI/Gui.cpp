@@ -1,20 +1,23 @@
-#include "Gui.hpp"
-#include "Widget.hpp"
+
+
 #include <stack>
 #include <cassert>
 #include <iostream>
 #include <ratio>
 #include <chrono>
-#include "Control.hpp"
 
+#include "Gui.hpp"
+#include "Control.hpp"
 #include "controls/Label.hpp" // only for tooltip
 #include "managers/Sounds.hpp"
+#include "managers/ResourceManager.hpp"
+#include "TiledFont.hpp"
 
 namespace ng {
 
-Backend default_backend(new Screen(), new Speaker());
+Backend default_backend(new Screen(), new Speaker(), new System());
 
-void Gui::play_sound( Args& args ) {
+void Gui::cmd_play_sound( Args& args ) {
 	if(args.cmd_args.empty()) {
 		return;
 	}
@@ -33,43 +36,62 @@ void Gui::play_sound( Args& args ) {
 	}
 }
 
+void Gui::cmd_style( Args& args ) {
+	if(args.cmd_args.size() == 3) {
+		Control* c = rootWidget.Get<Control>(args.cmd_args[0]);
+		if(c) {
+			c->SetStyle(args.cmd_args[1], args.cmd_args[2]);
+		}
+	}
+	if(args.control) {
+		args.control->SetStyle(args.cmd_args[0], args.cmd_args[1]);
+	}
+}
 
-
-Gui::Gui() : ControlManager(this) {
+Gui::Gui() {
+	m_delta_accum = 0;
 	m_mouse_down = false;
 	m_focus = false;
 	m_keyboard_lock = false;
 	m_focus_lock = false;
-	m_widget_lock = false;
 	m_lock_once = false;
+	m_block_all_events = false;
+	
 	m_time = 0;
 	dragging = false;
 	m_frames = 0;
 	drag_offset = {0,0};
 	depth = 0;
-	selected_control = 0;
+	sel_control = 0;
 	active_control = 0;
-	sel_first_depth_widget = 0;
-	last_selected_widget = 0;
+	sel_parent = 0;
+	m_lock_target = 0;
 	
 	hasIntercepted = false;
 	sel_intercept = 0;
 	sel_intercept_vector.resize(15);
 	
 	selection_margin = 1;
-	selection_margin_control_min_size = Size(10,10);
 	
 	m_tooltip_shown = false;
 	m_tooltip_delay = 2;
 	m_tooltip = 0;
+	mutex = new std::mutex();
+	
+	rootWidget.set_engine(this);
+	rootWidget.SetId("RootWidget");
+	rootWidget.SetLayout(Layout("0,0,1W,1H"));
+	
 	SetBackend(default_backend);
-	AddFunction( "play_sound", play_sound );
+	AddFunction( "playsound", cmd_play_sound );
+	AddFunction( "style", std::bind( &Gui::cmd_style, this, std::placeholders::_1 ) );
+	
+	ResourceManager::RegisterResourceLoader("tiledfont", TiledFont::GetFont);
 }
 
 void Gui::HideOSCursor() {
 	backend.system->SetCursorVisibility(false);
 }
-
 
 Gui::Gui(int xsize, int ysize) : Gui() {
 	SetSize(xsize, ysize);
@@ -77,7 +99,8 @@ Gui::Gui(int xsize, int ysize) : Gui() {
 
 Gui& Gui::operator=(Gui && engine) {
 	*this = engine;
-	this_engine = this;
+	rootWidget.set_engine(this);
+	AddFunction( "style", std::bind( &Gui::cmd_style, this, std::placeholders::_1 ) );
 	return *this;
 }
 
@@ -86,13 +109,14 @@ Gui::~Gui() {
 }
 
 void Gui::Clear() {
-	for(Control* c : controls) {
-		RemoveControl(c);
-	}
+	rootWidget.RemoveControls();
 }
 
 void Gui::SetDefaultFont(std::string font, int size) {
-	Fonts::LoadFont(font, "default", size);
+	if(!Fonts::LoadFont(font, "default", size)) {
+		std::cout << "NOT LOADED\n";
+		exit(-2);
+	}
 }
 
 void Gui::SetSize(int w, int h) {
@@ -101,6 +125,11 @@ void Gui::SetSize(int w, int h) {
 		backend.screen->SetResolution(w, h);
 		resolution = Size(w,h);
 	}
+	
+	rootWidget.SetLayout(Layout(Point(0,0), 0,0,0,w,0,h));
+	rootWidget.SetRect(0,0,w,h);
+	rootWidget.min = Size(w,h);
+	rootWidget.max = Size(w,h);
 	ProcessLayout();
 }
 
@@ -111,150 +140,64 @@ Size Gui::GetSize() {
 	return resolution;
 }
 
-void Gui::LockWidget(Widget* widget) {
-	if(!widget or widget->engine != this) return;
-	sel_first_depth_widget = widget;
-	Point ofs = {0,0};
-	Widget *w;
-	if(selected_control) {
-		w = selected_control->getWidget();
-		while(w && w != widget) {
-			w = w->getWidget();
-		}
-		if(w != widget) {
-			unselectControl();
-			unselectWidgets();
-		} else {
-			int d = depth;
-			w = last_selected_widget;
-			while(w != widget) {
-				d--;
-				w = w->widget;
-			}
-			int dff = depth - d;
-			for(int i=0; i < dff; i++) {
-				sel_intercept_vector[i] = sel_intercept_vector[i+d-1];
-			}
-			sel_intercept_vector[dff].widget = 0;
-			depth = dff;
-		}
-	} else {
-		unselectWidgets();
-		last_selected_widget = widget;
-		
-		sel_intercept_vector[0].intercept_mask = widget->intercept_mask;
-		sel_intercept_vector[0].widget = widget;
-		sel_intercept_vector[1].widget = 0;
-		sel_intercept = widget->intercept_mask;
-		depth = 1;
-	}
+void Gui::LockWidget(Control* c) {
+	if(!c or c->engine != this) return;
 	
-	w = sel_first_depth_widget;
-	while(w) {
-		ofs = {ofs.x + w->m_rect.x, ofs.y + w->m_rect.y};
-		w = w->widget;
-	}
-	sel_widget_offset = ofs;
-	m_widget_lock = true;
+	Focus(c);
+	m_focus_lock = true;
 }
 
 void Gui::UnlockWidget() {
-	if(!m_widget_lock) return;
-	
-	// get real depth
-	int d = -1;
-	Widget *w = sel_first_depth_widget;
-	while(w) {
-		w = w->widget;
-		d++;
-	}
-	
-	// fix intercept vector
-	// shift intercept vector
-	for(int i=depth; i >= 0; i--) {
-		sel_intercept_vector[i+d] = sel_intercept_vector[i];
-	}
-	// add intercepts from engine to widget
-	w = sel_first_depth_widget;
-	w = w->widget;
-	depth += d;
-	while(w) {
-		d--;
-		sel_intercept_vector[d].widget = w;
-		sel_intercept_vector[d].intercept_mask = w->intercept_mask;
-		sel_intercept |= w->intercept_mask;
-		if(d == 0) {
-			sel_first_depth_widget = w;
+	m_focus_lock = false;
+}
+
+void Gui::processControlEvent(int event_type, Control* target) {
+	if(target) {
+		m_lock_target = target;
+		Focus(target);
+	} else if(event_type == GUI_FOCUS_LOCK || event_type == GUI_LOCK_ONCE) {
+		if(!sel_control) {
+			return;
 		}
-		w = w->widget;
+		if(sel_control != m_lock_target) {
+			m_lock_target = sel_control;
+			Focus(m_lock_target);
+		}
 	}
-
-	assert(d == 0);
-
-	m_widget_lock = false;
-}
-
-Control* Gui::GetControlById(std::string id) {
-	auto it = map_id_control.find(id);
-	if(it != map_id_control.end())
-		return it->second;
-	else
-		return 0;
-}
-
-void Gui::processControlEvent(int event_type) {
+	
 	switch(event_type) {
 		case GUI_KEYBOARD_LOCK:
 			m_keyboard_lock = true;
 			break;
+			
 		case GUI_FOCUS_LOCK:
 			m_focus_lock = true;
 			break;
+			
 		case GUI_UNLOCK:
 			m_focus_lock = false;
 			m_keyboard_lock = false;
+			m_lock_once = false;
+			m_lock_target = 0;
 			break;
+			
 		case GUI_LOCK_ONCE:
+			m_focus_lock = true;
 			m_lock_once = true;
 			break;
+			
+		case GUI_UNLOCK_BY_MOUSEUP:
+			m_unblock_all_events_on_mouse_up = true;
+			break;
+		
 		case GUI_UNSELECT:
 			unselectControl();
 			return;
-		case GUI_WIDGET_UNLOCK: {
-				m_widget_lock = false;
-				if(selected_control) {
-					Widget* w = static_cast<Widget*>(selected_control);
-					while(w && w->widget) {
-						w = w->widget;
-					}
-					if(w) sel_first_depth_widget = w;
-				}
-			}
+			
 		case GUI_UNSELECT_WIDGET:
-			unselectWidget();
-			break;
-		case GUI_UNSELECT_WIDGETS:
-			unselectWidgets();
+			unselectControls();
 			break;
 	}
-}
-	  
-void Gui::AddControl( Control* control ) {
-	if(control->engine) return;
-	
-	if(control->isWidget) {
-		Widget* w = static_cast<Widget*>(control);
-
-		recursiveProcessWidgetControls(w, true);
-		
-		w->set_engine(this);
-	} else {
-		control->engine = this;
-	}
-	
-	addControlToCache(control);
-	
-	map_id_control[control->id] = control;
 }
 
 /*
@@ -262,91 +205,118 @@ void Gui::AddControl( Control* control ) {
 		  if its widget, then remove all children events from event queue
 */
 void Gui::RemoveControl( Control* control ) {
-	if(control->engine != this) {
+	if(!control->parent || control->engine != this) {
 		return;
 	}
+	std::cout << "RemoveControl called\n";
+
 	
-	if(selected_control == control) {
+	if(sel_control == control) {
 		unselectControl();
 	}
 	
 	std::string id = control->id;
 	
-	map_id_control.erase(id);
-	
 	// if its widget, make sure nothing breaks
-	if(control->isWidget) {
-		Widget* widget = (Widget*)control;
-		
-		recursiveProcessWidgetControls(widget, false);
-		
-		if(sel_first_depth_widget == widget) {
-			unselectWidgets();
-			sel_first_depth_widget = 0;
-			m_widget_lock = false;
+	Control* widget = control;
+	
+	// if any of selected controls or widgets are inside this widget, we must break selection
+	if(sel_control) {
+		Control* w = sel_control->parent;
+		while(w && w != widget) {
+			w = w->parent;
 		}
-		// if any of selected controls or widgets are inside this widget, we must break selection
-		if(selected_control) {
-			Widget* w = selected_control->widget;
-			while(w && w != widget) {
-				w = w->widget;
-			}
-			if(w == widget) {
-				unselectControl();
-			}
-		}
-		
-		if(last_selected_widget) {
-			Widget* w = last_selected_widget;
-			while(w && w != widget) {
-				w = w->widget;
-			}
-			if(w == widget) {
-				unselectWidgets();
-			}
+		if(w == widget) {
+			unselectControl();
 		}
 	}
 	
-	if(!control->widget) {
-		removeControlFromCache(control);
-	} else {
-		control->widget->removeControlFromCache(control);
+	if(sel_parent) {
+		Control* w = sel_parent;
+		while(w && w != widget) {
+			w = w->parent;
+		}
 	}
+	// }
+	
+	control->parent->removeControlFromCache(control);
 	control->engine = 0;
-	control->widget = 0;
+	control->parent = 0;
 }
 
-#define INTERCEPT_HOOK(action_enum,action) {								\
-	/* TODO: what if gets deleted in one of the actions */					\
-	Control* last_selected_control = selected_control;						\
-	if((sel_intercept & Widget::imask::action_enum) != 0) {  				\
+void Gui::SetStyle(std::string control, std::string style, std::string value) {
+	Control* c = rootWidget.Get<Control>(control);
+	if(c) {
+		c->SetStyle(style, value);
+	}
+}
+
+/*
+void Gui::intercept_hook(Control::imask onaction, std::function<void()> action, std::function<void()> intercept_action, std::function<void()> no_intercept_control_action) {
+	Control* last_sel_control = sel_control;
+	if((sel_intercept & Control::imask::action_enum) != 0) {
+		for(int i=0; !hasIntercepted; i++) {
+			if(sel_intercept_vector.size() <= i) break;					
+			interceptInfo &v = sel_intercept_vector[i];             	
+			if(!v.parent_control || v.parent_control == sel_control) break;
+			if( (v.intercept_mask & Control::imask::action_enum) != 0) {  
+				v.parent_control->m_is_intercepted = true;
+				v.parent_control->action;
+				if(intercept_action) {
+					intercept_action();
+				}
+				v.parent_control->m_is_intercepted = false;
+				// std::cout << "intercepted: " << last_sel_control->GetId()< " by: " << v.parent_control->GetId() << "\n";
+			}                                                       	
+		}                                                           	
+	} 																	
+	if(hasIntercepted) {												
+		hasIntercepted = false; 										
+	} else if(last_sel_control) {										
+		last_sel_control->action;										
+	}}
+}
+*/
+
+/* TODO: what if gets deleted in one of the actions */
+#define INTERCEPT_HOOK(action_enum,action,intercept_action,no_intercept_action) {\
+	Control* last_sel_control = sel_control;								\
+	if((sel_intercept & Control::imask::action_enum) != 0) {  				\
 		for(int i=0; !hasIntercepted; i++) {                        		\
 			if(sel_intercept_vector.size() <= i) break;						\
 			interceptInfo &v = sel_intercept_vector[i];             		\
-			if(!v.widget) break;                                    		\
-			if( (v.intercept_mask & Widget::imask::action_enum) != 0) {  	\
-				v.widget->action;                                   		\
+			if(!v.parent_control || v.parent_control == sel_control) break; \
+			if( (v.intercept_mask & Control::imask::action_enum) != 0) {  	\
+				v.parent_control->m_is_intercepted = true;					\
+				v.parent_control->action;                                   \
+				intercept_action											\
+				v.parent_control->m_is_intercepted = false;					\
+				/*std::cout << "intercepted: " << last_sel_control->GetId() << " by: " << v.parent_control->GetId() << "\n";*/ \
 			}                                                       		\
 		}                                                           		\
 	} 																		\
 	if(hasIntercepted) {													\
 		hasIntercepted = false; 											\
-	} else if(last_selected_control) {										\
-		last_selected_control->action;										\
+	} else if(last_sel_control) {											\
+		last_sel_control->action;											\
+		no_intercept_action\
 	}}
+	
 	
 #define INTERCEPT_HOOK_KEYBOARD(action_enum,action) {					\
 	if(active_control) {												\
-		std::stack<Widget*> wgts;                                       \
-		Widget* w = active_control->widget;								\
+		std::stack<Control*> wgts;                                       \
+		Control* w = active_control->parent;							\
 		while(w) {                                 						\
 			wgts.push(w);                          						\
-			w = w->widget;                          					\
+			w = w->parent;                          					\
 		}                                                               \
 		while(!wgts.empty()) {                                          \
-			Widget* w = wgts.top();                                     \
-			if(w->intercept_mask & Widget::imask::action_enum) {        \
+			Control* w = wgts.top();                                     \
+			if((w->intercept_mask & Control::imask::action_enum) != 0) {        \
+				w->m_is_intercepted = true;								\
 				w->action;                                              \
+				w->m_is_intercepted = false;							\
 				if(hasIntercepted) {                                    \
 					break;												\
 				}														\
@@ -360,89 +330,123 @@ void Gui::RemoveControl( Control* control ) {
 		}																\
 	}}
 	
-#define WIDGET_HOOK(action_enum,action) if(last_selected_widget) { 		\
-	if((sel_intercept & Widget::imask::action_enum) != 0) {				\
-		/*sel_first_depth_widget->action;*/								\
-		for(int i=0; !hasIntercepted; i++) {                        	\
-			interceptInfo &v = sel_intercept_vector[i];             	\
-			if(!v.widget) break;                                    	\
-			if((v.intercept_mask                                    	\
-				& Widget::imask::action_enum) != 0) {          			\
-				v.widget->action;                                   	\
-			}                                                       	\
-		}    															\
-	} 																	\
-	if(hasIntercepted)													\
-		hasIntercepted = false; 										\
-}
 
 bool Gui::check_for_drag() {
-	if(selected_control && selected_control->IsDraggable()) {
+	if(sel_control && sel_control->IsDraggable()) {
 		dragging = true;
 		Point p = cursor.GetCursor();
-		Point gpos = selected_control->GetGlobalPosition();
-		drag_start_diff = Point(p.x - gpos.x, p.y - gpos.y);
-		drag_offset = Point(p.x - drag_start_diff.x, p.y - drag_start_diff.y);
-		selected_control->emitEvent( "drag_start" );
+		Point gpos = sel_control->GetGlobalPosition();
+		drag_start_diff = p - gpos;
+		drag_offset = p - drag_start_diff;
+		sel_control->emitEvent( "drag_start" );
 	}
 	return dragging;
 }
 
+bool Gui::check_for_lock() {
+	if(m_focus_lock) {
+		if(! m_lock_target->CheckCollisionA(cursor.GetCursor())) {
+			
+			// lose focus
+			m_lock_target->emitEvent("lostfocus");
+			m_lock_target->OnLostFocus();
+			
+			if(m_lock_once) {
+				m_focus_lock = false;
+				m_lock_once = false;
+				if(m_unblock_all_events_on_mouse_up) {
+					m_block_all_events = true;
+				}
+				// m_lock_target->emitEvent("lostcontrol");
+				// m_lock_target->OnLostControl();
+				unselectControls();
+				Activate(0);
+				// OnMouseMove( p.x, p.y );
+				// std::cout << "lock once unlocked: sel_control now is: " << (sel_control ? sel_control->GetId() : "none") << "\n";
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 void Gui::OnMouseDown( unsigned int button ) {
+	std::unique_lock<std::mutex> lock(*mutex);
+	if(m_block_all_events) {
+		return;
+	}
 	m_mouse_down = true;
 	
 	Point p = cursor.GetCursor();
 	
+	Control* last_sel_control = sel_control;
+
+	
 #ifndef OVERLAPPING_CHECK
-	if(!selected_control) {
-		check_for_new_collision( p.x, p.y, true );
+	if(!sel_control) {
+		check_for_new_collision( p, true );
 	}
 #else
-	if(!m_focus_lock) {
-		check_for_new_collision( p.x, p.y, true );
-	}
+	check_for_new_collision( p, true );
 #endif
-	Point control_coords{p.x-sel_widget_offset.x, p.y-sel_widget_offset.y};
-	active_control = selected_control;
-	if( selected_control ) {
+	
+	if(!m_focus_lock) {
+		Activate(sel_control);
+	}
+	
+	/*
+	if(active_control) {
+		std::cout << "active: " << active_control->GetId() << "\n";
+	}
+	*/
+	
+	Point parent_control_coords = p - sel_control_parent_window_position;
+	bool was_locked = m_focus_lock;
+	if( sel_control ) {
 		
-		if(m_focus_lock) {
-			INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ));
-			
-			// if still locked
-			if(m_focus_lock) {
-				return;
-			}
-			
-			if(m_lock_once) {
-				m_lock_once = false;
-				return;
-			}
-		}
+		Point control_coords = parent_control_coords - sel_control->GetRect();
 
-		if( selected_control->CheckCollision(control_coords.x, control_coords.y) ) {
+		
+
+		// mouse down event
+		if( sel_control->CheckCollision(parent_control_coords) ) {
 			
+			// if not dragging, then pass event
 			if(!check_for_drag()) {
-				selected_control->emitEvent( "mousedown", {control_coords.x-selected_control->m_rect.x, control_coords.y-selected_control->m_rect.y} );
-				INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ));
+				INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ), 
+					v.parent_control->emitEvent("mousedown", {control_coords.x, control_coords.y});
+					,
+					sel_control->emitEvent( "mousedown", {control_coords.x, control_coords.y} );
+				);
 			}
 			
 		} else {
-			unselectControl();
-			check_for_new_collision( p.x, p.y );
-			
-			if(!check_for_drag() && selected_control && !dragging) {
-				selected_control->OnGetFocus();
-				INTERCEPT_HOOK(mouse_down, OnMouseDown( p.x-sel_widget_offset.x, p.y-sel_widget_offset.y, (MouseButton)button ));
+
+			if(check_for_lock()) {
+				return;
 			}
-		}
+			
+			if(!check_for_drag() && sel_control && !dragging) {
+				INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ),
+					,
+					sel_control->OnGetFocus();
+					sel_control->emitEvent( "mousedown", {control_coords.x, control_coords.y} );
+				);
+			}
+		} 
 		
 	} else {
-		WIDGET_HOOK(mouse_down, OnMouseDown( p.x, p.y, (MouseButton)button )); 
+		if(sel_control != last_sel_control) {
+			last_sel_control->emitEvent("lostfocus");
+		}
 	}
 	
-	if(selected_control) {
-		active_control = selected_control;
+	if(sel_control) {
+		Activate(sel_control);
+		/*
+		Point control_coords = parent_control_coords - sel_control->GetRect();
+		INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, (MouseButton)button ),,);
+		*/
 	}
 }
 
@@ -451,19 +455,31 @@ void Gui::SetTooltipDelay(double seconds) {
 }
 
 void Gui::OnMouseUp( unsigned int button ) {
+	std::unique_lock<std::mutex> lock(*mutex);
+	
 	m_mouse_down = false;
 	
-	int mX, mY;
-	Point p = cursor.GetCursor();
-	mX = p.x;
-	mY = p.y;
+	if(m_block_all_events) {
+		// std::cout << "block all evts\n";
+		if(m_unblock_all_events_on_mouse_up) {
+			m_block_all_events = false;
+			m_unblock_all_events_on_mouse_up = false;
+		}
+		return;
+	}
 	
+	// if(check_for_lock()) {
+		// return;
+	// }
+	
+	Point p = cursor.GetCursor();
+
 	// ------- dragging -----
 	if(dragging) {
-		Control* dragging_control = selected_control;
-		UnselectControl();
-		check_for_new_collision(mX, mY);
-		if(last_selected_widget) {
+		Control* dragging_control = sel_control;
+		unselectControl();
+		check_for_new_collision(p);
+		if(sel_parent) {
 			dragging_control->emitEvent( "drag" );
 		}
 		dragging = false;
@@ -471,34 +487,49 @@ void Gui::OnMouseUp( unsigned int button ) {
 	}
 	// -----------------------
 		
-	Point widget_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
-	if( selected_control ) {
-		INTERCEPT_HOOK(mouse_up, OnMouseUp( widget_coords.x, widget_coords.y, (MouseButton)button ));
-		if(selected_control->CheckCollision(widget_coords.x, widget_coords.y)) {
-			Rect r = selected_control->GetRect();
-			Point control_coords{widget_coords.x-r.x, widget_coords.y-r.y};
-			// std::cout << "button: " << button << "\n";
-			selected_control->emitEvent( "click", {control_coords.x, control_coords.y} );
-		}
-	} else {
-		WIDGET_HOOK(mouse_up, OnMouseUp( mX, mY, (MouseButton)button ));
+	Point widget_coords = p-sel_control_parent_window_position;
+	if( sel_control ) {
+		const Rect &r = sel_control->GetRect();
+		Point control_coords = widget_coords - r;
+		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y, (MouseButton)button ),,
+			if(sel_control->CheckCollision(widget_coords)) {
+				sel_control->emitEvent( "click", {control_coords.x, control_coords.y} );
+				if( button == MouseButton::BUTTON_RIGHT ) {
+					sel_control->emitEvent( "rclick", {control_coords.x, control_coords.y} );
+				}
+				sel_control->OnClick(p.x, p.y, (MouseButton)button);
+			}
+			// std::cout << "MOUSE UP " << widget_coords << " " << sel_control->GetId() << "\n";
+			sel_control->emitEvent( "mouseup", {control_coords.x, control_coords.y} );
+		);
 	}
+	lock.unlock();
+	OnMouseMove(p.x, p.y);
 }
 
 void Gui::ShowTooltip(Control* control) {
 	m_last_cursor_update_time = m_time;
 	if(!control) return;
 	if(control->GetTooltip().empty()) return;
+	std::cout << "should show tooltip\n";
 	Point p = cursor.GetCursor();
+	
 	Point g = control->GetOffset();
-	if(!control->CheckCollision(p.x-g.x, p.y-g.y)) return;
+	if(sel_control != control) return;
+	
 	if(!m_tooltip) {
-		m_tooltip = (Label*)CreateControl("tooltip", "tooltip");
+		// std::cout << "show tooltip\n";
+		m_tooltip = CreateControl<Label>("tooltip", "tooltip");
 	}
+	
 	int distance = 25;
+	m_tooltip->engine = this;
+	
 	// TODO: tooltip: fix this rect
-	m_tooltip->SetRect(p.x+distance, p.y+distance, 200, 100);
-	m_tooltip->SetText( selected_control->GetTooltip() );
+	m_tooltip->SetRect(p.x+distance, p.y+distance, 9999, 9999);
+	m_tooltip->SetText( sel_control->GetTooltip() );
+	Rect r = m_tooltip->GetContentRect();
+	m_tooltip->SetRect(p.x+distance, p.y+distance, r.w+10, r.h+10);
 	m_tooltip->SetAlignment( Alignment::center );
 	m_tooltip_shown = true;
 }
@@ -510,138 +541,126 @@ void Gui::HideTooltip() {
 }
 
 void Gui::OnMouseMove( int mX, int mY ) {
-	
+	std::unique_lock<std::mutex> lock(*mutex);
+	if(m_block_all_events) {
+		return;
+	}
 	cursor.MoveCursor(mX, mY);
 	Point p = cursor.GetCursor();
-	mX = p.x;
-	mY = p.y;
 	m_last_cursor_update_time = m_time;
-	// return;
-	
-	Point control_coords{mX-sel_widget_offset.x, mY-sel_widget_offset.y};
+	Point widget_coords = p - sel_control_parent_window_position;
 	HideTooltip();
-	if(selected_control) {
+	
+	if(sel_control) {
+		// if(sel_control->parent) std::cout << "m_focus_lock: " << m_focus_lock << m_lock_once << " " << sel_control->parent->sel_control->GetId() << ", " << sel_control->GetId()  << "\n";
+		
+		Rect r = sel_control->GetRect();
+		Point control_coords = widget_coords - r;
 		if( m_mouse_down || m_focus_lock ) {
-			if(m_mouse_down && selected_control->IsDraggable()) {
-				Point pt = selected_control->GetGlobalPosition();
-				drag_offset = Point(mX - drag_start_diff.x, mY - drag_start_diff.y);
+			
+			// drag
+			if(m_mouse_down && sel_control->IsDraggable()) {
+				drag_offset = p - drag_start_diff;
 			}
 			
 			if(!dragging) {
-				INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
+				if(!m_mouse_down) {
+					check_for_new_collision( p );
+					r = sel_control->GetRect();
+					widget_coords = p - sel_control_parent_window_position;
+					control_coords = widget_coords - r;
+				}
+				
+				// std::cout << "MMOVE: " << sel_control->GetId() << " " << control_coords << "\n";
+				INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ),,);
 			}
 			return;
 		}
 		
 		#ifdef OVERLAPPING_CHECK
-		if(!m_keyboard_lock) {
-			Control *last_control = selected_control;
+		if(!m_keyboard_lock && !m_focus_lock) {
+			
+			Control *last_control = sel_control;
 			#ifdef OVERLAPPING_CHECK
-				check_for_new_collision( mX, mY, true );
+				check_for_new_collision( p, true );
 			#else
-				check_for_new_collision( mX, mY );
+				check_for_new_collision( p );
 			#endif
-			if(selected_control) {
-				if(last_control != selected_control) {
+			
+			if(sel_control) {
+				widget_coords = p - sel_control_parent_window_position;
+				r = sel_control->GetRect();
+				control_coords = widget_coords - r;
+				
+				if(last_control != sel_control) {
 					last_control->OnLostFocus();
-					INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
+					last_control->emitEvent("lostfocus");
+					INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ),,);
+					
 					return;
 				}
 			} else {
+				last_control->emitEvent("lostfocus");
 				last_control->OnLostFocus();
-				WIDGET_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
 				return;
 			}
 		}
 		#endif
 		
-		if(selected_control->CheckCollision(control_coords.x, control_coords.y))
-		{
-			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ));
+		// if mouse over sel_control then pass event, else unselect and lose focus if not focus locked
+		if(sel_control->CheckCollision(widget_coords)) {
+			
+			INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down),
+				if(v.parent_control != v.last_control) {
+					v.last_control = v.parent_control;
+					// std::cout << "HOVER\n";
+					v.last_control->emitEvent("hover");
+				}
+				,
+			);
+			
 			if(!m_focus) {
-				selected_control->OnGetFocus();
+				sel_control->OnGetFocus();
 				m_focus = true;
 			}
-		} else {
-			selected_control->OnLostFocus();
+		} else if(!m_focus_lock) {
+			sel_control->OnLostFocus();
 			m_focus = false;
-			if(!(m_focus_lock || m_keyboard_lock)) {
+			if(!m_keyboard_lock) {
 				unselectControl();
 			}
 		}
 	} else {
-		WIDGET_HOOK(mouse_move, OnMouseMove( mX, mY, m_mouse_down ));
 		#ifdef OVERLAPPING_CHECK
-			check_for_new_collision( mX, mY, true );
+			check_for_new_collision(p, true);
 		#else
-			check_for_new_collision( mX, mY );
+			check_for_new_collision(p);
 		#endif
 	}
 }
 
 void Gui::OnMWheel( int updown ) {
-	if(selected_control) {
-		INTERCEPT_HOOK(mwheel, OnMWheel( updown ));
-	} else {
-		WIDGET_HOOK(mwheel, OnMWheel( updown ));
+	std::unique_lock<std::mutex> lock(*mutex);
+	if(sel_control) {
+		INTERCEPT_HOOK(mwheel, OnMWheel( updown ),,);
 	}
 }
 
-void Gui::check_for_new_collision( int x, int y, bool start_from_top ) {
-	Control* last_control = selected_control;
-	Point offset{0,0};
-	Point &o = offset;
-	Widget *p = 0;
+void Gui::check_for_new_collision( Point pt, bool start_from_top ) {
+	Control* last_control = sel_control;
+	Point o{0,0};
+	Control *p = 0;
 	
-	if(!start_from_top) {
-		if(last_selected_widget || m_widget_lock) {
-			offset = sel_widget_offset;
-			if(m_widget_lock) {
-				p = sel_first_depth_widget;
-			}
-		}
-		
-		if(last_selected_widget) {
-			p = last_selected_widget;
-			if(m_widget_lock) {
-				Rect r = p->m_rect;
-				while(p != sel_first_depth_widget and !(x >= o.x && x <= o.x + r.w && 
-					y >= o.y && y <= o.y + r.h)
-					) {
-					p->selected_control = 0;
-					const Point &o2 = p->m_offset;
-					o = {o.x - r.x - o2.x, o.y - r.y - o2.y};
-					p = p->widget;
-					r = p->m_rect;
-					depth--;
-				}
-				if(p == sel_first_depth_widget and !(x >= o.x && x <= o.x + r.w && 
-					y >= o.y && y <= o.y + r.h)) {
-					// mouse not in locked widget
-					return;
-				}
-			} else {
-				Rect r = p->m_rect;
-				while(p && !(x >= o.x && x <= o.x + r.w && 
-					y >= o.y && y <= o.y + r.h)) {
-					p->selected_control = 0;
-					const Point &o2 = p->m_offset;
-					o = {o.x - r.x - o2.x, o.y - r.y - o2.y};
-					p = p->widget;
-					if(p) {
-						r = p->m_rect;
-					}
-					depth--;
-				}
-			}
-		}
 	
-		if(p != last_selected_widget) {
+	if(m_focus_lock) {
+		depth = 0;
+		p = m_lock_target;
+		if(p != sel_control) {
 			unselectControl();
 		}
+		o = p->getAbsoluteOffset();
 	} else {
-		
-		unselectWidgets();
+		unselectControl();
 	}
 	
 	std::vector<cache_entry>::reverse_iterator it, it_end;
@@ -650,78 +669,46 @@ void Gui::check_for_new_collision( int x, int y, bool start_from_top ) {
 		it = p->cache.rbegin();
 		it_end = p->cache.rend();
 	} else {
-		it = cache.rbegin();
-		it_end = cache.rend();
+		it = rootWidget.cache.rbegin();
+		it_end = rootWidget.cache.rend();
 		depth = 0;
 		o = {0,0};
 	}
 	
-	Widget* last_widget = p;
-	last_selected_widget = p;
-	sel_widget_offset = o;
+	Control* last_widget = p;
+	if(!last_widget) {
+		last_widget = &rootWidget;
+	}
+	sel_parent = p;
+	Point last_offset;
+	
 	
 	// --- descending tree ---
 	while(it != it_end) {
 		if(!it->interactible) { it++; continue; }
 		
-		/*
-		bool in = false;
-		{
-			Rect& r = it->rect;
-			int x1 = r.x + o.x;
-			int x2 = x1 + r.w;
-			int y1 = r.y + o.y;
-			int y2 = y1 + r.h;
-			
-			if(r.w > selection_margin_control_min_size.w) {
-				x1 += selection_margin;
-				x2 -= selection_margin;
-			}
-			if(r.h > selection_margin_control_min_size.h) {
-				y1 += selection_margin;
-				y2 -= selection_margin;
-			}
-			
-			if(x >= x1 && x <= x2 &&
-			   y >= y1 && y <= y2) {
-			   in = true;
-			}
-		}
-		*/
-		
-		// std::cout << "checking collision: " << it->control->GetId() << "\n";
-		if(it->control->CheckCollision(x-o.x,y-o.y)) {
+		// std::cout << "checking collision: " << it->control->GetId() << " " << pt - o << " " << y-o.y<< "\n";
+		if(it->control->CheckCollision(pt - o)) {
 			auto c = it->control;
 			Rect r = c->GetRect();
-			// std::cout << "[" << x << ", " << y << "]" << "found collision: " << (x-o.x) << ", " << (y-o.y) << " " << it->control->GetId() << " : " << r.x << ", " << r.y << ", " << "\n";
-			if(it->isWidget) {
-				Widget* w = static_cast<Widget*>(it->control);
-				if(depth == 0 && !m_widget_lock) {
-					sel_first_depth_widget = w;
-				} else if(last_widget) {
-					last_widget->selected_control = w;
-				}
-				last_widget = w;
-				
-				// per widget
-				sel_intercept_vector[depth].intercept_mask = w->intercept_mask;
-				sel_intercept_vector[depth].widget = w;
-				
-				w->cached_absolute_offset.x = offset.x + it->rect.x;
-				w->cached_absolute_offset.y = offset.y + it->rect.y;
-				
-				offset.x += it->rect.x + w->m_offset.x;
-				offset.y += it->rect.y + w->m_offset.y;
-				
-				it = w->cache.rbegin();
-				it_end = w->cache.rend();
-			} else {
-				selected_control = it->control;
-				if(last_widget) {
-					last_widget->selected_control = selected_control;
-				}
-				break;
-			}
+			Control* w = it->control;
+
+			last_widget->sel_control = w;
+			last_widget = w;
+			
+			// per widget
+			sel_intercept_vector[depth].intercept_mask = w->intercept_mask;
+			sel_intercept_vector[depth].parent_control = w;
+			
+			w->cached_absolute_offset = o + it->rect;
+			
+			last_offset = o;
+			o += it->rect + w->m_offset;
+			
+			it = w->cache.rbegin();
+			it_end = w->cache.rend();
+			sel_control = w;
+			
 			depth++;
 		} else {
 			it++;
@@ -729,11 +716,17 @@ void Gui::check_for_new_collision( int x, int y, bool start_from_top ) {
 	}
 	
 	if(last_widget) {
-		last_selected_widget = last_widget;
-		sel_widget_offset = offset;
+		// std::cout << "last_widget: " << last_widget->GetId() << "\n";
+		sel_control = last_widget;
+		sel_parent = last_widget->parent;
+		if(sel_parent) {
+			sel_parent->sel_control = sel_control;
+		}
+		sel_control_parent_window_position = last_offset;
 	}
-		
-	sel_intercept_vector[depth].widget = 0;
+
+	sel_intercept_vector[depth].parent_control = 0;
+	sel_intercept_vector[depth].last_control = 0;
 	
 	// global intercept flag
 	sel_intercept = 0;
@@ -741,55 +734,71 @@ void Gui::check_for_new_collision( int x, int y, bool start_from_top ) {
 		sel_intercept |= sel_intercept_vector[i].intercept_mask;
 	}
 		
-	if(last_control != selected_control) {
+	if(last_control != sel_control) {
+		// std::cout << "new sel: " << sel_control->GetId() << "\n";
 		if(last_control) {
 			last_control->emitEvent("leave");
-			last_control->OnLostControl();
+			// last_control->OnLostControl();
 		}
-		if(selected_control) {
+		if(sel_control) {
 			
-			selected_control->emitEvent("hover");
-			selected_control->OnGetFocus();
+			sel_control->emitEvent("hover");
+			sel_control->OnGetFocus();
 			m_focus = true;
 			m_keyboard_lock = false;
-		}
+		} 
 	}
 }
 
 void Gui::Focus(Control* control) {
-	if(!control || !control->engine || selected_control == control) return;
-	
-	if(control->widget) {
-		if(selected_control && selected_control->widget == control->widget) {
-			selected_control = control;
-			active_control = control;
-			control->widget->selected_control = control;
-		} else {
-			Widget* w = control->widget;
-			Widget* wgt = w;
-			last_selected_widget = w;
-			Point ofs{0,0};
-			while(w->widget) {
-				ofs.x += w->m_offset.x;
-				ofs.y += w->m_offset.y;
-				w = w->widget;
-			}
-			sel_first_depth_widget = w;
-			w = wgt;
-			Point o = ofs;
-			while(w->widget) {
-				o.x -= w->m_offset.x;
-				o.y -= w->m_offset.y;
-				w = w->widget;
-				w->cached_absolute_offset = o;
-			}
-			selected_control = control;
-			active_control = control;
-			wgt->selected_control = selected_control;
-		}
+	if(!control || !control->engine || sel_control == control || !control->parent) return;
+
+	if(sel_control && sel_control->parent == control->parent) {
+		sel_control = control;
+		Activate(active_control);
+		control->parent->sel_control = control;
 	} else {
-		active_control = control;
-		selected_control = control;
+		
+		unselectControls();
+		
+		Control* w = control->parent;
+		Control* p = control;
+		// std::cout << "focus called to: " << p->GetId() << "\n";
+		Control* wgt = control->parent;
+		sel_parent = wgt;
+		Point ofs{0,0};
+		depth = 1;
+
+		while(w->parent) {
+			ofs += w->m_offset + w->m_rect;
+			depth++;
+			w->sel_control = p;
+			p = w;
+			w = w->parent;
+		}
+		// w->sel_control = p;
+		rootWidget.sel_control = p;
+		w = wgt;
+		Point o = ofs;
+		control->cached_absolute_offset = o + control->m_rect;
+		int d = depth-1;
+		sel_intercept = 0;
+		
+		while(w->parent) {
+			o -= w->m_offset + w->m_rect;
+			sel_intercept_vector[d].intercept_mask = w->intercept_mask;
+			sel_intercept_vector[d].parent_control = w->parent;
+			sel_intercept |= w->intercept_mask;
+			d--;
+			w->cached_absolute_offset = o;
+			w = w->parent;
+		}
+		
+		sel_intercept_vector[depth].parent_control = 0;
+		sel_control = control;
+		sel_control_parent_window_position = wgt->cached_absolute_offset;
+
+		Activate(control);
 	}
 }
 
@@ -800,87 +809,100 @@ void Gui::OnText( std::string text ) {
 }
 
 void Gui::Activate(Control* control) {
+	if(active_control == control) return;
+	Control* old_active_control = active_control;
+	
 	if(control && control->engine == this && control->interactible) {
 		active_control = control;
-		active_control->OnGetFocus();
+		active_control->emitEvent("activate");
+		active_control->OnActivate();
 	} else if(!control) {
 		active_control = 0;
 	}
-}
-
-void Gui::recursiveProcessWidgetControls(Widget* wgt, bool add_or_remove) {
-	Widget* w = wgt;
-	for(auto it = w->cache.begin(); it != w->cache.end(); it++) {
-		if(it->isWidget) {
-			if(add_or_remove) {
-				map_id_control[it->control->id] = it->control;
-			} else {
-				map_id_control.erase(it->control->id);
-			}
-			recursiveProcessWidgetControls((Widget*)it->control, add_or_remove);
-		} else {
-			if(add_or_remove) {
-				map_id_control[it->control->id] = it->control;
-			} else {
-				map_id_control.erase(it->control->id);
-			}
+	
+	if(old_active_control) {
+		Control* p = old_active_control;
+		while(p && !p->inSelectedBranch()) {
+			p->OnLostControl();
+			p->emitEvent("lostcontrol");
+			p = p->parent;
 		}
 	}
 }
 
-void Gui::unselectWidget() {
-	if(last_selected_widget) {
-		if(selected_control) {
-			unselectControl();
+void Gui::unselectControls() {
+	// unselectControl();
+	
+	// nullify all control->sel_control
+	if(sel_parent) {
+		for(Control* w = sel_parent; w; w = w->parent) {
+			w->sel_control = 0;
 		}
-		Widget* lsw = last_selected_widget;
-		lsw = lsw->widget;
-		if(lsw) {
-			lsw->selected_control = 0;
-		}
-		last_selected_widget = lsw;
-		depth--;
+		sel_parent = 0;
 	}
+	sel_control = 0;
+	depth = 0;
 }
 
-void Gui::unselectWidgets() {
-	if(selected_control) {
-		unselectControl();
-	}
-	if(last_selected_widget) {
-		Widget* w = last_selected_widget;
-		while(w) {
-			w->selected_control = 0;
-			w = w->widget;
-		}
-		last_selected_widget = 0;
-		depth = 0;
-	}
-	// active_control = 0;
+
+Control* Gui::GetSelectedControl() {
+	return sel_control;
+}
+
+Control* Gui::GetSelectedWidget() {
+	if(sel_control) { return sel_control->parent; } else return 0;
+}
+
+Control* Gui::GetActiveControl() {
+	return active_control;
 }
 
 void Gui::unselectControl() {
-	if(!selected_control) return;
-	selected_control->OnLostControl();
-	selected_control->emitEvent("leave");
-	m_focus_lock = false;
-	m_keyboard_lock = false;
-	if(selected_control->widget) {
-		selected_control->widget->selected_control = 0;
+	if(!sel_control) {
+		return;
 	}
-	selected_control = 0;
+	
+	// remove locks
+	m_keyboard_lock = false;
+	m_focus_lock = false;
+	
+	/*
+	if(sel_control == &rootWidget) {
+		rootWidget.sel_control = 0;
+		sel_control = 0;
+		return;
+	}
+	*/
+	// TODO: review
+	// sel_control->OnLostControl();
+	// sel_control->emitEvent("leave");
+	
+	
+	// sel_parent->sel_control = 0
+	/*
+	if(sel_parent) {
+		std::cout << "Sel_control: " << sel_control->GetId() << "\n";
+		std::cout << "sel_parent: " << sel_parent->GetId() << " : " << sel_control->parent->GetId() << "\n";
+	}
+	*/
+	if(sel_control->parent) {
+		sel_control->parent->sel_control = 0;
+	}
+	// select parent
+	sel_control = sel_control->parent;
+	
 }
 
 #ifdef USE_EVENT_QUEUE
-	bool Gui::HasEvents( ) {
-		return !m_events.empty();
-	}
+bool Gui::HasEvents() {
+	return !m_events.empty();
+}
 
-	Event Gui::PopEvent() {
-		Event evt = m_events.front();
-		m_events.pop();
-		return evt;
-	}
+Event Gui::PopEvent() {
+	Event evt = m_events.front();
+	m_events.pop();
+	return evt;
+}
 #endif
 
 void Gui::SetRelativeMode(bool relative_mode) {
@@ -889,123 +911,169 @@ void Gui::SetRelativeMode(bool relative_mode) {
 
 // OnEvent function
 void Gui::OnEvent( std::string id, std::string event_type, EventCallback callback ) {
-	auto it = map_id_control.find(id);
-	if(it != map_id_control.end()) {
-		it->second->OnEvent(event_type, callback);
+	Control* c = rootWidget.Get<Control>(id);
+	if(c) {
+		c->OnEvent(event_type, callback);
 	}
 }
 
-std::map<std::string, EventCallback> Gui::function_map  __attribute__ ((init_priority (200))) ;
+void Gui::MtLock() {
+	mutex->lock();
+}
+void Gui::MtUnlock() {
+	mutex->unlock();
+}
+
+std::map<std::string, EventCallback> Gui::function_map  __attribute__ ((init_priority (200)));
 
 bool Gui::AddFunction( std::string function_name, EventCallback callback ) {
 	function_map[function_name] = callback;
 	return true;
 }
 
+void Gui::CallFunc( std::string function_name, const Argv& a ) {
+	Args args;
+	args.event_args = a;
+	function_map[function_name](args);
+}
 // ------------------------------------------------------------------------------
 
+void Gui::OnKeyDown( KeyFunc f) {
+	m_keydown_cb.push_back(f);
+}
+void Gui::OnKeyUp( KeyFunc f) {
+	m_keyup_cb.push_back(f);
+}
 
-	void Gui::OnKeyDown( Keycode sym, Keymod mod) {
-		if(active_control) {
-			INTERCEPT_HOOK_KEYBOARD(key_down, OnKeyDown( sym, mod ));
+void Gui::OnKeyDown( Keycode sym, Keymod mod) {
+	std::unique_lock<std::mutex> lock(*mutex);
+	if(active_control) {
+		INTERCEPT_HOOK_KEYBOARD(key_down, OnKeyDown( sym, mod ));
+	}
+	for(auto i : m_keydown_cb) {
+		i(sym,mod);
+	}
+}
+
+void Gui::OnKeyUp( Keycode sym, Keymod mod ) {
+	std::unique_lock<std::mutex> lock(*mutex);
+	if(active_control) {
+		INTERCEPT_HOOK_KEYBOARD(key_up, OnKeyUp( sym, mod ));
+	}
+	for(auto i : m_keyup_cb) {
+		i(sym,mod);
+	}
+}
+
+uint32_t Gui::GetFps() {
+	if(m_delta_accum > 0.2) {
+		return m_frames / m_delta_accum;
+	} else {
+		return m_fps;
+	}
+}
+
+void Gui::renderInvalidate(Control* c) {
+	
+}
+
+void Gui::Render() {
+	if(m_on_render) {
+		m_on_render();
+	}
+	std::unique_lock<std::mutex> lock(*mutex);
+	static std::chrono::high_resolution_clock::time_point time_point = std::chrono::high_resolution_clock::now();
+	
+	// measure time for animations
+	auto now = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> d = now - time_point;
+	double last_time = m_time;
+	m_time = d.count();
+	m_delta_time = m_time - last_time;
+	// --------
+	
+	// measure fps
+	m_frames++;
+	m_delta_accum += m_delta_time;
+	if(m_delta_accum > 1.0) {
+		// m_fps = m_frames / m_delta_accum;
+		m_fps = m_frames;
+		m_delta_accum = 0;
+		m_frames = 0;
+		if(m_on_fps_change) {
+			m_on_fps_change(m_fps);
 		}
 	}
-
-	void Gui::OnKeyUp( Keycode sym, Keymod mod ) {
-		if(active_control) {
-			INTERCEPT_HOOK_KEYBOARD(key_up, OnKeyUp( sym, mod ));
+	// ---------
+	
+	if(!m_tooltip_shown && sel_control && 
+		m_time - m_last_cursor_update_time > m_tooltip_delay)
+	{
+		ShowTooltip(sel_control);
+	}
+	
+	bool dragging_widget_workaround = false;
+	if(dragging && sel_control->parent) {
+		dragging_widget_workaround = true;
+		sel_control->visible = false;
+		sel_control->update_cache(CacheUpdateFlag::attributes);
+	}
+	
+	bool has_selected_control = false;
+	Point pos(0,0);
+	
+	// rootWidget.render(pos, true);
+	
+	/*
+	if(rootWidget.sel_control) {
+		Control* w = &rootWidget;
+		std::cout << "SELECTION TREE: ";
+		while(w) {
+			std::cout << w->GetId() << " => ";
+			w = w->sel_control;
+		}
+		std::cout << "\n";
+	}
+	*/
+	// TODO: review
+	for(auto &ca : rootWidget.cache) {
+		Control* const &c = ca.control;
+		if(ca.visible) {
+			if(c != sel_control) {
+				c->render(pos, c == rootWidget.sel_control);
+			} else {
+				#ifdef SELECTED_CONTROL_ON_TOP
+					has_selected_control = true;
+				#else
+					if(!dragging) {
+						c->render(pos, true);
+					}
+				#endif
+			}
 		}
 	}
 	
-	uint32_t Gui::GetFps() {
-		if(m_delta_accum > 0.2) {
-			return m_frames / m_delta_accum;
-		} else {
-			return m_fps;
+	
+	if(dragging_widget_workaround) {
+		sel_control->visible = true;
+		sel_control->update_cache(CacheUpdateFlag::attributes);
+	}
+	
+	if(dragging) {
+		const Rect& r = sel_control->GetRect();
+		sel_control->render(pos - r + drag_offset, true);
+	} else {
+		if(has_selected_control) {
+			sel_control->render(pos,true);
 		}
 	}
 	
-	void Gui::Render() {
-		static std::chrono::high_resolution_clock::time_point time_point = std::chrono::high_resolution_clock::now();
-		// measure time for animations
-		auto now = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> d = now - time_point;
-		double last_time = m_time;
-		m_time = d.count();
-		m_delta_time = m_time - last_time;
-		// --------
-		
-		// measure fps
-		m_frames++;
-		m_delta_accum += m_delta_time;
-		if(m_delta_accum > 1.0) {
-			// m_fps = m_frames / m_delta_accum;
-			m_fps = m_frames;
-			m_delta_accum = 0;
-			m_frames = 0;
-			if(m_on_fps_change) {
-				m_on_fps_change(m_fps);
-			}
-		}
-		// ---------
-		
-		if(!m_tooltip_shown && selected_control && 
-			m_time - m_last_cursor_update_time > m_tooltip_delay)
-		{
-			ShowTooltip(selected_control);
-		}
-		
-		bool dragging_widget_workaround = false;
-		if(dragging && selected_control->widget) {
-			dragging_widget_workaround = true;
-			selected_control->visible = false;
-			selected_control->update_cache(CacheUpdateFlag::attributes);
-		}
-		
-		bool has_selected_control = false;
-		Point pos(0,0);
-		for(auto &ca : cache) {
-			if(ca.visible) {
-				Control* const &c = ca.control;
-				
-				if(c != selected_control) {
-					c->render(pos, c == sel_first_depth_widget);
-				} else {
-					#ifdef SELECTED_CONTROL_ON_TOP
-						has_selected_control = true;
-					#else
-						if(!dragging) {
-							c->render(pos, true);
-						}
-					#endif
-				}
-			}
-		}
-		
-		if(dragging_widget_workaround) {
-			selected_control->visible = true;
-			selected_control->update_cache(CacheUpdateFlag::attributes);
-		}
-		
-		if(dragging) {
-			const Rect& r = selected_control->GetRect();
-			selected_control->render(pos.Offset(Point(-r.x, -r.y)).Offset(drag_offset), true);
-		} else {
-			if(has_selected_control) {
-				selected_control->render(pos,true);
-			}
-		}
-				
-		if(m_tooltip_shown) {
-			m_tooltip->engine = this;
-			m_tooltip->interactible = false;
-			static_cast<Control*>(m_tooltip)->render( Point(0,0), false );
-			m_tooltip->engine = 0;
-		}
-		
-		cursor.Render(backend.screen);
-		
+	if(m_tooltip_shown) {
+		m_tooltip->render( Point(0,0), true );
 	}
+	
+	cursor.Render(backend.screen);
+}
 	
 Cursor& Gui::GetCursor() {
 	return cursor;
@@ -1034,6 +1102,78 @@ GUIFUNC(debug) {
 	if(args.cmd_args.empty()) return;
 	std::cout << "dbg control: " << args.control->GetId() << ": " << args.cmd_args[0] << "\n";
 }
+
+// ------ forward to rootwidget -----
+
+void Gui::AddControl(Control* control, bool processlayout) {
+	rootWidget.AddControl(control, processlayout);
+}
+
+void Gui::LoadXml(std::string xml_filename) {
+	rootWidget.LoadXml(xml_filename);
+}
+
+void Gui::LoadXml(std::istream& stream) {
+	rootWidget.LoadXml(stream);
+}
+
+void Gui::BreakRow() {
+	rootWidget.BreakRow();
+}
+
+void Gui::RemoveControls() {
+	rootWidget.RemoveControls();
+}
+
+void Gui::EnableStyleGroup(std::string name, bool enable) {
+	for(auto &s : ControlManager::group_styles) {
+		if(s.name == name) {
+			s.disabled = !enable;
+			break;
+		}
+	}
+}
+
+void Gui::DisableAllStyles() {
+	for(auto &s : ControlManager::group_styles) {
+		s.disabled = true;
+		if(s.tag_id != 0) {
+			ForEachControl([&](Control* c) {
+				for(auto it = c->subscribers.begin(); it != c->subscribers.end(); ) {
+					if(it->tag == s.tag_id) {
+						it = c->subscribers.erase(it);
+						if(it == c->subscribers.end()) {
+							break;
+						}
+					} else {
+						it++;
+					}
+				}
+			});
+		}
+	}
+}
+
+const std::vector<Control*>& Gui::GetControls() {
+	return rootWidget.GetControls();
+}
+
+Control* Gui::get(const std::string& id) {
+	return rootWidget.get(id);
+}
+
+Control* Gui::CreateControl(std::string type, std::string id) {
+	return ControlManager::CreateControl(type, id);
+}
+
+void Gui::ProcessLayout(bool asRoot) {
+	rootWidget.ProcessLayout();
+}
+
+void Gui::ForEachControl(std::function<void(Control* c)> func) {
+	rootWidget.ForEachControl(func);
+}
+
 
 
 }

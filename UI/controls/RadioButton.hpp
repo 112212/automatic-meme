@@ -3,10 +3,7 @@
 
 #include "../Control.hpp"
 namespace ng {
-
-
-#define RADIO_BUTTON_RADIUS 14
-
+	
 class RadioButton : public Control {
 	private:
 		Image* m_surf_text;
@@ -15,7 +12,7 @@ class RadioButton : public Control {
 		bool m_is_mouseDown;
 		bool m_isSelected;
 		int m_group;
-		// Font* m_font;
+		int m_checksize;
 		std::string m_text;
 		void onRectChange();
 		

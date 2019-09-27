@@ -1,0 +1,5 @@
+// the configured options and settings for Tutorial
+#cmakedefine USE_SDL2_image
+#cmakedefine USE_LIBSNDFILE
+#cmakedefine USE_SDL2_ttf
+#cmakedefine USE_LIBPNG

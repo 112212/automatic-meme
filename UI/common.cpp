@@ -1,12 +1,37 @@
-#include "common.hpp"
 #include <iostream>
-
+#include <cstdarg>
+#include "common.hpp"
 namespace ng {
 	
 void printChars(char* str, int start, int end) {
 	for(int i=start; i < end-start; i++) {
 		std::cout << str[i];
 	}
+}
+
+void split_string(const std::string& str, std::vector<std::string>& values, char delimiter) {
+	size_t prevpos = 0;
+	size_t pos = str.find(delimiter, prevpos);
+	while(pos != str.npos) {
+		int len = pos-prevpos;
+		if(len != 0) {
+			values.push_back( str.substr(prevpos, len) );
+		}
+		prevpos = pos + 1;
+		pos = str.find(delimiter, prevpos);
+	}
+	if(prevpos < str.size()) {
+		values.push_back( str.substr(prevpos) );
+	}
+}
+
+void find_and_replace(std::string& source, std::string const& find, std::string const& replace) {
+    for(std::string::size_type i = 0; (i = source.find(find, i)) != std::string::npos; i += replace.length()) {
+        source.replace(i, find.length(), replace);
+    }
+}
+bool toBool(std::string str) {
+	return str == "true" || str == "1" || str=="t";
 }
 
 Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
@@ -20,39 +45,14 @@ Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
 	return {0,0,0,0};
 }
 
-
-#ifdef USE_SDL
-const char sdl_code_conversion_table[] = 
-"................................" // 32 dots
-" !\"#$%&\'()*+,-./0123456789:;<=>?@" // 33 chars
-".........................." // 26 dots
-"[\\]^_`abcdefghijklmnopqrstuvwxyz"
-;
-const char sdl_code_conversion_table_shift[] = 
-"................................" // 32 dots
-" !\"#$%&\"()*+<_>?)!@#$%^&*(::<+>?@" // 33 chars
-".........................." // 26 dots
-"{|}^_~ABCDEFGHIJKLMNOPQRSTUVWXYZ" // 32 chars
-;
-char SDLCodeToChar( int code, bool shift ) {
-	if(code <= 122) {
-		return (shift ? sdl_code_conversion_table_shift[code] : sdl_code_conversion_table[code]);
-	} else {
-		return ' ';
-	}
+std::string getString(const char* format, ...) {
+	char buffer[200];
+	va_list list;
+	va_start(list, format);
+	vsprintf(buffer, format, list);
+	return std::string(buffer);
 }
 
-#endif
 
-
-// #ifdef USE_SFML
-// const char sf_code_conversion_table[] =
-// "abcdefghijklmnopqrstuvwxyz0123456789..........[];,.'/\\`=- l\b\t......+-*/....0123456789................";
-// const char sf_code_conversion_table_shift[] =
-// "ABCDEFGHIJKLMNOPQRSTUVWXYZ)!@#$%^&*(..........{}:<>\"?|~+_ l\b\t......+-*/....0123456789................";
-// char SFMLCodeToChar( unsigned char sf_code, bool shift ) {
-	// return (shift ? sf_code_conversion_table_shift[sf_code] : sf_code_conversion_table[sf_code]);
-// }
-// #endif
 
 }

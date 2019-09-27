@@ -1,7 +1,7 @@
 #ifndef NG_WGT_RESIZER_HPP
 #define NG_WGT_RESIZER_HPP
 #include "../Control.hpp"
-#include "../Widget.hpp"
+#include "../Control.hpp"
 namespace ng {
 class WidgetResizer : public Control {
 	private:
@@ -9,7 +9,6 @@ class WidgetResizer : public Control {
 		Rect last_rect;
 	public:
 		WidgetResizer();
-		
 		void OnMouseMove( int mX, int mY, bool mouseState );
 		void OnMouseDown( int mX, int mY, MouseButton button );
 		void OnMouseUp( int mX, int mY, MouseButton button );

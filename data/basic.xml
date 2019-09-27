@@ -1,18 +1,30 @@
 <gui>
-	<theme>
-		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" down_color="#00ff00" onhover="play_sound click.wav" />
-		<radiobutton onhover="play_sound click.wav" />
-		<all onhover="play_sound click.wav" />
+	<resources>
 <!--
+		<font name="default" engine="tiledfont" file="data/lazyfont.bmp" fontsize="10" tilesize="39,55" bgcolor="#0000ffff" />
+-->
+		<font name="default" engine="tiledfont" file="data/lazyfont.bmp" fontsize="10" tilesize="39,55" bgcolor="#0000ffff" />
+	</resources>
+	
+	<theme>
+		<style for="**" bgcolor="#ff00ff00" />
+<!--
+		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" down_color="#00ff00" onhover="play_sound data/click2.wav" />
+-->
+<!--
+		<button backgroundcolor="#050550" font="default,20" down_color="#00ff00" onhover="play_sound data/click2.wav" />
+		<radiobutton onhover="play_sound data/click2.wav" />
+		<all onhover="play_sound data/click2.wav" />
+
 		<listbox onhover="play_sound click.wav"/>
-		<canvas onhover="play_sound click.wav" />
+		
 		<textbox onhover="play_sound click.wav" />
 		<checkbox onhover="play_sound click.wav" />
 		<label onhover="play_sound click.wav" />
 		<combobox onhover="play_sound click.wav" />
 		<trackbar onhover="play_sound click.wav" />
 -->
-
+<canvas onhover="play_sound click.wav" />
 <!--
 		<terminal>
 			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" backgroundcolor="#33777777" bordercolor="#FF1228D1" hoverbordercolor="#FF1228D1" />
@@ -25,12 +37,15 @@
 	</theme>
 -->
 
-	<button value="heyyyy" rect="0,0,150,200" />
+	<button value="abcdef" rect="0,0,150,200" bgcolor="#ff00ff00" />
+	<trackbar rect="0,0,100,30"/>
+	<graph rect="0,0,300,300"/>
 	<radiobutton value="heyyyy" rect="0,0,150,30" />
 	<radiobutton value="heyyyy" rect="0,0,150,30" />
 	<radiobutton value="heyyyy" rect="0,0,150,30" />
 	<radiobutton value="heyyyy" rect="0,0,150,30" />
 	<checkbox value="checkbox yay" rect="0,0,150,30" />
+	
 	<combobox id="combo"  rect="0,0,150,30">
 		<item>hehe</item>
 		<item>heha</item>
@@ -38,14 +53,29 @@
 	</combobox>
 	<br/>
 	<label value="yey ^rhaha ^git works" rect="0,0,300,30" />
-	<listbox rect="0,0,400,200"  backgroundcolor="#00000000" image="apng.png">
+	
+	<listbox rect="0,0,400,200"  backgroundcolor="#ff0000ff">
 		<item>ow yea</item>
 		<item>cool</item>
 		<item>awesome</item>
 	</listbox>
+<!--
 	<textbox value="ow yeah" rect="0,0,200,100" multiline="true"/>
-	<trackbar min="0" max="100" value="10"/>
+	<trackbar rect="0,0,200,30" min="0" max="100" value="10"/>
 	<br/>
-	<canvas rect="0,0,500,500"/>
-	
+-->
+	<canvas rect="0,0,500,500" bgcolor="#ff00ff00" color="#ffff0000"/>
+	<tabcontainer id="tabcontainer" rect="0,0,200,100">
+		<tab name="tab1">
+			<button id="hh1" value="wut" rect="0,0,50,50"  tooltip="heyyy"/>
+		</tab>
+		
+		<tab name="tab2">
+			<button id="hh4" value="btn1" rect="0,0,50,50"/>
+			<button id="hh5" value="btn2" rect="0,0,50,50"/>
+		</tab>
+		<tab name="haha">
+			<button id="hh" value="haha"/>
+		</tab>
+	</tabcontainer>
 </gui>

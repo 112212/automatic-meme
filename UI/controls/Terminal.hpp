@@ -3,13 +3,13 @@
 
 #include <unordered_map>
 
-#include "../Widget.hpp"
+#include "../Control.hpp"
 #include "TextBox.hpp"
 #include "../managers/Effects.hpp"
 
 namespace ng {
 
-class Terminal : public Widget {
+class Terminal : public Control {
 	private:
 		TextBox *m_log;
 		Effects::AutoFade* m_log_fade_effect;

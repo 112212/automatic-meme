@@ -24,10 +24,10 @@ void ProgressBar::Render( Point pos, bool isSelected ) {
 	int text_space = 20;
 	int brightness = 100;
 	
-	Drawing().FillRect(r.x+pos.x, r.y+pos.y, m_value*r.w/100, r.h, bar_color > 0 ? bar_color : Color::GetColor(brightness - (m_value * brightness / 100), m_value * brightness / 100, 0, 255));
-	Drawing().TexRect(r.x+pos.x + r.w / 2 - progress_text.w/2, r.y+pos.y, progress_text.w, progress_text.h, progress_text.tex, false, progress_text.w, progress_text.h);
-	
 	Control::Render(pos, isSelected);
+	Drawing().FillRect(r.x+pos.x, r.y+pos.y, m_value*r.w/100, r.h, bar_color > 0 ? bar_color : Color::GetColor(brightness - (m_value * brightness / 100), m_value * brightness / 100, 0, 255));
+	Drawing().TexRect(r.x+pos.x + r.w / 2 - progress_text.w/2, r.y+pos.y+(r.h-progress_text.h)/2, progress_text.w, progress_text.h, progress_text.tex, false, progress_text.w, progress_text.h);
+	
 }
 
 
@@ -54,7 +54,20 @@ int ProgressBar::GetValue() {
 
 void ProgressBar::SetValue( int value ) {
 	ColorString str(std::to_string(value) + "%");
+	
+	if(!m_style.font) {
+		std::cout << "[ERROR] Missing font for progress bar: " << GetId() << "\n";
+		return;
+	}
+	
 	Image* img = str.get_image(m_style.font, 0);
+	if(progress_text.tex) {
+		delete progress_text.tex;
+	}
+	Size s = img->GetImageSize();
+	progress_text.w = s.w;
+	progress_text.h = s.h;
+	progress_text.tex = img;
 	m_value = value;
 }
 

@@ -1,13 +1,13 @@
-#ifndef _H__CONTAINER
-#define _H__CONTAINER
+#ifndef NG_CONTAINER
+#define NG_CONTAINER
 
 #include "../Control.hpp"
-#include "../Widget.hpp"
+#include "../Control.hpp"
 #include "ScrollBar.hpp"
 
 
 namespace ng {
-class Container : public Widget {
+class Container : public Control {
 	private:
 		int m_grid_w, m_grid_h;
 		bool m_is_mouseDown;
@@ -25,7 +25,7 @@ class Container : public Widget {
 		bool isOnHorizontalScrollbar( int x, int y );
 		inline void transformCoords( int &x, int &y );
 		static int depth;
-		Widget* innerWidget;
+		Control* innerWidget;
 		
 		void OnSetStyle(std::string& style, std::string& value);
 	public:
@@ -41,7 +41,7 @@ class Container : public Widget {
 		void OnMouseMove( int x, int y, bool lmb );
 		
 		void AddItem( Control* control );
-		void AddControl( Control* control );
+		void AddControl( Control* control, bool processlayout=true );
 };
 
 }

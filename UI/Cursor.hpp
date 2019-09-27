@@ -1,5 +1,5 @@
-#ifndef CURSORS_HPP
-#define CURSORS_HPP
+#ifndef NG_CURSORS_HPP
+#define NG_CURSORS_HPP
 #include <string>
 #include <vector>
 
@@ -33,7 +33,7 @@ private:
 public:
 	
 	Cursor();
-	void SetCursor(int x, int y);
+	void SetCursor(int x, int y); // TODO: -> SetCursorPosition
 	void SetRelativeMode(bool relativemode);
 	void SetSize(int w, int h);
 	void SetSize(CursorType type, int w, int h);
@@ -44,13 +44,9 @@ public:
 	void SetCursorImage(CursorType type, std::string filename, Point offset);
 	void SetCursorImage(CursorType type, Image* img, Point offset);
 	void Render(Screen* screen);
-	
 
 	static void Init();
 	static void Deinit();
-	
-
-
 };
 }
 #endif

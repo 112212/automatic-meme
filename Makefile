@@ -1,54 +1,66 @@
 
-# all: dirs
-# 	@echo choose target 'sdl_test' or 'sfml_test' which doesn\'t work yet
-	
-build := build
+##############################
+### default configuration ####
+##############################
+backend := sdl2
+platform := linux
+USE_SDL2_image := y
+USE_SDL2_ttf := y
+USE_OPENGL := n
+USE_LIBSNDFILE := n
+USE_LIBBMP := y
+USE_LIBPNG := y
+USE_PTHREAD := n
+###############################
 
+# CORE
 cpp = \
 	UI/Gui.cpp \
 	UI/Control.cpp \
-	UI/Widget.cpp \
-	\
+	UI/Layout.cpp \
 	UI/common.cpp \
-	UI/managers/ControlManager.cpp \
-	UI/managers/Fonts.cpp \
-	UI/managers/Images.cpp \
-	UI/managers/Sounds.cpp \
-	UI/managers/Effects.cpp \
+	UI/Font.cpp \
 	UI/Color.cpp \
 	UI/ColorString.cpp \
 	UI/Cursor.cpp \
 	UI/Image.cpp \
 	UI/BasicImage.cpp \
 	UI/Sound.cpp \
+	UI/File.cpp \
 	UI/TiledImage.cpp \
 	UI/TiledFont.cpp \
-	\
-	UI/Font.cpp \
+	UI/managers/ControlManager.cpp \
+	UI/managers/Fonts.cpp \
+	UI/managers/Images.cpp \
+	UI/managers/Sounds.cpp \
+	UI/managers/Effects.cpp \
+	UI/managers/ResourceManager.cpp \
 	UI/backend/Speaker.cpp \
 	UI/backend/Screen.cpp \
-	
-	
-	
 
 exe := 
 link := 
 defs := 
+build_dirs = UI/ UI/managers UI/backend UI/extensions/ lib/libbmp lib/bmpread
 
-.PHONY: dirs, sfml_test, sdl_test
+
+.PHONY: dirs
+
 
 build := build
-
 flags := -g -Wfatal-errors
-inc := -Ilib
+inc = -Ilib -I$(build)
 
 CXX := 
 CFLAGS := 
 
-obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(cpp)))
+# obj = $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(cpp)))
 
 controls_path := UI/controls
 
+
+
+# CONTROLS
 # all controls which contains only controls with .cpp code
 control_names := Button 	    \
 				RadioButton 	\
@@ -67,82 +79,213 @@ control_names := Button 	    \
 				WidgetResizer	\
 				ProgressBar		\
 				TabContainer    \
+				Graph    		\
+				ContextMenu		\
 
-############ SFML ##############
-# sfml_test_cpp := $(cpp) SFML_test.cpp \
-# 		UI/common/SFML/Drawing.cpp \
-# 		$(addsuffix .cpp, $(addprefix $(controls_path)/SFML/, $(control_names)))
+
+
+
+build_dirs += $(controls_path)
+core_cpp := $(cpp) $(addsuffix .cpp, $(addprefix $(controls_path)/, $(control_names)))
+cpp += $(core_cpp)
+test_cpp :=
+s :=
+
+backends_dir := UI/backends
+extensions_dir := UI/extensions
+
+ifeq ($(backend_use),win32)
+	CXX := i686-w64-mingw32-
+	# CXX := x86_64-w64-mingw32-
+	build := build_win
+endif
+
+
+############ SDL2 ###############
+$(shell mkdir -p build; echo "" > $(build)/config.h)
+
+backend := sdl2
+backend_use := $(backend)
+
+ifneq (, $(filter sdl2 emscripten, $(backend_use)))
+
+	ifeq (${backend_use},emscripten)
+		CXX := em-
+		test := sdl_test.html
+		inc += -s USE_SDL=2 -s USE_SDL_TTF=2 -s USE_SDL_IMAGE=2
+		link +=  -s USE_SDL=2 -s USE_SDL_TTF=2 --embed-file data -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=2 -s USE_SDL_IMAGE=2
+	else
 		
-# sfml_test_obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(sfml_test_cpp)))
-# sfml_link := -lsfml-window -lsfml-graphics -lsfml-system -lGL
-# sfml_defs := -DUSE_SFML
-# sfml_test_exe := sfml_test
+		test := sdl_test
+		inc += $(shell /usr/local/bin/sdl2-config --cflags) -I/usr/include/SDL2
+		link +=  $(shell /usr/local/bin/sdl2-config --libs)
+		
+		ifeq (${USE_SDL2_image},y)
+			link += -lSDL2_image
+			s:=$(shell echo "\#define USE_SDL2_image" >> $(build)/config.h)
+		endif
+		
+		ifeq (${USE_PTHREAD},y)
+			link += -pthread
+			s:=$(shell echo "\#define USE_PTHREAD" >> $(build)/config.h)
+		endif
+				
+		ifeq (${USE_SDL2_ttf},y)
+			link += -lSDL2_ttf
+			backend_cpp += $(backend_dir)/SDL_TTF_Font.cpp
+			s:=$(shell echo "\#define USE_SDL2_ttf" >> $(build)/config.h)
+		endif
 
-# sfml_test_build: defs := -DUSE_SFML
-# sfml_test_build: $(sfml_test_obj)
-# 	g++ $^ -o $@ $(sfml_link)
+		ifeq (${USE_LIBSNDFILE},y)
+			link += -lsndfile
+			backend_cpp += $(extensions_dir)/SoundLibSnd.cpp
+			s:=$(shell echo "\#define USE_LIBSNDFILE" >> $(build)/config.h)
+		endif
+	endif
+	backend_use := sdl2
 	
-# sfml_test: dirs sfml_test_build
+	
+	backend_dir=$(backends_dir)/SDL2
+	build_dirs += $(backend_dir)
+	backend_cpp += \
+			$(backend_dir)/SDL_Surface_Image.cpp \
+			$(backend_dir)/SDLSound.cpp \
+			$(backend_dir)/SDLSpeaker.cpp \
+			$(backend_dir)/Backend.cpp \
+			$(backend_dir)/SDLSystem.cpp \
+			$(backend_dir)/RWOpsFromFile.cpp
+
+	ifeq (${USE_OPENGL},y)
+		backend_cpp += $(backend_dir)/SDLOpenGLScreen.cpp
+		link += -lGL -lGLEW
+		s:=$(shell echo "\#define USE_OPENGL" >> $(build)/config.h)
+	else
+		backend_cpp += $(backend_dir)/SDLScreen.cpp
+	endif
 
 
-############ SDL ###############
-sdl_test_cpp := $(cpp) \
-		$(addsuffix .cpp, $(addprefix $(controls_path)/, $(control_names))) \
-		UI/backend/SDL/SDLScreen.cpp \
-		UI/backend/SDL/SDL_Surface_Image.cpp \
-		UI/backend/SDL/SDL_TTF_Font.cpp \
-		UI/backend/SDL/SDLSound.cpp \
-		UI/backend/SDL/SDLSpeaker.cpp \
-		UI/backend/SDL/SDLBackend.cpp \
-		UI/backend/SDL/SDLSystem.cpp \
-		UI/backend/drivers/SoundLibSnd.cpp \
-		
-		
-sdl_test_obj := $(addprefix $(build)/, $(patsubst %.cpp,%.o,$(sdl_test_cpp)))
-sdl_link := -lSDL2 -lSDL2_ttf -lSDL2_image -lGL -lGLEW -lpng -lsndfile
-sdl_test_exe := sdl_test
+	exe := $(test)
+	test_cpp := tests/gui-test.cpp
 
-sdl_test_build: defs :=
-sdl_test_build: 
-sdl_test_build: $(sdl_test_obj) build/SDL_test.o
-	$(CXX)g++ $^ -o sdl_test $(sdl_link) $(CFLAGS)
+	#test_cpp := tests/wut.cpp
+	cpp += $(backend_cpp)
+	backend_use:=SDL2
+endif
+#################################
 
-sdl_test: dirs sdl_test_build
+###### LIBPNG ######
+ifeq (${USE_LIBPNG},y)
+	link += -lpng -lz
+	cpp +=	$(extensions_dir)/Image_libpng.cpp
+	s:=$(shell echo "\#define USE_LIBPNG" >> $(build)/config.h)
+endif
+#####################
 
-libout := libgui.a
+###### LIBBMP ######
+ifeq (${USE_LIBBMP},y)
+	# cpp += lib/libbmp/libbmp.cpp
+	cpp += lib/bmpread/bmpread.cpp
+	cpp += $(extensions_dir)/Image_libbmp.cpp
+	# link += lib/libbmp/libbmp.o
+	s:=$(shell echo "\#define USE_LIBBMP" >> $(build)/config.h)
+endif
+#####################
 
-sdl_lib_make: defs :=
-sdl_lib_make: $(sdl_test_obj)
+########## Xlib #################
+ifeq ($(backend_use),xlib)
+	backend_dir=$(backends_dir)/xlib
+	build_dirs += $(backend_dir)
+	backend_cpp += \
+			$(backend_dir)/Speaker.cpp \
+			$(backend_dir)/Screen.cpp \
+			$(backend_dir)/Backend.cpp \
+			$(backend_dir)/System.cpp \
+			$(backend_dir)/Font.cpp
+			
+	link += -lX11
+	exe := xlib_test
+	test_cpp := tests/gui-test.cpp
+	cpp += $(backend_cpp) 
+endif
+###############################
+
+########## XCB #################
+ifeq ($(backend_use),xcb)
+	backend_dir=$(backends_dir)/xcb
+	build_dirs += $(backend_dir)
+	backend_cpp += \
+			$(backend_dir)/Speaker.cpp \
+			$(backend_dir)/Screen.cpp \
+			$(backend_dir)/Backend.cpp \
+			$(backend_dir)/System.cpp \
+			$(backend_dir)/Font.cpp
+			
+	link += -lxcb -lxcb-image
+	exe := xcb_test
+	test_cpp := tests/gui-test.cpp
+	cpp += $(backend_cpp)
+endif
+###############################
+
+########## Win32 #################
+ifeq ($(backend_use),win32)
+	backend_dir=$(backends_dir)/win32
+	build_dirs += $(backend_dir)
+	backend_cpp := \
+			$(backend_dir)/Speaker.cpp \
+			$(backend_dir)/Screen.cpp \
+			$(backend_dir)/Backend.cpp \
+			$(backend_dir)/System.cpp \
+			$(backend_dir)/Font.cpp
+
+	link += -mwindows -static -s -lmsimg32
+	# link += -mwindows -s
+	exe := win32_test.exe
+	cpp += $(backend_cpp) tests/win32_test.cpp
+endif
+###############################
+
+# DefaultBackend
+$(shell echo "#ifdef NG_DEFAULT_BACKEND_HPP" >> $(build)/config.h)
+$(shell echo "#include \"../UI/backends/$(backend_use)/Backend.hpp\"" >> $(build)/config.h)
+$(shell echo "namespace ng {" >> $(build)/config.h)
+$(shell echo "namespace DefaultBackend = ng::$(backend_use)Backend;" >> $(build)/config.h)
+$(shell echo "}" >> $(build)/config.h)
+$(shell echo "#endif" >> $(build)/config.h)
+
+#~ sdl_link += `pkg-config --libs opencv` -pthread
+
+
+obj := $(addprefix $(build)/,$(patsubst %.cpp,%.o,$(cpp)))
+
+######### TEST ##########
+test_obj := $(addprefix $(build)/,$(patsubst %.cpp,%.o,$(test_cpp)))
+test: dirs test_exe
+
+build_dirs += tests/
+test_exe: $(obj) $(test_obj)
+	$(CXX)g++ $^ -o $(exe) $(link) $(CFLAGS)
+#########################
+
+
+########## LIB ##########
+libout := libngui.a
+lib_make: defs :=
+lib_make: $(obj)
 	$(CXX)ar r $(libout) $^
-
-sdl_lib: dirs sdl_lib_make
-
-###########################
+lib: dirs lib_make
+#########################
 
 
-	
 clean:
 	@echo project cleaned
-	@rm -f libgui.a
-	@rm -f sdl_test
-	@rm -f sfml_test
-	@rm -rf build
+	@rm -f libgui.a *_test *_test.exe
+	@rm -rf build build_win
 	
 dirs:
-	@mkdir -p $(build)
-	@mkdir -p $(build)/UI
-	@mkdir -p $(build)/UI/backend
-	@mkdir -p $(build)/UI/backend/SDL
-	@mkdir -p $(build)/UI/backend/drivers
-	@mkdir -p $(build)/UI/managers
-	@mkdir -p $(build)/UI/common
-	@mkdir -p $(build)/UI/common/SDL
-	@mkdir -p $(build)/UI/common/SFML
-	@mkdir -p $(build)/UI/controls
-	@mkdir -p $(build)/UI/controls/SDL
-	@mkdir -p $(build)/UI/controls/SFML
+	@mkdir -p $(addprefix $(build)/,$(build_dirs))
 	
 $(build)/%.o: %.cpp
-	$(CXX)g++ -c $< -o $@ -std=c++11 $(flags) $(defs) $(inc) $(CFLAGS)
+	$(CXX)g++ -c $< -o $@ -std=c++14 $(flags) $(defs) $(inc) $(CFLAGS)
 
 

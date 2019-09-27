@@ -17,6 +17,7 @@ class CheckBox : public Control {
 		Image* tex_text;
 		std::string m_text;
 		bool tmode;
+		int m_checksize;
 		void onRectChange();
 		static int m_font_index;
 		void updateText();

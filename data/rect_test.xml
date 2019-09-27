@@ -1,0 +1,117 @@
+<gui>
+	
+	<stylegroup>
+	
+		
+<!--
+		<style for="**" hoverbordercolor="#43EDF9" >
+			<style for="textbox" bordercolor="#68F943" />
+		</style>
+-->
+		
+			<style for="control/control/button" hoverbordercolor="#F95543">
+				<control></control>
+			</style>
+<!--
+		<style for="*">
+			<style for="control">
+				<style for="button" hoverbordercolor="#FF00DE"/>
+			</style>
+			<style for="button" hoverbordercolor="#A9F943">
+				<control></control>
+			</style>
+		</style>
+		
+		<style for="**">
+			<style for="#haha" hoverbordercolor="#FF2000" />
+		</style>
+	
+-->
+	</stylegroup>
+	
+	<control rect="R,M">
+		<control rect="0,0" >
+			<button rect="0,0,100,30" value="a" />
+			<button rect="0,0,100,30" value="b" id="haha" />
+			<button rect="0,0,100,30" value="c" />
+		</control>
+	</control>
+	
+	<control rect="R,T,(200,500)" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+	
+	
+	
+	
+	<control rect="R,B,1/4W,30" >
+		<button rect="0,0,2/4W,30" padding="10,10,5,5" value="a" />
+		<button rect="0,0,1/4W,30" padding="10,10,5,5" value="b" />
+		<button rect="0,0,1/4W,30" padding="10,10,5,5" value="c" />
+	</control>
+	
+	
+	<dialog rect="L,T,(60,400),(0,300)" caption="test" 
+	onhover2="style labela font default,10; style caption selected:test" 
+	onleave2="style labela font default,12; style caption test" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+		<br/>
+		<label id="labela" value="HEYYA" />
+		<label value="HEYYA" />
+		<br/>
+		<label id="omg" value="hehe
+haha
+hehe
+cool" align="center" />
+	</dialog>
+	
+	
+	<control rect="L,B" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+	
+	
+	<control rect="L,M" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+	
+	<control rect="M,M" id="wut">
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,50%W,100,30" value="b" />
+		<br/>
+		<button rect="0,0,100,30" value="c" />
+		
+	</control>
+	<control rect="M,T" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+	<control rect="M,B" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+	
+	
+	<control rect="M,B" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+<!--
+	<control rect="M+0.3w,B" >
+		<button rect="0,0,100,30" value="a" />
+		<button rect="0,0,100,30" value="b" />
+		<button rect="0,0,100,30" value="c" />
+	</control>
+-->
+</gui>

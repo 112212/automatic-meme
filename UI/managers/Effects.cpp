@@ -4,6 +4,37 @@
 #include "../Gui.hpp"
 namespace ng {
 namespace Effects {
+	// Fade
+	Fade::Fade(double time, bool direction) : OneShotEffect("Fade", time) {
+		this->direction = direction;
+	}
+	
+	void Fade::Init() {
+		if(direction) {
+			control->SetStyle("visible", "t");
+		}
+	}
+	
+	void Fade::OnRemove() {
+		if(!direction) {
+			control->SetStyle("visible", "f");
+		}
+	}
+	
+	void Fade::PreRender() {
+		double alpha = time/end_time;
+		if(!direction) {
+			alpha = 1-alpha;
+		} 
+		Drawing().PushMaxAlpha(alpha);
+	}
+	
+	void Fade::PostRender() {
+		Drawing().PopMaxAlpha();
+	}
+	
+	// AutoFade
+	
 	AutoFade::AutoFade(double delay, double fade_speed) : Effect("AutoFade") {
 		this->delay = delay;
 		timer = 0;
@@ -81,9 +112,8 @@ namespace Effects {
 		
 	}
 	
-	Move::Move(Point target_point, double time) : OneShotEffect("Move") {
+	Move::Move(Point target_point, double time) : OneShotEffect("Move", time) {
 		this->target_point = target_point;
-		end_time = time;
 	}
 	
 	// ----------------------------------
@@ -104,9 +134,8 @@ namespace Effects {
 		
 	}
 	
-	Resize::Resize(Point target_size, double time) : OneShotEffect("Resize") {
+	Resize::Resize(Size target_size, double time) : OneShotEffect("Resize", time) {
 		this->target_size = target_size;
-		end_time = time;
 	}
 	
 }

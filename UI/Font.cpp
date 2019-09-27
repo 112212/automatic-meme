@@ -11,7 +11,7 @@ Font::Font() {
 }
 
 GlyphMetrics Font::GetGlyphMetrics( uint32_t c ) {
-	
+	return {};
 }
 
 void Font::BlitText( Image* img, int x, int y, std::string text, uint32_t color ) {
@@ -19,7 +19,7 @@ void Font::BlitText( Image* img, int x, int y, std::string text, uint32_t color 
 }
 
 Image* Font::GetTextImage( std::string text, uint32_t color ) {
-	
+	return 0;
 }
 
 Font::~Font() {
@@ -92,6 +92,16 @@ int Font::GetMaxTextBw(const std::string &text, int width) {
 
 int Font::GetHeight() {
 	return GetGlyphMetrics('A').height;
+}
+
+
+std::string Font::ClipText( std::string s, int w ) {
+	int maxtext = GetMaxText( s, w );
+	if( maxtext < s.size() ) {
+		return s.substr( 0, maxtext-3 ) + "..";
+	} else {
+		return s;
+	}
 }
 
 }

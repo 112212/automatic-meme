@@ -4,16 +4,19 @@ namespace ng {
 Canvas::Canvas() {
 	setType( "canvas" );
 	pixel_size = 1;
-	pixel_color = 0xffffffff;
+	m_pixel_color = 0xffffffff;
 
-	last_x = last_y = -1;
+	last_pt = {-1,-1};
 	m_is_readonly = false;
-	align_to_grid = false;
-	display_grid = false;
+	m_align_to_grid = false;
+	m_display_grid = false;
+	m_grid_size_mode = false;
 	m_should_update_texture_sizes = false;
 	maketex = true;
+	m_pixel_size = {1,1};
+	m_grid_size = {1,1};
 	m_style.background_color = 0;
-	grid_color = 0xff808080;
+	m_grid_color = 0xff808080;
 	AddLayers(1);
 	Clear(0,0);
 }
@@ -22,39 +25,71 @@ Canvas::~Canvas() {
 	
 }
 
-void Canvas::Render( Point pos, bool isSelected ) {
-	const Rect& rect = GetRect();
-	int x = rect.x + pos.x;
-	int y = rect.y + pos.y;
+void Canvas::drawGrid(Point p) {
+	Rect r = GetRect();
 	
-	Drawing().FillRect(x, y, rect.w, rect.h, m_style.background_color );
-	Control::Render(pos, isSelected);
-	// 
-	for(auto rit = layers.rbegin(); rit != layers.rend(); rit++) {
-		Drawing().TexRect( x, y, &(*rit) );
+	float fw = (float)r.w / (float)m_grid_size.w;
+	float fh = (float)r.h / (float)m_grid_size.h;
+	
+	// horizontal lines
+	for(float y=0; y < r.h; y+=fh) {
+		Drawing().Line( Point(p.x, p.y + y), Point(p.x + r.w, p.y + y), m_grid_color );
 	}
+	
+	// vertical lines
+	for(float x=0; x < r.w; x+=fw) {
+		Drawing().Line( Point(p.x + x, p.y), Point(p.x + x, p.y + r.h), m_grid_color );
+	}
+}
 
+void Canvas::Render( Point p, bool isSelected ) {
+	const Rect& rect = GetRect();
+	Point pt = rect + p;
+	
+	Drawing().FillRect(pt.x, pt.y, rect.w, rect.h, m_style.background_color );
+	Control::Render(p, isSelected);
+	
+	// render layers in reverse
+	for(auto rit = layers.rbegin(); rit != layers.rend(); rit++) {
+		Drawing().TexRect( pt.x, pt.y, &(*rit) );
+	}
+	drawGrid(pt);
 }
 
 void Canvas::RefreshTexture() {
 	maketex = true;
 }
 
+void Canvas::SetGridSize(Size size) {
+	m_grid_size_mode = true;
+	Rect r = GetRect();
+	m_pixel_size = { (float)r.w / size.w, (float)r.h / size.h };
+	m_grid_size = size;
+}
+
 void Canvas::OnSetStyle(std::string& style, std::string& value) {
 	STYLE_SWITCH {
 		_case("grid"):
-			display_grid = (value == "true" );
+			m_display_grid = toBool(value);
 			maketex=true;
 		_case("pixel_size"):
-			SetPixelSize( std::stoi( value ) );
+			SetPixelSize( std::stoi(value) );
 		_case("align_to_grid"):
-			SetAlignToGrid( value == "true" );
+			SetAlignToGrid( toBool(value) );
 		_case("color"):
-			if(value[0] == '#') SetPixelColor( Color::ParseColor(value)  ); 
+			if(value[0] == '#') {
+				SetPixelColor(Color::ParseColor(value)); 
+			}
+		_case("grid_size"):
+			{
+				std::vector<std::string> wh;
+				split_string(value, wh, ',');
+				SetGridSize(Size(std::stoi(wh[0]), std::stoi(wh[1])));
+			}
 		_case("grid_color"):
-			grid_color = Color::ParseColor(value);
+			m_grid_color = Color::ParseColor(value);
 		_case("readonly"):
-			SetReadOnly( value == "true" );
+			SetReadOnly(toBool(value));
 		_case("layers"):
 			SetLayers(std::stoi(value));
 	}
@@ -65,7 +100,7 @@ void Canvas::SetBackgroundColor(int color) {
 }
 
 void Canvas::SetPixelSize(int size) {
-	pixel_size = size;
+	m_pixel_size = {(float)size,(float)size};
 }
 
 BasicImage& Canvas::GetLayer(int layer) {
@@ -90,7 +125,6 @@ void Canvas::SetLayers(int layers) {
 	while(layers < this->layers.size()) {
 		this->layers.pop_back();
 	}
-	
 	while(layers > this->layers.size()) {
 		this->layers.emplace_back(r.w, r.h);
 	}
@@ -98,9 +132,44 @@ void Canvas::SetLayers(int layers) {
 
 void Canvas::OnMouseDown( int mX, int mY, MouseButton button ) {
 	if(!m_is_readonly) {
-		PutPixel(mX-GetRect().x, mY-GetRect().y);
+		PutPixel(mX, mY);
 	}
 	m_is_mouseDown = true;
+}
+
+int Canvas::GetPixel(int x, int y, int layer) {
+	if(layer >= layers.size()) {
+		return 0;
+	}
+
+	Point p(x,y);
+	if(m_align_to_grid) {
+		alignToGrid(p);
+	}
+	
+	auto &l = layers[layer];
+	auto *img = l.GetImage();
+	auto s = l.GetImageSize();
+	return img[p.y * s.w + p.x];
+}
+
+int Canvas::GetGridPixel(int x, int y, int layer) {
+	if(layer >= layers.size()) {
+		return 0;
+	}
+	
+	Point p(x*m_pixel_size.w,y*m_pixel_size.h);
+	alignToGrid(p);
+	
+	auto &l = layers[layer];
+	auto *img = l.GetImage();
+	auto s = l.GetImageSize();
+	return img[p.y * s.w + p.x];
+}
+
+void Canvas::alignToGrid(Point& p) {
+	p.x = (int)(p.x / m_pixel_size.w) * m_pixel_size.w;
+	p.y = (int)(p.y / m_pixel_size.h) * m_pixel_size.h;
 }
 
 void Canvas::PutPixel(int x, int y, int layer) {
@@ -109,20 +178,21 @@ void Canvas::PutPixel(int x, int y, int layer) {
 		return;
 	}
 	
-	x -= pixel_size/2;
-	y -= pixel_size/2;
 	
-	if(align_to_grid) {
-		x = x - x%pixel_size;
-		y = y - y%pixel_size;
+	// Point p(x + m_pixel_size.w/2,y + m_pixel_size.h/2);
+	Point p(x,y);
+	if(m_align_to_grid) {
+		alignToGrid(p);
 	}
-	int i,j;
-	// Size &r = layers[0].GetTextureSize();
-	for(i=0; i < pixel_size; i++) {
-		for(j=0; j < pixel_size; j++) {
-			layers[layer].Pixel(Point(x+j,y+i), pixel_color);
+	
+	
+	auto &l = layers[layer];
+	for(int y1=0; y1 < m_pixel_size.h; y1++) {
+		for(int x1=0; x1 < m_pixel_size.w; x1++) {
+			l.Pixel(Point(p.x+x1, p.y+y1), m_pixel_color);
 		}
 	}
+	l.Refresh();
 }
 
 void Canvas::updateTextureSizes() {
@@ -144,31 +214,34 @@ Canvas* Canvas::Clone() {
 }
 
 void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
-	
-	if(!m_is_readonly && mouseState && CheckCollision(mX, mY)) {
-		int x = mX - GetRect().x;
-		x = clip(x, 0, GetRect().w-1);
-		int y = mY - GetRect().y;
-		y = clip(y, 0, GetRect().h-1);
+	const Rect &r = GetRect();
+	if(!m_is_readonly && mouseState && CheckCollision(Point(mX,mY)+r)) {
+		int x = mX;
+		int c = 2;
+		x = clip(x, c, r.w-c);
+		int y = mY;
+		y = clip(y, c, r.h-c);
 		
-		if(last_x < 0 || last_y < 0) {
-			last_x = x;
-			last_y = y;
+		Point pt(x,y);
+		
+		if(last_pt.x < 0 || last_pt.y < 0) {
+			last_pt = pt;
 		}
 
-		
-		layers.front().Line(Point(x, y), Point(last_x, last_y), pixel_color);
-		
-		last_x = x;
-		last_y = y;
+		if(m_grid_size_mode) {
+			PutPixel(pt.x, pt.y);
+		} else {
+			layers.front().Line(pt, last_pt, m_pixel_color);
+		}
+		last_pt = pt;
 		
 		emitEvent( "change" );
 	}
 }
 
-void Canvas::OnMouseUp( int mX, int mY, MouseButton which_button ) {
+void Canvas::OnMouseUp( int mX, int mY, MouseButton btn ) {
 	m_is_mouseDown = false;
-	last_x = last_y = -1;
+	last_pt = {-1,-1};
 }
 
 void Canvas::OnLostFocus() {
@@ -177,6 +250,9 @@ void Canvas::OnLostFocus() {
 
 void Canvas::onRectChange() {
 	updateTextureSizes();
+	if(m_grid_size_mode) {
+		SetGridSize(m_grid_size);
+	}
 }
 
 }

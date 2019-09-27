@@ -8,6 +8,7 @@
 #include "utf8/utf8.h"
 
 #define USE_UTF8
+using std::cout; using std::endl;
 
 namespace ng {
 static const char* colormap[10] = { 
@@ -18,6 +19,7 @@ static const char* colormap[10] = {
 	"\x1b[33m", // yellow
 	"\x1b[36m", // cyan
 	"\x1b[35m", // purple
+	"\x1b[35m", // purple
 };
 
 static const unsigned int i_colormap[] = {
@@ -27,9 +29,10 @@ static const unsigned int i_colormap[] = {
 	0xff00ff00,
 	0xffffff00,
 	0xff00ffff,
-	0xffff00ff
+	0xffff00ff,
+	0xff101010
 };
-const char *c_colormap = "wrbgycp";
+const char *c_colormap = "wrbgycpB";
 
 ColorString::ColorString() {}
 
@@ -40,6 +43,7 @@ ColorString::ColorString(const std::string& a) {
 ColorString& ColorString::insert (size_t pos, const std::string& str) {
 	*this = csubstr(0,pos) + ColorString(str) + csubstr(pos);
 	calc_len();
+	return *this;
 }
 
 std::string ColorString::GetRawString() {
@@ -81,6 +85,7 @@ void ColorString::process_string(const char* str) {
 					case 'y': a.color = Attribute::Color::yellow; break;
 					case 'c': a.color = Attribute::Color::cyan; break;
 					case 'p': a.color = Attribute::Color::purple; break;
+					case 'B': a.color = Attribute::Color::black;break;
 					default: 
 						m_str[c++] = '^';
 						continue;
@@ -235,6 +240,13 @@ ColorString ColorString::csubstr (size_t pos, size_t len) const {
 }
 
 Image* ColorString::get_image(Font* font, int color, bool passw) {
+	if(!font) return 0;
+	if((color >> 24) != 0) {
+		if(passw) {
+			return font->GetTextImage( std::string(utf8_size(), '*'), color );
+		}
+		return font->GetTextImage( m_str, color );
+	}
 	
 	Attribute::Color last_color = (Attribute::Color)color;
 	Image* surf;
@@ -272,7 +284,6 @@ Image* ColorString::get_image(Font* font, int color, bool passw) {
 		last_pos = i.pos;
 	}
 	if(last_pos < utf8_size()) {
-		// std::string s = m_str.substr(last_pos);
 		std::string s = utf8_substr(last_pos);
 		if(s.size() > 0) {
 			Image* mini_surf = font->GetTextImage( s, i_colormap[last_color]  );
@@ -285,6 +296,7 @@ Image* ColorString::get_image(Font* font, int color, bool passw) {
 	
 	return surf;
 }
+
 
 uint32_t ColorString::operator[](int i) {
 #ifdef USE_UTF8

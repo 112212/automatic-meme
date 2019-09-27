@@ -18,4 +18,6 @@
 	#include "controls/WidgetResizer.hpp"
 	#include "controls/ProgressBar.hpp"
 	#include "controls/Form.hpp"
+	#include "controls/Graph.hpp"
+	#include "controls/ContextMenu.hpp"
 #endif

@@ -5,8 +5,8 @@ namespace ng {
 
 Terminal::Terminal() {
 	setType( "terminal" );
-	m_log = (TextBox*)CreateControl("terminal/textbox");
-	m_terminal = (TextBox*)CreateControl("terminal/textbox");
+	m_log = createControl<TextBox>("textbox", "log");
+	m_terminal = createControl<TextBox>("textbox", "terminal");
 	m_log->SetMultilineMode(true);
 	m_log->SetReadOnly(true);
 	m_log->SetStyle("colors", "false");
@@ -91,12 +91,12 @@ void Terminal::Focus() {
 
 void Terminal::Render( Point position, bool isSelected ) {
 	// cout << m_state << endl;
-	Control::Render(position, isSelected);
+	// Control::Render(position, isSelected);
 	RenderWidget(position,isSelected);
 }
 
 Terminal* Terminal::Clone() {
-	Terminal *t = new Terminal;
+	Terminal *t = new Terminal();
 	copyStyle(t);
 	return t;
 }
@@ -108,12 +108,12 @@ void Terminal::OnSetStyle(std::string& style, std::string& value) {
 	} else {
 		STYLE_SWITCH {
 			_case("wordwrap"): {
-				bool val = value == "true";
+				bool val = toBool(value);
 				m_log->SetTextWrap(val);
 				m_log->SetWordWrap(val);
 			}
 			_case("textwrap"): {
-				bool val = value == "true";
+				bool val = toBool(value);
 				m_log->SetTextWrap(val);
 			}
 			break;
@@ -169,7 +169,7 @@ void Terminal::onRectChange() {
 	a.SetSize(0,1,-h,1);
 	m_log->SetLayout(a);
 	
-	a = Layout::parseRect("0,B");
+	a = Layout("A0,B");
 	a.SetSize(0,1,h,0);
 	
 	m_terminal->SetLayout(a);

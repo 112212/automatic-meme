@@ -88,7 +88,7 @@ namespace ng {
 		// if(!should_play) {
 			// stopPlaying();
 		// }
-		
+		return 0;
 	}
 	
 	void Speaker::Process() {

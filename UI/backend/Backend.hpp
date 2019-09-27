@@ -1,12 +1,11 @@
-#ifndef BACKEND_HPP
-#define BACKEND_HPP
+#ifndef NG_BACKEND_HPP
+#define NG_BACKEND_HPP
 #include "Screen.hpp"
 #include "Input.hpp"
 #include "Speaker.hpp"
 #include "System.hpp"
 
 namespace ng {
-	
 class Backend {
 	public:
 		Backend() : screen(0), speaker(0), system(0) {}

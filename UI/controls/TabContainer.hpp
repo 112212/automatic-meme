@@ -1,16 +1,16 @@
-#ifndef _H_TAB_CONTAINER
-#define _H_TAB_CONTAINER
+#ifndef NG_TAB_CONTAINER
+#define NG_TAB_CONTAINER
 
 #include "../Control.hpp"
 #include "Container.hpp"
 namespace ng {
 
-class TabContainer : public Widget {
+class TabContainer : public Control {
 	private:
 		struct TabContext {
 			std::string tabname;
 			Control* tab;
-			Widget* widget;
+			Control* widget;
 			int tabwidth;
 		};
 		
@@ -22,16 +22,15 @@ class TabContainer : public Widget {
 		void OnMouseDown( int mX, int mY );
 		// void OnMouseUp( int mX, int mY );
 		// void OnMWheel( int updown );
-		void OnLostControl();
 		// void OnMouseMove( int mX, int mY, bool mouseState );
 		virtual void parseXml(rapidxml::xml_node<char>* node);
 	public:
 		TabContainer();
 		void Render( Point pos, bool isSelected );
 		Control* Clone();
-		Widget* NewTab(std::string tabname);
-		Widget* GetTabWidget(std::string tabname);
-		Widget* GetTabWidget(int idx);
+		Control* NewTab(std::string tabname);
+		Control* GetTabWidget(std::string tabname);
+		Control* GetTabWidget(int idx);
 };
 }
 #endif

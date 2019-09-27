@@ -1,0 +1,226 @@
+<gui>
+	<resources>
+		<image name="apng2" file="data/apng.png" />
+<!--
+		<font name="hehefont" engine="SDL2_ttf" file="data/Ubuntu-B.ttf" fontsize="20" />
+-->
+		<font name="hehe2" 	 engine="tiledfont" file="data/lazyfont.bmp" fontsize="10" tilesize="39,55" bgcolor="#0000ffff" />
+		<font name="default" engine="tiledfont" file="data/lazyfont.bmp" fontsize="10" tilesize="39,55" bgcolor="#0000ffff" />
+<!--
+		<font name="default" file="data/Ubuntu-B.ttf" fontsize="10" />
+-->
+<!--
+		<font name="default" engine="Font" font="-misc-fixed-bold-r-normal--14-130-75-75-c-70-iso8859-9" />
+-->
+<!--
+		<font name="hehe2"  file="/usr/share/fonts/TTF/Ubuntu-B.ttf" fontsize="15"  tilesize="39,55" bgcolor="#0000ffff" />
+-->
+	</resources>
+	
+	<stylegroup id="def" disabled="false">
+		<style for="**/terminal/#log" colors="true" />
+		<style for="**/terminal/#terminal" colors="false" />
+	</stylegroup>
+	
+	<stylegroup id="hehe_looks" disabled="true">
+		<style for="**" hoverbordercolor="#43EDF9" />
+		<style for="**/textbox" bordercolor="#68F943" />
+
+		<style for="*/control/button" hoverbordercolor="#FF00DE" />
+		
+		<style for="**" 
+			backgroundcolor="#30F0341D" 
+			hoverbordercolor=""
+			bordercolor=""
+			selection_color="#C68574" >
+		</style>
+		
+		<style for="**/button" backgroundcolor="" hoverimage="data/button3_hover.png" image="data/button3.png" hoverbordercolor="" font="hehefont,20"/>
+		
+		<style for="*/listbox" backgroundcolor="#501DF08F" selection_color="#A1A297" />
+		<style for="*/canvas" backgroundcolor="#537075" />
+	</stylegroup>
+	
+	<stylegroup id="interesting" disabled="true">
+		<style for="**/textbox" bordercolor="#68F943" />
+		<style for="*/control/button" hoverbordercolor="#FF00DE"/>
+		
+		<style for="**" 
+			backgroundcolor="#20F0341D" 
+			hoverbordercolor="#BCBCD1"
+			bordercolor="#7674C6"
+			selection_color="#7AC674" >
+			<style for="button" backgroundcolor="" hoverimage="apng2" image="" hoverbordercolor="#08081A" />
+		</style>
+		<style for="*/canvas" backgroundcolor="#537075" />
+	</stylegroup>
+	
+	<stylegroup id="white" disabled="true">
+		<style for="**/textbox" bordercolor="#68F943" />
+		<style for="*/control/button" hoverbordercolor="#FF00DE"/>
+		<style for="**" 
+			
+			backgroundcolor="#838080"
+			hoverbordercolor="#BCBCD1"
+			bordercolor="#7674C6"
+			selection_color="#7AC674"
+			font="default,13" >
+			
+			<style for="button" backgroundcolor="#B1AFDC" hoverimage="" image="" hoverbordercolor="" />
+			<style for="control" backgroundcolor="#a0FFFFFF" />
+		</style>
+		<style for="*/canvas" backgroundcolor="#537075" />
+	</stylegroup>
+	
+	<stylegroup id="awesome_looks" disabled="true">
+
+		<style for="**/combobox" font="hehe2" />
+		<style for="**">
+			
+			<style for="scrollbar" backgroundcolor="#30FFEA00" />
+			<style for="trackbar" backgroundcolor="#3000FFB7" />
+			
+			<style for="button" hoverimage=""/>
+		</style>
+		
+		<style for="**/button" backgroundcolor="#30FFD615" image="" downcolor="#ADC4FF" hoverbackgroundcolor="#FF1600" />
+		<style for="*/terminal/#terminal" backgroundcolor="#30FF3700" />
+		<style for="**" 
+			backgroundcolor="#800D524B" 
+			selection_color="#C68574"
+			hoverbordercolor=""
+			bordercolor=""
+			>
+			<style for="label" backgroundcolor=""/>
+		</style>
+			
+		<style for="*/tabcontainer/#tab" image="data/button.png" down_color="#60F329"/>
+		<style for="*/tabcontainer/control/*" image="data/button2.png" down_color="#60F329"/>
+		<style for="**/textbox" selection_color="#C7C877" />
+		
+		<style for="tooltip" backgroundcolor="#30FF1800"/>
+	</stylegroup>
+	
+	<control rect="A0,0,0.95W" id="keke" onrclick="show_context">
+		<control>
+			<control>
+				<button id="2" rect="0,0,100,50" font="default,30" value="test" />
+				<br/>
+				<label id="fps" value="fps" rect="0,0,100,50" tooltip="lol fps"/>
+			</control><br/>
+		</control>
+		
+		<container id="container1" rect="0,0,200,200" backgroundcolor="black">
+			<container id="container2" rect="0,0,150,150">
+				<button id="5" rect="0,0,200,50" value="1"/>
+				<button id="55" rect="0,20,200,50" value="3"/>
+				<button id="56" rect="50,105,200,50" value="4"/>
+			</container>
+		</container>
+		
+		<form rect="0,0,200" id="form" onsubmit="say submit">
+			<textbox rect="0,0,200,30" placeholder="username" onhover="say hoveeer" onleave="say lalalala" id="username" />
+			<textbox rect="0,0,200,30" placeholder="password" max_length="10" />
+			<textbox rect="0,0,200,30" placeholder="username" password="true"/>
+			<textbox rect="0,0,200,30" placeholder="password" />
+			<textbox rect="0,0,200,30" placeholder="username" />
+			<textbox rect="0,0,200,30" placeholder="password" />
+			<button rect="0,10,200,20" value="ok" id="sp" onclick="play_sound data/lol.ogg ; say should play"/>
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
+			<button rect="0,10,200,20" value="ok"/>
+		</form>
+
+		<combobox id="combo" tooltip="hehhe ahaha" rect="0,0,200,30" font="hehe2" value="3" draggable="true" onclick="hehe 6 87 hehe hhaha; hehe 5">
+			<item>heheheeh</item>
+			<item>hghfghf ow yea nice</item>
+			<item>jhgjghjhg</item>
+			<item>kjhkhj</item>
+			<item>ljklj</item>
+			<item>ytrytr</item>
+			<item>rwerew</item>
+		</combobox>
+
+	
+
+		<control noborder="true">
+			<label value="cursor size: " rect="0,0,100,30"/>
+			<trackbar id="curs" range="50,200" rect="0,0,100,30"/>
+			<br/>
+			<scrollbar id="lol" range="50,200" rect="0,10,100,30"/>
+			<scrollbar id="lol" range="50,200" orientation="vertical" rect="0,10,30,100"/>
+		</control>
+			
+		<br/>
+
+		<label id="label" align="center" rect="0,0,150,150"
+value="hehehe test1 hhfghgf hfghghgfhhhcangfdgfgfdhhgfhgf
+	test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf
+test3^g
+hehehehe
+fddgdf" rotation="50"></label>
+
+		<control id="gut" rect="0,0,expand(100,500),expand(100,500)">
+			<style onclick="style backgroundcolor #ff0000">
+				<radiobutton id="radiobutton1" rect="0,0,100,30" value="radiobutton1"></radiobutton><br/>
+				<radiobutton id="radiobutton2" rect="0,0,100,30" value="radiobutton2"></radiobutton><br/>
+				<radiobutton id="radiobutton3" rect="0,0,100,30" value="radiobutton3"></radiobutton><br/>
+				<widgetmover rect="0,0,100,20" zindex="50"></widgetmover><br/>
+				<widgetresizer rect="0,0,100,20" zindex="50" tooltip="resizes control"></widgetresizer>
+			</style>
+		</control>
+		
+		<listbox id="200" rect="0,0,200,50" value="4" hoverselectionmode="tf" onclick="lbox">
+			<item>hehehehe</item>
+			<item>hghgfhf</item>
+			<item>jhjhg</item>
+			<item>343</item>
+			<item>564645</item>
+			<item>777 :D</item>
+			<item>hehehehe</item>
+			<item>hghgfhf</item>
+			<item>jhjhg</item>
+			<item>343</item>
+		</listbox>
+		
+		<canvas rect="0,0,200,200" grid="false" color="#0000ff" pixelsize="1" aligntogrid="false" grid_color="#220000" id="canvas" ></canvas>
+		<button onclick="clear_canvas" value="clear canvas" rect="0,0,150,40"/>
+
+		<control rect="0,0">
+			<control id="put_here" rect="0,0,300,100" backgroundcolor="#ff094D33">
+				<button rect="0,0" value="button" tooltip="this button has no rect :D but uses content
+to determine size of tooltip :D" />
+			</control>
+			<br/>
+			<control id="or_here" rect="0,0,300,100">
+			</control>
+		</control>
+		
+		<trackbar rect="0,0,100,30" id="1" range="0,100" value="15" /><br/>
+		<textbox rect="0,0,100,30" id="terminal" value="" />
+		
+		<tabcontainer id="tabcontainer" rect="0,0,200,100">
+			<tab name="tab1">
+				<button id="hh1" value="wut" rect="0,0,50,50"  tooltip="heyyy"/>
+			</tab>
+			<tab name="tab2">
+				<button id="hh4" value="btn1" rect="0,0,50,50"/>
+				<button id="hh5" value="btn2" rect="0,0,50,50"/>
+			</tab>
+			<tab name="haha">
+				<button id="hh" value="haha"/>
+			</tab>
+		</tabcontainer>
+		
+<!--
+		<dialog id="dialog" caption="hehe" rect="0,0,(100,200),(100,200)" onclose="say close dialog?;position">
+			<button id="hh1" value="btn1" rect="0,0,50,50"/>
+			<button id="hh2" value="btn2" rect="0,0,50,50"/>
+			<br/>
+			<button id="hh3" value="btn3" rect="0,0,50,50"/>
+		</dialog>
+-->
+
+	</control>
+	
+</gui>

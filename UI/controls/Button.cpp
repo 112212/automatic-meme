@@ -7,9 +7,10 @@ Button::Button(std::string id) {
 	tex_text = 0;
 	need_update = false;
 	m_is_mouseDown = false;
-	m_down_color = 0xffff0000;
+	m_down_color = 0xff00ff00;
 	m_up_color = 0xffffffff;
-	m_style.background_color = Color::Dgray;
+	m_style.background_color = Color::DGray;
+	m_disabled = false;
 }
 
 Button::~Button() {
@@ -28,6 +29,8 @@ void Button::OnSetStyle(std::string& style, std::string& value) {
 			m_down_color = Color::ParseColor(value);
 		_case("up_color"):
 			m_up_color = Color::ParseColor(value);
+		_case("disabled"):
+			m_disabled = toBool(value);
 	}
 }
 
@@ -36,17 +39,22 @@ void Button::Render( Point pos, bool isSelected ) {
 	int x = r.x + pos.x;
 	int y = r.y + pos.y;
 	
-	Drawing().FillRect(x, y, r.w, r.h, m_style.background_color);
 	
-	Control::Render(pos,isSelected || isActive());
+	Control::Render(pos, isSelected);
 	
+	// draw text
 	if(tex_text) {
-		
 		Drawing().TexRect(m_text_rect.x + pos.x, m_text_rect.y + pos.y, m_text_rect.w, m_text_rect.h, tex_text);
 	}
 }
 
+
+Rect Button::GetContentRect() {
+	return m_text_rect;
+}
+
 void Button::update_text() {
+	if(m_disabled) return;
 	if(!m_style.font) return;
 	int color = m_is_mouseDown ? m_down_color : m_up_color;
 	
@@ -101,7 +109,9 @@ void Button::OnKeyUp( Keycode sym, Keymod mod ) {
 	if(sym == KEY_RETURN || sym == KEY_KP_ENTER) {
 		m_is_mouseDown = false;
 		update_text();
-		emitEvent( "click" );
+		if(!m_disabled) {
+			emitEvent( "click" );
+		}
 	}
 }
 

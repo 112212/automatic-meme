@@ -1,5 +1,5 @@
-#ifndef _SOUND_HPP_
-#define _SOUND_HPP_
+#ifndef NG_SPEAKER_HPP
+#define NG_SPEAKER_HPP
 #include <vector>
 #include <string>
 #include "../Sound.hpp"
