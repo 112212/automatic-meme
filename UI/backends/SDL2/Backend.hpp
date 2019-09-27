@@ -14,6 +14,7 @@ namespace SDL2Backend {
 	void MainLoop(Gui* gui);
 	void RegisterExtensions();
 	void SDLProcessInput(Gui* gui, SDL_Event& e);
+	void Update();
 	SDL_Window* GetWindow();
 	void CloseBackend();
 }

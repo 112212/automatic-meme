@@ -235,7 +235,7 @@ void SDLProcessInput(Gui* gui, SDL_Event& e) {
 Gui* g_gui;
 bool running;
 
-void some_loop() {
+void Update() {
 	Gui* gui = (Gui*)g_gui;
 	Size s = gui->GetSize();
 #ifdef USE_OPENGL
@@ -286,7 +286,7 @@ void MainLoop(Gui* gui) {
 #else
 	SDL_GL_SetSwapInterval(1);
 	while(running) {
-		some_loop();
+		Update();
 	}
 #endif
 	// emscripten_set_main_loop_arg(some_loop, gui, 60, 1);
