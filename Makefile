@@ -6,7 +6,7 @@ backend := sdl2
 platform := linux
 USE_SDL2_image := y
 USE_SDL2_ttf := y
-USE_OPENGL := n
+USE_OPENGL := y
 USE_LIBSNDFILE := n
 USE_LIBBMP := y
 USE_LIBPNG := y
@@ -94,18 +94,19 @@ s :=
 backends_dir := UI/backends
 extensions_dir := UI/extensions
 
+
+backend := sdl2
+backend_use := $(backend)
+
 ifeq ($(backend_use),win32)
 	CXX := i686-w64-mingw32-
 	# CXX := x86_64-w64-mingw32-
-	build := build_win
 endif
-
 
 ############ SDL2 ###############
 $(shell mkdir -p build; echo "" > $(build)/config.h)
 
-backend := sdl2
-backend_use := $(backend)
+
 
 ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 
@@ -117,8 +118,8 @@ ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 	else
 		
 		test := sdl_test
-		inc += $(shell /usr/local/bin/sdl2-config --cflags) -I/usr/include/SDL2
-		link +=  $(shell /usr/local/bin/sdl2-config --libs)
+		inc += $(shell /usr/bin/sdl2-config --cflags) -I/usr/include/SDL2
+		link +=  $(shell /usr/bin/sdl2-config --libs)
 		
 		ifeq (${USE_SDL2_image},y)
 			link += -lSDL2_image
@@ -172,6 +173,9 @@ ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 	backend_use:=SDL2
 endif
 #################################
+
+
+
 
 ###### LIBPNG ######
 ifeq (${USE_LIBPNG},y)
@@ -241,7 +245,7 @@ ifeq ($(backend_use),win32)
 	link += -mwindows -static -s -lmsimg32
 	# link += -mwindows -s
 	exe := win32_test.exe
-	cpp += $(backend_cpp) tests/win32_test.cpp
+	cpp += $(backend_cpp) tests/gui-test.cpp
 endif
 ###############################
 
@@ -275,6 +279,10 @@ lib_make: $(obj)
 	$(CXX)ar r $(libout) $^
 lib: dirs lib_make
 #########################
+
+all:
+	make lib
+	make
 
 
 clean:

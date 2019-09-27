@@ -235,7 +235,7 @@ void SDLProcessInput(Gui* gui, SDL_Event& e) {
 Gui* g_gui;
 bool running;
 
-void Update() {
+void a_loop() {
 	Gui* gui = (Gui*)g_gui;
 	Size s = gui->GetSize();
 #ifdef USE_OPENGL
@@ -248,6 +248,18 @@ void Update() {
 	SDL_RenderClear(ren);
 #endif
 	
+	Update(gui);
+	gui->Render();
+	
+#ifdef USE_OPENGL
+	SDL_GL_SwapWindow(win);
+#else
+	SDL_RenderPresent(ren);
+#endif
+}
+
+
+void Update(Gui* gui) {
 	SDL_PumpEvents();
 	SDL_Event e;
 
@@ -262,18 +274,7 @@ void Update() {
 		
 		SDLProcessInput(gui, e);
 	}
-	
-	gui->Render();
-	
-#ifdef USE_OPENGL
-	SDL_GL_SwapWindow(win);
-#else
-	SDL_RenderPresent(ren);
-#endif
 }
-
-
-
 
 void MainLoop(Gui* gui) {
 	g_gui = gui;
@@ -286,7 +287,7 @@ void MainLoop(Gui* gui) {
 #else
 	SDL_GL_SetSwapInterval(1);
 	while(running) {
-		Update();
+		a_loop();
 	}
 #endif
 	// emscripten_set_main_loop_arg(some_loop, gui, 60, 1);
@@ -297,12 +298,13 @@ void MainLoop(Gui* gui) {
 		// return;
 	// }
 	
-	SDL_StopTextInput();
+	
 	CloseBackend();
 }
 
 
 void CloseBackend() {
+	SDL_StopTextInput();
 	if(ren) {
 		SDL_DestroyRenderer(ren);
 	}
