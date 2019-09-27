@@ -846,7 +846,7 @@ void Gui::unselectControls() {
 
 
 Control* Gui::GetSelectedControl() {
-	return sel_control;
+	return sel_control != &rootWidget ? sel_control : 0;
 }
 
 Control* Gui::GetSelectedWidget() {

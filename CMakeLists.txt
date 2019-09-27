@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project("Gui Engine")
+project("NG Gui Engine")
 
 set(SOURCES
 	./UI/backend/Speaker.cpp
@@ -57,7 +57,7 @@ option(USE_LIBSNDFILE "libsndfile library" OFF)
 option(USE_LIBPNG "libpng library" OFF)
 
 
-add_executable(sdl_test tests/SDL_test.cpp)
+add_executable(sdl_test tests/gui-test.cpp)
 
 target_link_libraries(sdl_test SDL2)
 
@@ -77,22 +77,22 @@ endif()
 
 if(USE_SDL2_BACKEND)
 	set(SOURCES ${SOURCES} 
-	./UI/backend/SDL2/SDL_Surface_Image.cpp
-	./UI/backend/SDL2/SDLBackend.cpp
-	./UI/backend/SDL2/SDLSpeaker.cpp
-	./UI/backend/SDL2/SDLScreen.cpp
-	./UI/backend/SDL2/SDLSystem.cpp
-	./UI/backend/SDL2/SDLSound.cpp
-	./UI/backend/SDL2/RWOpsFromFile.cpp)
+	./UI/backends/SDL2/SDL_Surface_Image.cpp
+	./UI/backends/SDL2/Backend.cpp
+	./UI/backends/SDL2/SDLSpeaker.cpp
+	./UI/backends/SDL2/SDLScreen.cpp
+	./UI/backends/SDL2/SDLSystem.cpp
+	./UI/backends/SDL2/SDLSound.cpp
+	./UI/backends/SDL2/RWOpsFromFile.cpp)
 	if(USE_SDL2_image)
 		target_link_libraries(sdl_test SDL2_image)
 	endif()
 	if(USE_SDL2_ttf)
-		set(SOURCES ${SOURCES} ./UI/backend/SDL2/SDL_TTF_Font.cpp)
+		set(SOURCES ${SOURCES} ./UI/backends/SDL2/SDL_TTF_Font.cpp)
 		target_link_libraries(sdl_test SDL2_ttf)
 	endif()
 	if(USE_OPENGL)
-		set(SOURCES ${SOURCES} ./UI/backend/SDL2/SDLOpenGLScreen.cpp)
+		set(SOURCES ${SOURCES} ./UI/backends/SDL2/SDLOpenGLScreen.cpp)
 		target_link_libraries(sdl_test GL)
 		target_link_libraries(sdl_test GLEW)
 	endif()
@@ -103,11 +103,23 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/config.h.in"
   "${PROJECT_BINARY_DIR}/config.h"
   )
+ 
+ 
+ # add_custom_command(TARGET sdl_test
+	# POST_BUILD
+	# COMMAND echo "#ifdef NG_DEFAULT_BACKEND_HPP" >> $(build)/config.h
+	# COMMAND echo "#include \"../UI/backends/$(backend_use)/Backend.hpp\"" >> $(build)/config.h
+	# COMMAND echo "namespace ng {" >> $(build)/config.h
+	# COMMAND echo "namespace DefaultBackend = ng::$(backend_use)Backend;" >> $(build)/config.h
+	# COMMAND echo "}" >> $(build)/config.h
+	# COMMAND echo "#endif" >> $(build)/config.h
+	# )
+
 include_directories("${PROJECT_BINARY_DIR}")
-  
+
 add_library(gui STATIC ${SOURCES})
 target_include_directories(gui PRIVATE lib)
-
+include_directories(/usr/include/SDL2)
 target_link_libraries(sdl_test gui)
 
 

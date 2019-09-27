@@ -105,10 +105,7 @@ void Control::AddControl( Control* control, bool processlayout ) {
 }
 
 bool Control::isSelected() {
-	if(engine) {
-		return engine->GetSelectedControl() == this;
-	}
-	return false;
+	return engine && engine->GetSelectedControl() == this;
 }
 
 bool Control::inSelectedBranch() {

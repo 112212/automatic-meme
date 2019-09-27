@@ -283,7 +283,7 @@ void MainLoop(Gui* gui) {
 	running = true;
 	
 #ifdef EMSCRIPTEN
-	emscripten_set_main_loop(some_loop, 60, 1);
+	emscripten_set_main_loop(a_loop, 60, 1);
 #else
 	SDL_GL_SetSwapInterval(1);
 	while(running) {
