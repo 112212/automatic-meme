@@ -7,7 +7,7 @@ namespace ng {
 class ProgressBar : public Control {
 	private:
 		int m_value;
-		int bar_color;
+		uint32_t bar_color;
 		void OnSetStyle(std::string& style, std::string& value);
 		
 		struct TextLine {

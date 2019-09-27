@@ -12,7 +12,7 @@ ProgressBar::ProgressBar(std::string id) {
 	m_style.font = Fonts::GetFont( "default", 13 );
 	m_value = 0;
 	m_style.hoverborder_color = m_style.border_color;
-	bar_color = 0xffffffff;
+	bar_color = 0;
 	progress_text.tex = 0;
 }
 
