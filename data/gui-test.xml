@@ -28,7 +28,7 @@
 		<style for="**/terminal/#terminal" colors="false" />
 	</stylegroup>
 	
-	
+	<style for="**/button" onclick="playsound data/click23.wav"/>
 	
 	<stylegroup id="hehe_looks" disabled="true">
 		<style for="**" hoverbordercolor="#43EDF9" />
@@ -157,7 +157,7 @@ END OF STYLES
 			<textbox rect="0,0,200,30" placeholder="password" />
 			<textbox rect="0,0,200,30" placeholder="username" />
 			<textbox rect="0,0,200,30" placeholder="password" />
-			<button rect="0,10,200,20" value="ok" id="sp" onclick="play_sound data/lol.ogg ; say should play"/>
+			<button rect="0,10,200,20" value="ok" id="sp" onhover="playsound data/click2.wav ; say should play"/>
 			<button rect="0,10,200,20" value="ok"/>
 			<button rect="0,10,200,20" value="ok"/>
 			<button rect="0,10,200,20" value="ok"/>
@@ -315,7 +315,7 @@ to determine size of tooltip :D" />
 			<label rect="0,0,100,50" font="hehe2" value="AB" />
 			<control>
 				<button rect="0,0,50,20" value="yay"/>
-				<progressbar id="progress" rect="0,0,100,30" value="80"/>
+				
 				
 				<combobox id="themes" rect="0,0,200,20" onchange="changetheme" font="default" >
 					<item>awesome_looks</item>
@@ -338,9 +338,9 @@ to determine size of tooltip :D" />
 				
 			</control>
 	</control>
-	<textbox id="coords" value="coords" rect="0,0,100,30"/>	
+	<textbox id="coords" value="coords" rect="0,0,100,30" />	
 	
-	
+	<progressbar id="progress" rect="0,0,100,30" hover_backgroundcolor="#00ff00" backgroundcolor="#ff0000" onhover="playsound data/click2.wav" barcolor="#00000001"  value="20"/>
 	
 	
 </gui>

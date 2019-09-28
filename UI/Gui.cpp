@@ -854,7 +854,7 @@ Control* Gui::GetSelectedWidget() {
 }
 
 Control* Gui::GetActiveControl() {
-	return active_control;
+	return active_control != &rootWidget ? active_control : 0;
 }
 
 void Gui::unselectControl() {

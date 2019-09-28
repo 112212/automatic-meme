@@ -24,13 +24,13 @@
 		<combobox onhover="play_sound click.wav" />
 		<trackbar onhover="play_sound click.wav" />
 -->
-<canvas onhover="play_sound click.wav" />
 <!--
 		<terminal>
 			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" backgroundcolor="#33777777" bordercolor="#FF1228D1" hoverbordercolor="#FF1228D1" />
 		</terminal>
 -->
 	</theme>
+	<style for="**/canvas"  onhover="playsound data/click2.wav" />
 <!--
 	<theme prefix="terminal/">
 		<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" textwrap="true" wordwrap="true" />
@@ -64,7 +64,7 @@
 	<trackbar rect="0,0,200,30" min="0" max="100" value="10"/>
 	<br/>
 -->
-	<canvas rect="0,0,500,500" bgcolor="#ff00ff00" color="#ffff0000"/>
+	<canvas rect="0,0,500,500" bgcolor="#ff00ff00" color="#ffff0000" />
 	<tabcontainer id="tabcontainer" rect="0,0,200,100">
 		<tab name="tab1">
 			<button id="hh1" value="wut" rect="0,0,50,50"  tooltip="heyyy"/>

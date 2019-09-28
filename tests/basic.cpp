@@ -1,6 +1,6 @@
 #include "../UI/Gui.hpp"
 #include "../UI/AllControls.hpp"
-#include "../UI/backends/SDL2/SDLBackend.hpp"
+#include "../UI/backends/default/Backend.hpp"
 
 #include <iostream>
 #include <thread>
@@ -31,6 +31,8 @@ int main() {
 	gui.OnRender([&]() {
 		Point pt = gui.GetCursor().GetCursor();
 		// tbox->SetText(std::to_string(pt.x) + " " + std::to_string(pt.y));
+		// if (gui.GetActiveControl())
+		// std::cout << gui.GetActiveControl()->GetId() << "\n";
 		t+=2;
 	});
 	

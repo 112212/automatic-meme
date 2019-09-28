@@ -11,9 +11,9 @@ namespace ng {
 	uint32_t Speaker::canAcceptData() { return 0; }
 	
 	void Speaker::PlaySound(Sound* sound, bool loop) {
+		// std::cout << "play sound " << sound << "\n";
 		if(!sound) return;
 		
-		// std::cout << "play sound " << sound << "\n";
 		SoundData sd;
 		sd.sound = sound;
 		sd.looping = loop;
