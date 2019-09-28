@@ -19,7 +19,7 @@ Control::Control()
 	, z_index(0)
 	, sel_control(0)
 	, type("control")
-	, interactible(true)
+	, interactible(1)
 	, visible(true)
 	, use_clipping(true)
 	, intercept_mask(0)
@@ -47,6 +47,7 @@ Control::Control()
 	m_style.color = 0;
 	m_style.draggable = false;
 	m_style.hoverimg = 0;
+	update_cache(CacheUpdateFlag::attributes);
 	// std::cout << "creating control: " << type << ", "  << this << "\n";
 	layout = Layout("0,0");
 	// ------ [/ControlBase] ------
@@ -163,7 +164,7 @@ void Control::RenderWidget( Point position, bool isSelected ) {
 	// must go between these 2 "position.Offset"
 	if(use_clipping) {
 		save_clipping = Drawing().GetClipRegion(old_box.x, old_box.y, old_box.w, old_box.h);
-		int margin = 2;
+		int margin = 0;
 		old_box += Rect(-margin, -margin, margin, margin);
 		ng::Rect clipRect = ng::Rect( std::max(0,position.x-margin), std::max(0, position.y-margin), m_rect.w+margin*2, m_rect.h+margin*2 );
 		if(save_clipping) {
@@ -628,7 +629,7 @@ void Control::SetRenderable(bool visible) {
 	}
 }
 
-void Control::setInteractible(bool interactible) {
+void Control::setInteractible(int interactible) {
 	if(this->interactible != interactible) {
 		this->interactible = interactible;
 		update_cache(CacheUpdateFlag::attributes);
@@ -797,17 +798,26 @@ std::string Control::GetTooltip() {
 bool Control::CheckCollisionA(const Point& p) {
 	return CheckCollision(p - GetParentRect());
 }
-bool Control::CheckCollision(const Point& p) {
-	Rect& r = m_rect;
-	if(p.x >= r.x && p.x <= r.x+r.w && p.y >= r.y && p.y <= r.y+r.h) {
-		if(m_border) {
-			return m_border->CheckCollision(p);
+
+bool Control::checkCollision(const Point& p, bool use_interactible) {
+	if(CheckCollision(p)) {
+		if(use_interactible && interactible == 2) {
+			for(auto c = cache.rbegin(); c != cache.rend(); c++) {
+				if(c->interactible == 0) continue;
+				if(c->control->checkCollision(p - m_rect, use_interactible)) {
+					return true;
+				}
+			}
 		} else {
 			return true;
 		}
-	} else {
-		return false;
 	}
+	return false;
+}
+
+bool Control::CheckCollision(const Point& p) {
+	Rect& r = m_rect;
+	return p.x >= r.x && p.x < r.x+r.w && p.y >= r.y && p.y < r.y+r.h && (m_border ? m_border->CheckCollision(p) : 1);
 }
 
 void Control::SetRect( int x, int y, int w, int h ) {
@@ -1045,7 +1055,7 @@ void Control::render(Point position, bool isSelected) {
 	// draw border
 	Point pos = m_rect.Offset(position);
 	#ifdef SELECTION_MARK
-		if(isSelected) {
+		if(isSelected && interactible == 1) {
 			if(m_style.hoverborder_color != 0) {
 				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverborder_color );
 			}
@@ -1271,7 +1281,7 @@ void Control::SetStyle(std::string style, std::string value) {
 		_case("id"):
 			SetId(value);
 		_case("interactible"):
-			setInteractible(toBool(value));
+			setInteractible(value.find("child") != value.end() ? 2 : toBoolOrInt(value));
 		_case("visible"):
 			SetVisible(toBool(value));
 		_case("color"):

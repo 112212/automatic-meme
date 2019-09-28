@@ -59,4 +59,19 @@
 			<button id="hh" value="haha"/>
 		</tab>
 	</tabcontainer>
+	
+	
+<!--
+	<resources>
+		<font name="default" file="libs/ngui/data/Ubuntu-B.ttf" fontsize="10" />
+	</resources>
+-->
+
+	<label id="fps" value="" rect="5,0,100,20" noborder="true" align="left" interactible="false" />
+
+	<control rect="M,M+100,200,100" noborder="false" interactible="2">
+		<label id="progress_loading_filename" value="" rect="0,0,600,30" noborder="false" align="center" />
+		<br/>
+		<progressbar id="progress" rect="0,0,200,30" value="100" onhover="playsound libs/ngui/data/click2.wav" noborder="false" interactible="true" />
+	</control>
 </gui>

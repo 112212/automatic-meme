@@ -23,8 +23,8 @@ struct cache_entry {
 	const char* type;
 	int z_index;
 	bool visible;
-	bool interactible;
 	bool isWidget;
+	int interactible;
 	Rect rect;
 	Control* control;
 };

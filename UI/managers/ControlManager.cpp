@@ -21,13 +21,13 @@ namespace ng {
 
 cache_entry ControlManager::getControlCache(Control* control) {
 	return {
-	  control->type,
-	  control->z_index,
-	  control->visible,
-	  control->interactible,
-	  true,
-	  control->m_rect,
-	  control };
+	  .type = control->type,
+	  .z_index = control->z_index,
+	  .visible = control->visible,
+	  .isWidget = true,
+	  .interactible = control->interactible,
+	  .rect = control->m_rect,
+	  .control = control };
 }
 
 ControlManager::ControlManager(Control* c) : next_z_index(0), this_widget(c), coords(0,0) {}

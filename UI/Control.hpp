@@ -108,7 +108,7 @@ class Control : public ControlManager  {
 		Control* parent;
 		
 		bool visible;
-		bool interactible;
+		int interactible;
 		bool render_enabled;
 		bool nostyling;
 		Layout layout;
@@ -186,7 +186,7 @@ class Control : public ControlManager  {
 		double getDeltaTime();
 		void shareEngineBackend(Control* c);
 		void removeEngine(Control* c);
-		void setInteractible(bool interactible);
+		void setInteractible(int interactible);
 		Point getAbsCursor();
 		Point getCursor();
 		
@@ -255,6 +255,7 @@ class Control : public ControlManager  {
 		void applyStyling(std::vector<ControlCreationPair>& vec, std::string group="");
 		bool applyStyling(std::vector<Styling>& styling, std::vector<ControlCreationPair>::iterator vec_start, std::vector<ControlCreationPair>::iterator vec_end);
 		Control* createControl(std::string type, std::string id="");
+		bool checkCollision(const Point& p, bool use_interactible=0);
 		
 	public:
 		// TODO: shouldn't be public

@@ -25,7 +25,7 @@ void ProgressBar::Render( Point pos, bool isSelected ) {
 	int brightness = 100;
 	
 	Control::Render(pos, isSelected);
-	Drawing().FillRect(r.x+pos.x+1, r.y+pos.y+1, m_value*r.w/100-2, r.h-2, bar_color > 0 ? bar_color : Color::GetColor(brightness - (m_value * brightness / 100), m_value * brightness / 100, 0, 255));
+	Drawing().FillRect(r.x+pos.x, r.y+pos.y, m_value*r.w/100-1, r.h, bar_color > 0 ? bar_color : Color::GetColor(brightness - (m_value * brightness / 100), m_value * brightness / 100, 0, 255));
 	Drawing().TexRect(r.x+pos.x + r.w / 2 - progress_text.w/2, r.y+pos.y+(r.h-progress_text.h)/2, progress_text.w, progress_text.h, progress_text.tex, false, progress_text.w, progress_text.h);
 	
 }

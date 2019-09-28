@@ -44,7 +44,7 @@ int main() {
 		// tbox->SetText(std::to_string(pt.x) + " " + std::to_string(pt.y));
 		// if (gui.GetActiveControl())
 		// std::cout << gui.GetActiveControl()->GetId() << "\n";
-		std::cout << gui.GetActiveControl() << gui.IsKeyboardLocked() << "\n";
+		// std::cout << gui.GetActiveControl() << " : " << gui.GetSelectedControl() << " : " << gui.IsKeyboardLocked() << "\n";
 		t+=2;
 	});
 	

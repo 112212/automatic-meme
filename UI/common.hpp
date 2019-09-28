@@ -77,6 +77,7 @@ typedef Range_t<> Range;
 
 Rect getIntersectingRectangle(const Rect &a, const Rect &b);
 bool toBool(std::string str);
+int toBoolOrInt(std::string str);
 
 std::string getString(const char* format, ...);
 

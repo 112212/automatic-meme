@@ -689,10 +689,10 @@ void Gui::check_for_new_collision( Point pt, bool start_from_top ) {
 	
 	// --- descending tree ---
 	while(it != it_end) {
-		if(!it->interactible) { it++; continue; }
+		if(it->interactible == 0) { it++; continue; }
 		
 		// std::cout << "checking collision: " << it->control->GetId() << " " << pt - o << " " << y-o.y<< "\n";
-		if(it->control->CheckCollision(pt - o)) {
+		if(it->control->checkCollision(pt - o, true)) {
 			auto c = it->control;
 			Rect r = c->GetRect();
 			Control* w = it->control;

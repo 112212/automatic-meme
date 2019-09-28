@@ -30,8 +30,20 @@ void find_and_replace(std::string& source, std::string const& find, std::string 
         source.replace(i, find.length(), replace);
     }
 }
+
+bool is_number(const std::string& s) {
+	for(char c : s) {
+		if(!std::isdigit(c)) return false;
+	}
+	return true;
+}
+
 bool toBool(std::string str) {
 	return str == "true" || str == "1" || str=="t";
+}
+
+int toBoolOrInt(std::string str) {
+	return is_number(str) ? std::stoi(str) : toBool(str);
 }
 
 Rect getIntersectingRectangle(const Rect &a, const Rect &b) {
