@@ -6,30 +6,7 @@
 		<font name="default" engine="tiledfont" file="data/lazyfont.bmp" fontsize="10" tilesize="39,55" bgcolor="#0000ffff" />
 	</resources>
 	
-	<theme>
-		<style for="**" bgcolor="#ff00ff00" />
-<!--
-		<button backgroundcolor="#050550" font="/usr/share/fonts/TTF/Ubuntu-B.ttf,20" down_color="#00ff00" onhover="play_sound data/click2.wav" />
--->
-<!--
-		<button backgroundcolor="#050550" font="default,20" down_color="#00ff00" onhover="play_sound data/click2.wav" />
-		<radiobutton onhover="play_sound data/click2.wav" />
-		<all onhover="play_sound data/click2.wav" />
 
-		<listbox onhover="play_sound click.wav"/>
-		
-		<textbox onhover="play_sound click.wav" />
-		<checkbox onhover="play_sound click.wav" />
-		<label onhover="play_sound click.wav" />
-		<combobox onhover="play_sound click.wav" />
-		<trackbar onhover="play_sound click.wav" />
--->
-<!--
-		<terminal>
-			<textbox backgroundcolor="#505000" font="/usr/share/fonts/TTF/DroidSerif-Regular.ttf,15" backgroundcolor="#33777777" bordercolor="#FF1228D1" hoverbordercolor="#FF1228D1" />
-		</terminal>
--->
-	</theme>
 	<style for="**/canvas"  onhover="playsound data/click2.wav" />
 <!--
 	<theme prefix="terminal/">
@@ -37,7 +14,11 @@
 	</theme>
 -->
 
-	<button value="abcdef" rect="0,0,150,200" bgcolor="#ff00ff00" />
+	<button value="abcdef" rect="0,0,150,200" bgcolor="#ff00ff00" onclick="say you clicked" >
+		<label value="lol" />
+	</button>
+	
+	<textbox value="hehe" rect="-10,0, 100,30" />
 	<trackbar rect="0,0,100,30"/>
 	<graph rect="0,0,300,300"/>
 	<radiobutton value="heyyyy" rect="0,0,150,30" />

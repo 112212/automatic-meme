@@ -153,6 +153,7 @@ class Control : public ControlManager  {
 			uint32_t color;
 			uint32_t hovercolor;
 			uint32_t hoverbackground_color;
+			int border_thickness;
 			std::string tooltip;
 			
 			Font* font;

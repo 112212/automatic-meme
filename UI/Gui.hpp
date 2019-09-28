@@ -188,6 +188,7 @@ class Gui
 		Control* GetSelectedControl();
 		Control* GetSelectedWidget();
 		Control* GetActiveControl();
+		bool IsKeyboardLocked();
 		
 		Size GetSize();
 		uint32_t GetFps();
@@ -232,6 +233,7 @@ class Gui
 		void 			SetBackend(Backend backend);
 		const Backend&  GetBackend();
 		
+		Point GetCursorPosition();
 		Cursor& GetCursor();
 		
 		// forward to root widget

@@ -1067,11 +1067,11 @@ void Control::RenderBase( Point pos, bool selected ) {
 	#ifdef SELECTION_MARK
 		if(selected) {
 			if(m_style.hoverborder_color != 0) {
-				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverborder_color );
+				Drawing().Rect(pos.x-1, pos.y-1, m_rect.w+1, m_rect.h+1, m_style.hoverborder_color );
 			}
 		} else {
 			if(m_style.border_color != 0) {
-				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.border_color );
+				Drawing().Rect(pos.x-1, pos.y-1, m_rect.w+1, m_rect.h+1, m_style.border_color );
 			}
 		}
 	#else

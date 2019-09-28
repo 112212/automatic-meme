@@ -299,6 +299,7 @@ void TextBox::OnGetFocus() {
 
 void TextBox::OnActivate() {
 	PutCursorAt(Point(999,0));
+	sendGuiCommand(GUI_KEYBOARD_LOCK);
 }
 
 

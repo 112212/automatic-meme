@@ -1,5 +1,28 @@
-// the configured options and settings for Tutorial
 #cmakedefine USE_SDL2_image
 #cmakedefine USE_LIBSNDFILE
 #cmakedefine USE_SDL2_ttf
 #cmakedefine USE_LIBPNG
+
+
+#cmakedefine BACKEND_SDL2
+#cmakedefine BACKEND_WIN32
+
+#ifdef BACKEND_SDL2
+
+#ifdef NG_DEFAULT_BACKEND_HPP
+	#include "../UI/backends/SDL2/Backend.hpp"
+	namespace ng {
+		namespace DefaultBackend = ng::SDL2Backend;
+	}
+#endif
+
+#elif BACKEND_WIN32
+
+#ifdef NG_DEFAULT_BACKEND_HPP
+	#include "../UI/backends/win32/Backend.hpp"
+	namespace ng {
+		namespace DefaultBackend = ng::win32Backend;
+	}
+#endif
+
+#endif

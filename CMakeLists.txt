@@ -48,7 +48,14 @@ set(SOURCES
 	)
 
 
-option(USE_SDL2_BACKEND "SDL2 Backend" ON)
+# define backend
+set(BACKEND "SDL2" CACHE STRING "Backend")
+set_property(CACHE BACKEND PROPERTY STRINGS SDL2 win32 xlib xcb)
+
+
+option(BACKEND_SDL2 "SDL2 Backend" ON)
+option(BACKEND_WIN32 "Win32 Backend" OFF)
+
 option(USE_PTHREAD "Input Mutex Locking" OFF)
 option(USE_OPENGL "SDL2 OpenGL" OFF)
 option(USE_SDL2_image "SDL2_image library" OFF)
@@ -75,15 +82,17 @@ if(USE_LIBSNDFILE)
 	set(SOURCES ${SOURCES} ./UI/backend/addons/SoundLibSnd.cpp)
 endif()
 
-if(USE_SDL2_BACKEND)
+if(BACKEND EQUAL SDL2)
 	set(SOURCES ${SOURCES} 
-	./UI/backends/SDL2/SDL_Surface_Image.cpp
-	./UI/backends/SDL2/Backend.cpp
-	./UI/backends/SDL2/SDLSpeaker.cpp
-	./UI/backends/SDL2/SDLScreen.cpp
-	./UI/backends/SDL2/SDLSystem.cpp
-	./UI/backends/SDL2/SDLSound.cpp
-	./UI/backends/SDL2/RWOpsFromFile.cpp)
+		./UI/backends/SDL2/SDL_Surface_Image.cpp
+		./UI/backends/SDL2/Backend.cpp
+		./UI/backends/SDL2/SDLSpeaker.cpp
+		./UI/backends/SDL2/SDLScreen.cpp
+		./UI/backends/SDL2/SDLSystem.cpp
+		./UI/backends/SDL2/SDLSound.cpp
+		./UI/backends/SDL2/RWOpsFromFile.cpp
+	)
+	
 	if(USE_SDL2_image)
 		target_link_libraries(sdl_test SDL2_image)
 	endif()
@@ -96,6 +105,40 @@ if(USE_SDL2_BACKEND)
 		target_link_libraries(sdl_test GL)
 		target_link_libraries(sdl_test GLEW)
 	endif()
+
+elseif(BACKEND EQUAL win32)
+
+	set(SOURCES ${SOURCES} 
+		./UI/backends/win32/Backend.cpp
+		./UI/backends/win32/Speaker.cpp
+		./UI/backends/win32/Screen.cpp
+		./UI/backends/win32/System.cpp
+		./UI/backends/win32/Font.cpp
+	)
+	target_link_libraries(sdl_test msimg32)
+	
+elseif(BACKEND EQUAL xlib)
+
+	set(SOURCES ${SOURCES} 
+		./UI/backends/xlib/SDL_Surface_Image.cpp
+		./UI/backends/xlib/Backend.cpp
+		./UI/backends/xlib/Speaker.cpp
+		./UI/backends/xlib/Screen.cpp
+		./UI/backends/xlib/System.cpp
+		./UI/backends/xlib/Font.cpp
+	)
+
+elseif(BACKEND EQUAL xcb)
+	
+	set(SOURCES ${SOURCES} 
+		./UI/backends/xcb/SDL_Surface_Image.cpp
+		./UI/backends/xcb/Backend.cpp
+		./UI/backends/xcb/Speaker.cpp
+		./UI/backends/xcb/Screen.cpp
+		./UI/backends/xcb/System.cpp
+		./UI/backends/xcb/Font.cpp
+	)
+	
 endif()
 
 
@@ -103,17 +146,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/config.h.in"
   "${PROJECT_BINARY_DIR}/config.h"
   )
- 
- 
- # add_custom_command(TARGET sdl_test
-	# POST_BUILD
-	# COMMAND echo "#ifdef NG_DEFAULT_BACKEND_HPP" >> $(build)/config.h
-	# COMMAND echo "#include \"../UI/backends/$(backend_use)/Backend.hpp\"" >> $(build)/config.h
-	# COMMAND echo "namespace ng {" >> $(build)/config.h
-	# COMMAND echo "namespace DefaultBackend = ng::$(backend_use)Backend;" >> $(build)/config.h
-	# COMMAND echo "}" >> $(build)/config.h
-	# COMMAND echo "#endif" >> $(build)/config.h
-	# )
+
 
 include_directories("${PROJECT_BINARY_DIR}")
 

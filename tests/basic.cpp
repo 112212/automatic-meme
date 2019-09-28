@@ -11,6 +11,16 @@ ng::Gui gui;
 using namespace std;
 using namespace ng;
 
+GUIFUNC(say) {
+	if(args.cmd_args.empty()) return;
+	string l;
+	for(auto s : args.cmd_args) {
+		l += s + " ";
+	}
+	cout << "control " << args.control->GetId() << " says: " << l << endl;
+}
+
+
 int main() {
 	int sizeX = 1800;
 	int sizeY = 900;
@@ -27,12 +37,14 @@ int main() {
 		return 0;
 	}
 	
+	
 	double t=25;
 	gui.OnRender([&]() {
 		Point pt = gui.GetCursor().GetCursor();
 		// tbox->SetText(std::to_string(pt.x) + " " + std::to_string(pt.y));
 		// if (gui.GetActiveControl())
 		// std::cout << gui.GetActiveControl()->GetId() << "\n";
+		std::cout << gui.GetActiveControl() << gui.IsKeyboardLocked() << "\n";
 		t+=2;
 	});
 	

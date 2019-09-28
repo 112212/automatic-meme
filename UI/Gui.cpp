@@ -639,6 +639,10 @@ void Gui::OnMouseMove( int mX, int mY ) {
 	}
 }
 
+bool Gui::IsKeyboardLocked() {
+	return m_keyboard_lock;
+}
+
 void Gui::OnMWheel( int updown ) {
 	std::unique_lock<std::mutex> lock(*mutex);
 	if(sel_control) {
@@ -1077,6 +1081,10 @@ void Gui::Render() {
 	
 Cursor& Gui::GetCursor() {
 	return cursor;
+}
+
+Point Gui::GetCursorPosition() {
+	return cursor.GetCursor();
 }
 
 void Gui::SetBackend(Backend backend) {

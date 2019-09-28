@@ -53,6 +53,8 @@ int ProgressBar::GetValue() {
 
 
 void ProgressBar::SetValue( int value ) {
+	value = clip(value, 0, 100);
+	if (value == m_value) return;
 	ColorString str(std::to_string(value) + "%");
 	
 	if(!m_style.font) {
