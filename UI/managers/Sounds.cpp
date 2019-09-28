@@ -39,7 +39,7 @@ Sound* Sounds::LoadSound(std::string filename) {
 // }
 
 Sound* Sounds::GetSound(std::string filename) {
-	return (Sound*)ResourceManager::GetResource(filename);
+	return (Sound*)ResourceManager::LoadResource(filename, filename);
 	/*
 	auto it = loaded_sounds.find(filename);
 	if(it == loaded_sounds.end()) {

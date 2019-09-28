@@ -124,6 +124,8 @@ SDL_Window* GetWindow() {
 	return win;
 }
 
+
+
 void RegisterExtensions() {
 #ifdef USE_SDL2_ttf
 	ng::ResourceManager::RegisterResourceLoader("SDL2_ttf", ng::SDL_TTF_Font::GetFont);
@@ -161,6 +163,8 @@ void RegisterExtensions() {
 	ng::ResourceManager::RegisterExtension(".bmp", "libbmp");
 #endif
 	
+	ng::ResourceManager::RegisterResourceLoader("sdlwav", SDLSound::LoadSound);
+	ng::ResourceManager::RegisterExtension(".wav", "sdlwav");
 	// ng::ResourceManager::RegisterResourceLoader("SDL2", ng::SDL_Surface_Image::LoadBMP);
 	// ng::ResourceManager::RegisterExtension(".bmp", "SDL2");
 }

@@ -147,12 +147,12 @@ class Control : public ControlManager  {
 		bool use_clipping;
 		
 		struct ControlStyle {
-			int border_color;
-			int hoverborder_color;
-			int background_color;
-			int color;
-			int hovercolor;
-			int hoverbackground_color;
+			uint32_t border_color;
+			uint32_t hoverborder_color;
+			uint32_t background_color;
+			uint32_t color;
+			uint32_t hovercolor;
+			uint32_t hoverbackground_color;
 			std::string tooltip;
 			
 			Font* font;

@@ -38,7 +38,7 @@ void Gui::cmd_play_sound( Args& args ) {
 
 void Gui::cmd_style( Args& args ) {
 	if(args.cmd_args.size() == 3) {
-		Control* c = rootWidget.Get<Control>(args.cmd_args[0]);
+		Control* c = rootWidget.Get(args.cmd_args[0]);
 		if(c) {
 			c->SetStyle(args.cmd_args[1], args.cmd_args[2]);
 		}

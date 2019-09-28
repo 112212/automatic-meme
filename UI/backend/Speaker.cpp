@@ -105,12 +105,13 @@ namespace ng {
 			it++;
 		}
 		
-		/*
-		uint32_t frames = canAcceptData();
-		if(frames > 0) {
-			uint32_t written = writeData(frames, buffer.data());
-		}
-		*/
+		// std::cout << "proc audio\n";
+		
+		// uint32_t frames = canAcceptData();
+		// if(frames > 0) {
+			// uint32_t written = writeData(frames, buffer.data());
+		// }
+		
 		
 		if(!sounds.empty()) {
 			startPlaying();
