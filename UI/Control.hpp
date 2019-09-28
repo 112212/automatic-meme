@@ -32,6 +32,7 @@ namespace ng {
 #define STYLE_FUNC(value) OnSetStyle(std::string& style, std::string& value)
 #define STYLE_SWITCH switch(hash(style.c_str()))
 #define _case(a) break; case hash(a)
+#define _casef(a) case hash(a)
 //
 
 // used from within controls

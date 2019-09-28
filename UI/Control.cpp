@@ -164,9 +164,9 @@ void Control::RenderWidget( Point position, bool isSelected ) {
 	// must go between these 2 "position.Offset"
 	if(use_clipping) {
 		save_clipping = Drawing().GetClipRegion(old_box.x, old_box.y, old_box.w, old_box.h);
-		int margin = 0;
+		int margin = 1;
 		old_box += Rect(-margin, -margin, margin, margin);
-		ng::Rect clipRect = ng::Rect( std::max(0,position.x-margin), std::max(0, position.y-margin), m_rect.w+margin*2, m_rect.h+margin*2 );
+		ng::Rect clipRect = ng::Rect( std::max(0,position.x-margin), std::max(0, position.y-margin), m_rect.w+margin, m_rect.h+margin );
 		if(save_clipping) {
 			clipRect = getIntersectingRectangle(old_box, clipRect);
 		}
@@ -1288,9 +1288,9 @@ void Control::SetStyle(std::string style, std::string value) {
 			m_style.color = Color(value).GetUint32();
 		_case("bordercolor"):
 			m_style.border_color = Color(value).GetUint32();
-		_case("bgcolor"):
-			m_style.background_color = Color(value).GetUint32();
-		_case("backgroundcolor"):
+			break;
+		_casef("bgcolor"):
+		_casef("backgroundcolor"):
 			m_style.background_color = Color(value).GetUint32();
 		_case("hoverbordercolor"):
 			if(value == "nochange" || value == "bordercolor") {
