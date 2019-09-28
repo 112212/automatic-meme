@@ -1281,7 +1281,7 @@ void Control::SetStyle(std::string style, std::string value) {
 		_case("id"):
 			SetId(value);
 		_case("interactible"):
-			setInteractible(value.find("child") != value.end() ? 2 : toBoolOrInt(value));
+			setInteractible(value.find("child") != std::string::npos ? 2 : toBoolOrInt(value));
 		_case("visible"):
 			SetVisible(toBool(value));
 		_case("color"):
