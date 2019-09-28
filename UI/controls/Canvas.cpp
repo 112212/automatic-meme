@@ -46,14 +46,16 @@ void Canvas::Render( Point p, bool isSelected ) {
 	const Rect& rect = GetRect();
 	Point pt = rect + p;
 	
-	Drawing().FillRect(pt.x, pt.y, rect.w, rect.h, m_style.background_color );
 	Control::Render(p, isSelected);
 	
 	// render layers in reverse
 	for(auto rit = layers.rbegin(); rit != layers.rend(); rit++) {
 		Drawing().TexRect( pt.x, pt.y, &(*rit) );
 	}
-	drawGrid(pt);
+	
+	if(m_display_grid) {
+		drawGrid(pt);
+	}
 }
 
 void Canvas::RefreshTexture() {
@@ -173,18 +175,15 @@ void Canvas::alignToGrid(Point& p) {
 }
 
 void Canvas::PutPixel(int x, int y, int layer) {
-	if(x < 0 or y < 0) return;
-	if(layer >= layers.size()) {
+	if(x < 0 or y < 0 or layer >= layers.size()) {
 		return;
 	}
-	
 	
 	// Point p(x + m_pixel_size.w/2,y + m_pixel_size.h/2);
 	Point p(x,y);
 	if(m_align_to_grid) {
 		alignToGrid(p);
 	}
-	
 	
 	auto &l = layers[layer];
 	for(int y1=0; y1 < m_pixel_size.h; y1++) {
@@ -216,11 +215,9 @@ Canvas* Canvas::Clone() {
 void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
 	const Rect &r = GetRect();
 	if(!m_is_readonly && mouseState && CheckCollision(Point(mX,mY)+r)) {
-		int x = mX;
-		int c = 2;
-		x = clip(x, c, r.w-c);
-		int y = mY;
-		y = clip(y, c, r.h-c);
+		int c = 1;
+		int x = clip(mX, c, r.w-c);
+		int y = clip(mY, c, r.h-c);
 		
 		Point pt(x,y);
 		

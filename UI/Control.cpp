@@ -163,7 +163,7 @@ void Control::RenderWidget( Point position, bool isSelected ) {
 	// must go between these 2 "position.Offset"
 	if(use_clipping) {
 		save_clipping = Drawing().GetClipRegion(old_box.x, old_box.y, old_box.w, old_box.h);
-		int margin = 1;
+		int margin = 2;
 		old_box += Rect(-margin, -margin, margin, margin);
 		ng::Rect clipRect = ng::Rect( std::max(0,position.x-margin), std::max(0, position.y-margin), m_rect.w+margin*2, m_rect.h+margin*2 );
 		if(save_clipping) {
@@ -1041,21 +1041,38 @@ void Control::render(Point position, bool isSelected) {
 	if(render_enabled) {
 		Render(position, isSelected);
 	}
+	
+	// draw border
+	Point pos = m_rect.Offset(position);
+	#ifdef SELECTION_MARK
+		if(isSelected) {
+			if(m_style.hoverborder_color != 0) {
+				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverborder_color );
+			}
+		} else {
+			if(m_style.border_color != 0) {
+				Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.border_color );
+			}
+		}
+	#else
+		Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_bordercolor );
+	#endif
+	
 	process_postrender_effects();
 }
 
 // overridable
-void Control::RenderBase( Point pos, bool selected ) {
+void Control::RenderBase( Point pos, bool isSelected ) {
 	pos = m_rect.Offset(pos);
 	
-	if(selected && m_style.hoverbackground_color != 0) {
+	if(isSelected && m_style.hoverbackground_color != 0) {
 		Drawing().FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverbackground_color );
 	} else
 	if(m_style.background_color != 0) {
 		Drawing().FillRect( pos.x, pos.y, m_rect.w, m_rect.h, m_style.background_color );
 	}
 	
-	if(selected && m_style.hoverimg) {
+	if(isSelected && m_style.hoverimg) {
 		Size s = m_style.hoverimg->GetImageSize();
 		Drawing().TexRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.hoverimg, false, s.w, s.h);
 	} else
@@ -1063,21 +1080,8 @@ void Control::RenderBase( Point pos, bool selected ) {
 		Drawing().TexRect(pos.x, pos.y, m_rect.w, m_rect.h, m_style.image_tex, m_style.image_repeat, 
 			m_style.image_size.w, m_style.image_size.h);
 	}
-	
-	#ifdef SELECTION_MARK
-		if(selected) {
-			if(m_style.hoverborder_color != 0) {
-				Drawing().Rect(pos.x-1, pos.y-1, m_rect.w+1, m_rect.h+1, m_style.hoverborder_color );
-			}
-		} else {
-			if(m_style.border_color != 0) {
-				Drawing().Rect(pos.x-1, pos.y-1, m_rect.w+1, m_rect.h+1, m_style.border_color );
-			}
-		}
-	#else
-		Drawing().Rect(pos.x, pos.y, m_rect.w, m_rect.h, m_bordercolor );
-	#endif
 }
+
 
 void Control::SetFont( std::string name ) { 
 	Font* f = Fonts::GetFont(name, 0); 
