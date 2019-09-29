@@ -284,20 +284,17 @@ namespace ng {
 	}
 	
 	void SDLScreen::SetClipRegion(int x, int y, int w, int h, bool enable) {
+				std::cout << "scissor\n"; 
 		if(enable) {
 			if(x != -1) {
 				SDL_Rect r = {x,y,w,h};
 				SDL_RenderSetClipRect(ren, &r);
-				clip_region.x = x;
-				clip_region.y = y;
-				clip_region.w = w;
-				clip_region.h = h;
+				clip_region = Rect(x,y,w,h);
 			}
 			using_scissor = true;
 		} else {
 			using_scissor = false;
 			SDL_RenderSetClipRect(ren, 0);
-			// SDL_RenderFlush(ren);
 		}
 	}
 	

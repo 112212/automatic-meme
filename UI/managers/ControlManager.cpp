@@ -118,7 +118,6 @@ void ControlManager::setZIndex(Control* control, int new_z_index) {
 		return;
 	}
 	
-	
 	if(new_z_index < cache.front().z_index) {
 		sendToBack(control);
 		return;
@@ -126,10 +125,11 @@ void ControlManager::setZIndex(Control* control, int new_z_index) {
 	
 	int old = binary_search(control->z_index);
 	int put_after = binary_search(new_z_index);
+	
 	if(old == put_after || old == put_after+1) return;
 	
 	int new_z;
-	if(new_z_index >= cache.back().z_index) {
+	if(new_z_index > cache.back().z_index) {
 		new_z = cache.back().z_index + CACHE_SPACING;
 	} else {
 		new_z = (cache[put_after].z_index + cache[put_after+1].z_index) >> 1;
@@ -158,7 +158,6 @@ void ControlManager::setZIndex(Control* control, int new_z_index) {
 	if(cache[put_after].z_index == cache[put_after-1].z_index) {
 		rescale_z_indices(CACHE_SPACING);
 	}
-	
 }
 
 void ControlManager::updateCache(Control* control, CacheUpdateFlag flag) {
@@ -193,17 +192,22 @@ void ControlManager::BreakRow() {
 void ControlManager::addControlToCache(Control* control) {
 	int z_index = control->z_index;
 	
-	if(z_index == 0 or z_index >= next_z_index) {
+	if(cache.empty() or z_index == 0 or z_index >= next_z_index) {
 		control->z_index = next_z_index;
 		cache.push_back(getControlCache(control));
 		next_z_index += CACHE_SPACING;
 	} else {
 		int put_after = binary_search(z_index);
+		if(z_index < cache[put_after].z_index) {
+			cache.insert(cache.begin(), getControlCache(control));
+			return;
+		}
 		if(put_after == cache.size()-1) {
 			cache.push_back(getControlCache(control));
 		} else {
 			cache.insert(cache.begin()+put_after, getControlCache(control));
 		}
+		
 	}
 	
 	if(control->layout.coord == Point(0,0)) {

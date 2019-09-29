@@ -1040,9 +1040,11 @@ void Gui::Render() {
 	}
 	*/
 	// TODO: review
+	// std::cout << "cycle" << "\n";
 	for(auto &ca : rootWidget.cache) {
 		Control* const &c = ca.control;
 		if(ca.visible) {
+			// std::cout << c->GetId() << "\n";
 			if(c != sel_control) {
 				c->render(pos, c == rootWidget.sel_control);
 			} else {

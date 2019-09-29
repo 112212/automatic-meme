@@ -221,9 +221,9 @@ namespace ng {
 		glBindVertexArray(vao);
 
 		float x1 = (float)(x+0.3) / sizeX * 2.0 - 1.0;
-		float y1 = -((float)(y) / sizeY * 2.0 - 1.0);
+		float y1 = -((float)(y+0.3) / sizeY * 2.0 - 1.0);
 		float x2 = (float)(x+w) / sizeX * 2.0 - 1.0;
-		float y2 = -((float)(y+h) / sizeY * 2.0 - 1.0);
+		float y2 = -((float)(y+h-0.1) / sizeY * 2.0 - 1.0);
 
 		GLfloat positions[] = {
 			x1, y1,
@@ -473,10 +473,7 @@ namespace ng {
 		if(enable) {
 			if(x != -1) {
 				glScissor(x, sizeY-y-h, w, h);
-				clip_region.x = x;
-				clip_region.y = y;
-				clip_region.w = w;
-				clip_region.h = h;
+				clip_region = ng::Rect(x,y,w,h);
 			}
 			using_scissor = true;
 			glEnable(GL_SCISSOR_TEST);
@@ -484,7 +481,6 @@ namespace ng {
 			using_scissor = false;
 			glDisable(GL_SCISSOR_TEST);
 		}
-		
 	}
 	
 	bool SDLOpenGLScreen::GetClipRegion(int &x, int &y, int &w, int &h) {

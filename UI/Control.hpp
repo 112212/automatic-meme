@@ -163,7 +163,7 @@ class Control : public ControlManager  {
 			Image* image_tex;
 			Size image_size;
 			bool image_repeat;
-			
+			bool clipping;
 			bool draggable;
 			float alpha;
 			

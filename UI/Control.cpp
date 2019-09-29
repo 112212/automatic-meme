@@ -47,6 +47,7 @@ Control::Control()
 	m_style.color = 0;
 	m_style.draggable = false;
 	m_style.hoverimg = 0;
+	m_style.clipping = true;
 	update_cache(CacheUpdateFlag::attributes);
 	// std::cout << "creating control: " << type << ", "  << this << "\n";
 	layout = Layout("0,0");
@@ -153,7 +154,7 @@ void Control::Render( Point position, bool isSelected ) {
 
 void Control::RenderWidget( Point position, bool isSelected ) {
 	if(cache.empty()) return;
-	use_clipping = true;
+	use_clipping = true && m_style.clipping;
 	
 	Rect old_box;
 	bool save_clipping;
@@ -561,6 +562,8 @@ void Control::SetZIndex( int zindex ) {
 	if(zindex == z_index) return;
 	if(parent) {
 		parent->setZIndex((Control*)this, zindex);
+	} else {
+		z_index = zindex;
 	}
 }
 
@@ -1310,6 +1313,8 @@ void Control::SetStyle(std::string style, std::string value) {
 				m_style.border_color = 0;
 				m_style.hoverborder_color = 0;
 			}
+		_case("clipping"):
+			m_style.clipping = toBool(value);
 		_case("font"): {
 			Font* f = Fonts::GetParsedFont(value);
 			if(f) {
