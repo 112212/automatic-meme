@@ -65,70 +65,71 @@ void Label::AppendText( std::string text ) {
 	SetText(m_text.GetRawString());
 }
 
-void Label::SetText( std::string text ) {
-	// replace tabs with 4 spaces
-	find_and_replace(text, "\t", "    ");
-	m_text = text;
-	
-	std::vector<Image*> new_text_lines;
-	
-	if(!m_style.font) {
-		return;
-	}
-	
-	int j = 0;
-	
-	int max_text_width = GetRect().w-5;
-	int last_color = 0;
-	for(std::string::size_type pos = 0; pos < m_text.size(); ) {
+void Label::SetText( std::string new_text ) {
+	doOnRender([=]() {
+		std::string text = new_text;
+		// replace tabs with 4 spaces
+		find_and_replace(text, "\t", "    ");
+		m_text = text;
 		
-		ColorString cstr = m_text.utf8_csubstr(pos);
+		std::vector<Image*> new_text_lines;
 		
-		int max_text = m_style.font->GetMaxText(cstr.str(), max_text_width);
-		int p = cstr.utf8_find('\n').second;
-		if(p != std::string::npos) {
-			max_text = std::min(max_text, p);
-		}
-		
-		if(max_text < cstr.utf8_size()) {
-			cstr = cstr.utf8_csubstr(0, max_text);
-		}
-		
-		Image* img = cstr.get_image( m_style.font, m_style.color != 0 ? m_style.color : last_color );
-		if(!img) {
+		if(!m_style.font) {
 			return;
 		}
+		
+		int j = 0;
+		
+		int max_text_width = GetRect().w-5;
+		int last_color = 0;
+		for(std::string::size_type pos = 0; pos < m_text.size(); ) {
+			
+			ColorString cstr = m_text.utf8_csubstr(pos);
+			
+			int max_text = m_style.font->GetMaxText(cstr.str(), max_text_width);
+			int p = cstr.utf8_find('\n').second;
+			if(p != std::string::npos) {
+				max_text = std::min(max_text, p);
+			}
+			
+			if(max_text < cstr.utf8_size()) {
+				cstr = cstr.utf8_csubstr(0, max_text);
+			}
+			
+			Image* img = cstr.get_image( m_style.font, m_style.color != 0 ? m_style.color : last_color );
+			if(!img) {
+				return;
+			}
 
-		int ncol = cstr.GetLastColor();
-		if(ncol > 0) {
-			last_color = ncol;
-		}
-		if(j < new_text_lines.size()) {
-			delete new_text_lines[j];
-			new_text_lines[j] = img;
-			j++;
-		} else {
-			new_text_lines.push_back( img );
-			j++;
+			int ncol = cstr.GetLastColor();
+			if(ncol > 0) {
+				last_color = ncol;
+			}
+			if(j < new_text_lines.size()) {
+				delete new_text_lines[j];
+				new_text_lines[j] = img;
+				j++;
+			} else {
+				new_text_lines.push_back( img );
+				j++;
+			}
+			
+			if(max_text < cstr.utf8_size() && max_text != 0) {
+				pos += max_text;
+			} else {
+				pos = m_text.utf8_find('\n', pos).second;
+				if(pos == m_text.npos) {
+					break;
+				}
+				pos++;
+			}
 		}
 		
-		if(max_text < cstr.utf8_size() && max_text != 0) {
-			pos += max_text;
-		} else {
-			pos = m_text.utf8_find('\n', pos).second;
-			if(pos == m_text.npos) {
-				break;
-			}
-			pos++;
+		text_lines.swap(new_text_lines);
+		for(auto i : new_text_lines) {
+			delete i;
 		}
-	}
-	
-	mtLock();
-	text_lines.swap(new_text_lines);
-	mtUnlock();
-	for(auto i : new_text_lines) {
-		delete i;
-	}
+	});
 }
 
 void Label::onFontChange() {
