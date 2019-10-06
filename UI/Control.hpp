@@ -180,6 +180,8 @@ class Control : public ControlManager  {
 		void tabToNextControl();
 		void copyStyle(Control* copy_to);
 		void cloneBase(Control* copy_to);
+		void mtLock();
+		void mtUnlock();
 		void doOnRender(std::function<void()> f);
 		
 		inline Control* getParent() { return parent; }

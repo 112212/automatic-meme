@@ -70,10 +70,7 @@ void Label::SetText( std::string text ) {
 	find_and_replace(text, "\t", "    ");
 	m_text = text;
 	
-	for(auto t : text_lines) {
-		delete t;
-	}
-	text_lines.clear();
+	std::vector<Image*> new_text_lines;
 	
 	if(!m_style.font) {
 		return;
@@ -106,12 +103,12 @@ void Label::SetText( std::string text ) {
 		if(ncol > 0) {
 			last_color = ncol;
 		}
-		if(j < text_lines.size()) {
-			delete text_lines[j];
-			text_lines[j] = img;
+		if(j < new_text_lines.size()) {
+			delete new_text_lines[j];
+			new_text_lines[j] = img;
 			j++;
 		} else {
-			text_lines.push_back( img );
+			new_text_lines.push_back( img );
 			j++;
 		}
 		
@@ -124,6 +121,13 @@ void Label::SetText( std::string text ) {
 			}
 			pos++;
 		}
+	}
+	
+	mtLock();
+	text_lines.swap(new_text_lines);
+	mtUnlock();
+	for(auto i : new_text_lines) {
+		delete i;
 	}
 }
 

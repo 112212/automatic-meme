@@ -984,7 +984,9 @@ void Gui::renderInvalidate(Control* c) {
 void Gui::Render() {
 	std::unique_lock<std::mutex> lock(*mutex);
 	locked++;
-	backend.screen->ProcessQueue();
+	if(backend.screen) {
+		backend.screen->ProcessQueue();
+	}
 	if(m_on_render) {
 		m_on_render();
 	}

@@ -1376,7 +1376,13 @@ void Control::getRange(Size& min, Size& max) {
 	max = this->max;
 }
 
-
+void Control::mtLock() {
+	if(engine) engine->MtLock();
+}
+void Control::mtUnlock() {
+	if(engine) engine->MtUnlock();
+}
+		
 void Control::doOnRender(std::function<void()> f) {
 	if(engine) {
 		engine->MtLock();

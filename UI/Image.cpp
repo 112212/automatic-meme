@@ -66,12 +66,16 @@ bool Image::GetAffectedRegion(Point& a, Point &b) {
 	return c1.x != -1 && c1.x != c2.x && c1.y != c2.y;
 }
 
+void Image::Free() {
+	FreeCache();
+}
+
 void Image::FreeCache() {
-	if(screen) {
+	if(screen_cache_id != NO_TEXTURE && screen) {
 		screen->RemoveFromCache(screen_cache_id);
 		screen_cache_id = NO_TEXTURE;
+		SetFullAffectedRegion();
 	}
-	SetFullAffectedRegion();
 }
 
 const Rect Image::GetImageCropRegion() {
@@ -141,8 +145,6 @@ void Image::SetFullAffectedRegion() {
 	UpdateAffectedRegion(Point(s.w,s.h));
 }
 
-void Image::Free() {
-	FreeCache();
-}
+
 
 }
