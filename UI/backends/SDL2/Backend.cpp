@@ -65,6 +65,7 @@ bool SetupWindow(const char* window_name, int posx, int posy, int width, int hei
     int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 #ifdef USE_OPENGL
     if(adv_gl) {
+		std::cout << "using opengl\n";
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);

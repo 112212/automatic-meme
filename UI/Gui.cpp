@@ -48,34 +48,32 @@ void Gui::cmd_style( Args& args ) {
 	}
 }
 
-Gui::Gui() {
-	m_delta_accum = 0;
-	m_mouse_down = false;
-	m_focus = false;
-	m_keyboard_lock = false;
-	m_focus_lock = false;
-	m_lock_once = false;
-	m_block_all_events = false;
-	
-	m_time = 0;
-	dragging = false;
-	m_frames = 0;
-	drag_offset = {0,0};
-	depth = 0;
-	sel_control = 0;
-	active_control = 0;
-	sel_parent = 0;
-	m_lock_target = 0;
-	
-	hasIntercepted = false;
-	sel_intercept = 0;
+Gui::Gui()
+	: locked(0)
+	, m_delta_accum(0)
+	, m_mouse_down(false)
+	, m_focus(false)
+	, m_keyboard_lock(false)
+	, m_focus_lock(false)
+	, m_lock_once(false)
+	, m_block_all_events(false)
+	, m_time(0)
+	, dragging(false)
+	, m_frames(0)
+	, drag_offset(0,0)
+	, depth(0)
+	, sel_control(0)
+	, active_control(0)
+	, sel_parent(0)
+	, m_lock_target(0)
+	, hasIntercepted(false)
+	, sel_intercept(0)
+	, selection_margin(1)
+	, m_tooltip_shown(false)
+	, m_tooltip_delay(2)
+	, m_tooltip(0)
+{
 	sel_intercept_vector.resize(15);
-	
-	selection_margin = 1;
-	
-	m_tooltip_shown = false;
-	m_tooltip_delay = 2;
-	m_tooltip = 0;
 	mutex = new std::mutex();
 	
 	rootWidget.set_engine(this);
@@ -922,9 +920,11 @@ void Gui::OnEvent( std::string id, std::string event_type, EventCallback callbac
 }
 
 void Gui::MtLock() {
+	if(++locked == 1)
 	mutex->lock();
 }
 void Gui::MtUnlock() {
+	if(--locked == 0)
 	mutex->unlock();
 }
 
@@ -982,10 +982,16 @@ void Gui::renderInvalidate(Control* c) {
 }
 
 void Gui::Render() {
+	std::unique_lock<std::mutex> lock(*mutex);
+	locked++;
+	backend.screen->ProcessQueue();
 	if(m_on_render) {
 		m_on_render();
 	}
-	std::unique_lock<std::mutex> lock(*mutex);
+	while(!m_on_render_ops.empty()) {
+		m_on_render_ops.front()();
+		m_on_render_ops.pop();
+	}
 	static std::chrono::high_resolution_clock::time_point time_point = std::chrono::high_resolution_clock::now();
 	
 	// measure time for animations
@@ -1079,6 +1085,7 @@ void Gui::Render() {
 	}
 	
 	cursor.Render(backend.screen);
+	locked--;
 }
 	
 Cursor& Gui::GetCursor() {

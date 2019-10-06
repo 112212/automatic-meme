@@ -3,12 +3,15 @@
 #include "../Image.hpp"
 #include <stack>
 #include <string>
+#include <mutex>
 namespace ng {
 class Screen {
 	protected:
 		void SetCache(Image* img, uint32_t cache_id);
 		std::stack<ng::Rect> clip_stack;
+		std::mutex mtx;
 		std::stack<float> maxAlpha;
+		std::vector<uint32_t> cache_remove;
 		float current_alpha;
 		bool using_clip_region;
 	public:
@@ -61,7 +64,9 @@ class Screen {
 		virtual void TexRect(int x, int y, int w, int h, Image* tex, bool repeat = false, int texWidth = 1, int texHeight = 1);
 		virtual void TexRect(int x, int y, Image* tex, bool repeat = false);
 		virtual void DeleteTexture(uint32_t textureID);
-		virtual void RemoveFromCache(uint32_t cache_id);
+		void RemoveFromCache(uint32_t cache_id);
+		
+		void ProcessQueue();
 		virtual Image* GetOffScreenTexture(int id);
 };
 

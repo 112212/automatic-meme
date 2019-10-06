@@ -31,7 +31,6 @@ class SDLScreen : public Screen {
 		bool GetClipRegion(int &x, int &y, int &w, int &h);
 		void DeleteTexture(unsigned int textureID);
 		void CacheImage(Image* img);
-		void RemoveFromCache(unsigned int cache_id);
 		void TexRect(int x, int y, int w, int h, Image* texture, bool repeat = false, int texWidth = 1, int texHeight = 1);
 		void TexRect(int x, int y, Image* tex, bool repeat = false);
 		

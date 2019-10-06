@@ -249,7 +249,6 @@ Image* ColorString::get_image(Font* font, int color, bool passw) {
 	}
 	
 	Attribute::Color last_color = (Attribute::Color)color;
-	Image* surf;
 	if(passw) {
 		return font->GetTextImage( std::string(utf8_size(), '*'), i_colormap[0] );
 	}
@@ -258,6 +257,7 @@ Image* ColorString::get_image(Font* font, int color, bool passw) {
 		return font->GetTextImage( m_str, i_colormap[last_color] );
 	}
 	
+	Image* surf;
 	GlyphMetrics g = font->GetGlyphMetrics('A');
 	int w = font->GetTextSize(m_str);
 	int h = g.height;

@@ -28,7 +28,6 @@ class SDLOpenGLScreen : public Screen {
 		virtual bool GetClipRegion(int &x, int &y, int &w, int &h);
 		virtual void DeleteTexture(unsigned int textureID);
 		virtual void CacheImage(Image* img);
-		virtual void RemoveFromCache(unsigned int cache_id);
 		virtual void TexRect(int x, int y, int w, int h, Image* texture, bool repeat = false, int texWidth = 1, int texHeight = 1);
 		virtual void TexRect(int x, int y, Image* tex, bool repeat = false);
 		

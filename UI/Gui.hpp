@@ -81,6 +81,7 @@ class Gui
 		std::vector<interceptInfo> sel_intercept_vector;
 		// void intercept_hook(Control::imask onaction, std::function<void()> action, std::function<void()> intercept_action={}, std::function<void()> no_intercept_control_action={});
 		// ------------------
+		int locked;
 		
 		Control rootWidget;
 		
@@ -90,6 +91,7 @@ class Gui
 		uint32_t m_fps;
 		std::function<void(uint32_t)> m_on_fps_change;
 		std::function<void()> m_on_render;
+		std::queue<std::function<void()>> m_on_render_ops;
 		// ---------------------
 		
 		Cursor cursor;
@@ -176,6 +178,7 @@ class Gui
 		void SetRelativeMode(bool relative_mode);
 		void OnFpsChange(std::function<void(uint32_t)> f) { m_on_fps_change = f; }
 		void OnRender(std::function<void()> f) { m_on_render = f; }
+		void DoOnRender(std::function<void()> f) { m_on_render_ops.push(f); }
 		
 		void Focus(Control* control);
 		void Activate(Control* control);

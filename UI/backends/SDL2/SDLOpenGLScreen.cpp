@@ -644,10 +644,6 @@ namespace ng {
 		Line(x1, y1, x1, y2, color);
 	}
 
-	void SDLOpenGLScreen::RemoveFromCache(unsigned int cache_id) {
-		DeleteTexture(cache_id);
-	}
-	
 	uint32_t SDLOpenGLScreen::CompileShader(std::string vertexShader, std::string fragmentShader ) {
 		return loadShader(vertexShader.c_str(), fragmentShader.c_str());
 	}
@@ -685,18 +681,20 @@ namespace ng {
 		*/
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		return 0;
 	}
 	
 	bool SDLOpenGLScreen::FreeOffScreenRender(int id) {
 		// glDestro
+		return false;
 	}
 	
 	bool SDLOpenGLScreen::SetOffScreenRender(int id) {
-		
+		return false;
 	}
 	
 	Image* SDLOpenGLScreen::GetOffScreenTexture(int id) {
-		
+		return 0;
 	}
 	
 }

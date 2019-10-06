@@ -118,7 +118,7 @@ ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 	else
 		
 		test := sdl_test
-		inc += $(shell /usr/bin/sdl2-config --cflags) -I/usr/include/SDL2
+		inc += $(shell /usr/bin/sdl2-config --cflags)
 		link +=  $(shell /usr/bin/sdl2-config --libs)
 		
 		ifeq (${USE_SDL2_image},y)

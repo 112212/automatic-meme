@@ -204,10 +204,6 @@ void Screen::DisableClipRegion() {
 	SetClipRegion(0,0,0,0,false);
 }
 
-void Screen::RemoveFromCache(unsigned int cache_id) {
-	
-}
-
 void Screen::DeleteTexture(unsigned int cache_id) {
 	
 }
@@ -227,6 +223,20 @@ void Screen::SetCache(Image* img, unsigned int cache_id) {
 
 Image* Screen::GetOffScreenTexture(int id) {
 	return 0;
+}
+
+
+void Screen::RemoveFromCache(uint32_t cache_id) {
+	std::unique_lock<std::mutex> l(mtx);
+	cache_remove.push_back(cache_id);
+}
+
+void Screen::ProcessQueue() {
+	std::unique_lock<std::mutex> l(mtx);
+	for(uint32_t c : cache_remove) {
+		DeleteTexture(c);
+	}
+	cache_remove.clear();
 }
 
 }

@@ -1377,6 +1377,17 @@ void Control::getRange(Size& min, Size& max) {
 }
 
 
+void Control::doOnRender(std::function<void()> f) {
+	if(engine) {
+		engine->MtLock();
+		engine->DoOnRender(f);
+		engine->MtUnlock();
+	} else {
+		f();
+	}
+}
+
+
 // ---- backend accessor helpers ----
 Screen& Control::Drawing() {
 	if(engine) {

@@ -345,10 +345,6 @@ namespace ng {
 	void SDLScreen::VLine(int x1, int y1, int y2, uint32_t color) {
 		Line(x1, y1, x1, y2, color);
 	}
-
-	void SDLScreen::RemoveFromCache(unsigned int cache_id) {
-		DeleteTexture(cache_id);
-	}
 	
 	uint32_t SDLScreen::CompileShader(std::string vertexShader, std::string fragmentShader ) {
 		// return loadShader(vertexShader.c_str(), fragmentShader.c_str());

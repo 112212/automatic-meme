@@ -126,6 +126,7 @@ class Control : public ControlManager  {
 		void process_prerender_effects();
 		void process_postrender_effects();
 		void render(Point position, bool isSelected);
+		
 		// ----- </ControlBase> ------
 		
 		bool m_is_intercepted;
@@ -138,9 +139,7 @@ class Control : public ControlManager  {
 		Point m_offset;
 		
 		static int current_tag;
-		
 		void backtrackStylingCreationPairs();
-		
 		void set_engine(Gui* engine);
 	protected:
 		// ------- [ControlBase] --------
@@ -181,6 +180,7 @@ class Control : public ControlManager  {
 		void tabToNextControl();
 		void copyStyle(Control* copy_to);
 		void cloneBase(Control* copy_to);
+		void doOnRender(std::function<void()> f);
 		
 		inline Control* getParent() { return parent; }
 		inline Gui* getEngine() { return engine; }
