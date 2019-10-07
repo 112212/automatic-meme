@@ -7,6 +7,7 @@ namespace ng {
 class ProgressBar : public Control {
 	private:
 		int m_value;
+		bool hide_label;
 		uint32_t bar_color;
 		void OnSetStyle(std::string& style, std::string& value);
 		
