@@ -287,7 +287,7 @@ all:
 
 clean:
 	@echo project cleaned
-	@rm -f libgui.a *_test *_test.exe
+	@rm -f libngui.a *_test *_test.exe
 	@rm -rf build build_win
 	
 dirs:

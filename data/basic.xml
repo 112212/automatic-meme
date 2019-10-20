@@ -14,6 +14,7 @@
 	</theme>
 -->
 
+<!--
 	<button value="abcdef" rect="0,0,150,200" bgcolor="#ff00ff00" onclick="say you clicked" >
 		<label value="lol" />
 	</button>
@@ -40,26 +41,35 @@
 		<item>cool</item>
 		<item>awesome</item>
 	</listbox>
+-->
+	
+	
 <!--
 	<textbox value="ow yeah" rect="0,0,200,100" multiline="true"/>
 	<trackbar rect="0,0,200,30" min="0" max="100" value="10"/>
 	<br/>
 -->
+
+
+<!--
 	<canvas rect="0,0,500,500" bgcolor="#ff00ff00" color="#ffff0000" />
-	<tabcontainer id="tabcontainer" rect="0,0,200,100">
-		<tab name="tab1">
-			<button id="hh1" value="wut" rect="0,0,50,50"  tooltip="heyyy"/>
-		</tab>
-		
-		<tab name="tab2">
-			<button id="hh4" value="btn1" rect="0,0,50,50"/>
-			<button id="hh5" value="btn2" rect="0,0,50,50"/>
-		</tab>
-		<tab name="haha">
-			<button id="hh" value="haha"/>
-		</tab>
-	</tabcontainer>
+-->
 	
+	<control rect="A0,0,W,H" zindex="5" id="globcontr" bgcolor="#00000000">
+		<tabcontainer id="tabcontainer" rect="A0,0,200,100">
+			<tab name="tab1">
+				<button id="hh1" value="wut" rect="0,0,50,50"  tooltip="heyyy"/>
+			</tab>
+			
+			<tab name="tab2">
+				<button id="hh4" value="btn1" rect="0,0,50,50"/>
+				<button id="hh5" value="btn2" rect="0,0,50,50"/>
+			</tab>
+			<tab name="haha">
+				<button id="hh" value="haha"/>
+			</tab>
+		</tabcontainer>
+	</control>
 	
 <!--
 	<resources>
@@ -67,10 +77,12 @@
 	</resources>
 -->
 
+<!--
 	<label id="fps" value="" rect="5,0,100,20" noborder="true" align="left" interactible="false" />
+-->
 
-	<control rect="M,M+100,200,100" noborder="false" interactible="2">
-		<label id="progress_loading_filename" value="" rect="0,0,600,30" noborder="false" align="center" />
+	<control rect="M,B-20%H,200,100" noborder="false" interactible="1" zindex="3" id="below">
+		<label id="progress_loading_filename" value="" rect="0,0,600,30" noborder="false" align="center"  />
 		<br/>
 		<progressbar id="progress" rect="0,0,200,30" value="100" onhover="playsound libs/ngui/data/click2.wav" noborder="false" interactible="true" />
 	</control>

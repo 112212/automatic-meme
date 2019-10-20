@@ -42,7 +42,7 @@ SDL_Color toSDL_Color(uint32_t color) {
 	c.a = (color >> 24) & 0xff;
 	return c;
 }
-	
+
 Image* SDL_TTF_Font::GetTextImage( std::string text, uint32_t color ) {
 	// std::cout << " getting font text " << text << "\n";
 	if(text.empty()) {

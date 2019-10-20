@@ -956,16 +956,12 @@ void TextBox::PutTextAtCursor(std::string text) {
 		compact_lines(m_lines, m_lines.begin()+m_cursor.y+1);
 	}
 	
-	
-	
 	spreadColor(m_lines.begin()+m_cursor.y);
 	
 	m_cursor = next_cursor;
 	m_cursor_max_x = m_cursor.x;
 	
 	updatePosition();
-	
-	
 }
 
 void TextBox::OnMWheel( int updown ) {

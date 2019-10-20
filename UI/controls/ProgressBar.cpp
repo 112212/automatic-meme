@@ -49,6 +49,7 @@ ProgressBar* ProgressBar::Clone() {
 	ProgressBar* s = new ProgressBar();
 	copyStyle(s);
 	s->bar_color = bar_color;
+	s->hide_label = hide_label;
 	return s;
 }
 
