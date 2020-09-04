@@ -113,8 +113,8 @@ void TiledImage::ResetAffectedRegion() {
 	img->ResetAffectedRegion();
 }
 
-void TiledImage::SetCache(uint32_t cache_id) {
-	img->SetCache(cache_id);
+void TiledImage::SetCacheId(uint32_t cache_id) {
+	img->SetCacheId(cache_id);
 	
 }
 

@@ -172,7 +172,7 @@ MAIN
 	
 	double t=25;
 	gui.OnRender([&]() {
-		Point pt = gui.GetCursor().GetCursor();
+		Point pt = gui.GetCursor().GetPosition();
 		// tbox->SetText(std::to_string(pt.x) + " " + std::to_string(pt.y));
 		// graph->AddPoints(s, {{t,1}});
 		t+=2;

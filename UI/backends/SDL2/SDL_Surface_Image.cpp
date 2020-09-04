@@ -108,9 +108,14 @@ SDL_PixelFormat SDL_Surface_Image::getPixelFormat() {
 Resource* SDL_Surface_Image::LoadIMG(File* file) {
 #ifdef USE_SDL2_image
 	SDL_Surface* surf2 = IMG_Load_RW(GetRWOps(file), 1);
+	if(!surf2) {
+		std::cout << "SDL_Surface_Image::LoadIMG: SDL2_image failed to load texture\n";
+		return 0;
+	}
 	SDL_PixelFormat pfm = getPixelFormat();
 	return new SDL_Surface_Image( SDL_ConvertSurface(surf2, &pfm, 0) );
 #else
+	std::cout << "SDL_Surface_Image::LoadIMG: not supported\n";
 	return 0;
 #endif
 }
@@ -171,6 +176,7 @@ const unsigned int* SDL_Surface_Image::GetImage() {
 SDL_Surface_Image::~SDL_Surface_Image() {
 	if(surf) {
 		Free();
+		SDL_assert(surf->w != -1);
 		SDL_FreeSurface(surf);
 	}
 }
@@ -187,11 +193,11 @@ uint32_t SDL_Surface_Image::GetTextureId() {
 	}
 }
 
-void SDL_Surface_Image::SetCache(uint32_t cache_id) {
+void SDL_Surface_Image::SetCacheId(uint32_t cache_id) {
 	if(!caches.empty()) {
 		caches[cur_frame] = cache_id;
 	} else {
-		Image::SetCache(cache_id);
+		Image::SetCacheId(cache_id);
 	}
 }
 

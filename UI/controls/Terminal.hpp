@@ -25,7 +25,7 @@ class Terminal : public Control {
 		void execute_command(std::string cmd);
 		void onFontChange();
 		void OnSetStyle(std::string& style, std::string& value);
-		void OnKeyDown( Keycode &sym, Keymod mod );
+		
 		
 	public:
 	
@@ -42,7 +42,11 @@ class Terminal : public Control {
 		void WriteLog(const std::string& s);
 		void AppendLog(const std::string& s);
 		void Focus();
+		bool IsActive() {
+			return m_terminal->IsActive();
+		}
 		
+		void OnKeyDown( Keycode sym, Keymod mod );
 		void OnMouseDown( int x, int y, MouseButton button );
 		void OnMouseUp( int x, int y, MouseButton button );
 		void OnText( std::string s );

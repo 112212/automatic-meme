@@ -37,10 +37,9 @@ int main() {
 		return 0;
 	}
 	
-	
 	double t=25;
 	gui.OnRender([&]() {
-		Point pt = gui.GetCursor().GetCursor();
+		Point pt = gui.GetCursor().GetPosition();
 		// tbox->SetText(std::to_string(pt.x) + " " + std::to_string(pt.y));
 		// if (gui.GetActiveControl())
 		// std::cout << gui.GetActiveControl()->GetId() << "\n";

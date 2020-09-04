@@ -513,7 +513,7 @@ void Graph::drawScales() {
 			l->SetRect(dst);
 			
 			Rect cr = l->GetContentRect();
-			l->SetSize(cr.w, cr.h);
+			// l->SetSize(cr.w, cr.h); // TODO: this breaks rendering of scales
 			
 			
 			dist += dist_diff;

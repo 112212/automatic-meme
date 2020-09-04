@@ -16,7 +16,7 @@ Size BasicImage::GetImageSize() {
 	return size;
 }
 
-const unsigned int* BasicImage::GetImage() {
+const uint32_t* BasicImage::GetImage() {
 	return buffer;
 }
 

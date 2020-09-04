@@ -30,7 +30,7 @@ class SDLScreen : public Screen {
 		void SetClipRegion(int x, int y, int w, int h, bool enable=true);
 		bool GetClipRegion(int &x, int &y, int &w, int &h);
 		void DeleteTexture(unsigned int textureID);
-		void CacheImage(Image* img);
+		void CacheImage(ng::Image* img);
 		void TexRect(int x, int y, int w, int h, Image* texture, bool repeat = false, int texWidth = 1, int texHeight = 1);
 		void TexRect(int x, int y, Image* tex, bool repeat = false);
 		

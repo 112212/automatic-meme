@@ -55,15 +55,22 @@ class Border;
 class Effect;
 
 // ----------- Event --------------
+enum Types {
+	TYPE_INT,
+	TYPE_FLOAT,
+	TYPE_DOUBLE,
+	TYPE_CHAR,
+	TYPE_STRING
+};
 
 // Event arguments
 struct Arg {
 	Arg() {}
-	Arg(int i) { this->i = i; }
-	Arg(float f) { this->f = f; }
-	Arg(double d) { this->d = d; }
-	Arg(char c) { this->c = c; }
-	Arg(std::string str) { s=str; }
+	Arg(int i) { this->i = i; type=TYPE_INT; }
+	Arg(float f) { this->f = f; type=TYPE_FLOAT; }
+	Arg(double d) { this->d = d; type=TYPE_DOUBLE; }
+	Arg(char c) { this->c = c; type=TYPE_CHAR; }
+	Arg(std::string str) { s=str; type=TYPE_STRING; }
 	~Arg() { }
 	union {
 		int i;
@@ -72,6 +79,7 @@ struct Arg {
 		char c;
 	};
 	std::string s;
+	int type;
 };
 typedef std::vector<Arg> Argv;
 struct Args {
@@ -81,10 +89,9 @@ struct Args {
 };
 
 typedef std::function<void(Args& args)> EventCallback;
-
 // --------------------------
 
-class Control : public ControlManager  {
+class Control : public ControlManager {
 	private:
 		friend class Gui;
 		friend class ControlManager;
@@ -104,6 +111,7 @@ class Control : public ControlManager  {
 			Control* control;
 			std::string function_name;
 		};
+		
 		const char* type;
 		Gui* engine;
 		Control* parent;
@@ -141,6 +149,7 @@ class Control : public ControlManager  {
 		static int current_tag;
 		void backtrackStylingCreationPairs();
 		void set_engine(Gui* engine);
+		
 	protected:
 		// ------- [ControlBase] --------
 		int z_index;
@@ -343,6 +352,7 @@ class Control : public ControlManager  {
 		inline bool IsDraggable() { return m_style.draggable; }
 		bool IsBeingDragged();
 		bool IsSelected() { return isSelected(); }
+		bool IsActive() { return isActive(); }
 		
 		template <typename T>
 		void OnEvent(std::string event_type, T callback) {

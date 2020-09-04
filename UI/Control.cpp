@@ -110,6 +110,12 @@ bool Control::isSelected() {
 	return engine && engine->GetSelectedControl() == this;
 }
 
+/*
+bool Control::isActive() {
+	return engine && engine->GetActiveControl() == this;
+}
+*/
+
 bool Control::inSelectedBranch() {
 	return sel_control != 0 or isSelected();
 }
@@ -519,7 +525,7 @@ void Control::parseXml(rapidxml::xml_node<>* node) {
 	Layout layout;
 	for(;node;node=node->next_sibling()) {
 		// std::cout << "\tControl::parseXml (" << GetId() << ") :" << node->name() << "\n";
-		parseAndAddControl(node, layout);
+		parseAndAddControl(node, group_styles.front().styles, 1, layout);
 	}
 	// std::cout << "\tleaving Control::parseXml (" << GetId() << ")\n";
 }
@@ -551,7 +557,7 @@ Rect Control::GetContentRect() {
 
 // get control's window position
 const Point Control::GetGlobalPosition() {
-	return GetOffset().Offset(m_rect);
+	return getAbsoluteOffset();
 }
 
 void Control::SetDraggable( bool draggable ) {
@@ -606,16 +612,15 @@ bool Control::isActive() {
 
 void Control::SetVisible(bool visible) {
 	if(this->visible != visible) {
-		this->interactible = visible;
 		this->visible = visible;
+		
 		if(!visible && engine && engine->active_control == this) {
-			// engine->active_control = 0;
 			engine->Activate(0);
 		}
 		update_cache(CacheUpdateFlag::attributes);
-		if(!visible && ((Control*)this)->inSelectedBranch() ) {
+		if(!visible && engine && ((Control*)this)->inSelectedBranch() ) {
 			// TODO: review
-			
+			engine->Activate(0);
 		}
 		if(visible) {
 			emitEvent("show");
@@ -885,6 +890,7 @@ void Control::SetLayout( Rect r ) {
 void Control::SetLayout( const Layout& layout ) {
 	this->layout = layout;
 }
+
 Layout& Control::GetLayout() {
 	return layout;
 }
@@ -927,6 +933,7 @@ void Control::applyStyling(std::vector<ControlCreationPair>& vec, std::string gr
 	}
 	current_tag = 0;
 }
+
 bool Control::applyStyling(std::vector<Styling>& stylings, std::vector<ControlCreationPair>::iterator it, std::vector<ControlCreationPair>::iterator vec_end) {
 	bool is_leaf = it+1 == vec_end;
 	
@@ -965,13 +972,13 @@ bool Control::applyStyling(std::vector<Styling>& stylings, std::vector<ControlCr
 			}
 		}
 	}
-	return false;
+	return match;
 }
 
 int Control::current_tag = 0;
 
 void Control::applyStyling(const Styling& styling) {
-	// std::cout << "applying style: " << styling.style_for << " to " << GetId() << "\n";
+	// std::cout << "applying style: " << styling.style_for << " to " << GetId() << " : " << styling.attributes.size() << "\n";
 	for(auto &attr : styling.attributes) {
 		SetStyle(attr.first, attr.second);
 	}
@@ -1012,6 +1019,7 @@ Control* Control::createControl(std::string type, std::string id) {
 		// backtrack to creation_vector
 		backtrackStylingCreationPairs();
 	}
+	
 	c = ControlManager::CreateControl(type, id);
 	if(parent) {
 		creation_vector.clear();
@@ -1102,7 +1110,7 @@ void Control::SetFont( std::string name ) {
 }
 
 Point Control::getAbsCursor() {
-	return getEngine()->GetCursor().GetCursor();
+	return getEngine()->GetCursor().GetPosition();
 }
 
 Point Control::getCursor() {
@@ -1236,6 +1244,7 @@ Rect Control::GetParentRect() {
 void Control::SetImage(std::string image, bool repeat) {
 	Image* img = Images::LoadImage(image);
 	if(!img) {
+		std::cout << GetId() << ": fail to load image: " << image << "\n";
 		m_style.image_tex = 0;
 		return;
 	}
@@ -1396,27 +1405,15 @@ void Control::doOnRender(std::function<void()> f) {
 
 // ---- backend accessor helpers ----
 Screen& Control::Drawing() {
-	if(engine) {
-		return *engine->backend.screen;
-	} else {
-		return *default_backend.screen;
-	}
+	return engine ? *engine->backend.screen : *default_backend.screen;
 }
 
 Speaker& Control::Sound() {
-	if(engine) {
-		return *engine->backend.speaker;
-	} else {
-		return *default_backend.speaker;
-	}
+	return engine ? *engine->backend.speaker : *default_backend.speaker;
 }
 
 System& Control::GetSystem() {
-	if(engine) {
-		return *engine->backend.system;
-	} else {
-		return *default_backend.system;
-	}
+	return engine ? *engine->backend.system : *default_backend.system;
 }
 
 

@@ -45,6 +45,7 @@ class TextBox : public Control {
 		bool m_should_refresh_line_max;
 		bool m_update_viewport;
 		bool m_hscroll;
+		bool m_tabnextcontrol;
 		
 		bool m_color_input;
 		bool m_locked;

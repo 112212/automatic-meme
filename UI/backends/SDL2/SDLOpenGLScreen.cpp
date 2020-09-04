@@ -19,7 +19,8 @@ namespace ng {
 		float x,y,z,w;
 	};
 	
-	#define SHADER_VERSION "#version 130\n"
+	// #define SHADER_VERSION "#version 130\n"
+	#define SHADER_VERSION ""
 	
 	// shaders
 	static unsigned int readShader(std::string shaderStr, unsigned int shaderType)
@@ -28,6 +29,7 @@ namespace ng {
 		const char *shaderSource = shaderString.c_str();
 		GLint shaderLength = shaderString.size();
 
+		std::cout << "readShader: create shader\n";
 		// creating shader
 		GLuint shader = glCreateShader(shaderType);
 		glShaderSource(shader, 1, (const GLchar**)&shaderSource, (GLint*)&shaderLength);
@@ -35,14 +37,18 @@ namespace ng {
 		// compiling shader
 		GLint compileStatus;
 
+		std::cout << "readShader: compile shader\n";
 		glCompileShader(shader);
+		std::cout << "readShader: compile status\n";
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-
+		std::cout << "readShader: compile status read\n";
 		if(compileStatus != GL_TRUE) {
 			char buffer[512];
+			std::cout << "readShader: glGetShaderInfoLog\n";
 			glGetShaderInfoLog(shader, 512, NULL, buffer);
-
+			std::cout << "readShader: glGetShaderInfoLog 2\n" << buffer << "\n";
 			throw std::string(buffer);
+			std::cout << "readShader: throw exception\n";
 		}
 
 		return shader;
@@ -52,13 +58,16 @@ namespace ng {
     {
 		GLuint vertexShader;
 		GLuint fragmentShader;
+		std::cout << "loadShader: readShader"<< std::endl;
 		try {
 			vertexShader = readShader(vertexShaderFile, GL_VERTEX_SHADER);
 			fragmentShader = readShader(fragmentShaderFile, GL_FRAGMENT_SHADER);
-		} catch( std::exception &e ) {
-			std::cout << e.what() << std::endl;
+		} catch( std::string& e ) {
+			std::cout << "loadShader: " << e << std::endl;
 		}
-
+		
+		
+		std::cout << "loadShader: linking"<< std::endl;
         // linking
         GLuint shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
@@ -67,7 +76,7 @@ namespace ng {
         glLinkProgram(shaderProgram);
 
         if(!shaderProgram) {
-            throw std::string("Failed to create shader program");
+            throw std::runtime_error("Failed to create shader program");
         }
 
         return shaderProgram;
@@ -80,9 +89,10 @@ namespace ng {
 	// "#extension GL_ARB_separate_shader_objects : enable\n"
 	// "layout (location = 0) in vec2 position;"
 	// "layout (location = 1) in vec4 color;"
-	"in vec2 position;"
-	"in vec4 color;"
-	"out vec4 inColor;"
+	"attribute vec2 position;"
+	"attribute vec4 color;"
+	"varying vec4 inColor;"
+	"precision highp float;"
 	"void main() {"
 	"	gl_Position = vec4( position, 0.0, 1.0 );"
 	"	inColor = color;"
@@ -91,12 +101,13 @@ namespace ng {
 	static const char* fragmentShader_code =
 	SHADER_VERSION
 	// "#version 330\n"
-	"in vec4 inColor;"
-	"out vec4 color;"
+	"precision highp float;"
+	"varying vec4 inColor;"
+	// "varying vec4 color;"
 	// "in vec4 gl_FragCoord;"
 
 	"void main() {"
-	"	color = vec4(inColor);"
+	"	gl_FragColor = vec4(inColor);"
 	"}";
 	
 	
@@ -107,9 +118,10 @@ namespace ng {
 	// "#extension GL_ARB_separate_shader_objects : enable\n"
 	// "layout (location = 0) in vec2 position;"
 	// "layout (location = 1) in vec2 texCoord;"
-	"in vec2 position;"
-	"in vec2 texCoord;"
-	"out vec2 inTexCoord;"
+	"attribute vec2 position;"
+	"attribute vec2 texCoord;"
+	"varying vec2 inTexCoord;"
+	"precision highp float;"
 	"void main() {"
 		"gl_Position = vec4( position, 0.0, 1.0 );"
 		// "inTexCoord = vec2(1.0 - texCoord.x, 1.0 - texCoord.y);"
@@ -119,17 +131,19 @@ namespace ng {
 	static const char* texture_fragmentshader_code =
 	SHADER_VERSION
 	// "#version 330\n"
-	"in vec2 inTexCoord;"
-	"out vec4 color;"
+	"precision highp float;"
+	"varying vec2 inTexCoord;"
+	// "varying vec4 color;"
 	"uniform sampler2D textureUniform;"
 	"uniform float max_alpha;"
 	// "uniform float custom_color_interp;"
 	// "uniform vec3 custom_color;"
 	"void main() {"
-		"vec4 c = texture(textureUniform, inTexCoord);"
+		"vec4 c = texture2D(textureUniform, inTexCoord);"
 		"c.a = min(max_alpha, c.a);"
 		// "c.rgb = c.rgb * (1-custom_color_interp) + (custom_color_interp) * custom_color;"
-		"color = c;"
+		// "color = c;"
+		"gl_FragColor = c;"
 	"}";
 	
 
@@ -149,14 +163,18 @@ namespace ng {
 	void SDLOpenGLScreen::Init() {
 		static bool inited = false;
 		
-		if(!inited) {			
+		std::cout << "SDLOpenGLScreen::Init()" << "\n";
+		if(!inited) {
+			
+			std::cout << "SDLOpenGLScreen::Init : load shaders" << "\n";
 			try {
 				shader = loadShader( vertexShader_code, fragmentShader_code );
 				shader2 = loadShader( texture_vertexshader_code, texture_fragmentshader_code );
 			} catch( std::string& e ) {
-				std::cout << e << std::endl;
+				std::cout << "SDLOpenGLScreen::Init: " << e << std::endl;
 			}
 
+			std::cout << "SDLOpenGLScreen::Init : gen arrays" << "\n";
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 
@@ -171,10 +189,12 @@ namespace ng {
 	}
 
 	int sizeX=800, sizeY=800;
+	
 	void SDLOpenGLScreen::SetResolution( int w, int h ) {
 		sizeX = w;
 		sizeY = h;
 	}
+	
 	void SDLOpenGLScreen::GetResolution( int &w, int &h ) {
 		w = sizeX;
 		h = sizeY;
@@ -445,6 +465,8 @@ namespace ng {
 		if(img->GetAffectedRegion(a,b)) {
 			// img->FreeCache();
 			// std::cout << "cache img\n";
+			
+				
 			if(texid == NO_TEXTURE) {
 				glGenTextures(1, &texid);
 				// tex->SetTextureId(texid);
@@ -452,19 +474,35 @@ namespace ng {
 				glBindTexture( GL_TEXTURE_2D, texid );
 				// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, s.w, s.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				
+				
+				// glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, s.w, s.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
+				glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, s.w, s.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->GetImage() );
+				
+				
+				// glGenerateMipmap(GL_TEXTURE_2D);
 				// std::cout << "caching img size " << s.w << ", " << s.h << "\n";
 			} else {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texid);
 				
-				// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				// glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, s.w, s.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.GetTexture() );
 				// std::cout << "caching img2 size " << s.w << ", " << s.h << "\n";
-				glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, s.w, s.h, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
+				
+				
+				
+				// glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, s.w, s.h, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
+				glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, s.w, s.h, GL_RGBA, GL_UNSIGNED_BYTE, img->GetImage() );
 			}
-			SetCache(img, texid);
+			SetCacheId(img, texid);
 			img->ResetAffectedRegion();
 		}
 	}
@@ -492,6 +530,7 @@ namespace ng {
 	}
 	
 	void SDLOpenGLScreen::TexRect(int x, int y, Image* tex, bool repeat) {
+		if(!tex) return;
 		ng::Rect s = tex->GetImageCropRegion();
 		if(s.w == 0 || s.h == 0 || !tex->GetImage() ) return;
 		
@@ -502,7 +541,7 @@ namespace ng {
 
 	//void TexRect(int x, int y, int w, int h, GLuint texture) {
 	void SDLOpenGLScreen::TexRect(int x, int y, int w, int h, Image* texture, bool repeat, int texWidth, int texHeight) {
-		
+		if(!texture) return;
 		// Size s = texture->GetImageSize();
 		// if(s.w == 0 || s.h == 0 || !texture->GetImage() ) return;
 		CacheImage(texture);
@@ -571,16 +610,16 @@ namespace ng {
 		glBindTexture(GL_TEXTURE_2D, texture->GetTextureId());
 		glUniform1i(glGetUniformLocation(shader2, "textureUniform"), 0);
 		glUniform1f(glGetUniformLocation(shader2, "max_alpha"), max_alpha);
-		glUniform1f(glGetUniformLocation(shader2, "custom_color_interp"), custom_color_interp);
-		glUniform4fv(glGetUniformLocation(shader2, "custom_color"), 1, custom_color);
+		// glUniform1f(glGetUniformLocation(shader2, "custom_color_interp"), custom_color_interp);
+		// glUniform4fv(glGetUniformLocation(shader2, "custom_color"), 1, custom_color);
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

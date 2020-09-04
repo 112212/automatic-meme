@@ -97,7 +97,7 @@ class ControlManager {
 		void sendToFront(Control* control);
 		void sendToBack(Control* control);
 	public:
-		Control* parseAndAddControl(rapidxml::xml_node<char>* node, Layout& layout);
+		Control* parseAndAddControl(rapidxml::xml_node<char>* node, std::vector<Styling>& push_where, int style_group_tag, Layout& layout);
 		
 		inline const std::vector<Control*>& GetControls() { return controls; }
 		void RemoveControls();

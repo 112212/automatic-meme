@@ -47,6 +47,8 @@ using std::endl;
 
 SDL_Window* win = 0;
 SDL_Renderer* ren = 0;
+void a_loop();
+
 bool SetupWindow(const char* window_name, int posx, int posy, int width, int height) {
 	// if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         // throw std::string("Failed to initialize SDL: ") + SDL_GetError();
@@ -54,7 +56,7 @@ bool SetupWindow(const char* window_name, int posx, int posy, int width, int hei
 	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_TIMER) != 0) {
         throw std::string("Failed to initialize SDL: ") + SDL_GetError();
     }
-
+	
     std::cout << "creating sdl window\n";
     
     bool adv_gl = true;
@@ -66,9 +68,9 @@ bool SetupWindow(const char* window_name, int posx, int posy, int width, int hei
 #ifdef USE_OPENGL
     if(adv_gl) {
 		std::cout << "using opengl\n";
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_SetHint("SDL_HINT_RENDER_VSYNC", "0");
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
@@ -80,6 +82,7 @@ bool SetupWindow(const char* window_name, int posx, int posy, int width, int hei
 	}
 	flags |= SDL_WINDOW_OPENGL;
 #endif
+	
 	
 	
 	std::cout << "creating window\n";
@@ -117,6 +120,7 @@ bool SetupWindow(const char* window_name, int posx, int posy, int width, int hei
 	glewInit();
 #endif
 	
+	std::cout << "RegisterExtensions\n";
     RegisterExtensions();
     return true;
 }
@@ -174,14 +178,15 @@ Screen* screen = 0;
 SDLSpeaker* speaker = 0;
 SDLSystem* system = 0;
 bool inited = false;
+
 void SetBackend(Gui* gui) {
 	if(!screen) {
 		#ifdef USE_OPENGL
-		screen = new SDLOpenGLScreen();
+			screen = new SDLOpenGLScreen();
 		#else
-		SDLScreen* scr = new SDLScreen();
-		scr->SetSDLRenderer(ren);
-		screen = scr;
+			SDLScreen* scr = new SDLScreen();
+			scr->SetSDLRenderer(ren);
+			screen = scr;
 		#endif
 	}
 	if(!speaker) {
@@ -197,30 +202,39 @@ void SetBackend(Gui* gui) {
 
 void SDLProcessInput(Gui* gui, SDL_Event& e) {
 	switch(e.type) {
+		
 		case SDL_MOUSEMOTION:
 			gui->OnMouseMove( e.motion.x, e.motion.y );
 			break;
+			
 		case SDL_KEYDOWN:
 			gui->OnKeyDown( (Keycode) e.key.keysym.sym, (Keymod)e.key.keysym.mod );
 			break;
+			
 		case SDL_TEXTEDITING:
 			break;
+			
 		case SDL_TEXTINPUT:
 			gui->OnText( e.text.text );
 			break;
+			
 		case SDL_KEYUP:
 			//std::cout << "keyup\n";
 			gui->OnKeyUp( (Keycode)e.key.keysym.sym, (Keymod)e.key.keysym.mod );
 			break;
+			
 		case SDL_MOUSEBUTTONUP:
 			gui->OnMouseUp( e.button.button );
 			break;
+			
 		case SDL_MOUSEBUTTONDOWN:
 			gui->OnMouseDown( e.button.button );
 			break;
+			
 		case SDL_MOUSEWHEEL:
 			gui->OnMWheel( e.wheel.y );
 			break;
+			
 		case SDL_WINDOWEVENT:
 			switch(e.window.event) {
 				case SDL_WINDOWEVENT_RESIZED:
@@ -240,63 +254,91 @@ void SDLProcessInput(Gui* gui, SDL_Event& e) {
 Gui* g_gui;
 bool running;
 
-void a_loop() {
-	Gui* gui = (Gui*)g_gui;
-	Size s = gui->GetSize();
-#ifdef USE_OPENGL
-	glViewport(0, 0, s.w, s.h);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-#else
+/*
+#include <bind.h>
 
-	SDL_SetRenderDrawColor(ren, 0, 0, 0, 0xff);
-	SDL_RenderClear(ren);
-#endif
-	
-	Update(gui);
-	gui->Render();
-	
-#ifdef USE_OPENGL
-	SDL_GL_SwapWindow(win);
-#else
-	SDL_RenderPresent(ren);
-#endif
+std::string getExceptionMessage(intptr_t exceptionPtr) {
+  return std::string(reinterpret_cast<std::exception *>(exceptionPtr)->what());
+}
+
+EMSCRIPTEN_BINDINGS(Bindings) {
+  emscripten::function("getExceptionMessage", &getExceptionMessage);
+};
+*/
+
+void a_loop() {
+	// std::cout << "a_loop enter" << "\n";
+	try {
+		Gui* gui = (Gui*)g_gui;
+		if(!gui) return;
+		Size s = gui->GetSize();
+	#ifdef USE_OPENGL
+		glViewport(0, 0, s.w, s.h);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	#else
+
+		SDL_SetRenderDrawColor(ren, 0, 0, 0, 0xff);
+		SDL_RenderClear(ren);
+	#endif
+		
+		Update(gui);
+		gui->Render();
+		
+	#ifdef USE_OPENGL
+		SDL_GL_SwapWindow(win);
+	#else
+		SDL_RenderPresent(ren);
+	#endif
+	} catch (std::exception& ex) {
+		std::cout << "(a_loop) exception: " << ex.what() << "\n";
+	}
+	// std::cout << "a_loop leave" << "\n";
 }
 
 
 void Update(Gui* gui) {
-	SDL_PumpEvents();
-	SDL_Event e;
+	// std::cout << "Update gui" << "\n";
+	try {
+		SDL_PumpEvents();
+		SDL_Event e;
 
-	while(SDL_PollEvent(&e)) {
-		if(e.type == SDL_KEYDOWN) {
-			if(e.key.keysym.sym == SDLK_ESCAPE) {
+		while(SDL_PollEvent(&e)) {
+			if(e.type == SDL_KEYDOWN) {
+				if(e.key.keysym.sym == SDLK_ESCAPE) {
+					running = false;
+				}
+			} else if(e.type == SDL_QUIT) {
 				running = false;
 			}
-		} else if(e.type == SDL_QUIT) {
-			running = false;
+			
+			SDLProcessInput(gui, e);
 		}
-		
-		SDLProcessInput(gui, e);
+	} catch (std::exception& ex) {
+		std::cout << "(Update) exception: " << ex.what() << "\n";
 	}
 }
 
 void MainLoop(Gui* gui) {
-	g_gui = gui;
-	SDL_StartTextInput();
-	
-	running = true;
-	
-#ifdef EMSCRIPTEN
-	emscripten_set_main_loop(a_loop, 60, 1);
-#else
-	SDL_GL_SetSwapInterval(1);
-	while(running) {
-		a_loop();
+	try {
+		g_gui = gui;
+		SDL_StartTextInput();
+		
+		running = true;
+	#ifdef EMSCRIPTEN
+		std::cout << "MainLoop emscripten_set_main_loop" << "\n";
+		emscripten_set_main_loop(a_loop, 60, 1);
+		// emscripten_set_main_loop(a_loop, 0, 1);
+	#else
+		SDL_GL_SetSwapInterval(1);
+		while(running) {
+			a_loop();
+		}
+	#endif
+		// emscripten_set_main_loop_arg(some_loop, gui, 60, 1);
+	} catch (std::exception& ex) {
+		std::cout << "(MainLoop) exception: " << ex.what() << "\n";
 	}
-#endif
-	// emscripten_set_main_loop_arg(some_loop, gui, 60, 1);
-	
 
 	// SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
 	// if(SDL_SetRelativeMouseMode((SDL_bool)1) != 0) {

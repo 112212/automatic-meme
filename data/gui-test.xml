@@ -223,11 +223,7 @@ value="" ></textbox>
 		<br/>
 
 		<label id="label" align="center" rect="0,0,150,150"
-value="hehehe test1 hhfghgf hfghghgfhhhcangfdgfgfdhhgfhgf
-	test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf
-test3^g
-hehehehe
-fddgdf" rotation="50"></label>
+value="hehehe test1 hhfghgf hfghghgfhhhcangfdgfgfdhhgfhgf test2ghfghfhgfhghgfhgjhgjgh jghjghfghgfhgf test3^g hehehehe fddgdf" rotation="50"></label>
 
 		<control id="gut" rect="0,0,expand(100,500),expand(100,500)">
 			<style onclick="style backgroundcolor #ff0000">
@@ -254,13 +250,12 @@ fddgdf" rotation="50"></label>
 		
 		
 		
-		<canvas rect="0,0,200,200" grid="false" color="#0000ff" pixelsize="1" aligntogrid="false" grid_color="#220000" id="canvas" ></canvas>
+		<canvas rect="0,0,256,257" grid="false" color="#0000ff" pixelsize="1" aligntogrid="false" grid_color="#220000" id="canvas" ></canvas>
 		<button onclick="clear_canvas" value="clear canvas" rect="0,0,150,40"/>
 
 		<control rect="0,0">
 			<control id="put_here" rect="0,0,300,100" backgroundcolor="#ff094D33">
-				<button rect="0,0" value="button" tooltip="this button has no rect :D but uses content
-to determine size of tooltip :D" />
+				<button rect="0,0" value="button" tooltip="this button has no rect :D but uses content to determine size of tooltip :D" />
 			</control>
 			<br/>
 			<control id="or_here" rect="0,0,300,100">

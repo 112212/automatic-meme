@@ -35,6 +35,7 @@ TextBox::TextBox(std::string id)
 	, m_cursor(0,0)
 	, m_position(0,0)
 	, m_scrollbar_thickness(10)
+	, m_tabnextcontrol(1)
 	{
 	SetId(id);
 	setType( "textbox" );
@@ -143,7 +144,7 @@ void TextBox::Render( Point pos, bool selected ) {
 				for( auto i = m_lines.begin()+m_position.y; i != m_lines.end(); i++,j++) {
 					// std::cout << "rend line: " << i->text << " , " << i->w << " " << i->h << "\n";
 					if(5+j*m_line_height+i->h > rect.h) break;
-					if(i->h <= 1) continue;
+					if(i->h <= 1 || !i->tex) continue;
 					// std::cout << GetId() << " did rend line: " << i->text << " : " << i->w << " " << i->h << "\n";
 					Drawing().TexRect(r.x-sz+5, r.y+5+j*m_line_height, i->w, i->h, i->tex);
 				}
@@ -262,6 +263,9 @@ void TextBox::OnSetStyle(std::string& style, std::string& value) {
 			if(s.size() == 2) {
 				PutCursorAt(Point(std::stoi(s[0]), std::stoi(s[1])));
 			}
+		}
+		_case("tabnext"): {
+			m_tabnextcontrol = toBool(value);
 		}
 	}
 }
@@ -483,12 +487,20 @@ void TextBox::updatePosition() {
 }
 
 void TextBox::updateTexture(TextLine& line, bool new_tex) {
+	if(line.text.empty()) {
+		if(line.tex) {
+			delete line.tex;
+			line.tex=0;
+		}
+		return;
+	}
 	if(line.tex == 0) {
 		new_tex = true;
 	}
 	
 	if(line.tex) {
 		delete line.tex;
+		line.tex=0;
 	}
 	
 	line.tex = line.text.get_image(m_style.font, line.last_color, m_password);
@@ -521,6 +533,7 @@ void TextBox::backspace() {
 				updateTexture(m_lines[m_cursor.y-1]);
 			}
 			delete m_lines[m_cursor.y].tex;
+			m_lines[m_cursor.y].tex = 0;
 			m_lines.erase(m_lines.begin()+m_cursor.y);
 			m_cursor.y--;
 			m_cursor.x = p;
@@ -614,7 +627,7 @@ void TextBox::OnKeyDown( Keycode sym, Keymod mod ) {
 		}
 	}
 	
-	if(val == KEY_TAB) {
+	if(val == KEY_TAB && m_tabnextcontrol) {
 		Control::tabToNextControl();
 		return;
 	}
@@ -830,7 +843,10 @@ void TextBox::deleteSelection() {
 		auto it1 = m_lines.begin()+p1.y+1;
 		auto it2 = m_lines.begin()+p2.y+1;
 		for(auto it = it1; it != it2; it++) {
-			it->tex->FreeCache();
+			if(it->tex) {
+				it->tex->FreeCache();
+				delete it->tex;
+			}
 		}
 		m_lines.erase(it1,it2);
 	}
@@ -1010,6 +1026,7 @@ std::vector<TextBox::TextLine> TextBox::wrap_lines(const std::vector<TextLine>& 
 			
 			if(last_pos != 0) {
 				nl.wrap = true;
+				// TODO: delete nl.tex?
 				nl.tex = 0;
 			}
 			

@@ -88,7 +88,7 @@ void Cursor::SetSize(CursorType type, int w, int h) {
 	d.size.h = h;
 }
 
-Point Cursor::GetCursor() {
+Point Cursor::GetPosition() {
 	return m_cursor_position;
 }
 

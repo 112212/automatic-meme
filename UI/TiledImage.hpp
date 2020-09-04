@@ -18,7 +18,7 @@ class TiledImage : public Image {
 		bool animated;
 		std::chrono::high_resolution_clock::time_point m_tp;
 	protected:
-		virtual void SetCache(uint32_t cache_id);
+		virtual void SetCacheId(uint32_t cache_id);
 	public:
 		TiledImage(std::string filename, Size tile_size);
 		TiledImage(const TiledImage& t, int tile);

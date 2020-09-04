@@ -155,7 +155,7 @@ void Screen::SetRotationPoint(int x, int y) {
 }
 
 void Screen::PutPixel(int x, int y, unsigned int color)  {
-	// MUST implement
+	// TODO: MUST implement
 }
 
 void Screen::TexRect(int x, int y, int w, int h, Image* tex, bool repeat, int texWidth, int texHeight ) {
@@ -216,9 +216,11 @@ int	 Screen::SetNewOffScreenRender() {return 0;}
 bool Screen::FreeOffScreenRender(int id) {return false;}
 bool Screen::SetOffScreenRender(int id) {return false;}
 
-void Screen::SetCache(Image* img, unsigned int cache_id) {
-	img->screen = this;
-	img->SetCache(cache_id);
+void Screen::SetCacheId(ng::Image* img, uint32_t cache_id) {
+	if(!img) return;
+	// std::cout << "Screen::SetCacheId: " << img << " " << cache_id << "\n";
+	if(img->screen != this) img->screen = this;
+	img->SetCacheId(cache_id);
 }
 
 Image* Screen::GetOffScreenTexture(int id) {

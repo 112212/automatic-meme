@@ -87,8 +87,9 @@ void TabContainer::parseXml(rapidxml::xml_node<>* node) {
 			}
 			Control* wgt = NewTab(attr->value());
 			Layout l;
+			std::vector<Styling> st;
 			for(rapidxml::xml_node<> *node2=node->first_node(); node2; node2=node2->next_sibling()) {
-				wgt->parseAndAddControl(node2, l);
+				wgt->parseAndAddControl(node2, st, 1, l);
 			}
 		}
 	}

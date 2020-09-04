@@ -320,35 +320,43 @@ void ControlManager::parseStyle(rapidxml::xml_node<>* node, std::vector<Styling>
 			styling.attributes.push_back(std::make_pair(attr->name(), attr->value()));
 		}
 	}
+	
+	auto node_parent = node;
 	for(node=node->first_node(); node; node=node->next_sibling()) {
 		if(!strcmp(node->name(), "style")) {
 			parseStyle(node, styling.child_styles, style_group_tag, layout);
-		} else {
-			// create control with this path
-			Control* c = parseAndAddControl(node, layout);
-			if(c) {
-				c->ApplyStyle(styling);
-			}
 		}
 	}
 	
+	Styling to_push;
+	Styling *s = &styling;
 	if(has_for) {
-		Styling to_push;
-		Styling *s = &to_push;
+		s = &to_push;
 		std::vector<std::string> vals;
 		split_string(styling.style_for, vals, '/');
 		styling.style_for = vals.back();
 		vals.pop_back();
+		
 		for(auto& v : vals) {
+			
 			s->style_for = v;
 			s->child_styles.emplace_back();
 			s = &s->child_styles.front();
-			// std::cout << "V: " << v << "\n";
 		}
+		
 		*s = std::move(styling);
 		mergeStyle(to_push, push_where);
 	}
 	
+	for(node=node_parent->first_node(); node; node=node->next_sibling()) {
+		if(strcmp(node->name(), "style") != 0) {
+			auto *c = parseAndAddControl(node, s->child_styles, style_group_tag, layout);
+			if(c) {
+				c->ApplyStyle(*s);
+				c->ForEachControl([&s](Control* c) { c->ApplyStyle(*s); });
+			}
+		}
+	}
 }
 
 void ControlManager::mergeStyle(Styling& styling, std::vector<Styling>& where) {
@@ -425,7 +433,7 @@ void ControlManager::loadXmlFirst(rapidxml::xml_node<>* node) {
 		} else if(strcmp(node->name(), "resources") == 0) {
 			ResourceManager::ProcessResource(node);
 		} else {
-			parseAndAddControl(node, layout);
+			parseAndAddControl(node, group_styles.front().styles, 1, layout);
 		}
 	}
 }
@@ -460,7 +468,7 @@ struct Scope {
 	}
 };
 
-Control* ControlManager::parseAndAddControl(rapidxml::xml_node<char>* node, Layout& layout) {
+Control* ControlManager::parseAndAddControl(rapidxml::xml_node<char>* node, std::vector<Styling>& push_where, int style_group_tag, Layout& layout) {
 	if(!node) return 0;
 	
 	dbg(std::cout << "parse and add control: " << node->name() << " \n";)
@@ -469,7 +477,8 @@ Control* ControlManager::parseAndAddControl(rapidxml::xml_node<char>* node, Layo
 				
 	// std::cout << "PARSE ADD control: " << this_widget->GetType() << "\n";
 	if(!strcmp(node->name(), "style")) {
-		parseStyle(node, group_styles.front().styles, 1, layout);
+		// parseStyle(node, group_styles.front().styles, 1, layout);
+		parseStyle(node, push_where, style_group_tag, layout);
 		return 0;
 	}
 	
@@ -506,7 +515,11 @@ Control* ControlManager::parseAndAddControl(rapidxml::xml_node<char>* node, Layo
 	// Scope scope([&]{creation_vector.push_back({id, type});},
 		// [&]{creation_vector.pop_back();});
 	creation_vector.push_back({id,type});
-	control->parseXml(node->first_node());
+	Layout b;
+	for(node = node->first_node(); node; node=node->next_sibling()) {
+		// control->parseXml(node->first_node());
+		control->parseAndAddControl(node, push_where, style_group_tag, b);
+	}
 	creation_vector.pop_back();
 	
 	dbg(std::cout << "adding control " << control->GetId() << "\n";)
@@ -532,9 +545,11 @@ void ControlManager::printCreationVector() {
 	if(creation_vector.size() > 0) {
 		std::string form_type;
 		for(auto &s : creation_vector) {
-			form_type += "/" + s.type;
+			form_type += "/" + s.type + "#"+s.id;
 		}
 		std::cout << "F: " << form_type << "\n";
+	} else {
+		std::cout << "creation vector is empty\n";
 	}
 }
 
@@ -546,6 +561,7 @@ Control* ControlManager::CreateControl(std::string tag, std::string id) {
 				[&]{creation_vector.pop_back();});
 	
 	Control* ctrl = createControlByXmlTag(tag);
+	// printCreationVector();
 	if(ctrl) {
 		ctrl->SetId(id);
 		ctrl->applyStyling(creation_vector);

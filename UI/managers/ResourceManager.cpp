@@ -139,7 +139,7 @@ namespace ng {
 			return 0;
 		}
 		std::string extension = filename.substr(ext_pos);
-		// std::cout << "loading resource: " << filename << " : " << extension << "\n";
+		std::cout << "loading resource: " << filename << " : " << extension << "\n";
 			
 		auto it = registered_extensions.find(extension);
 		if(it != registered_extensions.end()) {

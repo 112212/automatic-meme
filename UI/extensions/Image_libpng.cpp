@@ -86,7 +86,12 @@ void userReadData(png_structp pngPtr, png_bytep data, png_size_t length) {
 Resource* LoadPNG(File* file) {
 	std::vector<Image*> vect;
 	Image_libpng::load_png(file, vect);
-	return vect.front();
+	if(vect.empty()) {
+		std::cout << "Image_libpng: LoadPNG failed\n";
+		return 0;
+	} else {
+		return vect.front();
+	}
 }
 
 void load_png(File* f, std::vector<Image*>& out_vector)

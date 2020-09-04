@@ -248,7 +248,7 @@ int main() {
 
 	auto tbox = gui.Get<ng::TextBox>("coords");
 	gui.OnRender([&]() {
-		Point pt = gui.GetCursor().GetCursor();
+		Point pt = gui.GetCursor().GetPosition();
 		tbox->SetText(std::to_string(pt.x) + " " + std::to_string(pt.y));
 	});
 	

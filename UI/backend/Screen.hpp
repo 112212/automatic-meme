@@ -7,13 +7,13 @@
 namespace ng {
 class Screen {
 	protected:
-		void SetCache(Image* img, uint32_t cache_id);
 		std::stack<ng::Rect> clip_stack;
 		std::mutex mtx;
 		std::stack<float> maxAlpha;
 		std::vector<uint32_t> cache_remove;
 		float current_alpha;
 		bool using_clip_region;
+		void SetCacheId(ng::Image* img, uint32_t cache_id);
 	public:
 		Screen();
 		virtual void Init();

@@ -261,6 +261,8 @@ class Gui
 		C* Get(const std::string id) {
 			return static_cast<C*>(get(id));
 		}
+		
+		Control* DbgGet(const char* id);
 };
 
 }

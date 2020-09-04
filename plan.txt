@@ -7,8 +7,8 @@ TODO ASAP:
 	+ wingdi backend
 	- generic backend
 	
-	- backend: system - linux
-	- backend: system - windows
+	- backend: system - linux (input)
+	- backend: system - windows (input)
 	- handling windows on backends
 
 	- implement extensions so that they are general, by inclusion they register automatically
@@ -43,7 +43,7 @@ TODO ASAP:
 TO FIX:
 	- text wrapping
 	- scrolling container with mouse
-
+	- colorstring segfaults
 	
 TODO LATER:
 
@@ -112,14 +112,18 @@ android implementation:
 
 ===
 
+- stb_image for png
 / solve png for windows
 - solve ttf font (portable way)
 
 - win32 nicer text
 	https://docs.microsoft.com/en-us/windows/desktop/api/wingdi/nf-wingdi-bitblt
 
-- win32 opengl
-	https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
+- native opengl
+	- lin opengl
+	
+	- win32 opengl
+		https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
 
 
 ============================
@@ -135,16 +139,22 @@ Definition of:
 
 
 KEY PROBLEMS TO SOLVE (GOAL of this gui):
+
 	- simple to embed in other project
+	
 	- simple to choose backend
 		- also to put backend together from backend pieces
 			(like choose sound platform, choose video platform, choose input platform, ...)
+	
 	- simple to choose extensions (independent of backend)
-	- avail optimizations for backend (rendering)
+	
+	- optional optimization for backend (rendering)
 		- backend independent caching
+		
 	- build systems
 		cmake
 		makefile
+		
 	- full backend support
 		- sound
 		- image
@@ -153,11 +163,170 @@ KEY PROBLEMS TO SOLVE (GOAL of this gui):
 			- window (optional support for backend, abstracted window rendering)
 			- borderless window
 			- menu
+			
 	- powerful (and reusable) controls
+	
 	- make easy to document
 		- easy to start
 		- easy to use
 		- easy to do advanced stuff
 		- try minify limitations
 		- and yet optimized
+		
 	- try to not use macros anywhere if possible
+	
+	
+--------------------------------------------------
+invalidate functionality:
+
+	every control has its texture cache which is quick blit-able
+	on invalidate control:
+		while pop 1 invalidated control:
+			1. finds its clipping area
+			2. blits to screen
+			3. mark validated
+			
+			??? 4. renders (or just blits of not invalidated) all parent controls (touching invalidating control) with their clipping area.
+				if that control was invalidated, after rendering it: don't forget to mark it validated (not invalidated anymore)
+	thats it
+
+
+====================================================
+python interface:
+	
+		void setType(const char* type);
+		// ----------- [ControlBase] --------
+		virtual Control* Clone();
+		
+		bool CheckCollision(const Point& p);
+		bool CheckCollisionA(const Point& p);
+		
+		void CopyStyle(Control* copy_to);
+		
+		void SendToFront();
+		void SendToBack();
+		void SendUpper();
+		void SendLower();
+		void SendAfterControl(Control* c);
+		void SendBeforeControl(Control* c);
+		
+		void SetFont( Font* fnt );
+		void SetFont( std::string name );
+		void SetStyle(std::string style, std::string value);
+		void SetStyle(std::string style, const char* value);
+		void SetStyle(std::string style, bool value);
+		
+		void SetVisible(bool visible);
+		void SetRenderable(bool visible);
+		void SetAlpha(float alpha);
+		void SetId( std::string id );
+		void SetZIndex( int zindex );
+		
+		void SetLayout( float x, float w, float W, float y, float h, float H );
+		void SetLayout( Rect r );
+		void SetLayout( std::string layout );
+		void SetLayout( const Layout& anchor );
+		void SetLayoutEnabled(bool enabled);
+		
+		void SetRect( int x, int y, int w, int h );
+		void SetPosition( Point pt );
+		void SetPosition( int x, int y );
+		void SetSize( int w, int h );
+		void SetSize( Size s );
+		void SetRect( Rect r );
+		
+		void SetTooltip(std::string tooltip);
+		void SetDraggable( bool draggable );
+		void SetImage(std::string image, bool repeat = false);
+		void SetImage(Image *image, bool repeat = false);
+		void SetBorder(Border* border);
+		void SetRenderEnabled(bool enable);
+		void SetTransparentBackground();
+		void DisableStyling(bool tf = true);
+		
+		Point 				GetAbsCursor() { return getAbsCursor(); };
+		Point 				GetCursor() { return getCursor(); };
+		const Point 		GetAbsoluteOffset() { return getAbsoluteOffset(); };
+		virtual Rect		GetContentRect();
+		Rect 				GetParentRect();
+		std::string 		GetType();
+		std::string 		GetId();
+		std::string 		GetFullId();
+		int 				GetZIndex();
+		Layout& 			GetLayout();
+		std::string 		GetTooltip();
+		inline const Rect&  GetRect() { return m_rect; }
+		Border* 			GetBorder();
+		const Point 		GetGlobalPosition();
+		Font* 				GetFont();
+		Gui* 				GetEngine();
+		
+		void				AddEffect(Effect* effect);
+		void				RemoveEffect(Effect* effect);
+		void				RemoveEffect(std::string effect_name);
+		Effect*				GetEffect(std::string effect_name);
+		
+		void Focus();
+		void Activate();
+		void Unselect();
+		void Unattach();
+		
+		inline bool IsVisible() { return visible; }
+		inline bool IsDraggable() { return m_style.draggable; }
+		bool IsBeingDragged();
+		bool IsSelected() { return isSelected(); }
+		
+		// not pythonable
+		template <typename T>
+		void OnEvent(std::string event_type, T callback) {
+			
+			// TODO: implement optional function arguments passing
+			// void OnEvent( std::string event_type, T callback) {
+			// using P = typename function_argument_type<T,0>::type;
+			// onEvent( event_type, [=](Control* c, Argv& args) {
+				// callback((P)c, args);
+			// });
+			onEvent(event_type, callback);
+		}
+		
+		// not pythonable
+		template <typename T>
+		bool OnEvent( std::string event_type, void (T::* callback)(Args& args), T* _this ) {
+			OnEvent(event_type, std::bind(callback, _this, std::placeholders::_1));
+			// OnEvent(event_type, [=](Args& a){ (_this->*callback)(a);});
+			return true;
+		}
+		
+		
+		// -------------- [/ControlBase] --------------
+	
+		Control();
+		~Control();
+
+		void RenderBase( Point position, bool isSelected );
+		
+		virtual void AddControl( Control* control, bool processlayout=true );
+		
+		void RemoveControl( Control* control );
+		void LockWidget(bool lock);
+		void RenderWidget( Point position, bool isSelected );
+		
+		void 			SetOffset(int x, int y);
+		const Point& 	GetOffset() { return m_offset; }
+		
+		void ProcessLayout(bool asRoot=false);
+		
+		void ForEachControl(std::function<void(Control* c)> func);
+		
+		std::string GetSelectedRadioButton(int group=0);
+		
+		void ApplyStyle(std::string style_group="");
+		void ApplyStyle(const Styling& s);
+		
+		// maybe pythonable
+		template<typename C=Control>
+		C* Get(const std::string id) {
+			return static_cast<C*>(get(id));
+		}
+=======================================================
+

@@ -81,6 +81,7 @@ Gui::Gui()
 	rootWidget.SetLayout(Layout("0,0,1W,1H"));
 	
 	SetBackend(default_backend);
+	
 	AddFunction( "playsound", cmd_play_sound );
 	AddFunction( "style", std::bind( &Gui::cmd_style, this, std::placeholders::_1 ) );
 	
@@ -311,7 +312,7 @@ void Gui::intercept_hook(Control::imask onaction, std::function<void()> action, 
 		}                                                               \
 		while(!wgts.empty()) {                                          \
 			Control* w = wgts.top();                                     \
-			if((w->intercept_mask & Control::imask::action_enum) != 0) {        \
+			if((w->intercept_mask & Control::imask::action_enum) != 0) {\
 				w->m_is_intercepted = true;								\
 				w->action;                                              \
 				w->m_is_intercepted = false;							\
@@ -332,18 +333,20 @@ void Gui::intercept_hook(Control::imask onaction, std::function<void()> action, 
 bool Gui::check_for_drag() {
 	if(sel_control && sel_control->IsDraggable()) {
 		dragging = true;
-		Point p = cursor.GetCursor();
+		Point p = cursor.GetPosition();
+		
 		Point gpos = sel_control->GetGlobalPosition();
+		// std::cout << "drag start diff: " << sel_control->GetId() << " " << p << " , " << gpos << " " << drag_start_diff << "\n";
 		drag_start_diff = p - gpos;
 		drag_offset = p - drag_start_diff;
-		sel_control->emitEvent( "drag_start" );
+		sel_control->emitEvent("drag_start");
 	}
 	return dragging;
 }
 
 bool Gui::check_for_lock() {
 	if(m_focus_lock) {
-		if(! m_lock_target->CheckCollisionA(cursor.GetCursor())) {
+		if(! m_lock_target->CheckCollisionA(cursor.GetPosition())) {
 			
 			// lose focus
 			m_lock_target->emitEvent("lostfocus");
@@ -375,7 +378,7 @@ void Gui::OnMouseDown( unsigned int button ) {
 	}
 	m_mouse_down = true;
 	
-	Point p = cursor.GetCursor();
+	Point p = cursor.GetPosition();
 	
 	Control* last_sel_control = sel_control;
 
@@ -470,7 +473,7 @@ void Gui::OnMouseUp( unsigned int button ) {
 		// return;
 	// }
 	
-	Point p = cursor.GetCursor();
+	Point p = cursor.GetPosition();
 
 	// ------- dragging -----
 	if(dragging) {
@@ -478,7 +481,7 @@ void Gui::OnMouseUp( unsigned int button ) {
 		unselectControl();
 		check_for_new_collision(p);
 		if(sel_parent) {
-			dragging_control->emitEvent( "drag" );
+			dragging_control->emitEvent( "drag", p.x, p.y );
 		}
 		dragging = false;
 		return;
@@ -510,7 +513,7 @@ void Gui::ShowTooltip(Control* control) {
 	if(!control) return;
 	if(control->GetTooltip().empty()) return;
 	std::cout << "should show tooltip\n";
-	Point p = cursor.GetCursor();
+	Point p = cursor.GetPosition();
 	
 	Point g = control->GetOffset();
 	if(sel_control != control) return;
@@ -544,7 +547,7 @@ void Gui::OnMouseMove( int mX, int mY ) {
 		return;
 	}
 	cursor.MoveCursor(mX, mY);
-	Point p = cursor.GetCursor();
+	Point p = cursor.GetPosition();
 	m_last_cursor_update_time = m_time;
 	Point widget_coords = p - sel_control_parent_window_position;
 	HideTooltip();
@@ -687,7 +690,7 @@ void Gui::check_for_new_collision( Point pt, bool start_from_top ) {
 	
 	// --- descending tree ---
 	while(it != it_end) {
-		if(it->interactible == 0) { it++; continue; }
+		if(!it->visible || it->interactible == 0) { it++; continue; }
 		
 		// std::cout << "checking collision: " << it->control->GetId() << " " << pt - o << " " << y-o.y<< "\n";
 		if(it->control->checkCollision(pt - o, true)) {
@@ -928,10 +931,18 @@ void Gui::MtUnlock() {
 	mutex->unlock();
 }
 
-std::map<std::string, EventCallback> Gui::function_map  __attribute__ ((init_priority (200)));
+std::map<std::string, EventCallback> Gui::function_map __attribute__ ((init_priority (200)));;
 
 bool Gui::AddFunction( std::string function_name, EventCallback callback ) {
+	/*
+	static bool inited = false;
+	if(!inited) {
+		Gui::function_map = std::map<std::string, EventCallback>();
+		inited = true;
+	}
+	*/
 	function_map[function_name] = callback;
+	// std::cout << "fmap: " << function_name << " " << function_map.size() << "\n";
 	return true;
 }
 
@@ -1067,7 +1078,6 @@ void Gui::Render() {
 		}
 	}
 	
-	
 	if(dragging_widget_workaround) {
 		sel_control->visible = true;
 		sel_control->update_cache(CacheUpdateFlag::attributes);
@@ -1075,7 +1085,8 @@ void Gui::Render() {
 	
 	if(dragging) {
 		const Rect& r = sel_control->GetRect();
-		sel_control->render(pos - r + drag_offset, true);
+		// std::cout << "drag: " << drag_offset << "\n";
+		sel_control->render(pos + drag_offset + r, true);
 	} else {
 		if(has_selected_control) {
 			sel_control->render(pos,true);
@@ -1095,7 +1106,7 @@ Cursor& Gui::GetCursor() {
 }
 
 Point Gui::GetCursorPosition() {
-	return cursor.GetCursor();
+	return cursor.GetPosition();
 }
 
 void Gui::SetBackend(Backend backend) {
@@ -1194,5 +1205,10 @@ void Gui::ForEachControl(std::function<void(Control* c)> func) {
 }
 
 
+template Control* Gui::Get<>(const std::string id);
+
+Control* Gui::DbgGet(const char* id) {
+	return Get(id);
+}
 
 }

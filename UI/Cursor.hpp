@@ -39,7 +39,7 @@ public:
 	void SetSize(CursorType type, int w, int h);
 	void SetCursorType(CursorType type);
 	
-	Point GetCursor();
+	Point GetPosition();
 	void MoveCursor(int dx, int dy);
 	void SetCursorImage(CursorType type, std::string filename, Point offset);
 	void SetCursorImage(CursorType type, Image* img, Point offset);

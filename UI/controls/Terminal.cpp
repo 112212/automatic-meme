@@ -5,21 +5,26 @@ namespace ng {
 
 Terminal::Terminal() {
 	setType( "terminal" );
+	
 	m_log = createControl<TextBox>("textbox", "log");
 	m_terminal = createControl<TextBox>("textbox", "terminal");
+	
 	m_log->SetMultilineMode(true);
 	m_log->SetReadOnly(true);
 	m_log->SetStyle("colors", "false");
+	
 	m_history_counter = 0;
+	
 	AddControl(m_log);
 	AddControl(m_terminal);
+	
 	m_log_fade_effect = new Effects::AutoFade();
 	m_log->AddEffect( m_log_fade_effect );
 	
 	setInterceptMask(imask::mouse_up | imask::mouse_down | imask::key_down | imask::key_text);
 	m_terminal->OnEvent( "enter", [this](Args& args) { return tbox_enter(args.control); });
 	m_log_immediate = true;
-	
+	m_terminal->SetStyle("tabnext", "false");
 	// m_log->SetAlpha(0.0f);
 }
 
@@ -29,6 +34,8 @@ void Terminal::tbox_enter(Control* c) {
 	TextBox* t = static_cast<TextBox*>(c);
 	// if(t->GetText().size() <= 0) return;
 	m_command = t->GetRawText();
+	if(m_command.empty()) return;
+	// std::cout << "tbox_enter: " << m_command << "\n";
 	m_history.push_back(m_command);
 	m_history_counter = m_history.size();
 	// m_log_msg = "> " + m_command;
@@ -38,7 +45,6 @@ void Terminal::tbox_enter(Control* c) {
 	// m_log_immediate = true;
 	// WriteLog(m_log_msg);
 	m_log_fade_effect->Appear();
-	
 }
 
 const std::string& Terminal::GetLastCommand() {
@@ -89,6 +95,7 @@ void Terminal::Focus() {
 	m_log_fade_effect->Appear();
 }
 
+
 void Terminal::Render( Point position, bool isSelected ) {
 	// cout << m_state << endl;
 	// Control::Render(position, isSelected);
@@ -123,7 +130,7 @@ void Terminal::OnSetStyle(std::string& style, std::string& value) {
 	}
 }
 
-void Terminal::OnKeyDown( Keycode &sym, Keymod mod ) {
+void Terminal::OnKeyDown( Keycode sym, Keymod mod ) {
 	m_log_fade_effect->Appear(); 
 	
 	if(sym == KEY_UP) {

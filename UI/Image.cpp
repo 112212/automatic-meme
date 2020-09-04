@@ -44,7 +44,7 @@ Size Image::GetImageSize() {
 	return Size(0,0);
 }
 
-const unsigned int* Image::GetImage() {
+const uint32_t* Image::GetImage() {
 	return 0;
 }
 
@@ -56,7 +56,8 @@ void Image::Update(int ms) {
 	
 }
 
-void Image::SetCache(uint32_t cache_id) {
+void Image::SetCacheId(uint32_t cache_id) {
+	// std::cout << "Image::SetCacheId " << cache_id << "\n";
 	screen_cache_id = cache_id;
 }
 

@@ -234,15 +234,18 @@ namespace ng {
 		SDL_RenderDrawPoints(ren, points.data(), points.size());
 	}
 	
-	void SDLScreen::CacheImage(Image* img) {
+	void SDLScreen::CacheImage(ng::Image* img) {
+		// std::cout << "caching img\n";
 		img->Update();
 		Size s = img->GetImageSize();
 		Point a, b;
-		unsigned int texid = img->GetTextureId();
+		uint32_t texid = img->GetTextureId();
 		SDL_Texture* tex;
 		
 		// SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+		
 		if(img->GetAffectedRegion(a,b)) {
+			
 			if(texid < textures.size()) {
 				tex = textures[texid];
 			} else {
@@ -259,6 +262,8 @@ namespace ng {
 					textures[texid] = tex;
 				}
 			}
+			
+			
 			
 			// img->FreeCache();
 			SDL_Rect r = {a.x, a.y, b.x-a.x, b.y-a.y};
@@ -277,19 +282,20 @@ namespace ng {
 			}
 			SDL_UnlockTexture(tex);
 			
-			SetCache(img, texid);
+			SetCacheId(img, texid);
+			
 			img->ResetAffectedRegion();
 		}
 		// SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
 	}
 	
 	void SDLScreen::SetClipRegion(int x, int y, int w, int h, bool enable) {
-				std::cout << "scissor\n"; 
+				// std::cout << "scissor\n"; 
 		if(enable) {
 			if(x != -1) {
 				SDL_Rect r = {x,y,w,h};
 				SDL_RenderSetClipRect(ren, &r);
-				clip_region = Rect(x,y,w,h);
+				clip_region = ng::Rect(x,y,w,h);
 			}
 			using_scissor = true;
 		} else {
@@ -313,14 +319,15 @@ namespace ng {
 	}
 
 	//void TexRect(int x, int y, int w, int h, uint32_t texture) {
-	void SDLScreen::TexRect(int x, int y, int w, int h, Image* texture, bool repeat, int texWidth, int texHeight) {
-		
-		CacheImage(texture);
+	void SDLScreen::TexRect(int x, int y, int w, int h, ng::Image* texture, bool repeat, int texWidth, int texHeight) {
+		this->CacheImage(texture);
 		
 		ng::Rect cr = texture->GetImageCropRegion();
 		SDL_Rect src_rect = {cr.x, cr.y, cr.w, cr.h};
 		SDL_Rect dst_rect = {x,y,w,h};
 		int idx = texture->GetTextureId();
+		if(idx == NO_TEXTURE) return;
+		
 		if(idx > textures.size()) return;
 		auto* tex = textures[idx];
 		SDL_SetTextureAlphaMod(tex, (uint8_t)(max_alpha*255));

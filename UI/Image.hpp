@@ -18,7 +18,7 @@ class Image : public Resource {
 		Point c1,c2;
 		Point d1,d2;
 		Screen* screen;
-		unsigned int screen_cache_id;
+		uint32_t screen_cache_id;
 		
 	protected:
 		// affected regions
@@ -50,12 +50,12 @@ class Image : public Resource {
 		virtual void SetAnimated(bool animated);
 		virtual void SetAnimationSpeed(float delay_ms);
 		
-		virtual void SetCache(uint32_t cache_id);
+		virtual void SetCacheId(uint32_t cache_id);
 		virtual void FreeCache();
 		virtual void Free();
 		
 		virtual Size GetImageSize();
-		virtual const unsigned int* GetImage();
+		virtual const uint32_t* GetImage();
 		virtual const Rect GetImageCropRegion();
 		
 		bool GetAffectedRegion(Point& a, Point &b);

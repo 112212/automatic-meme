@@ -20,7 +20,7 @@ class SDL_Surface_Image : public Image {
 		std::chrono::high_resolution_clock::time_point m_tp;
 		std::vector<SDL_Surface*> frames;
 		static void load_png(std::string filename, std::vector<SDL_Surface*> &out_vector);
-		void SetCache(uint32_t cache_id);
+		void SetCacheId(uint32_t cache_id);
 		static SDL_PixelFormat getPixelFormat();
 	public:
 		SDL_Surface_Image( SDL_Surface* surf );
