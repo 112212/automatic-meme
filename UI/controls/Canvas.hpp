@@ -52,6 +52,7 @@ class Canvas : public Control {
 		void SetBackgroundColor(int color);
 		void SetAlignToGrid(bool align) { m_align_to_grid = align; }
 		void DisplayGrid( bool grid ) { m_display_grid = grid; }
+		void SetGridNum(Size size);
 		void SetGridSize(Size size);
 		void SetPixelColor(int color) { m_pixel_color = color; }
 		BasicImage& GetLayer(int layer=0);

@@ -55,7 +55,7 @@ class BasicImage : public Image {
 		void Line(Point a, Point b, uint32_t color);
 		void LineAA(Point a, Point b, uint32_t color);
 		void DrawPoly(std::vector<Point> points, uint32_t color);
-		void Clear(unsigned int color=0);
+		void Clear(uint32_t color=0);
 };
 }
 #endif

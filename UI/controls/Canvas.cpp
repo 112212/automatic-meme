@@ -62,11 +62,18 @@ void Canvas::RefreshTexture() {
 	maketex = true;
 }
 
-void Canvas::SetGridSize(Size size) {
+void Canvas::SetGridNum(Size size) {
 	m_grid_size_mode = true;
 	Rect r = GetRect();
 	m_pixel_size = { (float)r.w / size.w, (float)r.h / size.h };
 	m_grid_size = size;
+}
+
+void Canvas::SetGridSize(Size size) {
+	m_grid_size_mode = true;
+	Rect r = GetRect();
+	m_pixel_size = { (float)size.w, (float)size.h };
+	m_grid_size = Size( r.w / size.w, r.h / size.h );
 }
 
 void Canvas::OnSetStyle(std::string& style, std::string& value) {
@@ -81,6 +88,12 @@ void Canvas::OnSetStyle(std::string& style, std::string& value) {
 		_case("color"):
 			if(value[0] == '#') {
 				SetPixelColor(Color::ParseColor(value)); 
+			}
+		_case("grid_num"):
+			{
+				std::vector<std::string> wh;
+				split_string(value, wh, ',');
+				SetGridNum(Size(std::stoi(wh[0]), std::stoi(wh[1])));
 			}
 		_case("grid_size"):
 			{
@@ -232,7 +245,7 @@ void Canvas::OnMouseMove( int mX, int mY, bool mouseState ) {
 		}
 		last_pt = pt;
 		
-		emitEvent( "change" );
+		emitEvent("change", {pt} );
 	}
 }
 

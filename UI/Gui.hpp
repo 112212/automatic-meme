@@ -99,6 +99,8 @@ class Gui
 		// -- dragging info --
 		Point drag_start_diff;
 		Point drag_offset;
+		Point drag_snap;
+		bool snapped;
 		bool dragging;
 		// --------------------
 		
@@ -171,6 +173,8 @@ class Gui
 		void LockWidget(Control* w);
 		void UnlockWidget();
 		
+		bool IsDragging();
+		void DragSnapTo(ng::Point pt, bool enable=true);
 		void SetStyle(std::string control, std::string style, std::string value);
 		void SetDefaultFont(std::string font, int size=13);
 		void SetSize(int w, int h);

@@ -44,6 +44,8 @@ defs :=
 build_dirs = UI/ UI/managers UI/backend UI/extensions/ lib/libbmp lib/bmpread
 
 
+s:=
+	
 compiler=$(CXX)-g++
 linker=$(CXX)-ar
 .PHONY: dirs
@@ -97,7 +99,6 @@ build_dirs += $(controls_path)
 core_cpp := $(cpp) $(addsuffix .cpp, $(addprefix $(controls_path)/, $(control_names)))
 cpp += $(core_cpp)
 test_cpp :=
-s :=
 
 backends_dir := UI/backends
 extensions_dir := UI/extensions
@@ -112,8 +113,13 @@ ifeq ($(backend_use),win32)
 endif
 
 ############ SDL2 ###############
-$(shell mkdir -p $(build); echo "" > $(build)/config.h)
 
+	
+
+hasconf:=y
+ifeq (,$(wildcard $(build)/config.h))
+	hasconf:=n
+endif
 
 
 ifneq (, $(filter sdl2 emscripten, $(backend_use)))
@@ -141,20 +147,26 @@ ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 			link += -s USE_SDL_TTF=2
 			inc += -s USE_SDL_TTF=2 
 			backend_cpp += $(backend_dir)/SDL_TTF_Font.cpp
-			s:=$(shell echo "#define USE_SDL2_ttf" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+= USE_SDL2_ttf
+			endif
 		endif
 		
 		#### SDL2 IMAGE
 		ifeq (${USE_SDL2_image},y)
 			inc += -s USE_SDL_IMAGE=2
 			link += -s USE_SDL_IMAGE=2
-			s:=$(shell echo "#define USE_SDL2_image" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+=  USE_SDL2_image
+			endif
 		endif
 		
 		#### PTHREAD
 		ifeq (${USE_PTHREAD},y)
 			link += -pthread
-			s:=$(shell echo "#define USE_PTHREAD" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+=echo "#define USE_PTHREAD" >> $(build)/config.h;
+			endif
 		endif
 		
 		###### LIBPNG ######
@@ -175,27 +187,35 @@ ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 		#### SDL2 IMAGE
 		ifeq (${USE_SDL2_image},y)
 			link += -lSDL2_image
-			s:=$(shell echo "#define USE_SDL2_image" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+= USE_SDL2_image
+			endif
 		endif
 		
 		#### PTHREAD
 		ifeq (${USE_PTHREAD},y)
 			link += -pthread
-			s:=$(shell echo "#define USE_PTHREAD" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+= USE_PTHREAD
+			endif
 		endif
 		
 		#### SDL2 TTF
 		ifeq (${USE_SDL2_ttf},y)
 			link += -lSDL2_ttf
 			backend_cpp += $(backend_dir)/SDL_TTF_Font.cpp
-			s:=$(shell echo "#define USE_SDL2_ttf" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+= USE_SDL2_ttf
+			endif
 		endif
 		
 		#### LIBSNDFILE
 		ifeq (${USE_LIBSNDFILE},y)
 			link += -lsndfile
 			backend_cpp += $(extensions_dir)/SoundLibSnd.cpp
-			s:=$(shell echo "#define USE_LIBSNDFILE" >> $(build)/config.h)
+			ifeq ($(hasconf),n)
+				s+= USE_LIBSNDFILE
+			endif
 		endif
 	endif
 	
@@ -216,7 +236,9 @@ ifneq (, $(filter sdl2 emscripten, $(backend_use)))
 	ifeq (${USE_OPENGL},y)
 		backend_cpp += $(backend_dir)/SDLOpenGLScreen.cpp
 		link += -lGL -lGLEW
-		s:=$(shell echo "#define USE_OPENGL" >> $(build)/config.h)
+		ifeq ($(hasconf),n)
+			s+= USE_OPENGL
+		endif
 	else
 		backend_cpp += $(backend_dir)/SDLScreen.cpp
 	endif
@@ -232,13 +254,13 @@ endif
 #################################
 
 
-
-
 ###### LIBPNG ######
 ifeq (${USE_LIBPNG},y)
 	link += -lpng -lz
 	cpp +=	$(extensions_dir)/Image_libpng.cpp
-	s:=$(shell echo "#define USE_LIBPNG" >> $(build)/config.h)
+	ifeq ($(hasconf),n)
+		s+= USE_LIBPNG
+	endif
 endif
 #####################
 
@@ -248,7 +270,10 @@ ifeq (${USE_LIBBMP},y)
 	cpp += lib/bmpread/bmpread.cpp
 	cpp += $(extensions_dir)/Image_libbmp.cpp
 	# link += lib/libbmp/libbmp.o
-	s:=$(shell echo "#define USE_LIBBMP" >> $(build)/config.h)
+	
+	ifeq ($(hasconf),n)
+		s+= USE_LIBBMP
+	endif
 endif
 #####################
 
@@ -306,13 +331,7 @@ ifeq ($(backend_use),win32)
 endif
 ###############################
 
-# DefaultBackend
-$(shell echo "#ifdef NG_DEFAULT_BACKEND_HPP" >> $(build)/config.h)
-$(shell echo "#include \"../UI/backends/$(backend_use)/Backend.hpp\"" >> $(build)/config.h)
-$(shell echo "namespace ng {" >> $(build)/config.h)
-$(shell echo "namespace DefaultBackend = ng::$(backend_use)Backend;" >> $(build)/config.h)
-$(shell echo "}" >> $(build)/config.h)
-$(shell echo "#endif" >> $(build)/config.h)
+
 
 #~ sdl_link += `pkg-config --libs opencv` -pthread
 
@@ -347,14 +366,23 @@ all:
 	make
 
 
+dirs:
+	@mkdir -p $(addprefix $(build)/,$(build_dirs))
+	@[ $(hasconf) == n ] && (mkdir -p $(build); echo "" > $(build)/config.h) || true
+	
+	@[ $(hasconf) == n ] && echo "#ifdef NG_DEFAULT_BACKEND_HPP" >> $(build)/config.h || true
+	@[ $(hasconf) == n ] && echo "#include \"../UI/backends/$(backend_use)/Backend.hpp\"" >> $(build)/config.h || true
+	@[ $(hasconf) == n ] && echo "namespace ng {" >> $(build)/config.h || true
+	@[ $(hasconf) == n ] && echo "namespace DefaultBackend = ng::$(backend_use)Backend;" >> $(build)/config.h || true
+	@[ $(hasconf) == n ] && echo "}" >> $(build)/config.h || true
+	@[ $(hasconf) == n ] && echo "#endif" >> $(build)/config.h || true
+	@[ $(hasconf) == n ] && (for i in $(s); do echo "#define $$i" >> $(build)/config.h; done) || true
+	
 clean:
 	@echo project cleaned
 	@rm -f libngui-$(backend).a *_test *_test.exe
 	@rm -rf build-$(backend)
-	
-dirs:
-	@mkdir -p $(addprefix $(build)/,$(build_dirs))
-	
+
 
 $(build)/%.o: %.cpp
 	$(compiler) -c $< -MMD -o $@ -std=c++14 $(flags) $(defs) $(inc) $(CFLAGS)

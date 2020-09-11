@@ -60,7 +60,8 @@ enum Types {
 	TYPE_FLOAT,
 	TYPE_DOUBLE,
 	TYPE_CHAR,
-	TYPE_STRING
+	TYPE_STRING,
+	TYPE_POINT
 };
 
 // Event arguments
@@ -70,6 +71,7 @@ struct Arg {
 	Arg(float f) { this->f = f; type=TYPE_FLOAT; }
 	Arg(double d) { this->d = d; type=TYPE_DOUBLE; }
 	Arg(char c) { this->c = c; type=TYPE_CHAR; }
+	Arg(ng::Point pt) { this->pt = pt; type=TYPE_POINT; }
 	Arg(std::string str) { s=str; type=TYPE_STRING; }
 	~Arg() { }
 	union {
@@ -77,6 +79,7 @@ struct Arg {
 		float f;
 		double d;
 		char c;
+		ng::Point pt;
 	};
 	std::string s;
 	int type;
@@ -172,7 +175,7 @@ class Control : public ControlManager {
 			Size image_size;
 			bool image_repeat;
 			bool clipping;
-			bool draggable;
+			uint8_t draggable;
 			float alpha;
 			
 			void SetTransparentBackground();
@@ -323,7 +326,7 @@ class Control : public ControlManager {
 		
 		Point 				GetAbsCursor() { return getAbsCursor(); };
 		Point 				GetCursor() { return getCursor(); };
-		const Point 		GetAbsoluteOffset() { return getAbsoluteOffset(); };
+		
 		virtual Rect		GetContentRect();
 		Rect 				GetParentRect();
 		std::string 		GetType();
@@ -334,9 +337,12 @@ class Control : public ControlManager {
 		std::string 		GetTooltip();
 		inline const Rect&  GetRect() { return m_rect; }
 		Border* 			GetBorder();
+		const Point 		GetPosition();
 		const Point 		GetGlobalPosition();
+		const Point 		GetAbsoluteOffset() { return getAbsoluteOffset(); }; // same as GetGlobalPosition
 		Font* 				GetFont();
 		Gui* 				GetEngine();
+		Control*			GetParent() { return getParent(); }
 		
 		void				AddEffect(Effect* effect);
 		void				RemoveEffect(Effect* effect);
@@ -349,7 +355,7 @@ class Control : public ControlManager {
 		void Unattach();
 		
 		inline bool IsVisible() { return visible; }
-		inline bool IsDraggable() { return m_style.draggable; }
+		inline uint8_t IsDraggable() { return m_style.draggable; }
 		bool IsBeingDragged();
 		bool IsSelected() { return isSelected(); }
 		bool IsActive() { return isActive(); }

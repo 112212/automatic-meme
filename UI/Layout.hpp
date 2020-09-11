@@ -41,6 +41,7 @@ class Layout {
 	
 	Layout();
 	Layout( Point coord, float x, float y, float W, float w, float H, float h );
+	Layout( const Rect& rect );
 	Layout(std::string s);
 	Rect GetPadding();
 	void SetPadding(Rect padding);

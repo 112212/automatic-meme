@@ -107,6 +107,16 @@ Layout::Layout( Point coord, float x, float y, float W, float w, float H, float 
 	this->w_func = SizeFunction::none;
 	this->h_func = SizeFunction::none;
 	padding=Rect(0,0,0,0);
+	absolute_coordinate_x=false;
+	absolute_coordinate_y=false;
+	enabled = true;
+}
+
+Layout::Layout( const Rect& rect ) : Layout(ng::Point(0,0), rect.x, rect.y, 0, 0, 0, 0) {
+	w_min[0]=w_max[0]=rect.w;
+	h_min[0]=h_max[0]=rect.h;
+	w_min[1]=w_max[1] = 0;
+	h_min[1]=h_max[1] = 0;
 }
 
 void Layout::SetFuncs(SizeFunction w_func, SizeFunction h_func) {

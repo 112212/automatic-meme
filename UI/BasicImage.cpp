@@ -40,7 +40,7 @@ BasicImage::~BasicImage() {
 }
 
 
-void BasicImage::Clear(unsigned int color) {
+void BasicImage::Clear(uint32_t color) {
 	Point a,b;
 	if(!GetDirtyRegion(a,b)) return;
 	/*

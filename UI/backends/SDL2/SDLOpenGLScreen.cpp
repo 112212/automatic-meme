@@ -143,7 +143,7 @@ namespace ng {
 		"c.a = min(max_alpha, c.a);"
 		// "c.rgb = c.rgb * (1-custom_color_interp) + (custom_color_interp) * custom_color;"
 		// "color = c;"
-		"gl_FragColor = c;"
+		"gl_FragColor = vec4(c.b, c.g, c.r, c.a);"
 	"}";
 	
 
@@ -481,6 +481,7 @@ namespace ng {
 				
 				
 				// glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, s.w, s.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
+				// glTexImage2D( GL_TEXTURE_2D, 0, GL_BGRA, s.w, s.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
 				glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, s.w, s.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->GetImage() );
 				
 				
@@ -496,8 +497,6 @@ namespace ng {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				// glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, s.w, s.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.GetTexture() );
 				// std::cout << "caching img2 size " << s.w << ", " << s.h << "\n";
-				
-				
 				
 				// glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, s.w, s.h, GL_BGRA, GL_UNSIGNED_BYTE, img->GetImage() );
 				glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, s.w, s.h, GL_RGBA, GL_UNSIGNED_BYTE, img->GetImage() );

@@ -70,7 +70,8 @@ int ControlManager::binary_search(int z_index) {
 	}
 	return m;
 	
-	
+	// not used
+	/*
 	class BinaryCompare {
 		public:
 		bool operator()(int v, cache_entry& e) {
@@ -81,6 +82,7 @@ int ControlManager::binary_search(int z_index) {
 		}
 	};
 	return std::distance(cache.begin(), std::lower_bound(cache.begin(), cache.end(), z_index, BinaryCompare()));
+	*/
 }
 
 void ControlManager::printCacheZIndex() {
@@ -191,11 +193,12 @@ void ControlManager::BreakRow() {
 
 void ControlManager::addControlToCache(Control* control) {
 	int z_index = control->z_index;
-	
-	if(cache.empty() or z_index == 0 or z_index >= next_z_index) {
+	// control->z_index = 0;
+	// if(cache.empty() or z_index == 0 or z_index >= next_z_index) {
 		control->z_index = next_z_index;
 		cache.push_back(getControlCache(control));
 		next_z_index += CACHE_SPACING;
+	/*
 	} else {
 		int put_after = binary_search(z_index);
 		if(z_index < cache[put_after].z_index) {
@@ -208,7 +211,10 @@ void ControlManager::addControlToCache(Control* control) {
 			cache.insert(cache.begin()+put_after, getControlCache(control));
 		}
 		
-	}
+	}*/
+	
+	// TODO: fix
+	// setZIndex(control, z_index);
 	
 	if(control->layout.coord == Point(0,0)) {
 		control->layout.coord = coords;
@@ -220,12 +226,33 @@ void ControlManager::addControlToCache(Control* control) {
 
 void ControlManager::removeControlFromCache(Control* control) {
 	int idx = binary_search(control->z_index);
+	auto cbkp = cache;
 	cache.erase(cache.begin()+idx);
+	for(auto &c : cache) {
+		if(c.control == control) {
+			std::cout << "fail to remove from cache " << idx << " : " << control->z_index << " : " << c.z_index << " : " << cache.size() << "\n";
+			for(auto &c : cbkp) {
+				std::cout << c.z_index << " ";
+			}
+			std::cout << "\n";
+			for(auto &c : cache) {
+				std::cout << c.z_index << " ";
+			}
+			std::cout << "\n";
+		}
+	}
 	control->set_engine(0);
 	
 	for(auto j = controls.begin(); j != controls.end(); j++) {
 		if(*j == control) {
 			controls.erase(j);
+			break;
+		}
+	}
+	
+	for(auto j = controls.begin(); j != controls.end(); j++) {
+		if(*j == control) {
+			std::cout << "fail to erase " << control->GetId() << "\n";
 			break;
 		}
 	}
@@ -326,6 +353,13 @@ void ControlManager::parseStyle(rapidxml::xml_node<>* node, std::vector<Styling>
 		if(!strcmp(node->name(), "style")) {
 			parseStyle(node, styling.child_styles, style_group_tag, layout);
 		}
+		
+		if(!strcmp(node->name(), "br")) {
+			layout.coord.x = 0;
+			layout.coord.y++;
+			// return 0;
+		}
+		
 	}
 	
 	Styling to_push;
@@ -349,12 +383,10 @@ void ControlManager::parseStyle(rapidxml::xml_node<>* node, std::vector<Styling>
 	}
 	
 	for(node=node_parent->first_node(); node; node=node->next_sibling()) {
-		if(strcmp(node->name(), "style") != 0) {
-			auto *c = parseAndAddControl(node, s->child_styles, style_group_tag, layout);
-			if(c) {
-				c->ApplyStyle(*s);
-				c->ForEachControl([&s](Control* c) { c->ApplyStyle(*s); });
-			}
+		auto *c = parseAndAddControl(node, s->child_styles, style_group_tag, layout);
+		if(c) {
+			c->ApplyStyle(*s);
+			c->ForEachControl([&s](Control* c) { c->ApplyStyle(*s); });
 		}
 	}
 }
@@ -500,6 +532,7 @@ Control* ControlManager::parseAndAddControl(rapidxml::xml_node<char>* node, std:
 		return 0;
 	}
 	
+	// load control styles
 	for(rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute()) {
 		std::string style = std::string(attr->name());
 		std::string value = std::string(attr->value());
@@ -509,12 +542,14 @@ Control* ControlManager::parseAndAddControl(rapidxml::xml_node<char>* node, std:
 	
 	Layout a = control->GetLayout();
 	a.coord = layout.coord;
-	a += layout;
+	// a += layout;
 	control->SetLayout(a);
 	
 	// Scope scope([&]{creation_vector.push_back({id, type});},
 		// [&]{creation_vector.pop_back();});
 	creation_vector.push_back({id,type});
+	
+	// add child controls
 	Layout b;
 	for(node = node->first_node(); node; node=node->next_sibling()) {
 		// control->parseXml(node->first_node());

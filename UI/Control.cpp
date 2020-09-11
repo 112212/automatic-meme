@@ -2,6 +2,7 @@
 #include "controls/RadioButton.hpp"
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 #include "Control.hpp"
 #include "Gui.hpp"
 #include "Effect.hpp"
@@ -185,7 +186,7 @@ void Control::RenderWidget( Point position, bool isSelected ) {
 	for(auto &ca : cache) {
 		if(ca.visible) {
 			Control* const &c = ca.control;
-			// std::cout << "inner control render: " << c->GetId() << "\n";
+			// std::cout << GetId() << " render: " << c->GetId() << "\n";
 			#ifdef SELECTED_CONTROL_ON_TOP
 				if(c != sel_control) {
 					c->render( position, false );
@@ -560,6 +561,10 @@ const Point Control::GetGlobalPosition() {
 	return getAbsoluteOffset();
 }
 
+const Point Control::GetPosition() {
+	return Point(m_rect.x, m_rect.y);
+}
+
 void Control::SetDraggable( bool draggable ) {
 	m_style.draggable = draggable;
 }
@@ -711,7 +716,7 @@ void Control::OnActivate() {
 
 static int last_anon_id = 0;
 void Control::onEvent( std::string event_type, EventCallback callback ) {
-	std::string anon_id = std::string("_anon") + std::to_string(last_anon_id++);
+	std::string anon_id = std::string("_anon") + std::to_string(last_anon_id++) + "_" + GetId();
 	subscribers.emplace_back(event_type, anon_id);
 	Gui::function_map[ anon_id ] = callback;
 }
@@ -1119,13 +1124,14 @@ Point Control::getCursor() {
 }
 
 const Point Control::getAbsoluteOffset() { 
-	if(inSelectedBranch()) {
+	if(false && inSelectedBranch()) {
+		std::cout << "in sel branch\n";
 		return cached_absolute_offset;
 	} else {
 		Point pt;
 		Control* pc = this;
 		while(pc->parent) {
-			pt += pc->m_rect;
+			pt += pc->m_rect + pc->m_offset;
 			pc = pc->parent;
 		}
 		return pt;
@@ -1161,9 +1167,9 @@ void Control::Unselect() {
 void Control::Unattach() {
 	if(parent) {
 		parent->RemoveControl(this);
-		parent = 0;
+		// parent = 0;
 	}
-	engine = 0;
+	// engine = 0;
 }
 
 Gui* Control::GetEngine() {
@@ -1280,9 +1286,11 @@ void Control::SetStyle(std::string style, std::string value) {
 	const Rect& r = GetRect();
 	STYLE_SWITCH {
 		_case("rect"): {
+			Point coord = layout.coord;
 			Rect padding = layout.padding;
 			Layout a = Layout(value);
 			a.SetPadding(padding);
+			a.coord = coord;
 			SetLayout(a);
 			// SetRect(a.x, a.y, a.w_min[0], a.h_min[0]);
 		}
@@ -1349,7 +1357,7 @@ void Control::SetStyle(std::string style, std::string value) {
 			m_style.hoverimg = Images::LoadImage(value);
 		}
 		_case("draggable"): {
-			m_style.draggable = toBool(value);
+			m_style.draggable = std::isdigit(value[0]) ? (value[0]-0x30) : toBool(value);
 		}
 			break;
 			

@@ -59,6 +59,8 @@ struct Rect_t : Point_t<T> {
 	int h;
 	Rect_t() : w(0), h(0), Point_t<T>(0,0) {}
 	Rect_t(T _x, T _y, T _w, T _h) : Point_t<T>(_x,_y),w(_w),h(_h) {}
+	Rect_t(const Point_t<T> &pt, const Size_t<T>& size) : Point_t<T>(pt.x,pt.y),w(size.w),h(size.h) {}
+	Point_t<T> GetPoint() { return Point_t<T>(this->x, this->y); }
 	bool operator==(const Rect_t<T>& b) const { return b.x == Point_t<T>::x && b.y == Point_t<T>::y && b.w == w && b.h == h; }
 	friend std::ostream& operator<< (std::ostream& out, const Rect_t<T>& v) {
 		return out << "(" << v.x << ", " << v.y << ", " << v.w << ", " << v.h << ")";

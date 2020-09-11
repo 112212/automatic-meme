@@ -72,6 +72,8 @@ Gui::Gui()
 	, m_tooltip_shown(false)
 	, m_tooltip_delay(2)
 	, m_tooltip(0)
+	, drag_snap(0)
+	, snapped(0)
 {
 	sel_intercept_vector.resize(15);
 	mutex = new std::mutex();
@@ -331,15 +333,24 @@ void Gui::intercept_hook(Control::imask onaction, std::function<void()> action, 
 	
 
 bool Gui::check_for_drag() {
-	if(sel_control && sel_control->IsDraggable()) {
+	if(sel_control) {
+		uint8_t draggable = sel_control->IsDraggable();
+		if(!draggable) return false;
+		
 		dragging = true;
 		Point p = cursor.GetPosition();
-		
+		Rect r = sel_control->GetRect();
 		Point gpos = sel_control->GetGlobalPosition();
 		// std::cout << "drag start diff: " << sel_control->GetId() << " " << p << " , " << gpos << " " << drag_start_diff << "\n";
-		drag_start_diff = p - gpos;
+		if(draggable == 1) {
+			drag_start_diff = p - gpos;
+		} else if(draggable == 2) {
+			drag_start_diff = ng::Point(r.w/2, r.h/2);
+		} else {
+			drag_start_diff = 0;
+		}
 		drag_offset = p - drag_start_diff;
-		sel_control->emitEvent("drag_start");
+		sel_control->emitEvent("dragstart", {gpos});
 	}
 	return dragging;
 }
@@ -369,6 +380,53 @@ bool Gui::check_for_lock() {
 		}
 	}
 	return false;
+}
+
+
+void Gui::SetTooltipDelay(double seconds) {
+	m_tooltip_delay = seconds;
+}
+
+bool Gui::IsDragging() {
+	return dragging;
+}
+
+void Gui::DragSnapTo(ng::Point pt, bool enable) {
+	drag_snap = pt;
+	snapped = enable;
+}
+
+void Gui::ShowTooltip(Control* control) {
+	m_last_cursor_update_time = m_time;
+	if(!control) return;
+	if(control->GetTooltip().empty()) return;
+	std::cout << "should show tooltip\n";
+	Point p = cursor.GetPosition();
+	
+	Point g = control->GetOffset();
+	if(sel_control != control) return;
+	
+	if(!m_tooltip) {
+		// std::cout << "show tooltip\n";
+		m_tooltip = CreateControl<Label>("tooltip", "tooltip");
+	}
+	
+	int distance = 25;
+	m_tooltip->engine = this;
+	
+	// TODO: tooltip: fix this rect
+	m_tooltip->SetRect(p.x+distance, p.y+distance, 9999, 9999);
+	m_tooltip->SetText( sel_control->GetTooltip() );
+	Rect r = m_tooltip->GetContentRect();
+	m_tooltip->SetRect(p.x+distance, p.y+distance, r.w+10, r.h+10);
+	m_tooltip->SetAlignment( Alignment::center );
+	m_tooltip_shown = true;
+}
+
+void Gui::HideTooltip() {
+	if(m_tooltip_shown) {
+		m_tooltip_shown = false;
+	}
 }
 
 void Gui::OnMouseDown( unsigned int button ) {
@@ -451,10 +509,6 @@ void Gui::OnMouseDown( unsigned int button ) {
 	}
 }
 
-void Gui::SetTooltipDelay(double seconds) {
-	m_tooltip_delay = seconds;
-}
-
 void Gui::OnMouseUp( unsigned int button ) {
 	std::unique_lock<std::mutex> lock(*mutex);
 	
@@ -481,7 +535,9 @@ void Gui::OnMouseUp( unsigned int button ) {
 		unselectControl();
 		check_for_new_collision(p);
 		if(sel_parent) {
-			dragging_control->emitEvent( "drag", p.x, p.y );
+			lock.unlock();
+			dragging_control->emitEvent( "drag", {drag_offset} );
+			lock.lock();
 		}
 		dragging = false;
 		return;
@@ -494,51 +550,22 @@ void Gui::OnMouseUp( unsigned int button ) {
 		Point control_coords = widget_coords - r;
 		INTERCEPT_HOOK(mouse_up, OnMouseUp( control_coords.x, control_coords.y, (MouseButton)button ),,
 			if(sel_control->CheckCollision(widget_coords)) {
+				lock.unlock();
 				sel_control->emitEvent( "click", {control_coords.x, control_coords.y} );
 				if( button == MouseButton::BUTTON_RIGHT ) {
 					sel_control->emitEvent( "rclick", {control_coords.x, control_coords.y} );
 				}
 				sel_control->OnClick(p.x, p.y, (MouseButton)button);
+				lock.lock();
 			}
 			// std::cout << "MOUSE UP " << widget_coords << " " << sel_control->GetId() << "\n";
+			lock.unlock();
 			sel_control->emitEvent( "mouseup", {control_coords.x, control_coords.y} );
+			lock.lock();
 		);
 	}
 	lock.unlock();
 	OnMouseMove(p.x, p.y);
-}
-
-void Gui::ShowTooltip(Control* control) {
-	m_last_cursor_update_time = m_time;
-	if(!control) return;
-	if(control->GetTooltip().empty()) return;
-	std::cout << "should show tooltip\n";
-	Point p = cursor.GetPosition();
-	
-	Point g = control->GetOffset();
-	if(sel_control != control) return;
-	
-	if(!m_tooltip) {
-		// std::cout << "show tooltip\n";
-		m_tooltip = CreateControl<Label>("tooltip", "tooltip");
-	}
-	
-	int distance = 25;
-	m_tooltip->engine = this;
-	
-	// TODO: tooltip: fix this rect
-	m_tooltip->SetRect(p.x+distance, p.y+distance, 9999, 9999);
-	m_tooltip->SetText( sel_control->GetTooltip() );
-	Rect r = m_tooltip->GetContentRect();
-	m_tooltip->SetRect(p.x+distance, p.y+distance, r.w+10, r.h+10);
-	m_tooltip->SetAlignment( Alignment::center );
-	m_tooltip_shown = true;
-}
-
-void Gui::HideTooltip() {
-	if(m_tooltip_shown) {
-		m_tooltip_shown = false;
-	}
 }
 
 void Gui::OnMouseMove( int mX, int mY ) {
@@ -560,9 +587,9 @@ void Gui::OnMouseMove( int mX, int mY ) {
 		if( m_mouse_down || m_focus_lock ) {
 			
 			// drag
-			if(m_mouse_down && sel_control->IsDraggable()) {
-				drag_offset = p - drag_start_diff;
-			}
+			// if(m_mouse_down && sel_control->IsDraggable()) {
+				// drag_offset = p - drag_start_diff;
+			// }
 			
 			if(!dragging) {
 				if(!m_mouse_down) {
@@ -574,6 +601,9 @@ void Gui::OnMouseMove( int mX, int mY ) {
 				
 				// std::cout << "MMOVE: " << sel_control->GetId() << " " << control_coords << "\n";
 				INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ),,);
+			} else {
+				drag_offset = p - drag_start_diff;
+				sel_control->emitEvent("dragmove", {drag_offset});
 			}
 			return;
 		}
@@ -1063,7 +1093,7 @@ void Gui::Render() {
 	for(auto &ca : rootWidget.cache) {
 		Control* const &c = ca.control;
 		if(ca.visible) {
-			// std::cout << c->GetId() << "\n";
+			// std::cout << "root renders: " << c->GetId() << "\n";
 			if(c != sel_control) {
 				c->render(pos, c == rootWidget.sel_control);
 			} else {
@@ -1085,8 +1115,9 @@ void Gui::Render() {
 	
 	if(dragging) {
 		const Rect& r = sel_control->GetRect();
-		// std::cout << "drag: " << drag_offset << "\n";
-		sel_control->render(pos + drag_offset + r, true);
+		// std::cout << "drag2: " << drag_offset << "\n";
+		// sel_control->render(drag_offset + r, true);
+		sel_control->render( (snapped ? drag_snap : drag_offset) - r, true);
 	} else {
 		if(has_selected_control) {
 			sel_control->render(pos,true);
