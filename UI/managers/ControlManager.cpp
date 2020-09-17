@@ -598,6 +598,10 @@ Control* ControlManager::CreateControl(std::string tag, std::string id) {
 	Control* ctrl = createControlByXmlTag(tag);
 	// printCreationVector();
 	if(ctrl) {
+		if(id.empty()) {
+			static int control_cnt = 0;
+			id = "control"+std::to_string((control_cnt++));
+		}
 		ctrl->SetId(id);
 		ctrl->applyStyling(creation_vector);
 	}

@@ -115,6 +115,14 @@ static uint32_t col_mul(uint32_t col, float coef) {
 	return Color(c.r * coef, c.g * coef, c.b * coef, 0xff).GetUint32();
 }
 
+void BasicImage::SwapBGRA_to_RGBA() {
+	Size s = GetImageSize();
+	int i = s.w*s.h;
+	while(--i > 0) {
+		buffer[i] = ((buffer[i] & 0x00ff0000) >> 16) | ((buffer[i] & 0x000000ff)<< 16) | (buffer[i] & 0xff00ff00);
+	}
+}
+
 void BasicImage::PutImage(Image* img, ng::Rect dstRegion, ng::Rect srcRegion, uint32_t background_key_color, uint32_t bg_mask_check, unsigned int fg_color) {
 	Size s = img->GetImageSize();
 	const unsigned int* pixels = img->GetImage();
@@ -131,8 +139,6 @@ void BasicImage::PutImage(Image* img, ng::Rect dstRegion, ng::Rect srcRegion, ui
 		float sY = (float)srcRegion.y + (float)(y * (float)srcRegion.h / (float)dstRegion.h);
 		srcY = sY;
 		float dy = sY - (float)srcY;
-		// const uint32_t mask = 0xffffffff;
-		
 		for(int x=0; x < dstRegion.w; x++) {
 			dstX = dstRegion.x + x;
 			
@@ -141,9 +147,10 @@ void BasicImage::PutImage(Image* img, ng::Rect dstRegion, ng::Rect srcRegion, ui
 			
 			uint32_t i_pixel = pixels[srcY*s.w+srcX];
 			uint32_t &o_pixel = buffer[dstY*size.w+dstX];
+			
 			// printf("%08X ", i_pixel);
 			if((i_pixel&bg_mask_check) == background_key_color) {
-				o_pixel = 0;
+				// o_pixel = 0;
 			} else if(fg_color != 0) {
 				
 				float dx = sX - (float)srcX;
@@ -241,7 +248,7 @@ void BasicImage::Line(Point a, Point b, unsigned int color) {
 		return;
 	}
 	
-	// clip and return if whole line lies outside of frame
+	// clip and return if whole line lies outside of window
 	if(!clipLine(a,b)) {
 		return;
 	}

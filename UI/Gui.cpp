@@ -330,7 +330,11 @@ void Gui::intercept_hook(Control::imask onaction, std::function<void()> action, 
 			active_control->action;										\
 		}																\
 	}}
-	
+
+void Gui::DragCancel() {
+	dragging = false;
+	snapped = false;
+}
 
 bool Gui::check_for_drag() {
 	if(sel_control) {
@@ -341,6 +345,7 @@ bool Gui::check_for_drag() {
 		Point p = cursor.GetPosition();
 		Rect r = sel_control->GetRect();
 		Point gpos = sel_control->GetGlobalPosition();
+		snapped = false;
 		// std::cout << "drag start diff: " << sel_control->GetId() << " " << p << " , " << gpos << " " << drag_start_diff << "\n";
 		if(draggable == 1) {
 			drag_start_diff = p - gpos;
@@ -471,6 +476,7 @@ void Gui::OnMouseDown( unsigned int button ) {
 		if( sel_control->CheckCollision(parent_control_coords) ) {
 			
 			// if not dragging, then pass event
+			lock.unlock();
 			if(!check_for_drag()) {
 				INTERCEPT_HOOK(mouse_down, OnMouseDown( control_coords.x, control_coords.y, (MouseButton)button ), 
 					v.parent_control->emitEvent("mousedown", {control_coords.x, control_coords.y});
@@ -478,7 +484,7 @@ void Gui::OnMouseDown( unsigned int button ) {
 					sel_control->emitEvent( "mousedown", {control_coords.x, control_coords.y} );
 				);
 			}
-			
+			lock.lock();
 		} else {
 
 			if(check_for_lock()) {
@@ -601,6 +607,7 @@ void Gui::OnMouseMove( int mX, int mY ) {
 				
 				// std::cout << "MMOVE: " << sel_control->GetId() << " " << control_coords << "\n";
 				INTERCEPT_HOOK(mouse_move, OnMouseMove( control_coords.x, control_coords.y, m_mouse_down ),,);
+				sel_control->emitEvent("mousemove", {control_coords});
 			} else {
 				drag_offset = p - drag_start_diff;
 				sel_control->emitEvent("dragmove", {drag_offset});
@@ -847,12 +854,15 @@ void Gui::Activate(Control* control) {
 	if(active_control == control) return;
 	Control* old_active_control = active_control;
 	
-	if(control && control->engine == this && control->interactible) {
+	if(control && control->engine == this && control->interactible && control->visible) {
 		active_control = control;
 		active_control->emitEvent("activate");
 		active_control->OnActivate();
+		// std::cout << "act: " << active_control->GetId() << "\n";
 	} else if(!control) {
 		active_control = 0;
+		// processControlEvent(GUI_UNLOCK,0);
+		unselectControls();
 	}
 	
 	if(old_active_control) {
@@ -900,7 +910,7 @@ void Gui::unselectControl() {
 	// remove locks
 	m_keyboard_lock = false;
 	m_focus_lock = false;
-	
+	active_control = &rootWidget;
 	/*
 	if(sel_control == &rootWidget) {
 		rootWidget.sel_control = 0;
@@ -949,6 +959,8 @@ void Gui::OnEvent( std::string id, std::string event_type, EventCallback callbac
 	Control* c = rootWidget.Get<Control>(id);
 	if(c) {
 		c->OnEvent(event_type, callback);
+	} else {
+		std::cout << "Gui::OnEvent: no control id: " << id << "\n";
 	}
 }
 

@@ -5,7 +5,6 @@ namespace ng {
 
 Terminal::Terminal() {
 	setType( "terminal" );
-	
 	m_log = createControl<TextBox>("textbox", "log");
 	m_terminal = createControl<TextBox>("textbox", "terminal");
 	
@@ -34,13 +33,14 @@ void Terminal::tbox_enter(Control* c) {
 	TextBox* t = static_cast<TextBox*>(c);
 	// if(t->GetText().size() <= 0) return;
 	m_command = t->GetRawText();
-	if(m_command.empty()) return;
-	// std::cout << "tbox_enter: " << m_command << "\n";
-	m_history.push_back(m_command);
-	m_history_counter = m_history.size();
-	// m_log_msg = "> " + m_command;
-	t->SetText("");
-	// m_log_immediate = false;
+	if(!m_command.empty()) {
+		// std::cout << "tbox_enter: " << m_command << "\n";
+		m_history.push_back(m_command);
+		m_history_counter = m_history.size();
+		// m_log_msg = "> " + m_command;
+		t->SetText("");
+		// m_log_immediate = false;
+	}
 	emitEvent("enter", {m_command});
 	// m_log_immediate = true;
 	// WriteLog(m_log_msg);

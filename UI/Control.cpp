@@ -135,7 +135,11 @@ void Control::LockWidget(bool lock) {
 }
 
 void Control::RemoveControl( Control* control ) {
+	if(sel_control == control) {
+		control->Unselect();
+	}
 	removeControlFromCache(control);
+	
 	control->parent = 0;
 	control->engine = 0;
 }
@@ -151,6 +155,7 @@ void Control::SetOffset(int x, int y) {
 Control* Control::Clone() {
 	Control *w = new Control();
 	copyStyle(w);
+	cloneBase(w);
 	return w;
 }
 
@@ -1202,6 +1207,12 @@ bool Control::IsBeingDragged() {
 
 void Control::cloneBase(Control* clone_to) {
 	clone_to->subscribers.insert(clone_to->subscribers.end(), this->subscribers.begin(), this->subscribers.end());
+	
+	clone_to->layout = layout;
+	clone_to->interactible = interactible;
+	clone_to->visible = visible;
+	clone_to->render_enabled = render_enabled;
+	clone_to->m_rect = m_rect;
 }
 
 void Control::CopyStyle(Control* copy_to) {
@@ -1210,7 +1221,7 @@ void Control::CopyStyle(Control* copy_to) {
 
 void Control::copyStyle(Control* copy_to) {
 	copy_to->m_style = this->m_style;
-	cloneBase(copy_to);
+	copy_to->userData = this->userData;
 }
 
 void Control::SetAlpha(float alpha) {

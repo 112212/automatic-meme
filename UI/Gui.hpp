@@ -175,13 +175,16 @@ class Gui
 		
 		bool IsDragging();
 		void DragSnapTo(ng::Point pt, bool enable=true);
+		void DragCancel();
+		
 		void SetStyle(std::string control, std::string style, std::string value);
 		void SetDefaultFont(std::string font, int size=13);
 		void SetSize(int w, int h);
 		void SetTooltipDelay(double seconds);
 		void SetRelativeMode(bool relative_mode);
 		void OnFpsChange(std::function<void(uint32_t)> f) { m_on_fps_change = f; }
-		void OnRender(std::function<void()> f) { m_on_render = f; }
+		// void OnRender(std::function<void()> f) { m_on_render = f; }
+		void OnRender(std::function<void()> f) { DoOnRender(f); }
 		void DoOnRender(std::function<void()> f) { m_on_render_ops.push(f); }
 		
 		void Focus(Control* control);

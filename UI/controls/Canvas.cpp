@@ -47,6 +47,7 @@ void Canvas::Render( Point p, bool isSelected ) {
 	Point pt = rect + p;
 	
 	Control::Render(p, isSelected);
+	emitEvent("render");
 	
 	// render layers in reverse
 	for(auto rit = layers.rbegin(); rit != layers.rend(); rit++) {

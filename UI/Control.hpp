@@ -141,10 +141,11 @@ class Control : public ControlManager {
 		// ----- </ControlBase> ------
 		
 		bool m_is_intercepted;
-		unsigned int intercept_mask;
-		Control* sel_control;
+		uint32_t intercept_mask;
+		Control* sel_control; // child selected
 		Point cached_absolute_offset;
 		Size min, max;
+		void const* userData;
 		
 		// offset for easy scrolling controls (it adds to everys child control position)
 		Point m_offset;
@@ -384,6 +385,9 @@ class Control : public ControlManager {
 	
 		Control();
 		~Control();
+		
+		const void* GetUserData() { return this->userData; }
+		void SetUserData(const void* userdata) { this->userData = userdata; }
 
 		void RenderBase( Point position, bool isSelected );
 		

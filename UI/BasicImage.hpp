@@ -18,6 +18,7 @@ class BasicImage : public Image {
 		
 		virtual Size GetImageSize();
 		virtual const unsigned int* GetImage();
+		void SwapBGRA_to_RGBA();
 		
 		virtual void PutImage(Image* img, Rect dstRegion, Rect srcRegion, uint32_t background_key=0, uint32_t bg_mask_check=0x0ffffff, uint32_t fg_color=0);
 		
